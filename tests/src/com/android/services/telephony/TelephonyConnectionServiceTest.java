@@ -325,6 +325,10 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
 
     @After
     public void tearDown() throws Exception {
+        if (mTestConnectionService != null
+                && mTestConnectionService.getEmergencyConnection() != null) {
+            mTestConnectionService.onLocalHangup(mTestConnectionService.getEmergencyConnection());
+        }
         mTestConnectionService = null;
         super.tearDown();
     }
@@ -1990,6 +1994,27 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
     }
 
     /**
+     * For DSDA devices with AP domain selection service enabled, placing an outgoing call
+     * on a 2nd sub will hold the existing ACTIVE connection on the first sub.
+     */
+    @Test
+    @SmallTest
+    public void testHoldOnOtherSubForVirtualDsdaDeviceWithDomainSelectionEnabled() {
+        when(mTelephonyManagerProxy.isConcurrentCallsPossible()).thenReturn(true);
+        doReturn(true).when(mDomainSelectionResolver).isDomainSelectionSupported();
+
+        ArrayList<android.telecom.Connection> tcs = new ArrayList<>();
+        SimpleTelephonyConnection tc1 = createTestConnection(SUB1_HANDLE, 0, false);
+        tc1.setTelephonyConnectionActive();
+        tcs.add(tc1);
+
+        Conferenceable c = TelephonyConnectionService.maybeHoldCallsOnOtherSubs(
+                tcs, new ArrayList<>(), SUB2_HANDLE, mTelephonyManagerProxy);
+        assertTrue(c.equals(tc1));
+        assertTrue(tc1.wasHeld);
+    }
+
+    /**
      * For DSDA devices, if the existing connection was already held, placing an outgoing call on a
      * 2nd sub will not attempt to hold the existing connection on the first sub.
      */
@@ -2267,8 +2292,7 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
 
         ArgumentCaptor<DialArgs> argsCaptor = ArgumentCaptor.forClass(DialArgs.class);
 
-        Connection nc = Mockito.mock(Connection.class);
-        doReturn(nc).when(mPhone0).dial(anyString(), any(), any());
+        doReturn(mInternalConnection).when(mPhone0).dial(anyString(), any(), any());
 
         verify(mPhone0).dial(anyString(), argsCaptor.capture(), any());
         DialArgs dialArgs = argsCaptor.getValue();
@@ -2296,8 +2320,131 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
 
         ArgumentCaptor<DialArgs> argsCaptor = ArgumentCaptor.forClass(DialArgs.class);
 
-        Connection nc = Mockito.mock(Connection.class);
-        doReturn(nc).when(mPhone0).dial(anyString(), any(), any());
+        doReturn(mInternalConnection).when(mPhone0).dial(anyString(), any(), any());
+
+        verify(mPhone0).dial(anyString(), argsCaptor.capture(), any());
+        DialArgs dialArgs = argsCaptor.getValue();
+        assertNotNull("DialArgs param is null", dialArgs);
+        assertNotNull("intentExtras is null", dialArgs.intentExtras);
+        assertTrue(dialArgs.intentExtras.containsKey(PhoneConstants.EXTRA_DIAL_DOMAIN));
+        assertEquals(selectedDomain,
+                dialArgs.intentExtras.getInt(PhoneConstants.EXTRA_DIAL_DOMAIN, -1));
+    }
+
+    @Test
+    public void testDomainSelectionRedialFailedWithException() throws Exception {
+        setupForCallTest();
+
+        int preciseDisconnectCause = com.android.internal.telephony.CallFailCause.ERROR_UNSPECIFIED;
+        int disconnectCause = android.telephony.DisconnectCause.ERROR_UNSPECIFIED;
+        int selectedDomain = DOMAIN_CS;
+
+        TestTelephonyConnection c = setupForReDialForDomainSelection(
+                mPhone0, selectedDomain, preciseDisconnectCause, disconnectCause, true);
+
+        CallStateException cse = new CallStateException(CallStateException.ERROR_CALLING_DISABLED,
+                "Calling disabled via ro.telephony.disable-call property");
+        doThrow(cse).when(mPhone0).dial(anyString(), any(), any());
+
+        assertTrue(mTestConnectionService.maybeReselectDomain(c, null, true,
+                android.telephony.DisconnectCause.NOT_VALID));
+        verify(mEmergencyCallDomainSelectionConnection).reselectDomain(any());
+        verify(mEmergencyCallDomainSelectionConnection).cancelSelection();
+        verify(mEmergencyStateTracker).endCall(any());
+    }
+
+    @Test
+    public void testDomainSelectionRejectIncoming() throws Exception {
+        setupForCallTest();
+
+        int selectedDomain = DOMAIN_CS;
+
+        setupForDialForDomainSelection(mPhone0, selectedDomain, true);
+
+        doReturn(mInternalConnection2).when(mCall).getLatestConnection();
+        doReturn(true).when(mCall).isRinging();
+        doReturn(mCall).when(mPhone0).getRingingCall();
+
+        mTestConnectionService.onCreateOutgoingConnection(PHONE_ACCOUNT_HANDLE_1,
+                createConnectionRequest(PHONE_ACCOUNT_HANDLE_1,
+                        TEST_EMERGENCY_NUMBER, TELECOM_CALL_ID1));
+
+        ArgumentCaptor<android.telecom.Connection> connectionCaptor =
+                ArgumentCaptor.forClass(android.telecom.Connection.class);
+
+        verify(mDomainSelectionResolver)
+                .getDomainSelectionConnection(eq(mPhone0), eq(SELECTOR_TYPE_CALLING), eq(true));
+        verify(mEmergencyStateTracker)
+                .startEmergencyCall(eq(mPhone0), connectionCaptor.capture(), eq(false));
+        verify(mEmergencyCallDomainSelectionConnection).createEmergencyConnection(any(), any());
+
+        android.telecom.Connection tc = connectionCaptor.getValue();
+
+        assertNotNull(tc);
+        assertEquals(TELECOM_CALL_ID1, tc.getTelecomCallId());
+        assertEquals(mTestConnectionService.getEmergencyConnection(), tc);
+
+        ArgumentCaptor<Connection.Listener> listenerCaptor =
+                ArgumentCaptor.forClass(Connection.Listener.class);
+
+        verify(mInternalConnection2).addListener(listenerCaptor.capture());
+        verify(mCall).hangup();
+        verify(mPhone0, never()).dial(anyString(), any(), any());
+
+        Connection.Listener listener = listenerCaptor.getValue();
+
+        assertNotNull(listener);
+
+        listener.onDisconnect(0);
+
+        verify(mSatelliteSOSMessageRecommender).onEmergencyCallStarted(any());
+
+        ArgumentCaptor<DialArgs> argsCaptor = ArgumentCaptor.forClass(DialArgs.class);
+
+        verify(mPhone0).dial(anyString(), argsCaptor.capture(), any());
+
+        DialArgs dialArgs = argsCaptor.getValue();
+
+        assertNotNull("DialArgs param is null", dialArgs);
+        assertNotNull("intentExtras is null", dialArgs.intentExtras);
+        assertTrue(dialArgs.intentExtras.containsKey(PhoneConstants.EXTRA_DIAL_DOMAIN));
+        assertEquals(selectedDomain,
+                dialArgs.intentExtras.getInt(PhoneConstants.EXTRA_DIAL_DOMAIN, -1));
+    }
+
+    @Test
+    public void testDomainSelectionRedialRejectIncoming() throws Exception {
+        setupForCallTest();
+
+        int preciseDisconnectCause = com.android.internal.telephony.CallFailCause.ERROR_UNSPECIFIED;
+        int disconnectCause = android.telephony.DisconnectCause.ERROR_UNSPECIFIED;
+        int selectedDomain = DOMAIN_CS;
+
+        TestTelephonyConnection c = setupForReDialForDomainSelection(
+                mPhone0, selectedDomain, preciseDisconnectCause, disconnectCause, true);
+
+        doReturn(mInternalConnection2).when(mCall).getLatestConnection();
+        doReturn(true).when(mCall).isRinging();
+        doReturn(mCall).when(mPhone0).getRingingCall();
+
+        assertTrue(mTestConnectionService.maybeReselectDomain(c, null, true,
+                android.telephony.DisconnectCause.NOT_VALID));
+        verify(mEmergencyCallDomainSelectionConnection).reselectDomain(any());
+
+        ArgumentCaptor<Connection.Listener> listenerCaptor =
+                ArgumentCaptor.forClass(Connection.Listener.class);
+
+        verify(mInternalConnection2).addListener(listenerCaptor.capture());
+        verify(mCall).hangup();
+        verify(mPhone0, never()).dial(anyString(), any(), any());
+
+        Connection.Listener listener = listenerCaptor.getValue();
+
+        assertNotNull(listener);
+
+        listener.onDisconnect(0);
+
+        ArgumentCaptor<DialArgs> argsCaptor = ArgumentCaptor.forClass(DialArgs.class);
 
         verify(mPhone0).dial(anyString(), argsCaptor.capture(), any());
         DialArgs dialArgs = argsCaptor.getValue();
@@ -2621,6 +2768,7 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
 
         setupForDialForDomainSelection(mPhone0, selectedDomain, true);
         doReturn(mPhone0).when(mImsPhone).getDefaultPhone();
+        doReturn(mInternalConnection).when(mPhone0).dial(anyString(), any(), any());
 
         TestTelephonyConnection c = setupForReDialForDomainSelection(
                 mImsPhone, selectedDomain, preciseDisconnectCause, disconnectCause, false);
@@ -2671,6 +2819,7 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
 
         setupForDialForDomainSelection(mPhone0, selectedDomain, true);
         doReturn(mPhone0).when(mImsPhone).getDefaultPhone();
+        doReturn(mInternalConnection).when(mPhone0).dial(anyString(), any(), any());
 
         TestTelephonyConnection c = setupForReDialForDomainSelection(
                 mImsPhone, selectedDomain, preciseDisconnectCause, disconnectCause, false);
