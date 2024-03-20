@@ -973,13 +973,10 @@ public class TelephonyConnectionService extends ConnectionService {
                 return;
             }
             /*
-             * Either there is no call present on the other SUB or there is
-             * a connected Video call on other SUB then no need to check
-             * further since here we only handle Voice/Video + Voice use-cases.
+             * There is no call present on the other SUB then no need to check further.
              */
             PhoneAccountHandle accountHandle = c.getPhoneAccountHandle();
-            if (!isCallPresentOnOtherSub(accountHandle) ||
-                    hasConnectedVideoCallOnOtherSub(accountHandle)) {
+            if (!isCallPresentOnOtherSub(accountHandle)) {
                 return;
             }
             /*
@@ -1020,13 +1017,10 @@ public class TelephonyConnectionService extends ConnectionService {
             updateAnsweringDropsFgCallExtra();
 
             /*
-             * Either there is no call present on the other SUB or there is
-             * a connected Video call on other SUB then no need to check
-             * further since here we only handle Voice/Video + Voice use-cases.
+             * There is no call present on the other SUB then no need to check further.
              */
             PhoneAccountHandle accountHandle = c.getPhoneAccountHandle();
-            if (!isCallPresentOnOtherSub(accountHandle) ||
-                    hasConnectedVideoCallOnOtherSub(accountHandle)) {
+            if (!isCallPresentOnOtherSub(accountHandle)) {
                 return;
             }
             /*
@@ -1592,16 +1586,16 @@ public class TelephonyConnectionService extends ConnectionService {
                                         "Ongoing calls", phone.getPhoneId()));
                     }
                     /*
-                     * This is the case when we have Outgoing Video + Voice call and as per
-                     * carrier requirement we need to either disallow this operation or we
-                     * need to disable swap option if the Video call is permitted.
+                     * This is the case when we have Outgoing Video on one sub and held call on the
+                     * other sub and as per carrier requirement we need to either disallow this
+                     * operation or we need to disable swap option if the Video call is permitted.
                      * Note: In case of same SUB case, this will be blocked in
                      *       ImsPhoneCallTracker#canAddVideoCallDuringImsAudioCall()
                      */
-                    boolean hasOutgoingVideoCallDuringAudioCall =
+                    boolean hasOutgoingVideoCallDuringCall =
                             VideoProfile.isVideo(request.getVideoState()) &&
-                            hasActiveOrHeldAudioCall();
-                    if (!isVideoCallHoldAllowedOnAnySub() && hasOutgoingVideoCallDuringAudioCall) {
+                            hasActiveOrHeldCall();
+                    if (!isVideoCallHoldAllowed(phone) && hasOutgoingVideoCallDuringCall) {
                         if (!isConcurrentCallAllowedDuringVideoCall(phone)) {
                             return Connection.createFailedConnection(
                                     mDisconnectCauseFactory.toTelecomDisconnectCause(
@@ -2192,11 +2186,14 @@ public class TelephonyConnectionService extends ConnectionService {
         }
 
         boolean isVideoCallHoldAllowed = isVideoCallHoldAllowed(phone);
-        boolean videoCallDuringVoiceCall =
-                VideoProfile.isVideo(incomingConnection.getVideoState()) &&
-                !hasConnectedVideoCallOnOtherSub;
-        // Check this is Voice Call (SUB1) + Incoming VT call (SUB2) scenario
-        if (isVideoCallHoldAllowed || !videoCallDuringVoiceCall) {
+        boolean voiceCallDuringVideoCall =
+                !VideoProfile.isVideo(incomingConnection.getVideoState()) &&
+                hasConnectedVideoCallOnOtherSub;
+        /*
+         * If Video call hold allowed or there is incoming VoLTE call on one sub and
+         * active Video call on the other SUB, let it pass.
+         */
+        if (isVideoCallHoldAllowed || voiceCallDuringVideoCall) {
             return;
         }
 
@@ -5201,14 +5198,13 @@ public class TelephonyConnectionService extends ConnectionService {
     }
 
     /*
-     * This function checks if there is an ACTIVE / HELD audio call.
+     * This function checks if there is an ACTIVE / HELD call.
      */
-    private boolean hasActiveOrHeldAudioCall() {
+    private boolean hasActiveOrHeldCall() {
         for (Connection current : getAllConnections()) {
             if (isTelephonyConnection(current) &&
                 (current.getState() == Connection.STATE_HOLDING ||
-                    current.getState() == Connection.STATE_ACTIVE) &&
-                VideoProfile.isAudioOnly(((TelephonyConnection)current).getVideoState())) {
+                    current.getState() == Connection.STATE_ACTIVE)) {
                 return true;
             }
         }
@@ -5217,11 +5213,8 @@ public class TelephonyConnectionService extends ConnectionService {
             if (isTelephonyConferenceBase(conference) &&
                 (conference.getState() == Connection.STATE_HOLDING ||
                     conference.getState() == Connection.STATE_ACTIVE) &&
-                isImsConference(conference)) {
-                Connection conn = ((ImsConference)conference).getConferenceHost();
-                if (VideoProfile.isAudioOnly(((TelephonyConnection)conn).getVideoState())) {
-                    return true;
-                }
+                        isImsConference(conference)) {
+                return true;
             }
         }
 
