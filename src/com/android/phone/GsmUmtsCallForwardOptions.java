@@ -1,3 +1,9 @@
+/**
+* Changes from Qualcomm Innovation Center, Inc. are provided under the following license:
+* Copyright (c) 2024 Qualcomm Innovation Center, Inc. All rights reserved.
+* SPDX-License-Identifier: BSD-3-Clause-Clear
+*/
+
 package com.android.phone;
 
 import android.app.ActionBar;
@@ -11,7 +17,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PersistableBundle;
@@ -82,8 +89,8 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
     private boolean mReplaceInvalidCFNumbers;
     private int mServiceClass;
     private BroadcastReceiver mReceiver = null;
-    private SubscriptionManager mSubscriptionManager;
     private boolean mCheckData = false;
+    private boolean mIsUtAllowedWhenWifiOn = false;
     AlertDialog.Builder builder = null;
     private CarrierConfigManager mCarrierConfig;
     private boolean mCallForwardByUssd;
@@ -105,6 +112,9 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
         if (mCarrierConfig != null) {
             PersistableBundle pb = mCarrierConfig.getConfigForSubId(mPhone.getSubId());
             mCheckData = pb.getBoolean("check_mobile_data_for_cf");
+            mIsUtAllowedWhenWifiOn = pb.getBoolean("allow_ut_when_wifi_on_bool");
+            Log.d(LOG_TAG, "mCheckData = " + mCheckData + ", mIsUtAllowedWhenWifiOn = " +
+                    mIsUtAllowedWhenWifiOn);
         }
         PersistableBundle b = null;
         boolean supportCFB = true;
@@ -220,58 +230,76 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
     }
 
     public void checkDataStatus() {
-        // check the active data sub.
+        if (mPhone == null) {
+            return;
+        }
         int sub = mPhone.getSubId();
-        int slotId = mSubscriptionManager.getSlotIndex(sub);
-        int defaultDataSub = mSubscriptionManager.getDefaultDataSubscriptionId();
-        Log.d(LOG_TAG, "isUtEnabled = " + mPhone.isUtEnabled() + ", checkData= " + mCheckData);
         // Find out if the sim card is ready.
-        boolean isSimReady = TelephonyManager.from(this).getSimState(slotId)
+        boolean isSimReady = TelephonyManager.from(this)
+                .getSimState(SubscriptionManager.getSlotIndex(sub))
                 == TelephonyManager.SIM_STATE_READY;
         if (!isSimReady) {
             Log.d(LOG_TAG, "SIM is not ready!");
             String title = (String)this.getResources().getText(R.string.sim_is_not_ready);
             String message = (String)this.getResources()
-                .getText(R.string.sim_is_not_ready);
+                    .getText(R.string.sim_is_not_ready);
             showAlertDialog(title, message);
             return;
         }
-        if (mPhone != null) {
-            int activeNetworkType = getActiveNetworkType();
+        if (mPhone.isUtEnabled() && mCheckData) {
+            // check whether the current data network is roaming and roaming is enabled
             boolean isDataRoaming = mPhone.getServiceState().getDataRoaming();
             boolean isDataRoamingEnabled = mPhone.getDataRoamingEnabled();
             boolean promptForDataRoaming = isDataRoaming && !isDataRoamingEnabled;
-            Log.d(LOG_TAG, "activeNetworkType = " + getActiveNetworkType() + ", sub = " + sub +
-                    ", defaultDataSub = " + defaultDataSub + ", isDataRoaming = " +
-                    isDataRoaming + ", isDataRoamingEnabled= " + isDataRoamingEnabled);
-
-            if (mPhone.isUtEnabled() && mCheckData) {
-                boolean isDataEnabled = TelephonyManager.from(this).getDataEnabled(sub);
-                Log.d(LOG_TAG, "isDataEnabled: " + isDataEnabled);
-                if ((!isDataEnabled || activeNetworkType != ConnectivityManager.TYPE_MOBILE)
-                        && !(activeNetworkType == ConnectivityManager.TYPE_NONE
-                        && promptForDataRoaming)) {
-                    Log.d(LOG_TAG,
-                            "Show alert dialog if data sub is not on current sub or WLAN is on");
-                    String title = (String)this.getResources().getText(R.string.no_mobile_data);
+            Log.d(LOG_TAG, "sub = " + sub + ", isDataRoaming = " + isDataRoaming +
+                    ", isDataRoamingEnabled = " + isDataRoamingEnabled);
+            if (promptForDataRoaming) {
+                Log.d(LOG_TAG, "data roaming is disabled");
+                String title = (String)this.getResources()
+                        .getText(R.string.no_mobile_data_roaming);
+                String message = (String)this.getResources()
+                        .getText(R.string.cf_setting_mobile_data_roaming_alert);
+                showAlertDialog(title, message);
+                return;
+            }
+            // check if mobile data on current sub is enabled
+            boolean isDataEnabled = TelephonyManager.from(this).createForSubscriptionId(sub)
+                    .isDataEnabled();
+            if (!isDataEnabled) {
+                Log.d(LOG_TAG, "Mobile data is not available");
+                String title = (String)this.getResources().getText(R.string.no_mobile_data);
+                String message = (String)this.getResources()
+                        .getText(R.string.cf_setting_mobile_data_off_alert);
+                showAlertDialog(title, message);
+                return;
+            }
+            if (!mIsUtAllowedWhenWifiOn) {
+                // check network capabilities
+                NetworkCapabilities caps = getNetworkCapabilities();
+                if (caps == null) {
+                    Log.d(LOG_TAG, "Can not get network capabilities!");
+                    String title = (String)this.getResources()
+                            .getText(R.string.no_network_available);
                     String message = (String)this.getResources()
-                            .getText(R.string.cf_setting_mobile_data_alert);
+                            .getText(R.string.cf_setting_network_alert);
                     showAlertDialog(title, message);
                     return;
                 }
-                if (promptForDataRoaming) {
-                       Log.d(LOG_TAG, "Show alert dialog if data roaming is disabled");
-                       String title = (String)this.getResources()
-                               .getText(R.string.no_mobile_data_roaming);
-                       String message = (String)this.getResources()
-                               .getText(R.string.cf_setting_mobile_data_roaming_alert);
-                       showAlertDialog(title, message);
-                       return;
+                Log.d(LOG_TAG, "network capabilities : " + caps);
+                // check if Wi-Fi is on
+                if (caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                    Log.d(LOG_TAG, "Wi-Fi is on");
+                    String title = (String)this.getResources().getText(R.string.wifi_on);
+                    String message = (String)this.getResources()
+                            .getText(R.string.cf_setting_wifi_on_alert);
+                    showAlertDialog(title, message);
+                    return;
                 }
-                if (sub != defaultDataSub) {
-                    Log.d(LOG_TAG, "Show data in use indication if data sub is not on current sub");
-                    showDataInuseToast();
-                }
+            }
+            // check if the current sub is the default sub
+            if (sub != SubscriptionManager.getDefaultDataSubscriptionId()) {
+                Log.d(LOG_TAG, "Show data in use indication if data sub is not on current sub");
+                showDataInuseToast();
             }
         }
         initCallforwarding();
@@ -288,17 +316,14 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
         return;
     }
 
-    private int getActiveNetworkType() {
+    private NetworkCapabilities getNetworkCapabilities() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(
                 Context.CONNECTIVITY_SERVICE);
-        if (cm != null) {
-            NetworkInfo ni = cm.getActiveNetworkInfo();
-            if ((ni == null) || !ni.isConnected()){
-                return ConnectivityManager.TYPE_NONE;
-            }
-            return ni.getType();
+        if (cm == null) {
+            return null;
         }
-        return ConnectivityManager.TYPE_NONE;
+        Network activeNetwork = cm.getActiveNetwork();
+        return cm.getNetworkCapabilities(activeNetwork);
     }
 
     //prompt dialog to notify user turn off Enhance 4G LTE switch
@@ -344,7 +369,6 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
             intentFilter.addAction(TelephonyIntents.ACTION_ANY_DATA_CONNECTION_STATE_CHANGED);
             mReceiver = new PhoneAppBroadcastReceiver();
             registerReceiver(mReceiver, intentFilter);
-            final SubscriptionManager mSubscriptionManager = SubscriptionManager.from(this);
             checkDataStatus();
         } else {
             initCallforwarding();
