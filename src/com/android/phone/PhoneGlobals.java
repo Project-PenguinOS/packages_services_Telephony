@@ -79,6 +79,7 @@ import com.android.internal.telephony.ims.ImsResolver;
 import com.android.internal.telephony.imsphone.ImsPhone;
 import com.android.internal.telephony.imsphone.ImsPhoneCallTracker;
 import com.android.internal.telephony.satellite.SatelliteController;
+import com.android.internal.telephony.subscription.SubscriptionManagerService;
 import com.android.internal.telephony.uicc.UiccPort;
 import com.android.internal.telephony.uicc.UiccProfile;
 import com.android.internal.util.IndentingPrintWriter;
@@ -347,11 +348,23 @@ public class PhoneGlobals extends ContextWrapper {
                     handleSimLock(subType, phone);
                     break;
                 case EVENT_DATA_ROAMING_DISCONNECTED:
-                    notificationMgr.showDataRoamingNotification(msg.arg1, false);
+                    if (SubscriptionManagerService.getInstance()
+                            .isEsimBootStrapProvisioningActiveForSubId(msg.arg1)) {
+                        Log.i(LOG_TAG,
+                                "skip notification/warnings during esim bootstrap activation");
+                    } else {
+                        notificationMgr.showDataRoamingNotification(msg.arg1, false);
+                    }
                     break;
 
                 case EVENT_DATA_ROAMING_CONNECTED:
-                    notificationMgr.showDataRoamingNotification(msg.arg1, true);
+                    if (SubscriptionManagerService.getInstance()
+                            .isEsimBootStrapProvisioningActiveForSubId(msg.arg1)) {
+                        Log.i(LOG_TAG,
+                                "skip notification/warnings during esim bootstrap activation");
+                    } else {
+                        notificationMgr.showDataRoamingNotification(msg.arg1, true);
+                    }
                     break;
 
                 case EVENT_DATA_ROAMING_OK:
@@ -599,7 +612,7 @@ public class PhoneGlobals extends ContextWrapper {
                 mImsStateCallbackController =
                         ImsStateCallbackController.make(this, PhoneFactory.getPhones().length);
                 mTelephonyRcsService = new TelephonyRcsService(this,
-                        PhoneFactory.getPhones().length);
+                        PhoneFactory.getPhones().length, mFeatureFlags);
                 mTelephonyRcsService.initialize();
                 imsRcsController.setRcsService(mTelephonyRcsService);
                 mImsProvisioningController =

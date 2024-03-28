@@ -2753,6 +2753,7 @@ abstract class TelephonyConnection extends Connection implements Holdable,
                         fireOnOriginalConnectionRetryDial(cause
                                 == android.telephony.DisconnectCause.EMERGENCY_PERM_FAILURE);
                     } else {
+                        int preciseDisconnectCause = CallFailCause.NOT_VALID;
                         if (mSsNotification != null) {
                             setTelephonyConnectionDisconnected(
                                     DisconnectCauseUtil.toTelecomDisconnectCause(
@@ -2765,7 +2766,6 @@ abstract class TelephonyConnection extends Connection implements Holdable,
                             DisconnectCauseUtil.mNotificationCode = 0xFF;
                             DisconnectCauseUtil.mNotificationType = 0xFF;
                         } else {
-                            int preciseDisconnectCause = CallFailCause.NOT_VALID;
                             if (mShowPreciseFailedCause) {
                                 preciseDisconnectCause =
                                         mOriginalConnection.getPreciseDisconnectCause();
@@ -2791,6 +2791,27 @@ abstract class TelephonyConnection extends Connection implements Holdable,
                                             getPhone().getPhoneId(), imsReasonInfo,
                                             new FlagsAdapterImpl()));
                         }
+                        int disconnectCause = mOriginalConnection.getDisconnectCause();
+                        if ((mHangupDisconnectCause != DisconnectCause.NOT_VALID)
+                                && (mHangupDisconnectCause != disconnectCause)) {
+                            Log.i(LOG_TAG, "setDisconnected: override cause: " + disconnectCause
+                                    + " -> " + mHangupDisconnectCause);
+                            disconnectCause = mHangupDisconnectCause;
+                        }
+                        ImsReasonInfo imsReasonInfo = null;
+                        if (isImsConnection()) {
+                            ImsPhoneConnection imsPhoneConnection =
+                                    (ImsPhoneConnection) mOriginalConnection;
+                            imsReasonInfo = imsPhoneConnection.getImsReasonInfo();
+                        }
+                        setTelephonyConnectionDisconnected(
+                                DisconnectCauseUtil.toTelecomDisconnectCause(
+                                        disconnectCause,
+                                        preciseDisconnectCause,
+                                        mOriginalConnection.getVendorDisconnectCause(),
+                                        getPhone().getPhoneId(), imsReasonInfo,
+                                        new FlagsAdapterImpl(),
+                                        shouldTreatAsEmergencyCall()));
                         close();
                     }
                     break;
