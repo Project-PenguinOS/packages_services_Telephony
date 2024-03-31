@@ -47,6 +47,7 @@ import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.gsm.GsmMmiCode;
 import com.android.internal.telephony.gsm.SsData;
 import com.android.internal.telephony.Phone;
+import com.android.internal.telephony.flags.Flags;
 
 import com.qti.extphone.Client;
 import com.qti.extphone.ExtPhoneCallbackListener;
@@ -63,6 +64,9 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
     private static final boolean DBG = (PhoneGlobals.DBG_LEVEL >= 2);
 
     private static final String SRC_TAGS[]       = {"{0}"};
+
+    private static final int DEFAULT_NO_REPLY_TIMER_FOR_CFNRY = 20;
+
     private CharSequence mSummaryOnTemplate;
     /**
      * Remembers which button was clicked by a user. If no button is clicked yet, this should have
@@ -279,7 +283,14 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
                         .getCarrierConfigForSubId(mPhone.getSubId());
                 if (carrierConfig.getBoolean(
                         CarrierConfigManager.KEY_SUPPORT_NO_REPLY_TIMER_FOR_CFNRY_BOOL, true)) {
-                    time = 20;
+                    if (Flags.setNoReplyTimerForCfnry()) {
+                        // Get timer value from carrier config
+                        time = carrierConfig.getInt(
+                                CarrierConfigManager.KEY_NO_REPLY_TIMER_FOR_CFNRY_SEC_INT,
+                                DEFAULT_NO_REPLY_TIMER_FOR_CFNRY);
+                    } else {
+                        time = DEFAULT_NO_REPLY_TIMER_FOR_CFNRY;
+                    }
                 }
             }
             final String number = getPhoneNumber();

@@ -430,11 +430,11 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     private final SatelliteController mSatelliteController;
     private final SatelliteAccessController mSatelliteAccessController;
     private final UserManager mUserManager;
-    private final AppOpsManager mAppOps;
     private final MainThreadHandler mMainThreadHandler;
     private final SharedPreferences mTelephonySharedPreferences;
     private final PhoneConfigurationManager mPhoneConfigurationManager;
     private final RadioInterfaceCapabilityController mRadioInterfaceCapabilities;
+    private AppOpsManager mAppOps;
     private PackageManager mPackageManager;
 
     /** User Activity */
@@ -1588,7 +1588,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
                         // This is for the implementation of carrierRestrictionStatus.
                         CallerCallbackInfo callbackInfo = (CallerCallbackInfo) request.argument;
                         Consumer<Integer> callback = callbackInfo.getConsumer();
-                        int callerCarrierId = callbackInfo.getCarrierId();
+                        Set<Integer> callerCarrierIds = callbackInfo.getCarrierIds();
                         int lockStatus = TelephonyManager.CARRIER_RESTRICTION_STATUS_UNKNOWN;
                         if (ar.exception == null && ar.result instanceof CarrierRestrictionRules) {
                             CarrierRestrictionRules carrierRestrictionRules =
@@ -1603,8 +1603,10 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
                                 Rlog.e(LOG_TAG, "CarrierIdentifier exception = " + ex);
                             }
                             lockStatus = carrierRestrictionRules.getCarrierRestrictionStatus();
-                            if (carrierId != -1 && callerCarrierId == carrierId && lockStatus
-                                    == TelephonyManager.CARRIER_RESTRICTION_STATUS_RESTRICTED) {
+                            int restrictedStatus =
+                                    TelephonyManager.CARRIER_RESTRICTION_STATUS_RESTRICTED;
+                            if (carrierId != -1 && callerCarrierIds.contains(carrierId) &&
+                                    lockStatus == restrictedStatus) {
                                 lockStatus = TelephonyManager
                                         .CARRIER_RESTRICTION_STATUS_RESTRICTED_TO_CALLER;
                             }
@@ -9255,15 +9257,15 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         enforceTelephonyFeatureWithException(packageName,
                 PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION, "getCarrierRestrictionStatus");
 
-        int carrierId = validateCallerAndGetCarrierId(packageName);
-        if (carrierId == CarrierAllowListInfo.INVALID_CARRIER_ID) {
+        Set<Integer> carrierIds = validateCallerAndGetCarrierIds(packageName);
+        if (carrierIds.contains(CarrierAllowListInfo.INVALID_CARRIER_ID)) {
             Rlog.e(LOG_TAG, "getCarrierRestrictionStatus: caller is not registered");
             throw new SecurityException("Not an authorized caller");
         }
         final long identity = Binder.clearCallingIdentity();
         try {
             Consumer<Integer> consumer = FunctionalUtils.ignoreRemoteException(callback::accept);
-            CallerCallbackInfo callbackInfo = new CallerCallbackInfo(consumer, carrierId);
+            CallerCallbackInfo callbackInfo = new CallerCallbackInfo(consumer, carrierIds);
             sendRequestAsync(CMD_GET_ALLOWED_CARRIERS, callbackInfo);
         } finally {
             Binder.restoreCallingIdentity(identity);
@@ -9278,9 +9280,9 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     }
 
     @VisibleForTesting
-    public int validateCallerAndGetCarrierId(String packageName) {
+    public Set<Integer> validateCallerAndGetCarrierIds(String packageName) {
         CarrierAllowListInfo allowListInfo = CarrierAllowListInfo.loadInstance(mApp);
-        return allowListInfo.validateCallerAndGetCarrierId(packageName);
+        return allowListInfo.validateCallerAndGetCarrierIds(packageName);
     }
 
     /**
@@ -9480,7 +9482,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         try {
             if (reason == TelephonyManager.DATA_ENABLED_REASON_USER && enabled
                     && null != callingPackage && opEnableMobileDataByUser()) {
-                mAppOps.noteOp(AppOpsManager.OPSTR_ENABLE_MOBILE_DATA_BY_USER,
+                mAppOps.noteOpNoThrow(AppOpsManager.OPSTR_ENABLE_MOBILE_DATA_BY_USER,
                         callingUid, callingPackage, null, null);
             }
             Phone phone = getPhone(subId);
@@ -14014,19 +14016,19 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
      */
     private static class CallerCallbackInfo {
         private final Consumer<Integer> mConsumer;
-        private final int mCarrierId;
+        private final Set<Integer> mCarrierIds;
 
-        public CallerCallbackInfo(Consumer<Integer> consumer, int carrierId) {
+        public CallerCallbackInfo(Consumer<Integer> consumer, Set<Integer> carrierIds) {
             mConsumer = consumer;
-            mCarrierId = carrierId;
+            mCarrierIds = carrierIds;
         }
 
         public Consumer<Integer> getConsumer() {
             return mConsumer;
         }
 
-        public int getCarrierId() {
-            return mCarrierId;
+        public Set<Integer> getCarrierIds() {
+            return mCarrierIds;
         }
     }
 
@@ -14038,6 +14040,16 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     @VisibleForTesting
     public void setPackageManager(PackageManager packageManager) {
         mPackageManager = packageManager;
+    }
+
+    /*
+     * PhoneInterfaceManager is a singleton. Unit test calls the init() with context.
+     * But the context that is passed in is unused if the phone app is already alive.
+     * In this case PackageManager object is different in PhoneInterfaceManager and Unit test.
+     */
+    @VisibleForTesting
+    public void setAppOpsManager(AppOpsManager appOps) {
+        mAppOps = appOps;
     }
 
     /*

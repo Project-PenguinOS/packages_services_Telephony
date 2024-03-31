@@ -17,7 +17,7 @@
 package com.android.phone.satellite.accesscontrol;
 
 import static android.telephony.satellite.SatelliteManager.KEY_SATELLITE_COMMUNICATION_ALLOWED;
-import static android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_ERROR;
+import static android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_MODEM_ERROR;
 import static android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_REQUEST_NOT_SUPPORTED;
 import static android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_SUCCESS;
 
@@ -34,7 +34,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -58,6 +58,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.ResultReceiver;
 import android.telecom.TelecomManager;
+import android.telephony.satellite.SatelliteManager;
 import android.testing.TestableLooper;
 import android.util.Log;
 import android.util.Pair;
@@ -71,6 +72,7 @@ import com.android.internal.telephony.flags.FeatureFlags;
 import com.android.internal.telephony.satellite.SatelliteConfig;
 import com.android.internal.telephony.satellite.SatelliteConfigParser;
 import com.android.internal.telephony.satellite.SatelliteController;
+import com.android.internal.telephony.satellite.SatelliteModemInterface;
 
 import org.junit.After;
 import org.junit.Before;
@@ -84,7 +86,6 @@ import org.mockito.MockitoAnnotations;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -120,6 +121,8 @@ public class SatelliteAccessControllerTest {
     @Mock
     private SatelliteController mMockSatelliteController;
     @Mock
+    private SatelliteModemInterface mMockSatelliteModemInterface;
+    @Mock
     private Context mMockContext;
     @Mock private Phone mMockPhone;
     @Mock private Phone mMockPhone2;
@@ -139,8 +142,6 @@ public class SatelliteAccessControllerTest {
     private ArgumentCaptor<CancellationSignal> mLocationRequestCancellationSignalCaptor;
     @Captor
     private ArgumentCaptor<Consumer<Location>> mLocationRequestConsumerCaptor;
-    @Captor
-    private ArgumentCaptor<ResultReceiver> mResultReceiverFromSatelliteControllerCaptor;
     @Captor
     private ArgumentCaptor<Handler> mConfigUpdateHandlerCaptor;
     @Captor
@@ -175,33 +176,6 @@ public class SatelliteAccessControllerTest {
         }
     };
 
-    private boolean mQueriedSatelliteAllowed2 = false;
-    private int mQueriedSatelliteAllowedResultCode2 = SATELLITE_RESULT_SUCCESS;
-    private Semaphore mSatelliteAllowedSemaphore2 = new Semaphore(0);
-    private ResultReceiver mSatelliteAllowedReceiver2 = new ResultReceiver(null) {
-        @Override
-        protected void onReceiveResult(int resultCode, Bundle resultData) {
-            mQueriedSatelliteAllowedResultCode2 = resultCode;
-            if (resultCode == SATELLITE_RESULT_SUCCESS) {
-                if (resultData.containsKey(KEY_SATELLITE_COMMUNICATION_ALLOWED)) {
-                    mQueriedSatelliteAllowed2 = resultData.getBoolean(
-                            KEY_SATELLITE_COMMUNICATION_ALLOWED);
-                } else {
-                    logd("KEY_SATELLITE_COMMUNICATION_ALLOWED does not exist.");
-                    mQueriedSatelliteAllowed2 = false;
-                }
-            } else {
-                logd("mSatelliteAllowedReceiver2: resultCode=" + resultCode);
-                mQueriedSatelliteAllowed2 = false;
-            }
-            try {
-                mSatelliteAllowedSemaphore2.release();
-            } catch (Exception ex) {
-                fail("mSatelliteAllowedReceiver2: Got exception in releasing semaphore, ex=" + ex);
-            }
-        }
-    };
-
     @Before
     public void setUp() throws Exception {
         logd("setUp");
@@ -227,6 +201,8 @@ public class SatelliteAccessControllerTest {
         replaceInstance(PhoneFactory.class, "sPhones", null, mPhones);
         replaceInstance(SatelliteController.class, "sInstance", null,
                 mMockSatelliteController);
+        replaceInstance(SatelliteModemInterface.class, "sInstance", null,
+                mMockSatelliteModemInterface);
         replaceInstance(TelephonyCountryDetector.class, "sInstance", null,
                 mMockCountryDetector);
         when(mMockContext.getResources()).thenReturn(mMockResources);
@@ -242,9 +218,6 @@ public class SatelliteAccessControllerTest {
         when(mMockResources.getInteger(com.android.internal.R.integer
                 .config_oem_enabled_satellite_location_fresh_duration))
                 .thenReturn(TEST_LOCATION_FRESH_DURATION_SECONDS);
-        doNothing().when(mMockSatelliteController)
-                .requestIsSatelliteCommunicationAllowedForCurrentLocation(
-                        anyInt(), any(ResultReceiver.class));
 
         when(mMockLocationManager.getProviders(true)).thenReturn(LOCATION_PROVIDERS);
         when(mMockLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER))
@@ -298,92 +271,44 @@ public class SatelliteAccessControllerTest {
                 mSatelliteAllowedSemaphore, 1));
         assertEquals(SATELLITE_RESULT_REQUEST_NOT_SUPPORTED, mQueriedSatelliteAllowedResultCode);
 
-        // OEM-enabled satellite is supported, but SatelliteController returns error for the query
+        // OEM-enabled satellite is supported
         when(mMockFeatureFlags.oemEnabledSatelliteFlag()).thenReturn(true);
-        mSatelliteAccessControllerUT.requestIsCommunicationAllowedForCurrentLocation(
-                SUB_ID, mSatelliteAllowedReceiver);
-        mTestableLooper.processAllMessages();
-        verify(mMockSatelliteController).requestIsSatelliteCommunicationAllowedForCurrentLocation(
-                anyInt(), mResultReceiverFromSatelliteControllerCaptor.capture());
 
-        clearInvocations(mMockSatelliteController);
-        mSatelliteAccessControllerUT.requestIsCommunicationAllowedForCurrentLocation(
-                SUB_ID, mSatelliteAllowedReceiver2);
-        mTestableLooper.processAllMessages();
-        verify(mMockSatelliteController, never())
-                .requestIsSatelliteCommunicationAllowedForCurrentLocation(
-                        anyInt(), any(ResultReceiver.class));
-
-        sendSatelliteAllowResultFromSatelliteController(SATELLITE_RESULT_ERROR, null);
-        assertTrue(waitForRequestIsSatelliteAllowedForCurrentLocationResult(
-                mSatelliteAllowedSemaphore, 1));
-        assertTrue(waitForRequestIsSatelliteAllowedForCurrentLocationResult(
-                mSatelliteAllowedSemaphore2, 1));
-        assertEquals(SATELLITE_RESULT_ERROR, mQueriedSatelliteAllowedResultCode);
-        assertEquals(SATELLITE_RESULT_ERROR, mQueriedSatelliteAllowedResultCode2);
-        assertFalse(mQueriedSatelliteAllowed);
-        assertFalse(mQueriedSatelliteAllowed2);
-
-        // SatelliteController returns success result but the result bundle does not have
-        // KEY_SATELLITE_COMMUNICATION_ALLOWED
+        // Satellite is not supported
+        setUpResponseForRequestIsSatelliteSupported(false, SATELLITE_RESULT_SUCCESS);
         clearAllInvocations();
         mSatelliteAccessControllerUT.requestIsCommunicationAllowedForCurrentLocation(
                 SUB_ID, mSatelliteAllowedReceiver);
         mTestableLooper.processAllMessages();
-        verify(mMockSatelliteController).requestIsSatelliteCommunicationAllowedForCurrentLocation(
-                anyInt(), mResultReceiverFromSatelliteControllerCaptor.capture());
-        sendSatelliteAllowResultFromSatelliteController(SATELLITE_RESULT_SUCCESS, null);
         assertTrue(waitForRequestIsSatelliteAllowedForCurrentLocationResult(
                 mSatelliteAllowedSemaphore, 1));
         assertEquals(SATELLITE_RESULT_SUCCESS, mQueriedSatelliteAllowedResultCode);
         assertFalse(mQueriedSatelliteAllowed);
 
-        // SatelliteController returns disallowed result
+        // Failed to query whether satellite is supported or not
+        setUpResponseForRequestIsSatelliteSupported(false, SATELLITE_RESULT_MODEM_ERROR);
         clearAllInvocations();
         mSatelliteAccessControllerUT.requestIsCommunicationAllowedForCurrentLocation(
                 SUB_ID, mSatelliteAllowedReceiver);
         mTestableLooper.processAllMessages();
-        verify(mMockSatelliteController).requestIsSatelliteCommunicationAllowedForCurrentLocation(
-                anyInt(), mResultReceiverFromSatelliteControllerCaptor.capture());
-        sendSatelliteAllowResultFromSatelliteController(SATELLITE_RESULT_SUCCESS, false);
         assertTrue(waitForRequestIsSatelliteAllowedForCurrentLocationResult(
                 mSatelliteAllowedSemaphore, 1));
-        assertEquals(SATELLITE_RESULT_SUCCESS, mQueriedSatelliteAllowedResultCode);
-        assertFalse(mQueriedSatelliteAllowed);
+        assertEquals(SATELLITE_RESULT_MODEM_ERROR, mQueriedSatelliteAllowedResultCode);
 
-        // SatelliteController returns allowed result. Network country codes are available, but one
-        // country code is not in the allowed list
-        clearAllInvocations();
-        when(mMockCountryDetector.getCurrentNetworkCountryIso()).thenReturn(listOf("US", "IN"));
-        mSatelliteAccessControllerUT.requestIsCommunicationAllowedForCurrentLocation(
-                SUB_ID, mSatelliteAllowedReceiver);
-        mTestableLooper.processAllMessages();
-        verify(mMockSatelliteController).requestIsSatelliteCommunicationAllowedForCurrentLocation(
-                anyInt(), mResultReceiverFromSatelliteControllerCaptor.capture());
-        sendSatelliteAllowResultFromSatelliteController(SATELLITE_RESULT_SUCCESS, true);
-        assertTrue(waitForRequestIsSatelliteAllowedForCurrentLocationResult(
-                mSatelliteAllowedSemaphore, 1));
-        assertEquals(SATELLITE_RESULT_SUCCESS, mQueriedSatelliteAllowedResultCode);
-        assertFalse(mQueriedSatelliteAllowed);
-
-        // SatelliteController returns allowed result. Network country codes are available, and all
-        // country codes are in the allowed list
+        // Network country codes are available.
+        setUpResponseForRequestIsSatelliteSupported(true, SATELLITE_RESULT_SUCCESS);
         clearAllInvocations();
         when(mMockCountryDetector.getCurrentNetworkCountryIso()).thenReturn(listOf("US", "CA"));
         mSatelliteAccessControllerUT.requestIsCommunicationAllowedForCurrentLocation(
                 SUB_ID, mSatelliteAllowedReceiver);
         mTestableLooper.processAllMessages();
-        verify(mMockSatelliteController).requestIsSatelliteCommunicationAllowedForCurrentLocation(
-                anyInt(), mResultReceiverFromSatelliteControllerCaptor.capture());
-        sendSatelliteAllowResultFromSatelliteController(SATELLITE_RESULT_SUCCESS, true);
         assertTrue(waitForRequestIsSatelliteAllowedForCurrentLocationResult(
                 mSatelliteAllowedSemaphore, 1));
         assertEquals(SATELLITE_RESULT_SUCCESS, mQueriedSatelliteAllowedResultCode);
         assertTrue(mQueriedSatelliteAllowed);
 
-        // SatelliteController returns allowed result. Network country codes are not available.
-        // TelecomManager.isInEmergencyCall() returns true. On-device access controller will be
-        // used. Last known location is available and fresh.
+        // Network country codes are not available. TelecomManager.isInEmergencyCall() returns true.
+        // On-device access controller will be used. Last known location is available and fresh.
         clearAllInvocations();
         when(mMockCountryDetector.getCurrentNetworkCountryIso()).thenReturn(EMPTY_STRING_LIST);
         when(mMockTelecomManager.isInEmergencyCall()).thenReturn(true);
@@ -393,9 +318,6 @@ public class SatelliteAccessControllerTest {
         mSatelliteAccessControllerUT.requestIsCommunicationAllowedForCurrentLocation(
                 SUB_ID, mSatelliteAllowedReceiver);
         mTestableLooper.processAllMessages();
-        verify(mMockSatelliteController).requestIsSatelliteCommunicationAllowedForCurrentLocation(
-                anyInt(), mResultReceiverFromSatelliteControllerCaptor.capture());
-        sendSatelliteAllowResultFromSatelliteController(SATELLITE_RESULT_SUCCESS, true);
         assertTrue(
                 mSatelliteAccessControllerUT.isKeepOnDeviceAccessControllerResourcesTimerStarted());
         verify(mMockSatelliteOnDeviceAccessController).isSatCommunicationAllowedAtLocation(
@@ -419,9 +341,9 @@ public class SatelliteAccessControllerTest {
         mSatelliteAccessControllerUT.setSatelliteOnDeviceAccessController(
                 mMockSatelliteOnDeviceAccessController);
 
-        // SatelliteController returns allowed result. Network country codes are not available.
-        // TelecomManager.isInEmergencyCall() returns false. Phone0 is in ECM. On-device access
-        // controller will be used. Last known location is not fresh.
+        // Network country codes are not available. TelecomManager.isInEmergencyCall() returns
+        // false. Phone0 is in ECM. On-device access controller will be used. Last known location is
+        // not fresh.
         clearAllInvocations();
         when(mMockCountryDetector.getCurrentNetworkCountryIso()).thenReturn(EMPTY_STRING_LIST);
         when(mMockTelecomManager.isInEmergencyCall()).thenReturn(false);
@@ -432,9 +354,6 @@ public class SatelliteAccessControllerTest {
         mSatelliteAccessControllerUT.requestIsCommunicationAllowedForCurrentLocation(
                 SUB_ID, mSatelliteAllowedReceiver);
         mTestableLooper.processAllMessages();
-        verify(mMockSatelliteController).requestIsSatelliteCommunicationAllowedForCurrentLocation(
-                anyInt(), mResultReceiverFromSatelliteControllerCaptor.capture());
-        sendSatelliteAllowResultFromSatelliteController(SATELLITE_RESULT_SUCCESS, true);
         assertFalse(
                 mSatelliteAccessControllerUT.isKeepOnDeviceAccessControllerResourcesTimerStarted());
         verify(mMockLocationManager).getCurrentLocation(eq(LocationManager.GPS_PROVIDER),
@@ -464,9 +383,6 @@ public class SatelliteAccessControllerTest {
         mSatelliteAccessControllerUT.requestIsCommunicationAllowedForCurrentLocation(
                 SUB_ID, mSatelliteAllowedReceiver);
         mTestableLooper.processAllMessages();
-        verify(mMockSatelliteController).requestIsSatelliteCommunicationAllowedForCurrentLocation(
-                anyInt(), mResultReceiverFromSatelliteControllerCaptor.capture());
-        sendSatelliteAllowResultFromSatelliteController(SATELLITE_RESULT_SUCCESS, true);
         assertFalse(
                 mSatelliteAccessControllerUT.isKeepOnDeviceAccessControllerResourcesTimerStarted());
         verify(mMockLocationManager).getCurrentLocation(anyString(), any(LocationRequest.class),
@@ -486,10 +402,9 @@ public class SatelliteAccessControllerTest {
                 mQueriedSatelliteAllowedResultCode);
         assertFalse(mQueriedSatelliteAllowed);
 
-        // SatelliteController returns allowed result. Network country codes are not available.
-        // TelecomManager.isInEmergencyCall() returns false. No phone is in ECM. Last known location
-        // is not fresh. Cached country codes should be used for verifying satellite allow. No
-        // cached country codes are available.
+        // Network country codes are not available. TelecomManager.isInEmergencyCall() returns
+        // false. No phone is in ECM. Last known location is not fresh. Cached country codes should
+        // be used for verifying satellite allow. No cached country codes are available.
         clearAllInvocations();
         when(mMockCountryDetector.getCurrentNetworkCountryIso()).thenReturn(EMPTY_STRING_LIST);
         when(mMockCountryDetector.getCachedLocationCountryIsoInfo()).thenReturn(new Pair<>("", 0L));
@@ -503,9 +418,6 @@ public class SatelliteAccessControllerTest {
         mSatelliteAccessControllerUT.requestIsCommunicationAllowedForCurrentLocation(
                 SUB_ID, mSatelliteAllowedReceiver);
         mTestableLooper.processAllMessages();
-        verify(mMockSatelliteController).requestIsSatelliteCommunicationAllowedForCurrentLocation(
-                anyInt(), mResultReceiverFromSatelliteControllerCaptor.capture());
-        sendSatelliteAllowResultFromSatelliteController(SATELLITE_RESULT_SUCCESS, true);
         verify(mMockLocationManager, never()).getCurrentLocation(anyString(),
                 any(LocationRequest.class), any(CancellationSignal.class), any(Executor.class),
                 any(Consumer.class));
@@ -517,10 +429,9 @@ public class SatelliteAccessControllerTest {
         assertEquals(SATELLITE_RESULT_SUCCESS, mQueriedSatelliteAllowedResultCode);
         assertFalse(mQueriedSatelliteAllowed);
 
-        // SatelliteController returns allowed result. Network country codes are not available.
-        // TelecomManager.isInEmergencyCall() returns false. No phone is in ECM. Last known location
-        // is not fresh. Cached country codes should be used for verifying satellite allow. Cached
-        // country codes are available.
+        // Network country codes are not available. TelecomManager.isInEmergencyCall() returns
+        // false. No phone is in ECM. Last known location is not fresh. Cached country codes should
+        // be used for verifying satellite allow. Cached country codes are available.
         clearAllInvocations();
         when(mMockCountryDetector.getCurrentNetworkCountryIso()).thenReturn(EMPTY_STRING_LIST);
         when(mMockCountryDetector.getCachedLocationCountryIsoInfo())
@@ -539,9 +450,6 @@ public class SatelliteAccessControllerTest {
         mSatelliteAccessControllerUT.requestIsCommunicationAllowedForCurrentLocation(
                 SUB_ID, mSatelliteAllowedReceiver);
         mTestableLooper.processAllMessages();
-        verify(mMockSatelliteController).requestIsSatelliteCommunicationAllowedForCurrentLocation(
-                anyInt(), mResultReceiverFromSatelliteControllerCaptor.capture());
-        sendSatelliteAllowResultFromSatelliteController(SATELLITE_RESULT_SUCCESS, true);
         verify(mMockLocationManager, never()).getCurrentLocation(anyString(),
                 any(LocationRequest.class), any(CancellationSignal.class), any(Executor.class),
                 any(Consumer.class));
@@ -573,7 +481,7 @@ public class SatelliteAccessControllerTest {
 
         assertNull(spyConfigParserNull.getConfig());
 
-        // Verify the case when the configParser is exist but empty.
+        // Verify the case when the configParser exist but empty.
         SatelliteConfigParser spyConfigParserEmpty =
                 spy(new SatelliteConfigParser("test".getBytes()));
         doReturn(spyConfigParserEmpty).when(mMockSatelliteController).getSatelliteConfigParser();
@@ -582,23 +490,28 @@ public class SatelliteAccessControllerTest {
 
         assertNull(spyConfigParserEmpty.getConfig());
 
-        // Verify the case when the configParser is exist and valid data
+        // Verify the case when the configParser exists and has valid data
         SatelliteConfig mockSatelliteConfig = mock(SatelliteConfig.class);
-        final String filePath = "/data/user_de/0/com.android.phone/app_satellite/s2_cell_file";
-        Path targetSatS2FilePath = Paths.get(filePath);
+        Path mockTargetSatS2FilePath = mock(Path.class);
+        File mockS2CellFile = mock(File.class);
+        doReturn(mockS2CellFile).when(mockTargetSatS2FilePath).toFile();
+        doReturn(true).when(mockS2CellFile).exists();
         doReturn(false).when(mockSatelliteConfig).isFileExist(any());
-        doReturn(targetSatS2FilePath).when(mockSatelliteConfig)
+        doReturn(mockTargetSatS2FilePath).when(mockSatelliteConfig)
                 .copySatS2FileToPhoneDirectory(any(), any());
         doReturn(Arrays.asList("US")).when(mockSatelliteConfig).getDeviceSatelliteCountryCodes();
         doReturn(false).when(mockSatelliteConfig).isSatelliteDataForAllowedRegion();
-        doReturn(targetSatS2FilePath).when(mockSatelliteConfig).getSatelliteS2CellFile(any());
+        doReturn(mockTargetSatS2FilePath).when(mockSatelliteConfig).getSatelliteS2CellFile(any());
         doReturn(mockSatelliteConfig).when(mMockSatelliteController).getSatelliteConfig();
 
+        mSatelliteAccessControllerUT.setSatelliteOnDeviceAccessController(
+                mMockSatelliteOnDeviceAccessController);
         sendConfigUpdateChangedEvent(mMockContext);
 
-        verify(mockSatelliteConfig, times(0)).getDeviceSatelliteCountryCodes();
-        verify(mockSatelliteConfig, times(0)).isSatelliteDataForAllowedRegion();
+        verify(mockSatelliteConfig, times(2)).getDeviceSatelliteCountryCodes();
+        verify(mockSatelliteConfig, times(2)).isSatelliteDataForAllowedRegion();
         verify(mockSatelliteConfig, times(2)).getSatelliteS2CellFile(any());
+        assertTrue(mSatelliteAccessControllerUT.isSatelliteOnDeviceAccessControllerReset());
     }
 
     private void sendConfigUpdateChangedEvent(Context context) {
@@ -639,22 +552,25 @@ public class SatelliteAccessControllerTest {
         return true;
     }
 
-    private void sendSatelliteAllowResultFromSatelliteController(
-            int resultCode, Boolean satelliteAllowed) {
-        Bundle bundle = null;
-        if (resultCode == SATELLITE_RESULT_SUCCESS) {
-            bundle = new Bundle();
-            if (satelliteAllowed != null) {
-                bundle.putBoolean(KEY_SATELLITE_COMMUNICATION_ALLOWED, satelliteAllowed);
-            }
-        }
-        mResultReceiverFromSatelliteControllerCaptor.getValue().send(resultCode, bundle);
-        mTestableLooper.processAllMessages();
-    }
-
     private void sendLocationRequestResult(Location location) {
         mLocationRequestConsumerCaptor.getValue().accept(location);
         mTestableLooper.processAllMessages();
+    }
+
+    private void setUpResponseForRequestIsSatelliteSupported(
+            boolean isSatelliteSupported, @SatelliteManager.SatelliteResult int error) {
+        doAnswer(invocation -> {
+            ResultReceiver resultReceiver = invocation.getArgument(1);
+            if (error == SATELLITE_RESULT_SUCCESS) {
+                Bundle bundle = new Bundle();
+                bundle.putBoolean(SatelliteManager.KEY_SATELLITE_SUPPORTED, isSatelliteSupported);
+                resultReceiver.send(error, bundle);
+            } else {
+                resultReceiver.send(error, Bundle.EMPTY);
+            }
+            return null;
+        }).when(mMockSatelliteController).requestIsSatelliteSupported(anyInt(),
+                any(ResultReceiver.class));
     }
 
     @SafeVarargs
