@@ -501,6 +501,9 @@ public class ImsConferenceController {
             phoneAccountHandle =
                     PhoneUtils.makePstnPhoneAccountHandle(imsPhone.getDefaultPhone());
             carrierConfig = getCarrierConfig(imsPhone);
+
+            conferenceHostConnection.setTtyEnabled(new DeviceState().
+                    isTtyModeEnabled(imsPhone.getContext()));
         }
 
         ImsConference conference = new ImsConference(mTelecomAccountRegistry, mConnectionService,
