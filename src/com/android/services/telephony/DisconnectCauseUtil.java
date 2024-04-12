@@ -32,6 +32,7 @@ import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneFactory;
 import com.android.internal.telephony.flags.FeatureFlags;
 import com.android.internal.telephony.flags.FeatureFlagsImpl;
+import com.android.internal.telephony.satellite.SatelliteController;
 import com.android.phone.ImsUtil;
 import com.android.phone.PhoneGlobals;
 import com.android.phone.R;
@@ -516,7 +517,7 @@ public class DisconnectCauseUtil {
                 resourceId = R.string.callFailed_wfc_service_not_available_in_this_location;
                 break;
             case android.telephony.DisconnectCause.SATELLITE_ENABLED:
-                resourceId = R.string.incall_error_satellite_enabled;
+                resourceId = getSatelliteErrorString();
                 break;
             case android.telephony.DisconnectCause.CONCURRENT_CALLS_NOT_POSSIBLE:
                 resourceId = R.string.callFailed_concurrent_calls_not_possible;
@@ -703,7 +704,7 @@ public class DisconnectCauseUtil {
                         resourceId = R.string.clh_incall_error_out_of_service_txt;
                         break;
                     case android.telephony.DisconnectCause.SATELLITE_ENABLED:
-                        resourceId = R.string.clh_callFailed_satelliteEnabled_txt;
+                        resourceId = getSatelliteErrorString();
                         break;
                     default:
                         resourceId = R.string.clh_card_title_call_ended_txt;
@@ -1168,7 +1169,7 @@ public class DisconnectCauseUtil {
                 resourceId = R.string.callFailed_wfc_service_not_available_in_this_location;
                 break;
             case android.telephony.DisconnectCause.SATELLITE_ENABLED:
-                resourceId = R.string.incall_error_satellite_enabled;
+                resourceId = getSatelliteErrorString();
                 break;
             case android.telephony.DisconnectCause.CONCURRENT_CALLS_NOT_POSSIBLE:
                 resourceId = R.string.callFailed_concurrent_calls_not_possible;
@@ -1215,6 +1216,8 @@ public class DisconnectCauseUtil {
                 return DisconnectCause.REASON_IMS_ACCESS_BLOCKED;
             case android.telephony.DisconnectCause.OUTGOING_EMERGENCY_CALL_PLACED:
                 return DisconnectCause.REASON_EMERGENCY_CALL_PLACED;
+            case android.telephony.DisconnectCause.SATELLITE_ENABLED:
+                return reason;
         }
 
         // If no specific code-mapping found, then fall back to using the reason.
@@ -1333,5 +1336,12 @@ public class DisconnectCauseUtil {
                 TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G);
         boolean is2gEnabled = (currentlyAllowedNetworkTypes & bitmask2g) != 0;
         return !is2gEnabled;
+    }
+
+    private static Integer getSatelliteErrorString() {
+        if (SatelliteController.getInstance().isSatelliteEnabled()) {
+            return R.string.incall_error_satellite_enabled;
+        }
+        return R.string.incall_error_carrier_roaming_satellite_mode;
     }
 }

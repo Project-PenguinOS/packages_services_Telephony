@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,6 +100,7 @@ public class TestSatelliteService extends SatelliteImplBase {
     private List<String> mAllPlmnList = new ArrayList<>();
     private boolean mIsSatelliteEnabledForCarrier;
     private boolean mIsRequestIsSatelliteEnabledForCarrier;
+    private boolean mIsEmergnecy;
 
     /**
      * Create TestSatelliteService using the Executor specified for methods being called from
@@ -117,6 +118,7 @@ public class TestSatelliteService extends SatelliteImplBase {
         mIsCellularModemEnabledMode = false;
         mIsSatelliteEnabledForCarrier = false;
         mIsRequestIsSatelliteEnabledForCarrier = false;
+        mIsEmergnecy = false;
     }
 
     /**
@@ -184,8 +186,9 @@ public class TestSatelliteService extends SatelliteImplBase {
 
     @Override
     public void requestSatelliteEnabled(boolean enableSatellite, boolean enableDemoMode,
-            @NonNull IIntegerConsumer errorCallback) {
-        logd("requestSatelliteEnabled: mErrorCode=" + mErrorCode + " enable = " + enableSatellite);
+            boolean isEmergency, @NonNull IIntegerConsumer errorCallback) {
+        logd("requestSatelliteEnabled: mErrorCode=" + mErrorCode + " enable = " + enableSatellite
+                + " isEmergency=" + isEmergency);
         if (mErrorCode != SatelliteResult.SATELLITE_RESULT_SUCCESS) {
             runWithExecutor(() -> errorCallback.accept(mErrorCode));
             return;
@@ -196,6 +199,7 @@ public class TestSatelliteService extends SatelliteImplBase {
         } else {
             disableSatellite(errorCallback);
         }
+        mIsEmergnecy = isEmergency;
     }
 
     private void enableSatellite(@NonNull IIntegerConsumer errorCallback) {
@@ -467,6 +471,16 @@ public class TestSatelliteService extends SatelliteImplBase {
     }
 
     /**
+     * Helper method to report satellite supported from modem side for testing purpose.
+     * @param supported whether satellite is supported from modem or not.
+     */
+    public void sendOnSatelliteSupportedStateChanged(boolean supported) {
+        logd("sendOnSatelliteSupportedStateChanged: supported=" + supported);
+        mRemoteListeners.values().forEach(listener -> runWithExecutor(() ->
+                listener.onSatelliteSupportedStateChanged(supported)));
+    }
+
+    /**
      * Helper method to verify that the satellite modem is properly configured to receive
      * requests.
      *
@@ -563,6 +577,26 @@ public class TestSatelliteService extends SatelliteImplBase {
 
     public boolean isRequestIsSatelliteEnabledForCarrier() {
         return mIsRequestIsSatelliteEnabledForCarrier;
+    }
+
+    public boolean getIsEmergency() {
+        return mIsEmergnecy;
+    }
+
+    /**
+     * Helper methoid to provide a way to set supported state from test application to mock modem.
+     * @param supported whether satellite is supported by modem or not.
+     */
+    public void updateSatelliteSupportedState(boolean  supported) {
+        logd("updateSatelliteSupportedState: supported=" + supported);
+        mIsSupported = supported;
+        mRemoteListeners.values().forEach(listener -> runWithExecutor(
+                () -> listener.onSatelliteSupportedStateChanged(mIsSupported)));
+
+    }
+
+    public boolean getSatelliteSupportedState() {
+        return mIsSupported;
     }
 
     /**
