@@ -94,30 +94,6 @@ public class CdmaCallOptions extends TimeConsumingPreferenceActivity
         return isActivityPresent(context, CALL_WAITING_INTENT);
     }
 
-    //prompt dialog to notify user turn off Enhance 4G LTE switch
-    private boolean isPromptTurnOffEnhance4GLTE(Phone phone) {
-        if (phone == null || phone.getImsPhone() == null) {
-            return false;
-        }
-
-        com.android.ims.ImsManager imsMgr = com.android.ims.ImsManager.getInstance(this, phone.getPhoneId());
-        try {
-            if (imsMgr.getImsServiceState() != ImsFeature.STATE_READY) {
-                Log.d(LOG_TAG, "ImsServiceStatus is not ready!");
-                return false;
-            }
-        } catch (com.android.ims.ImsException ex) {
-            Log.d(LOG_TAG, "Exception when trying to get ImsServiceStatus: " + ex);
-            return false;
-        }
-
-        return imsMgr.isEnhanced4gLteModeSettingEnabledByUser()
-            && imsMgr.isNonTtyOrTtyOnVolteEnabled()
-            && !phone.isUtEnabled()
-            && !phone.isVolteEnabled()
-            && !phone.isVideoEnabled();
-    }
-
     private void showAlertDialog(String title, String message) {
         Dialog dialog = new AlertDialog.Builder(this)
             .setTitle(title)
@@ -198,16 +174,6 @@ public class CdmaCallOptions extends TimeConsumingPreferenceActivity
             if (prefPri != null) {
                 prefPri.setEnabled(false);
             }
-        }
-
-        if(mPhone.getPhoneType() == PhoneConstants.PHONE_TYPE_CDMA
-                && isPromptTurnOffEnhance4GLTE(mPhone)
-                && carrierConfig.getBoolean(CarrierConfigManager.KEY_CDMA_CW_CF_ENABLED_BOOL)) {
-            String title = (String)this.getResources()
-                .getText(R.string.ut_not_support);
-            String msg = (String)this.getResources()
-                .getText(R.string.ct_ut_not_support_close_4glte);
-            showAlertDialog(title, msg);
         }
 
         mCWButton = (CallWaitingSwitchPreference) prefScreen.findPreference(BUTTON_CW_KEY);
@@ -393,13 +359,6 @@ public class CdmaCallOptions extends TimeConsumingPreferenceActivity
     @Override
     public void onFinished(Preference preference, boolean reading) {
         if (mCdmaCfCwEnabled && mUtEnabled && mPhone != null && !mPhone.isUtEnabled()) {
-            if (isPromptTurnOffEnhance4GLTE(mPhone)) {
-                String title = (String)this.getResources()
-                    .getText(R.string.ut_not_support);
-                String msg = (String)this.getResources()
-                    .getText(R.string.ct_ut_not_support_close_4glte);
-                showAlertDialog(title, msg);
-            }
             mUtEnabled = false;
             if (mCWButton != null) {
                 PreferenceScreen prefScreen = getPreferenceScreen();

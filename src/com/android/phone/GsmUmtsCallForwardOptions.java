@@ -326,44 +326,9 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
         return cm.getNetworkCapabilities(activeNetwork);
     }
 
-    //prompt dialog to notify user turn off Enhance 4G LTE switch
-    private boolean isPromptTurnOffEnhance4GLTE(Phone phone) {
-        if (phone == null || phone.getImsPhone() == null) {
-            return false;
-        }
-
-        ImsManager imsMgr = ImsManager.getInstance(this, phone.getPhoneId());
-        try {
-            if (imsMgr.getImsServiceState() != ImsFeature.STATE_READY) {
-                Log.d(LOG_TAG, "ImsServiceStatus is not ready!");
-                return false;
-            }
-        } catch (ImsException ex) {
-            Log.d(LOG_TAG, "Exception when trying to get ImsServiceStatus: " + ex);
-            return false;
-        }
-
-        return imsMgr.isEnhanced4gLteModeSettingEnabledByUser()
-            && imsMgr.isNonTtyOrTtyOnVolteEnabled()
-            && !phone.isUtEnabled()
-            && !phone.isVolteEnabled()
-            && !phone.isVideoEnabled();
-    }
-
     @Override
     public void onResume() {
         super.onResume();
-        if (mCarrierConfig.getConfigForSubId(mPhone.getSubId())
-                .getBoolean(CarrierConfigManager.KEY_CDMA_CW_CF_ENABLED_BOOL)
-                && isPromptTurnOffEnhance4GLTE(mPhone)) {
-            String title = (String)this.getResources()
-                .getText(R.string.ut_not_support);
-            String msg = (String)this.getResources()
-                .getText(R.string.ct_ut_not_support_close_4glte);
-            showAlertDialog(title, msg);
-            return;
-        }
-
         if (mCheckData) {
             IntentFilter intentFilter = new IntentFilter();
             intentFilter.addAction(TelephonyIntents.ACTION_ANY_DATA_CONNECTION_STATE_CHANGED);
@@ -450,20 +415,13 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
                     getSystemService(CARRIER_CONFIG_SERVICE);
                 if(carrierConfig != null && mPhone != null
                         && carrierConfig.getConfigForSubId(mPhone.getSubId())
-                            .getBoolean(CarrierConfigManager.KEY_CDMA_CW_CF_ENABLED_BOOL)) {
-                    if (isPromptTurnOffEnhance4GLTE(mPhone)) {
-                        String title = (String)this.getResources()
-                            .getText(R.string.ut_not_support);
-                        String msg = (String)this.getResources()
-                            .getText(R.string.ct_ut_not_support_close_4glte);
-                        showAlertDialog(title, msg);
-                    }else if (mPhone.getPhoneType() == PhoneConstants.PHONE_TYPE_CDMA ){
-                        Log.i(LOG_TAG, "auto retry and switch to cmda method UI.");
-                        Intent intent = new Intent(CALL_FORWARD_INTENT);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                        finish();
-                    }
+                            .getBoolean(CarrierConfigManager.KEY_CDMA_CW_CF_ENABLED_BOOL)
+                        && mPhone.getPhoneType() == PhoneConstants.PHONE_TYPE_CDMA ) {
+                    Log.i(LOG_TAG, "auto retry and switch to cmda method UI.");
+                    Intent intent = new Intent(CALL_FORWARD_INTENT);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                    finish();
                 }
             } else {
                 mInitIndex++;
