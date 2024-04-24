@@ -95,7 +95,7 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
     private long mDelayMillisAfterUssdSet = 1000;
 
     private boolean mExpectMore;
-    private boolean mIsTimerEnabled;
+    private boolean mIsCfutEnabled;
     private boolean mAllowSetCallFwding = false;
     private boolean mUtEnabled = false;
     /*Variables which holds CFUT response data*/
@@ -163,11 +163,12 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
                         }
                         @Override
                         public void onConnectionUnavailable() {
+                            Log.i(LOG_TAG, "QtiImsExtConnector onConnectionUnavailable");
                             mQtiImsExtManager = null;
                             //QtiImsExtManager is not available so set
-                            //mIsTimerEnabled to false so that no Timer related operations will hit
+                            //mIsCfutEnabled to false so that no Timer related operations will hit
                             //and remove spinner.
-                            mIsTimerEnabled = false;
+                            mIsCfutEnabled = false;
                             mTcpListener.onFinished(CallForwardEditPreference.this, false);
                         }
                     });
@@ -181,7 +182,7 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
             mQtiImsExtConnector.disconnect();
             mQtiImsExtConnector = null;
             mQtiImsExtManager = null;
-            mIsTimerEnabled = false;
+            mIsCfutEnabled = false;
         }
     }
 
@@ -208,7 +209,7 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
     }
 
     //Used to check if CFUT(CFU with timer) is supported
-    private boolean isTimerEnabled() {
+    private boolean shouldCfutEnabled() {
         //Timer is enabled only when UT services are enabled
         CarrierConfigManager cfgManager = (CarrierConfigManager)
                 mContext.getSystemService(Context.CARRIER_CONFIG_SERVICE);
@@ -217,6 +218,54 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
                 cfgManager.getConfigForSubId(mPhone.getSubId())
                     .getBoolean("config_enable_cfu_time") : false)
                 && mPhone.isUtEnabled();
+    }
+
+    int getStartHour() {
+        return mStartHour;
+    }
+
+    int getStartMinute() {
+        return mStartMinute;
+    }
+
+    int getEndHour() {
+        return mEndHour;
+    }
+
+    int getEndMinute() {
+        return mEndMinute;
+    }
+
+    int getCfutStatus() {
+        return mStatus;
+    }
+
+    String getCfutNumber() {
+        return mNumber;
+    }
+
+    boolean isCfutEnabled() {
+        return mIsCfutEnabled;
+    }
+
+    void restoreCallCallForwardTimerInfo(int startHour, int startMinute, int endHour,
+            int endMinute, int status, String number, boolean shouldCfutEnabled) {
+        if (mQtiImsExtConnector == null) {
+            createQtiImsExtConnector(mContext);
+            //Connect will get the QtiImsExtManager instance.
+            mQtiImsExtConnector.connect();
+        }
+        mStartHour = startHour;
+        mStartMinute = startMinute;
+        mEndHour = endHour;
+        mEndMinute = endMinute;
+        mStatus = status;
+        mNumber = number;
+        mIsCfutEnabled = shouldCfutEnabled;
+        reason = CommandsInterface.CF_REASON_UNCONDITIONAL;
+        setTimeSettingVisibility(true);
+        handleCallForwardTimerResult();
+        updateSummaryText();
     }
 
     void restoreCallForwardInfo(CallForwardInfo cf) {
@@ -335,7 +384,7 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
                 // the interface of Phone.setCallForwardingOption has error:
                 // should be action, reason...
                 if (reason == CommandsInterface.CF_REASON_UNCONDITIONAL
-                        && !isAllDayChecked() && mIsTimerEnabled
+                        && !isAllDayChecked() && mIsCfutEnabled
                         && (action != CommandsInterface.CF_ACTION_DISABLE)) {
 
                     Log.d(LOG_TAG, "setCallForwardingUncondTimerOption,"
@@ -446,8 +495,8 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
                 Log.d(LOG_TAG, "Video CF query cannot be triggered due to UT is false now");
                 return;
             }
-            mIsTimerEnabled = isTimerEnabled();
-            Log.d(LOG_TAG, "isTimerEnabled=" + mIsTimerEnabled);
+            mIsCfutEnabled = shouldCfutEnabled();
+            Log.d(LOG_TAG, "shouldCfutEnabled=" + mIsCfutEnabled);
             if (mPhone != null &&  mPhone.isUtEnabled()) {
                 if (mQtiImsExtConnector == null) {
                     createQtiImsExtConnector(mContext);
@@ -561,7 +610,7 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
         if (mQtiImsExtManager != null) {
             try {
                 if (reason == CommandsInterface.CF_REASON_UNCONDITIONAL &&
-                        mIsTimerEnabled) {
+                        mIsCfutEnabled) {
                     setTimeSettingVisibility(true);
                     mQtiImsExtManager.getCallForwardUncondTimer(mPhone.getPhoneId(),
                             reason, mServiceClass, imsInterfaceListener);
@@ -582,7 +631,7 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
         if (isToggled()) {
             String number = getRawPhoneNumber();
             if (reason == CommandsInterface.CF_REASON_UNCONDITIONAL
-                    && mIsTimerEnabled && isTimerValid()){
+                    && mIsCfutEnabled && isTimerValid()){
                 number = getRawPhoneNumberWithTime();
             }
             if (number != null && number.length() > 0) {
@@ -708,7 +757,7 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
             if (DBG) Log.d(LOG_TAG, "onUTReqFailed phoneId=" + phoneId + " errCode= "
                     + errCode + "errString =" + errString);
             Message msg;
-            if (reason == CommandsInterface.CF_REASON_UNCONDITIONAL && mIsTimerEnabled) {
+            if (reason == CommandsInterface.CF_REASON_UNCONDITIONAL && mIsCfutEnabled) {
                 msg = mHandler.obtainMessage(mHandler.MESSAGE_GET_UT_FAILED);
                 msg.arg1 = errCode;
                 msg.sendToTarget();

@@ -437,6 +437,9 @@ public class EditPhoneNumberPreference extends EditTextPreference
         return this;
     }
 
+    public int getPrefId() {
+        return mPrefId;
+    }
 
     /**
      * Phone number handling code

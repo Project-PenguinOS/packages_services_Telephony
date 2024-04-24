@@ -69,6 +69,11 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
     private static final String KEY_STATUS = "status";
     private static final String KEY_NUMBER = "number";
     private static final String KEY_ENABLE = "enable";
+    private static final String KEY_START_HOUR = "start_hour";
+    private static final String KEY_END_HOUR = "end_hour";
+    private static final String KEY_START_MINUTE = "start_minute";
+    private static final String KEY_END_MINUTE = "end_minute";
+    private static final String KEY_IS_CFUT = "is_cfut";
 
     private CallForwardEditPreference mButtonCFU;
     private CallForwardEditPreference mButtonCFB;
@@ -356,11 +361,26 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
                     Bundle bundle = mIcicle.getParcelable(pref.getKey());
                     pref.setToggled(bundle.getBoolean(KEY_TOGGLE));
                     pref.setEnabled(bundle.getBoolean(KEY_ENABLE));
-                    CallForwardInfo cf = new CallForwardInfo();
-                    cf.number = bundle.getString(KEY_NUMBER);
-                    cf.status = bundle.getInt(KEY_STATUS);
-                    pref.init(this, mPhone, mReplaceInvalidCFNumbers, mServiceClass, mCallForwardByUssd);
-                    pref.restoreCallForwardInfo(cf);
+                    pref.setExpectMore(canExpectMoreCallFwdReq());
+                    if (bundle.getBoolean(KEY_IS_CFUT)) {
+                        pref.init(this, mPhone, mReplaceInvalidCFNumbers,
+                                mServiceClass, mCallForwardByUssd);
+                        pref.restoreCallCallForwardTimerInfo(
+                                bundle.getInt(KEY_START_HOUR),
+                                bundle.getInt(KEY_START_MINUTE),
+                                bundle.getInt(KEY_END_HOUR),
+                                bundle.getInt(KEY_END_MINUTE),
+                                bundle.getInt(KEY_STATUS),
+                                bundle.getString(KEY_NUMBER),
+                                bundle.getBoolean(KEY_IS_CFUT));
+                    } else {
+                        CallForwardInfo cf = new CallForwardInfo();
+                        cf.number = bundle.getString(KEY_NUMBER);
+                        cf.status = bundle.getInt(KEY_STATUS);
+                        pref.init(this, mPhone, mReplaceInvalidCFNumbers,
+                                mServiceClass, mCallForwardByUssd);
+                        pref.restoreCallForwardInfo(cf);
+                    }
                 }
             }
             mFirstResume = false;
@@ -398,9 +418,20 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
             Bundle bundle = new Bundle();
             bundle.putBoolean(KEY_TOGGLE, pref.isToggled());
             bundle.putBoolean(KEY_ENABLE, pref.isEnabled());
-            if (pref.callForwardInfo != null) {
-                bundle.putString(KEY_NUMBER, pref.callForwardInfo.number);
-                bundle.putInt(KEY_STATUS, pref.callForwardInfo.status);
+            if (pref.isCfutEnabled() &&
+                    pref.getPrefId() == CommandsInterface.CF_REASON_UNCONDITIONAL) {
+                bundle.putString(KEY_NUMBER, pref.getCfutNumber());
+                bundle.putInt(KEY_START_HOUR, pref.getStartHour());
+                bundle.putInt(KEY_END_HOUR, pref.getEndHour());
+                bundle.putInt(KEY_START_MINUTE, pref.getStartMinute());
+                bundle.putInt(KEY_END_MINUTE, pref.getEndMinute());
+                bundle.putInt(KEY_STATUS, pref.getCfutStatus());
+                bundle.putBoolean(KEY_IS_CFUT, pref.isCfutEnabled());
+            } else {
+                if (pref.callForwardInfo != null) {
+                    bundle.putString(KEY_NUMBER, pref.callForwardInfo.number);
+                    bundle.putInt(KEY_STATUS, pref.callForwardInfo.status);
+                }
             }
             outState.putParcelable(pref.getKey(), bundle);
         }
