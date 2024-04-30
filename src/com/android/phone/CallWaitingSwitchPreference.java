@@ -38,6 +38,8 @@ public class CallWaitingSwitchPreference extends SwitchPreference {
     private int mQueryStatus = TelephonyManager.CALL_WAITING_STATUS_UNKNOWN_ERROR;
     private boolean mUtEnabled = false;
     private boolean mUssdMode = false;
+    private boolean mCwEnabled = false;
+    private boolean mCwClicked = false;
 
     public CallWaitingSwitchPreference(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
@@ -64,6 +66,7 @@ public class CallWaitingSwitchPreference extends SwitchPreference {
         PersistableBundle bundle = configManager.getConfigForSubId(phone.getSubId());
         mUssdMode = (bundle != null) ? bundle.getBoolean(
                 CarrierConfigManager.KEY_USE_CALL_WAITING_USSD_BOOL, false) : false;
+        mCwEnabled = false;
 
         if (!skipReading) {
             Log.d(LOG_TAG, "init getCallWaitingStatus");
@@ -105,7 +108,9 @@ public class CallWaitingSwitchPreference extends SwitchPreference {
     @Override
     protected void onClick() {
         super.onClick();
-        mTelephonyManager.setCallWaitingEnabled(isChecked(), mExecutor, this::updateStatusCallBack);
+        mCwEnabled = isChecked();
+        mCwClicked = true;
+        mTelephonyManager.setCallWaitingEnabled(mCwEnabled, mExecutor, this::updateStatusCallBack);
         if (mTcpListener != null) {
             mIsDuringUpdateProcess = true;
             mTcpListener.onStarted(this, false);
@@ -163,6 +168,8 @@ public class CallWaitingSwitchPreference extends SwitchPreference {
                 } else if (mTcpListener != null) {
                     mTcpListener.onError(CallWaitingSwitchPreference.this, error);
                 }
+                handleCwFallbackOnError();
+                setChecked(mCwEnabled);
             } else if (mQueryStatus == TelephonyManager.CALL_WAITING_STATUS_UNKNOWN_ERROR
                     || (mIsDuringUpdateProcess && (
                     mUpdateStatus != TelephonyManager.CALL_WAITING_STATUS_ENABLED
@@ -171,14 +178,21 @@ public class CallWaitingSwitchPreference extends SwitchPreference {
                 if (mTcpListener != null) {
                     mTcpListener.onError(CallWaitingSwitchPreference.this, RESPONSE_ERROR);
                 }
+                handleCwFallbackOnError();
+                setChecked(mCwEnabled);
             } else {
-                if (mQueryStatus == TelephonyManager.CALL_WAITING_STATUS_ENABLED) {
-                    setChecked(true);
-                } else {
-                    setChecked(false);
-                }
+                mCwEnabled = mQueryStatus == TelephonyManager.CALL_WAITING_STATUS_ENABLED;
+                setChecked(mCwEnabled);
             }
             mIsDuringUpdateProcess = false;
+            mCwClicked = false;
+        }
+    }
+
+    private void handleCwFallbackOnError() {
+        // Recover initial state before onClick.
+        if (mCwClicked) {
+            mCwEnabled = !mCwEnabled;
         }
     }
 }
