@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+/**
+* Changes from Qualcomm Innovation Center, Inc. are provided under the following license:
+* Copyright (c) 2024 Qualcomm Innovation Center, Inc. All rights reserved.
+* SPDX-License-Identifier: BSD-3-Clause-Clear
+*/
+
 package com.android.services.telephony;
 
 import static junit.framework.Assert.assertFalse;
@@ -44,16 +50,19 @@ public class HoldTrackerTest {
     private PhoneAccountHandle mPhoneAccountHandle1;
     private PhoneAccountHandle mPhoneAccountHandle2;
     private Context mMockContext;
+    private TelephonyConnectionService mTelephonyConnectionService;
     private TelephonyManager mTelephonyManager;
 
     @Before
     public void setUp() throws Exception {
         mMockContext = mock(Context.class);
         mTelephonyManager = mock(TelephonyManager.class);
+        mTelephonyConnectionService = mock(TelephonyConnectionService.class);
         when(mMockContext.getSystemService(eq(Context.TELEPHONY_SERVICE)))
                          .thenReturn(mTelephonyManager);
-        mHoldTrackerUT = new HoldTracker(mMockContext);
+        mHoldTrackerUT = new HoldTracker(mTelephonyConnectionService, mMockContext);
         doReturn(false).when(mTelephonyManager).isDsdaOrDsdsTransitionMode();
+        doReturn(false).when(mTelephonyConnectionService).hasMultipleHeldCallsInDsds();
         mPhoneAccountHandle1 =
                 new PhoneAccountHandle(new ComponentName("pkg1", "cls1"), "0");
         mPhoneAccountHandle2 =

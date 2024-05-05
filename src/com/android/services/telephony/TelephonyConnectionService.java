@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+/**
+* Changes from Qualcomm Innovation Center, Inc. are provided under the following license:
+* Copyright (c) 2024 Qualcomm Innovation Center, Inc. All rights reserved.
+* SPDX-License-Identifier: BSD-3-Clause-Clear
+*/
+
 package com.android.services.telephony;
 
 import static android.telephony.CarrierConfigManager.KEY_USE_ONLY_DIALED_SIM_ECC_LIST_BOOL;
@@ -222,8 +228,11 @@ public class TelephonyConnectionService extends ConnectionService {
                     maybeRemoveAnsweringDropsFgCallExtra((TelephonyConnection)ringingConnection,
                             ringingConnection.getPhoneAccountHandle());
                 }
-                // recalculate conferenceable connections
+                // recalculate conferenceable connections and hold capability
                 mImsConferenceController.recalculateConferenceable();
+                mHoldTracker.updateAllPhoneAccountHoldCapability();
+                mUseDsdaHoldCapability = mTelephonyManagerProxy.isDsdsTransitionMode() ||
+                        hasMultipleHeldCallsInDsds();
             }
         }
     };
@@ -249,6 +258,10 @@ public class TelephonyConnectionService extends ConnectionService {
     private boolean mIsAcrossSubHoldInProgress = false;
     /** UNKNOWN original call type for video CRS. */
     public static final int CALL_TYPE_UNKNOWN = -1;
+
+    // Tracks whether DSDA hold capability logic is used in DSDS mode
+    // returns true if UE is in DSDS with two held calls or calls on both SUBs
+    private boolean mUseDsdaHoldCapability = false;
 
     // Contains one TelephonyConnection that has placed a call and a memory of which Phones it has
     // already tried to connect with. There should be only one TelephonyConnection trying to place a
@@ -1088,7 +1101,7 @@ public class TelephonyConnectionService extends ConnectionService {
         mExpectedComponentName = new ComponentName(this, this.getClass());
         mEmergencyTonePlayer = new EmergencyTonePlayer(this);
         TelecomAccountRegistry.getInstance(this).setTelephonyConnectionService(this);
-        mHoldTracker = new HoldTracker(getApplicationContext());
+        mHoldTracker = new HoldTracker(this, getApplicationContext());
         mIsTtyEnabled = mDeviceState.isTtyModeEnabled(this);
         mDomainSelectionMainExecutor = getApplicationContext().getMainExecutor();
         mDomainSelectionResolver = DomainSelectionResolver.getInstance();
@@ -1218,8 +1231,11 @@ public class TelephonyConnectionService extends ConnectionService {
             Log.e(this, null, "Cannot unhold call as holding in progress");
             return;
         }
-        if (!isDsdaOrDsdsTransitionMode()) {
-            // follow legacy unhold behavior
+        if (!isDsdaOrDsdsTransitionMode() && !hasMultipleHeldCalls()) {
+            // Use new dsda logic to handle a possible scenario of
+            // two held calls in DSDS. This is possible if device
+            // transitioned from DSDS transition/DSDA to DSDS
+            // Otherwise follow legacy unhold behavior
             super.unhold(callId);
             return;
         }
@@ -1229,7 +1245,7 @@ public class TelephonyConnectionService extends ConnectionService {
     @Override
     protected void hold(String callId) {
         if (isHoldOrSwapInProgress()) {
-            Log.e(this, null, "Cannot unhold call as holding in progress");
+            Log.e(this, null, "Cannot hold call as holding in progress");
             return;
         }
 
@@ -5296,6 +5312,54 @@ public class TelephonyConnectionService extends ConnectionService {
         }
 
         return false;
+    }
+
+    // Helper function to check if there are multiple held calls in DSDS mode
+    public boolean hasMultipleHeldCallsInDsds() {
+        return mTelephonyManagerProxy.isDsdsMode() && hasMultipleHeldCalls();
+    }
+
+    // Helper function to check if there are multiple held calls
+    private boolean hasMultipleHeldCalls() {
+        int numHeldCalls = 0;
+        for (Connection current : getAllConnections()) {
+            if (isTelephonyConnection(current) &&
+                    (current.getState() == Connection.STATE_HOLDING)) {
+                numHeldCalls++;
+            }
+        }
+
+        for (Conference conference : getAllConferences()) {
+            if (isTelephonyConferenceBase(conference) &&
+                    (conference.getState() == Connection.STATE_HOLDING &&
+                    isImsConference(conference))) {
+                numHeldCalls++;
+            }
+        }
+        return numHeldCalls > 1;
+    }
+
+    // Reevaluate hold capability if UE transitions to DSDS with DSDA hold
+    // capability behavior to pure DSDS hold capability behavior
+    // Possible DSDS with DSDA hold capability scenarios:
+    //  1) DSDS transition (DSDS but calls on both SUBs)
+    //  2) Two HELD calls (DSDS but two held calls on same SUB)
+    // Pure DSDS hold capability behavior:
+    //  1) one ACTIVE call
+    //  2) one ACTIVE + HELD call on the same SUB
+    public void maybeUpdateAllPhoneAccountsHoldCapability() {
+        if (mTelephonyManagerProxy.getPhoneCount() <= PhoneConstants.MAX_PHONE_COUNT_SINGLE_SIM) {
+            return;
+        }
+        boolean wasUseDsdaHoldCapability = mUseDsdaHoldCapability;
+        mUseDsdaHoldCapability = mTelephonyManagerProxy.isDsdsTransitionMode() ||
+                hasMultipleHeldCallsInDsds();
+        Log.v(this, "hasUseDsdaHoldCapabilityChanged - wasUseDsdaHoldCapability: " +
+                wasUseDsdaHoldCapability +
+                ", mUseDsdaHoldCapability: " + mUseDsdaHoldCapability);
+        if (wasUseDsdaHoldCapability != mUseDsdaHoldCapability) {
+            mHoldTracker.updateAllPhoneAccountHoldCapability();
+        }
     }
 
     private Connection getRingingOrDialingConnection() {

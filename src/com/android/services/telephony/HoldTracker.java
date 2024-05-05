@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+/**
+* Changes from Qualcomm Innovation Center, Inc. are provided under the following license:
+* Copyright (c) 2024 Qualcomm Innovation Center, Inc. All rights reserved.
+* SPDX-License-Identifier: BSD-3-Clause-Clear
+*/
+
 package com.android.services.telephony;
 
 import android.content.Context;
@@ -31,9 +37,14 @@ import java.util.Map;
 public class HoldTracker {
     private final Map<PhoneAccountHandle, List<Holdable>> mHoldables;
     private Context mContext;
+    private TelephonyConnectionService mTelephonyConnectionService;
 
-    public HoldTracker(Context context) {
+    private static final int DSDS_MAX_HOLDABLE_CALLS = 1;
+    private static final int DSDA_MAX_HOLDABLE_CALLS = 2;
+
+    public HoldTracker(TelephonyConnectionService service, Context context) {
         mHoldables = new HashMap<>();
+        mTelephonyConnectionService = service;
         mContext = context;
     }
 
@@ -66,6 +77,15 @@ public class HoldTracker {
         }
     }
 
+     /**
+     * Updates the hold capability for holdables for all phone account handles
+     */
+    public void updateAllPhoneAccountHoldCapability() {
+        for (PhoneAccountHandle handle : mHoldables.keySet()) {
+            updateHoldCapability(handle);
+        }
+    }
+
     /**
      * Updates the hold capability for all holdables associated with the {@code phoneAccountHandle}.
      */
@@ -82,9 +102,12 @@ public class HoldTracker {
             }
         }
 
-        Log.d(this, "topHoldableCount = " + topHoldableCount);
-        final int maxHoldableCallCount = TelephonyManager.from(mContext).
-                isDsdaOrDsdsTransitionMode() ? 2 /* DSDA/DSDS transition */ : 1;
+        // if there are multiple held calls in DSDS mode then use DSDA max holdable logic
+        int maxHoldableCallCount = (TelephonyManager.from(mContext).isDsdaOrDsdsTransitionMode() ||
+                mTelephonyConnectionService.hasMultipleHeldCallsInDsds() ?
+                DSDA_MAX_HOLDABLE_CALLS : DSDS_MAX_HOLDABLE_CALLS);
+        Log.v(this, "topHoldableCount = " + topHoldableCount +
+                " , maxHoldableCallCount = " + maxHoldableCallCount);
 
         boolean isHoldable = topHoldableCount <= maxHoldableCallCount;
         for (Holdable holdable : holdables) {

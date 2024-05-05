@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+/**
+* Changes from Qualcomm Innovation Center, Inc. are provided under the following license:
+* Copyright (c) 2024 Qualcomm Innovation Center, Inc. All rights reserved.
+* SPDX-License-Identifier: BSD-3-Clause-Clear
+*/
+
 package com.android.services.telephony;
 
 import static android.telephony.ims.ImsReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED;
@@ -1372,6 +1378,11 @@ abstract class TelephonyConnection extends Connection implements Holdable,
                 // Follow AOSP's approach for now. TODO:answer after disconnect completes
                 mTelephonyConnectionService.maybeDisconnectDialingCallsOnOtherSubs(
                         getPhoneAccountHandle());
+                // Pseudo-DSDA will be buffered if there are active calls, so it is possible
+                // to receive an incoming call on the other SUB in DSDS and if the
+                // user accepts the incoming call, the hold capability may need to be re-evaluated
+                // for calls on both phone accounts in case of DSDS transition
+                mTelephonyConnectionService.maybeUpdateAllPhoneAccountsHoldCapability();
             } else {
                 mTelephonyConnectionService.maybeDisconnectCallsOnOtherSubs(
                             getPhoneAccountHandle(), answeringDropsFgCalls());
@@ -2681,12 +2692,18 @@ abstract class TelephonyConnection extends Connection implements Holdable,
                 getTelecomCallId());
 
         if (mConnectionState != newState) {
+            boolean wasHolding = mConnectionState == Call.State.HOLDING;
             mConnectionState = newState;
             switch (newState) {
                 case IDLE:
                     break;
                 case ACTIVE:
                     setActiveInternal();
+                    // Usecase:
+                    // HELD + HELD on SUB0 the hold button will be shown on the UI
+                    // to allow the user to resume the foreground call if necessary
+                    // When a call becomes active, the hold button should be removed
+                    maybeUpdateHoldCapability(wasHolding);
                     break;
                 case HOLDING:
                     setTelephonyConnectionOnHold();
@@ -2812,6 +2829,13 @@ abstract class TelephonyConnection extends Connection implements Holdable,
                                         getPhone().getPhoneId(), imsReasonInfo,
                                         new FlagsAdapterImpl(),
                                         shouldTreatAsEmergencyCall()));
+
+                        // Usecase:
+                        // ACTIVE + HELD on SUB0 + HELD call on SUB1
+                        // HELD call on SUB1 is remotely disconnected
+                        // In this case, UE has transitioned back to DSDS
+                        // check hold capability after other layers are notified of disconnect
+                        maybeUpdateHoldCapability(wasHolding);
                         close();
                     }
                     break;
@@ -4217,5 +4241,12 @@ abstract class TelephonyConnection extends Connection implements Holdable,
     /* Determines if context based swap is disabled */
     public boolean isContextBasedSwapDisabled() {
         return mContextBasedSwapDisabled;
+    }
+
+    /* Update hold capability if there was a state transition from HOLDING for IMS calls */
+    private void maybeUpdateHoldCapability(boolean wasHolding) {
+        if (mTelephonyConnectionService != null && isImsConnection() && wasHolding) {
+            mTelephonyConnectionService.maybeUpdateAllPhoneAccountsHoldCapability();
+        }
     }
 }
