@@ -2545,7 +2545,6 @@ public class TelephonyConnectionService extends ConnectionService {
         // different underlying signaling (CDMA), which is already encapsulated in
         // TelephonyConnection.
         connection.onReject();
-        connection.close();
     }
 
     /**
