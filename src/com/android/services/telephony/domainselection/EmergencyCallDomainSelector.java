@@ -18,6 +18,7 @@ package com.android.services.telephony.domainselection;
 
 import static android.telephony.AccessNetworkConstants.AccessNetworkType.CDMA2000;
 import static android.telephony.AccessNetworkConstants.AccessNetworkType.EUTRAN;
+import static android.telephony.AccessNetworkConstants.AccessNetworkType.GERAN;
 import static android.telephony.AccessNetworkConstants.AccessNetworkType.NGRAN;
 import static android.telephony.AccessNetworkConstants.AccessNetworkType.UNKNOWN;
 import static android.telephony.AccessNetworkConstants.AccessNetworkType.UTRAN;
@@ -25,6 +26,7 @@ import static android.telephony.AccessNetworkConstants.TRANSPORT_TYPE_INVALID;
 import static android.telephony.AccessNetworkConstants.TRANSPORT_TYPE_WLAN;
 import static android.telephony.AccessNetworkConstants.TRANSPORT_TYPE_WWAN;
 import static android.telephony.BarringInfo.BARRING_SERVICE_TYPE_EMERGENCY;
+import static android.telephony.CarrierConfigManager.KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL;
 import static android.telephony.CarrierConfigManager.ImsEmergency.DOMAIN_CS;
 import static android.telephony.CarrierConfigManager.ImsEmergency.DOMAIN_PS_3GPP;
 import static android.telephony.CarrierConfigManager.ImsEmergency.DOMAIN_PS_NON_3GPP;
@@ -76,6 +78,7 @@ import android.os.Message;
 import android.os.PersistableBundle;
 import android.os.PowerManager;
 import android.os.SystemProperties;
+import android.telecom.TelecomManager;
 import android.telephony.AccessNetworkConstants.AccessNetworkType;
 import android.telephony.AccessNetworkConstants.RadioAccessNetworkType;
 import android.telephony.AccessNetworkConstants.TransportType;
@@ -121,6 +124,11 @@ public class EmergencyCallDomainSelector extends DomainSelectorBase
      */
     private static final int DEFAULT_DATA_DISCONNECTION_TIMEOUT_MS = 2 * 1000; // 2 seconds
 
+    /**
+     * Timeout of waiting for the IMS state change before selecting domain from initial state.
+     */
+    private static final int DEFAULT_WAIT_FOR_IMS_STATE_TIMEOUT_MS = 3 * 1000; // 3 seconds
+
     private static final int MSG_START_DOMAIN_SELECTION = 11;
     @VisibleForTesting
     public static final int MSG_NETWORK_SCAN_TIMEOUT = 12;
@@ -129,6 +137,9 @@ public class EmergencyCallDomainSelector extends DomainSelectorBase
     public static final int MSG_MAX_CELLULAR_TIMEOUT = 14;
     @VisibleForTesting
     public static final int MSG_WAIT_DISCONNECTION_TIMEOUT = 15;
+    @VisibleForTesting
+    public static final int MSG_WAIT_FOR_IMS_STATE_TIMEOUT = 16;
+    private static final int MSG_WIFI_AVAILABLE = 17;
 
     private static final int NOT_SUPPORTED = -1;
 
@@ -153,6 +164,7 @@ public class EmergencyCallDomainSelector extends DomainSelectorBase
                 public void onAvailable(Network network) {
                     logi("onAvailable: " + network);
                     mWiFiAvailable = true;
+                    sendEmptyMessage(MSG_WIFI_AVAILABLE);
                 }
 
                 @Override
@@ -207,6 +219,7 @@ public class EmergencyCallDomainSelector extends DomainSelectorBase
     private boolean mLtePreferredAfterNrFailure;
     private boolean mScanLimitedOnlyAfterVolteFailure;
     private List<Integer> mRetryReasonCodes;
+    private boolean mNonTtyOrTtySupported;
 
     // Members for states
     private boolean mIsMonitoringConnectivity;
@@ -228,6 +241,8 @@ public class EmergencyCallDomainSelector extends DomainSelectorBase
     private boolean mCrossStackTimerExpired = false;
     /** Indicates whether max cellular timer expired. */
     private boolean mMaxCellularTimerExpired = false;
+    /** Indicates whether network scan timer expired. */
+    private boolean mNetworkScanTimerExpired = false;
 
     /**
      * Indicates whether {@link #selectDomain(SelectionAttributes, TransportSelectionCallback)}
@@ -284,6 +299,14 @@ public class EmergencyCallDomainSelector extends DomainSelectorBase
                 requestScanDelayed();
                 break;
 
+            case MSG_WAIT_FOR_IMS_STATE_TIMEOUT:
+                handleWaitForImsStateTimeout();
+                break;
+
+            case MSG_WIFI_AVAILABLE:
+                handleWifiAvailable();
+                break;
+
             default:
                 super.handleMessage(msg);
                 break;
@@ -319,6 +342,15 @@ public class EmergencyCallDomainSelector extends DomainSelectorBase
                             logi("requestScan-onComplete");
                             sendMessage(obtainMessage(MSG_NETWORK_SCAN_RESULT, regResult));
                         });
+            } else if ((mPreferredNetworkScanType
+                    == CarrierConfigManager.ImsEmergency.SCAN_TYPE_FULL_SERVICE)
+                    && (mScanType == DomainSelectionService.SCAN_TYPE_FULL_SERVICE)) {
+                mWwanSelectorCallback.onRequestEmergencyNetworkScan(
+                        mLastPreferredNetworks, mScanType, true, mCancelSignal,
+                        (regResult) -> {
+                            logi("requestScan-onComplete");
+                            sendMessage(obtainMessage(MSG_NETWORK_SCAN_RESULT, regResult));
+                        });
             } else {
                 // Continuous scan, do not start a new timer.
                 requestScan(false);
@@ -344,16 +376,24 @@ public class EmergencyCallDomainSelector extends DomainSelectorBase
         if (accessNetworkType != EUTRAN) return accessNetworkType;
 
         int regState = result.getRegState();
-        int domain = result.getDomain();
 
         // Emergency is not supported with LTE, but CSFB is possible.
         if ((regState == REGISTRATION_STATE_HOME || regState == REGISTRATION_STATE_ROAMING)
-                && (domain == NetworkRegistrationInfo.DOMAIN_CS)) {
+                && isCsDomainOnlyAvailable(result)) {
             logi("getAccessNetworkType emergency not supported but CSFB is possible");
             accessNetworkType = UTRAN;
         }
 
         return accessNetworkType;
+    }
+
+    private boolean isCsDomainOnlyAvailable(EmergencyRegistrationResult result) {
+        int domain = result.getDomain();
+        if (domain == NetworkRegistrationInfo.DOMAIN_CS) return true;
+        if ((domain & NetworkRegistrationInfo.DOMAIN_CS) > 0) {
+            return (!result.isEmcBearerSupported() || !result.isVopsSupported());
+        }
+        return false;
     }
 
     @Override
@@ -551,12 +591,20 @@ public class EmergencyCallDomainSelector extends DomainSelectorBase
         mDomainSelectionRequested = true;
         startCrossStackTimer();
         if (SubscriptionManager.isValidSubscriptionId(getSubId())) {
+            sendEmptyMessageDelayed(MSG_WAIT_FOR_IMS_STATE_TIMEOUT,
+                    DEFAULT_WAIT_FOR_IMS_STATE_TIMEOUT_MS);
             selectDomain();
         } else {
             logi("startDomainSelection invalid subId");
             onImsRegistrationStateChanged();
             onImsMmTelCapabilitiesChanged();
         }
+    }
+
+    private void handleWaitForImsStateTimeout() {
+        logi("handleWaitForImsStateTimeout");
+        onImsRegistrationStateChanged();
+        onImsMmTelCapabilitiesChanged();
     }
 
     @Override
@@ -612,6 +660,7 @@ public class EmergencyCallDomainSelector extends DomainSelectorBase
                 KEY_EMERGENCY_LTE_PREFERRED_AFTER_NR_FAILED_BOOL,
                 KEY_SCAN_LIMITED_SERVICE_AFTER_VOLTE_FAILURE_BOOL,
                 KEY_IMS_REASONINFO_CODE_TO_RETRY_EMERGENCY_INT_ARRAY,
+                KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL,
                 KEY_EMERGENCY_CDMA_PREFERRED_NUMBERS_STRING_ARRAY);
         if (b == null) {
             b = CarrierConfigManager.getDefaultConfig();
@@ -647,6 +696,8 @@ public class EmergencyCallDomainSelector extends DomainSelectorBase
         String[] numbers = b.getStringArray(KEY_EMERGENCY_CDMA_PREFERRED_NUMBERS_STRING_ARRAY);
         int[] imsReasonCodes =
                 b.getIntArray(KEY_IMS_REASONINFO_CODE_TO_RETRY_EMERGENCY_INT_ARRAY);
+        boolean ttySupported = b.getBoolean(KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL);
+        mNonTtyOrTtySupported = isNonTtyOrTtySupported(ttySupported);
 
         if (mImsRatsConfig == null) mImsRatsConfig = new int[0];
         if (mCsRatsConfig == null) mCsRatsConfig = new int[0];
@@ -687,6 +738,7 @@ public class EmergencyCallDomainSelector extends DomainSelectorBase
                 + ", ltePreferredAfterNr=" + mLtePreferredAfterNrFailure
                 + ", scanLimitedOnly=" + mScanLimitedOnlyAfterVolteFailure
                 + ", retryReasonCodes=" + mRetryReasonCodes
+                + ", ttySupported=" + ttySupported
                 + ", cdmaPreferredNumbers=" + arrayToString(numbers));
 
         mCdmaPreferredNumbers = Arrays.asList(numbers);
@@ -760,6 +812,7 @@ public class EmergencyCallDomainSelector extends DomainSelectorBase
                     + " BarringInfo, IMS registration state, or MMTEL capabilities");
             return;
         }
+        removeMessages(MSG_WAIT_FOR_IMS_STATE_TIMEOUT);
 
         // The statements below should be executed only once to select domain from initial state.
         // Next domain selection shall be triggered by reselectDomain().
@@ -934,7 +987,7 @@ public class EmergencyCallDomainSelector extends DomainSelectorBase
                     sendMessage(obtainMessage(MSG_NETWORK_SCAN_RESULT, result));
                 });
 
-        if (startVoWifiTimer && SubscriptionManager.isValidSubscriptionId(getSubId())) {
+        if (startVoWifiTimer && isSimReady()) {
             if (isEmcOverWifiSupported()
                     && mScanTimeout > 0 && mVoWifiTrialCount < mMaxNumOfVoWifiTries) {
                 logi("requestScan start scan timer");
@@ -1036,6 +1089,15 @@ public class EmergencyCallDomainSelector extends DomainSelectorBase
             preferredNetworks.add(NGRAN);
         }
 
+        if (!mNonTtyOrTtySupported) {
+            logi("getNextPreferredNetworks adjust for TTY");
+            preferredNetworks.remove(Integer.valueOf(NGRAN));
+            preferredNetworks.remove(Integer.valueOf(EUTRAN));
+            if (preferredNetworks.isEmpty()) {
+                preferredNetworks.add(Integer.valueOf(UTRAN));
+                preferredNetworks.add(Integer.valueOf(GERAN));
+            }
+        }
         return preferredNetworks;
     }
 
@@ -1046,6 +1108,12 @@ public class EmergencyCallDomainSelector extends DomainSelectorBase
         }
 
         return preferredNetworks;
+    }
+
+    private void handleWifiAvailable() {
+        if (!mDomainSelected && (mMaxCellularTimerExpired || mNetworkScanTimerExpired)) {
+            maybeDialOverWlan();
+        }
     }
 
     private void handleMaxCellularTimeout() {
@@ -1070,13 +1138,14 @@ public class EmergencyCallDomainSelector extends DomainSelectorBase
 
     private void handleNetworkScanTimeout() {
         logi("handleNetworkScanTimeout");
+        mNetworkScanTimerExpired = true;
         maybeDialOverWlan();
     }
 
     private boolean maybeDialOverWlan() {
-        logi("maybeDialOverWlan overEmergencyPdn=" + mVoWifiOverEmergencyPdn
-                + ", wifiAvailable=" + mWiFiAvailable);
         boolean available = mWiFiAvailable;
+        logi("maybeDialOverWlan overEmergencyPdn=" + mVoWifiOverEmergencyPdn
+                + ", wifiAvailable=" + available);
         if (mVoWifiOverEmergencyPdn) {
             // SOS APN
             if (!available && isImsRegisteredOverCrossSim()) {
@@ -1191,7 +1260,8 @@ public class EmergencyCallDomainSelector extends DomainSelectorBase
      */
     private @RadioAccessNetworkType int getSelectablePsNetworkType(boolean inService) {
         List<Integer> domains = getDomainPreference();
-        if (domains.indexOf(DOMAIN_PS_3GPP) == NOT_SUPPORTED) {
+        if ((domains.indexOf(DOMAIN_PS_3GPP) == NOT_SUPPORTED)
+                || !mNonTtyOrTtySupported) {
             return UNKNOWN;
         }
         EmergencyRegistrationResult regResult =
@@ -1258,7 +1328,7 @@ public class EmergencyCallDomainSelector extends DomainSelectorBase
      * @return {@code true} if emergency call over Wi-Fi allowed.
      */
     private boolean isEmcOverWifiSupported() {
-        if (isSimReady()) {
+        if (isSimReady() && mNonTtyOrTtySupported) {
             List<Integer> domains = getDomainPreference();
             boolean ret = domains.contains(DOMAIN_PS_NON_3GPP);
             logi("isEmcOverWifiSupported " + ret);
@@ -1461,6 +1531,9 @@ public class EmergencyCallDomainSelector extends DomainSelectorBase
         }
 
         mDomainSelected = true;
+        mNetworkScanTimerExpired = false;
+        mIsWaitingForDataDisconnection = false;
+        removeMessages(MSG_WAIT_DISCONNECTION_TIMEOUT);
         mLastTransportType = TRANSPORT_TYPE_WLAN;
         mVoWifiTrialCount++;
         mTransportSelectorCallback.onWlanSelected(mVoWifiOverEmergencyPdn);
@@ -1491,6 +1564,7 @@ public class EmergencyCallDomainSelector extends DomainSelectorBase
         }
 
         mDomainSelected = true;
+        mNetworkScanTimerExpired = false;
         mLastNetworkType = accessNetworkType;
         int domain = NetworkRegistrationInfo.DOMAIN_CS;
         if (accessNetworkType == EUTRAN || accessNetworkType == NGRAN) {
@@ -1803,6 +1877,26 @@ public class EmergencyCallDomainSelector extends DomainSelectorBase
         return mEpdnHelper.isInEmergencyCallbackMode(getSlotId())
                 && mEpdnHelper.getTransportType(getSlotId()) == TRANSPORT_TYPE_WWAN
                 && mEpdnHelper.getDataConnectionState(getSlotId()) == DATA_CONNECTED;
+    }
+
+    /**
+     * Indicates whether the call is non-TTY or if TTY is supported.
+     */
+    private boolean isNonTtyOrTtySupported(boolean ttySupported) {
+        if (ttySupported) {
+            return true;
+        }
+
+        TelecomManager tm = mContext.getSystemService(TelecomManager.class);
+        if (tm == null) {
+            logi("isNonTtyOrTtySupported telecom not available");
+            return true;
+        }
+
+        boolean ret = (tm.getCurrentTtyMode() == TelecomManager.TTY_MODE_OFF);
+        logi("isNonTtyOrTtySupported ret=" + ret);
+
+        return ret;
     }
 
     @Override
