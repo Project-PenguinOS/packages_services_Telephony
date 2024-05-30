@@ -17,6 +17,7 @@
 package com.android.phone.settings.fdn;
 
 import android.app.ActionBar;
+import android.app.AlertDialog;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
@@ -34,6 +35,7 @@ import android.widget.Toast;
 import com.android.internal.telephony.CommandException;
 import com.android.internal.telephony.Phone;
 import com.android.phone.CallFeaturesSetting;
+import com.android.phone.FrameworksUtils;
 import com.android.phone.PhoneGlobals;
 import com.android.phone.R;
 import com.android.phone.SubscriptionInfoHelper;
@@ -376,7 +378,10 @@ public class FdnSetting extends PreferenceActivity
             }
         }
         log("displayMessage: attemptsRemaining=" + attemptsRemaining + " s=" + s);
-        Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
+        AlertDialog dialog = FrameworksUtils.makeAlertDialogBuilder(this)
+            .setMessage(s)
+            .create();
+        dialog.show();
     }
 
     private void displayMessage(int strId) {

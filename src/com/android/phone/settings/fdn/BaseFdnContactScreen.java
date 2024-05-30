@@ -20,6 +20,7 @@ import static android.view.Window.PROGRESS_VISIBILITY_OFF;
 import static android.view.Window.PROGRESS_VISIBILITY_ON;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.AsyncQueryHandler;
@@ -36,6 +37,7 @@ import android.widget.Toast;
 
 import com.android.internal.telephony.CommandException;
 import com.android.internal.telephony.Phone;
+import com.android.phone.FrameworksUtils;
 import com.android.phone.PhoneGlobals;
 import com.android.phone.R;
 import com.android.phone.SubscriptionInfoHelper;
@@ -139,12 +141,13 @@ public abstract class BaseFdnContactScreen extends Activity
                         } else {
                             final int attemptsRemaining = msg.arg1;
                             if (attemptsRemaining > 0) {
-                                Toast.makeText(
-                                        BaseFdnContactScreen.this,
-                                        getString(R.string.pin2_invalid)
-                                                + getString(R.string.pin2_attempts,
-                                                        attemptsRemaining), Toast.LENGTH_LONG)
-                                        .show();
+                                String s = getString(R.string.pin2_invalid)
+                                    + getString(R.string.pin2_attempts, attemptsRemaining);
+                                AlertDialog dialog = FrameworksUtils.makeAlertDialogBuilder(
+                                        BaseFdnContactScreen.this)
+                                        .setMessage(s)
+                                        .create();
+                                dialog.show();
                                 finish();
                             }
                         }
