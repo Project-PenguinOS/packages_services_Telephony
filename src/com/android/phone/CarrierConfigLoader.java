@@ -1602,6 +1602,10 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
             case IccCardConstants.INTENT_VALUE_ICC_LOADED:
             case IccCardConstants.INTENT_VALUE_ICC_LOCKED:
                 mIsEssentialSimRecordsLoaded[phoneId] = false;
+                if (mHasSentConfigChange[phoneId] && mFromSystemUnlocked[phoneId]) {
+                    logd("Reset mFromSystemUnlocked on phone " + phoneId);
+                    mFromSystemUnlocked[phoneId] = false;
+                }
                 updateConfigForPhoneId(phoneId);
                 break;
             case ExtTelephonyManager.SIM_STATE_ESSENTIAL_RECORDS_LOADED:
