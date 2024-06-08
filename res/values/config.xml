@@ -362,8 +362,19 @@
         <item>us</item>
     </string-array>
 
+    <!-- Array of countries that GERAN is preferred than UTRAN and EUTRAN when SIM is absent.
+         Values should be ISO3166 country codes in lowercase. -->
+    <string-array name="config_countries_prefer_geran_when_sim_absent"
+            translatable="false">
+        <!-- b/335537430 -->
+        <item>cn</item>
+    </string-array>
+
     <!-- The component name(a flattened ComponentName string) for the telephony domain selection
          service. The device should fallback to the modem based domain selection architecture
          if this is not configured. -->
     <string name="config_domain_selection_service_component_name" translatable="false"></string>
+
+    <!-- Whether to turn off OEM-enabled satellite during emergency call -->
+    <bool name="config_turn_off_oem_enabled_satellite_during_emergency_call">false</bool>
 </resources>
