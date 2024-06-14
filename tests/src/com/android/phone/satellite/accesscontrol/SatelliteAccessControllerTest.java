@@ -55,6 +55,7 @@ import android.location.LocationRequest;
 import android.os.AsyncResult;
 import android.os.Bundle;
 import android.os.CancellationSignal;
+import android.os.DropBoxManager;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -125,6 +126,8 @@ public class SatelliteAccessControllerTest {
     private SatelliteController mMockSatelliteController;
     @Mock
     private SatelliteModemInterface mMockSatelliteModemInterface;
+    @Mock
+    private DropBoxManager mMockDropBoxManager;
     @Mock
     private Context mMockContext;
     @Mock
@@ -210,10 +213,14 @@ public class SatelliteAccessControllerTest {
                 Context.LOCATION_SERVICE);
         when(mMockContext.getSystemServiceName(TelecomManager.class)).thenReturn(
                 Context.TELECOM_SERVICE);
+        when(mMockContext.getSystemServiceName(DropBoxManager.class)).thenReturn(
+                Context.DROPBOX_SERVICE);
         when(mMockContext.getSystemService(LocationManager.class)).thenReturn(
                 mMockLocationManager);
         when(mMockContext.getSystemService(TelecomManager.class)).thenReturn(
                 mMockTelecomManager);
+        when(mMockContext.getSystemService(DropBoxManager.class)).thenReturn(
+                mMockDropBoxManager);
         mPhones = new Phone[]{mMockPhone, mMockPhone2};
         replaceInstance(PhoneFactory.class, "sPhones", null, mPhones);
         replaceInstance(SatelliteController.class, "sInstance", null,
@@ -258,6 +265,8 @@ public class SatelliteAccessControllerTest {
                 .putBoolean(anyString(), anyBoolean());
         doReturn(mMockSharedPreferencesEditor).when(mMockSharedPreferencesEditor)
                 .putStringSet(anyString(), any());
+
+        when(mMockFeatureFlags.satellitePersistentLogging()).thenReturn(true);
 
         mSatelliteAccessControllerUT = new TestSatelliteAccessController(mMockContext,
                 mMockFeatureFlags, mLooper, mMockLocationManager, mMockTelecomManager,
@@ -323,22 +332,11 @@ public class SatelliteAccessControllerTest {
                 mSatelliteAllowedSemaphore, 1));
         assertEquals(SATELLITE_RESULT_MODEM_ERROR, mQueriedSatelliteAllowedResultCode);
 
-        // Network country codes are available.
-        setUpResponseForRequestIsSatelliteSupported(true, SATELLITE_RESULT_SUCCESS);
-        setUpResponseForRequestIsSatelliteProvisioned(true, SATELLITE_RESULT_SUCCESS);
-        clearAllInvocations();
-        when(mMockCountryDetector.getCurrentNetworkCountryIso()).thenReturn(listOf("US", "CA"));
-        mSatelliteAccessControllerUT.requestIsCommunicationAllowedForCurrentLocation(
-                SUB_ID, mSatelliteAllowedReceiver);
-        mTestableLooper.processAllMessages();
-        assertTrue(waitForRequestIsSatelliteAllowedForCurrentLocationResult(
-                mSatelliteAllowedSemaphore, 1));
-        assertEquals(SATELLITE_RESULT_SUCCESS, mQueriedSatelliteAllowedResultCode);
-        assertTrue(mQueriedSatelliteAllowed);
-
         // Network country codes are not available. TelecomManager.isInEmergencyCall() returns true.
         // On-device access controller will be used. Last known location is available and fresh.
         clearAllInvocations();
+        setUpResponseForRequestIsSatelliteSupported(true, SATELLITE_RESULT_SUCCESS);
+        setUpResponseForRequestIsSatelliteProvisioned(true, SATELLITE_RESULT_SUCCESS);
         when(mMockCountryDetector.getCurrentNetworkCountryIso()).thenReturn(EMPTY_STRING_LIST);
         when(mMockTelecomManager.isInEmergencyCall()).thenReturn(true);
         mSatelliteAccessControllerUT.elapsedRealtimeNanos = TEST_LOCATION_FRESH_DURATION_NANOS + 1;
@@ -424,12 +422,11 @@ public class SatelliteAccessControllerTest {
         assertFalse(mSatelliteAccessControllerUT.isWaitForCurrentLocationTimerStarted());
         verify(mMockSatelliteOnDeviceAccessController, never()).isSatCommunicationAllowedAtLocation(
                 any(SatelliteOnDeviceAccessController.LocationToken.class));
-        verifyCountryDetectorApisCalled();
         assertTrue(waitForRequestIsSatelliteAllowedForCurrentLocationResult(
                 mSatelliteAllowedSemaphore, 1));
         assertEquals(SATELLITE_RESULT_SUCCESS,
                 mQueriedSatelliteAllowedResultCode);
-        assertFalse(mQueriedSatelliteAllowed);
+        assertTrue(mQueriedSatelliteAllowed);
 
         // Network country codes are not available. TelecomManager.isInEmergencyCall() returns
         // false. No phone is in ECM. Last known location is not fresh. Cached country codes should
@@ -452,43 +449,11 @@ public class SatelliteAccessControllerTest {
                 any(Consumer.class));
         verify(mMockSatelliteOnDeviceAccessController, never()).isSatCommunicationAllowedAtLocation(
                 any(SatelliteOnDeviceAccessController.LocationToken.class));
-        verifyCountryDetectorApisCalled();
         assertTrue(waitForRequestIsSatelliteAllowedForCurrentLocationResult(
                 mSatelliteAllowedSemaphore, 1));
         assertEquals(SATELLITE_RESULT_SUCCESS, mQueriedSatelliteAllowedResultCode);
         assertFalse(mQueriedSatelliteAllowed);
 
-        // Network country codes are not available. TelecomManager.isInEmergencyCall() returns
-        // false. No phone is in ECM. Last known location is not fresh. Cached country codes should
-        // be used for verifying satellite allow. Cached country codes are available.
-        clearAllInvocations();
-        when(mMockCountryDetector.getCurrentNetworkCountryIso()).thenReturn(EMPTY_STRING_LIST);
-        when(mMockCountryDetector.getCachedLocationCountryIsoInfo())
-                .thenReturn(new Pair<>("US", 5L));
-        Map<String, Long> cachedNetworkCountryCodes = new HashMap<>();
-        cachedNetworkCountryCodes.put("UK", 1L);
-        cachedNetworkCountryCodes.put("US", 3L);
-        when(mMockCountryDetector.getCachedNetworkCountryIsoInfo())
-                .thenReturn(cachedNetworkCountryCodes);
-        when(mMockTelecomManager.isInEmergencyCall()).thenReturn(false);
-        when(mMockPhone.isInEcm()).thenReturn(false);
-        when(mMockPhone2.isInEcm()).thenReturn(false);
-        mSatelliteAccessControllerUT.elapsedRealtimeNanos = TEST_LOCATION_FRESH_DURATION_NANOS + 1;
-        when(mMockLocation0.getElapsedRealtimeNanos()).thenReturn(0L);
-        when(mMockLocation1.getElapsedRealtimeNanos()).thenReturn(0L);
-        mSatelliteAccessControllerUT.requestIsCommunicationAllowedForCurrentLocation(
-                SUB_ID, mSatelliteAllowedReceiver);
-        mTestableLooper.processAllMessages();
-        verify(mMockLocationManager, never()).getCurrentLocation(anyString(),
-                any(LocationRequest.class), any(CancellationSignal.class), any(Executor.class),
-                any(Consumer.class));
-        verify(mMockSatelliteOnDeviceAccessController, never()).isSatCommunicationAllowedAtLocation(
-                any(SatelliteOnDeviceAccessController.LocationToken.class));
-        verifyCountryDetectorApisCalled();
-        assertTrue(waitForRequestIsSatelliteAllowedForCurrentLocationResult(
-                mSatelliteAllowedSemaphore, 1));
-        assertEquals(SATELLITE_RESULT_SUCCESS, mQueriedSatelliteAllowedResultCode);
-        assertTrue(mQueriedSatelliteAllowed);
     }
 
     @Test

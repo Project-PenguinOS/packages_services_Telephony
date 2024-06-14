@@ -26,6 +26,12 @@
  * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+* Changes from Qualcomm Innovation Center, Inc. are provided under the following license:
+* Copyright (c) 2024 Qualcomm Innovation Center, Inc. All rights reserved.
+* SPDX-License-Identifier: BSD-3-Clause-Clear
+*/
+
 package com.android.phone;
 
 import android.content.BroadcastReceiver;
@@ -33,6 +39,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceScreen;
@@ -53,6 +60,7 @@ import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import android.preference.Preference.OnPreferenceClickListener;
+import android.provider.Settings;
 
 public class CallForwardType extends PreferenceActivity {
     private static final String LOG_TAG = "CallForwardType";
@@ -72,22 +80,36 @@ public class CallForwardType extends PreferenceActivity {
     private int mPhoneId;
     private IntentFilter mIntentFilter;
 
-     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
-         @Override
-         public void onReceive(Context context, Intent intent) {
-             Log.d(LOG_TAG, "onReceive intent : " + intent);
-                 int phoneId = intent.getIntExtra(PhoneConstants.PHONE_KEY,
-                         SubscriptionManager.INVALID_PHONE_INDEX);
-             if (TelephonyIntents.ACTION_SIM_STATE_CHANGED.equals(intent.getAction())) {
-                 if (phoneId == mPhoneId &&
-                         IccCardConstants.INTENT_VALUE_ICC_ABSENT.equals(
-                             intent.getStringExtra(IccCardConstants.INTENT_KEY_ICC_STATE))) {
-                     Log.d(LOG_TAG, "onSimAbsent, exit");
-                     finish();
-                 }
-             }
-         }
+    private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(LOG_TAG, "onReceive intent : " + intent);
+            String action = intent.getAction();
+            int phoneId = intent.getIntExtra(PhoneConstants.PHONE_KEY,
+                    SubscriptionManager.INVALID_PHONE_INDEX);
+            if (action.equals(TelephonyIntents.ACTION_SIM_STATE_CHANGED)) {
+                if (phoneId == mPhoneId &&
+                        IccCardConstants.INTENT_VALUE_ICC_ABSENT.equals(
+                            intent.getStringExtra(IccCardConstants.INTENT_KEY_ICC_STATE))) {
+                    Log.d(LOG_TAG, "onSimAbsent, exit");
+                    finish();
+                }
+            } else if (action.equals(Intent.ACTION_AIRPLANE_MODE_CHANGED)) {
+                if (mPhone != null) {
+                    setPreferencesState(PhoneUtils.isSuppServiceAllowedInAirplaneMode(mPhone));
+                }
+            }
+        }
      };
+
+    private void setPreferencesState(boolean state) {
+        if (mVoicePreference != null && findPreference(BUTTON_CF_KEY_VOICE) != null) {
+            mVoicePreference.setEnabled(state);
+        }
+        if (mVideoPreference != null && findPreference(BUTTON_CF_KEY_VIDEO) != null) {
+            mVideoPreference.setEnabled(state);
+        }
+    }
 
     private ImsMmTelManager.CapabilityCallback mCapabilityCallback =
         new ImsMmTelManager.CapabilityCallback() {
@@ -117,12 +139,15 @@ public class CallForwardType extends PreferenceActivity {
     }
 
     private void showVideoOption(boolean show) {
-        if (!show){
+        if (!show && mVideoPreference != null && findPreference(BUTTON_CF_KEY_VIDEO) != null) {
             Log.d(LOG_TAG, "remove video option");
             getPreferenceScreen().removePreference(mVideoPreference);
-        } else {
+        } else if (show && mVideoPreference != null) {
             Log.d(LOG_TAG, "enable video option");
             getPreferenceScreen().addPreference(mVideoPreference);
+            if (mPhone != null) {
+                mVideoPreference.setEnabled(PhoneUtils.isSuppServiceAllowedInAirplaneMode(mPhone));
+            }
         }
     }
     @Override
@@ -167,29 +192,32 @@ public class CallForwardType extends PreferenceActivity {
             }
         });
 
-         /*Video Button*/
-         mVideoPreference = (Preference) findPreference(BUTTON_CF_KEY_VIDEO);
-         mVideoPreference.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+        /*Video Button*/
+        mVideoPreference = (Preference) findPreference(BUTTON_CF_KEY_VIDEO);
+        mVideoPreference.setOnPreferenceClickListener(new OnPreferenceClickListener() {
 
-             /*onClicking Video Button*/
-             public boolean onPreferenceClick(Preference pref) {
+            /*onClicking Video Button*/
+            public boolean onPreferenceClick(Preference pref) {
                 Intent intent = mSubscriptionInfoHelper.getIntent(GsmUmtsCallForwardOptions.class);
                 Log.d(LOG_TAG, "Video button clicked!");
                 intent.putExtra(PhoneUtils.SERVICE_CLASS,
-                       (CommandsInterface.SERVICE_CLASS_DATA_SYNC +
+                        (CommandsInterface.SERVICE_CLASS_DATA_SYNC +
                         CommandsInterface.SERVICE_CLASS_PACKET));
                 startActivity(intent);
                 return true;
-             }
+            }
         });
         mIntentFilter = new IntentFilter();
         mIntentFilter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
+        mIntentFilter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         CarrierConfigManager cfgManager = (CarrierConfigManager)
                 mPhone.getContext().getSystemService(Context.CARRIER_CONFIG_SERVICE);
         if (cfgManager != null) {
             mHideVtCfOption = cfgManager.getConfigForSubId(mPhone.getSubId())
                 .getBoolean("config_hide_vt_callforward_option");
         }
+        /*set preference state base on whether supplementary service is allowed*/
+        setPreferencesState(PhoneUtils.isSuppServiceAllowedInAirplaneMode(mPhone));
     }
 
     @Override

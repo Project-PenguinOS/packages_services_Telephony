@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+/**
+* Changes from Qualcomm Innovation Center, Inc. are provided under the following license:
+* Copyright (c) 2024 Qualcomm Innovation Center, Inc. All rights reserved.
+* SPDX-License-Identifier: BSD-3-Clause-Clear
+*/
+
 package com.android.phone;
 
 import android.app.AlertDialog;
@@ -39,6 +45,7 @@ import android.os.PersistableBundle;
 import android.os.UserHandle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.provider.Settings;
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
 import android.telecom.TelecomManager;
@@ -1039,6 +1046,27 @@ public class PhoneUtils {
                 "";
         ArrayList<String> controlStrings = GsmMmiCode.getControlStrings(requestType, serviceType);
         return FdnUtils.isSuppServiceRequestBlockedByFdn(phoneId, controlStrings, countryIso);
+    }
+    /**
+     * To check whether supplementary service is allowed in airplane mode.
+     */
+    public static boolean isSuppServiceAllowedInAirplaneMode(Phone phone) {
+        if (phone == null) {
+            return false;
+        }
+        final PhoneGlobals app = PhoneGlobals.getInstance();
+        int subId = phone.getSubId();
+        PersistableBundle b = SubscriptionManager.isValidSubscriptionId(subId)
+                ? app.getCarrierConfigForSubId(subId) : app.getCarrierConfig();
+        boolean config = b != null && b.getBoolean(
+                CarrierConfigManager.KEY_DISABLE_SUPPLEMENTARY_SERVICES_IN_AIRPLANE_MODE_BOOL);
+        if (!config) {
+            return true;
+        }
+        boolean isAirplaneModeOn = Settings.Global.getInt(phone.getContext().getContentResolver(),
+                Settings.Global.AIRPLANE_MODE_ON, PhoneGlobals.AIRPLANE_OFF)
+                == PhoneGlobals.AIRPLANE_ON;
+        return !isAirplaneModeOn || phone.isWifiCallingEnabled() && phone.isImsRegistered();
     }
 
     /**

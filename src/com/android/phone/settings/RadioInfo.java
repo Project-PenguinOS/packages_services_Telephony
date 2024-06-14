@@ -175,6 +175,9 @@ public class RadioInfo extends AppCompatActivity {
 
     private static final boolean IS_USER_BUILD = "user".equals(Build.TYPE);
 
+    private static final String ACTION_ESOS_TEST =
+            "com.google.android.apps.stargate.ACTION_ESOS_QUESTIONNAIRE";
+
     private static final String[] PREFERRED_NETWORK_LABELS = {
             "GSM/WCDMA preferred",
             "GSM only",
@@ -353,6 +356,7 @@ public class RadioInfo extends AppCompatActivity {
     private Button mOemInfoButton;
     private Button mCarrierProvisioningButton;
     private Button mTriggerCarrierProvisioningButton;
+    private Button mEsosButton;
     private Switch mImsVolteProvisionedSwitch;
     private Switch mImsVtProvisionedSwitch;
     private Switch mImsWfcProvisionedSwitch;
@@ -813,6 +817,17 @@ public class RadioInfo extends AppCompatActivity {
                     mTriggerCarrierProvisioningButtonHandler);
         } else {
             mTriggerCarrierProvisioningButton.setEnabled(false);
+        }
+
+        mEsosButton = (Button) findViewById(R.id.esos_questionnaire);
+        if (!TelephonyUtils.IS_DEBUGGABLE) {
+            mEsosButton.setVisibility(View.GONE);
+        } else {
+            mEsosButton.setOnClickListener(v ->
+                    mPhone.getContext().startActivity(
+                        new Intent(ACTION_ESOS_TEST)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK))
+            );
         }
 
         mOemInfoButton = (Button) findViewById(R.id.oem_info);

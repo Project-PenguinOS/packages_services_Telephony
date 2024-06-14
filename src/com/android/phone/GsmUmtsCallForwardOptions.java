@@ -230,6 +230,14 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
                     Log.d(LOG_TAG, "default data is disconnected.");
                     checkDataStatus();
                 }
+            } else if (action.equals(Intent.ACTION_AIRPLANE_MODE_CHANGED)) {
+                if (mPhone != null) {
+                    for (CallForwardEditPreference pref : mPreferences) {
+                        if (pref != null) {
+                            pref.setEnabled(PhoneUtils.isSuppServiceAllowedInAirplaneMode(mPhone));
+                        }
+                    }
+                }
             }
         }
     }
@@ -267,7 +275,7 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
                 showAlertDialog(title, message);
                 return;
             }
-            // check if mobile data on current sub is enabled
+            // check if mobile data on current sub is enabled by user
             boolean isDataEnabled = TelephonyManager.from(this).createForSubscriptionId(sub)
                     .isDataEnabled();
             if (!isDataEnabled) {
@@ -337,6 +345,7 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
         if (mCheckData) {
             IntentFilter intentFilter = new IntentFilter();
             intentFilter.addAction(TelephonyIntents.ACTION_ANY_DATA_CONNECTION_STATE_CHANGED);
+            intentFilter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
             mReceiver = new PhoneAppBroadcastReceiver();
             registerReceiver(mReceiver, intentFilter);
             checkDataStatus();
