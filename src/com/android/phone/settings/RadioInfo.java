@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-/* Changes from Qualcomm Innovation Center are provided under the following license:
- * Copyright (c) 2023 Qualcomm Innovation Center, Inc. All rights reserved.
+/* Changes from Qualcomm Innovation Center, Inc. are provided under the following license:
+ * Copyright (c) 2023-2024 Qualcomm Innovation Center, Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted (subject to the limitations in the
@@ -146,6 +146,7 @@ import com.android.internal.telephony.PhoneFactory;
 import com.android.internal.telephony.euicc.EuiccConnector;
 import com.android.internal.telephony.util.TelephonyUtils;
 import com.android.phone.R;
+import com.android.phone.utils.Utils;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -611,6 +612,7 @@ public class RadioInfo extends AppCompatActivity {
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
+        Utils.setupEdgeToEdge(this);
         if (!android.os.Process.myUserHandle().isSystem()) {
             Log.e(TAG, "Not run from system user, don't do anything.");
             finish();
