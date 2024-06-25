@@ -134,6 +134,8 @@
     <string name="updating_title" msgid="6130548922615719689">"កំណត់​ការ​ហៅ"</string>
     <string name="call_settings_admin_user_only" msgid="7238947387649986286">"ការកំណត់ការហៅអាចផ្លាស់ប្តូរបានដោយអ្នកប្រើដែលមានសិទ្ធិគ្រប់គ្រងតែប៉ុណ្ណោះ។"</string>
     <string name="phone_account_settings_user_restriction" msgid="9142685151087208396">"មានតែ​អ្នកគ្រប់គ្រង ឬអ្នកប្រើប្រាស់​ពាក់ព័ន្ធនឹងការងារ​ប៉ុណ្ណោះ ទើបអាចផ្លាស់ប្ដូរ​ការកំណត់​គណនី​ទូរសព្ទបាន។"</string>
+    <!-- no translation found for phone_account_no_config_mobile_networks (7351062247756521227) -->
+    <skip />
     <string name="call_settings_with_label" msgid="8460230435361579511">"ការកំណត់ (<xliff:g id="SUBSCRIPTIONLABEL">%s</xliff:g>)"</string>
     <string name="error_updating_title" msgid="2024290892676808965">"បញ្ហា​ការ​កំណត់​ការ​ហៅ"</string>
     <string name="reading_settings" msgid="1605904432450871183">"កំពុង​អាន​ការ​កំណត់…"</string>
@@ -845,8 +847,7 @@
     <string name="radio_info_radio_power" msgid="8805595022160471587">"ថាមពល​វិទ្យុ​ទូរសព្ទ​ចល័ត"</string>
     <string name="simulate_out_of_service_string" msgid="7787925611727597193">"ត្រាប់តាម​ពេលគ្មានសេវា (កំណែបង្កើតសម្រាប់ជួសជុលតែប៉ុណ្ណោះ)"</string>
     <string name="mock_carrier_roaming_satellite_string" msgid="4796300252858292593">"មុខងារ​ផ្កាយរណប​ក្រុមហ៊ុន​សេវាទូរសព្ទ​សាកល្បង (កំណែបង្កើត​សម្រាប់​ជួសជុល​តែប៉ុណ្ណោះ)"</string>
-    <!-- no translation found for esos_satellite_string (7291726039210940609) -->
-    <skip />
+    <string name="esos_satellite_string" msgid="7274794226125968657">"មុខងារ​ធ្វើតេស្ត eSOS ផ្កាយរណប​ជាក់ស្ដែង (កំណែបង្កើត​សម្រាប់​ជួសជុល​តែប៉ុណ្ណោះ)"</string>
     <string name="radioInfo_menu_viewADN" msgid="4533179730908559846">"មើលសៀវភៅអាសយដ្ឋានក្នុងស៊ីមកាត"</string>
     <string name="radioInfo_menu_viewFDN" msgid="1847236480527032061">"មើល​លេខ​ហៅ​ថេរ"</string>
     <string name="radioInfo_menu_viewSDN" msgid="2613431584522392842">"មើល​លេខ​ហៅ​សេវាកម្ម"</string>

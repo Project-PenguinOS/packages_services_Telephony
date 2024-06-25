@@ -134,6 +134,8 @@
     <string name="updating_title" msgid="6130548922615719689">"కాల్ సెట్టింగ్‌లు"</string>
     <string name="call_settings_admin_user_only" msgid="7238947387649986286">"కాల్ సెట్టింగ్‌లను నిర్వాహక వినియోగదారు మాత్రమే మార్చగలరు."</string>
     <string name="phone_account_settings_user_restriction" msgid="9142685151087208396">"ఫోన్ ఖాతా సెట్టింగ్‌లను అడ్మిన్ లేదా వర్క్ యూజర్ మాత్రమే మార్చగలరు."</string>
+    <!-- no translation found for phone_account_no_config_mobile_networks (7351062247756521227) -->
+    <skip />
     <string name="call_settings_with_label" msgid="8460230435361579511">"సెట్టింగ్‌లు (<xliff:g id="SUBSCRIPTIONLABEL">%s</xliff:g>)"</string>
     <string name="error_updating_title" msgid="2024290892676808965">"కాల్ సెట్టింగ్‌ల ఎర్రర్"</string>
     <string name="reading_settings" msgid="1605904432450871183">"సెట్టింగ్‌లను చదువుతోంది…"</string>
@@ -845,8 +847,7 @@
     <string name="radio_info_radio_power" msgid="8805595022160471587">"మొబైల్ రేడియో పవర్"</string>
     <string name="simulate_out_of_service_string" msgid="7787925611727597193">"పరికరాన్ని సిమ్యులేట్ చేయడం అందుబాటులో లేదు (డీబగ్ బిల్డ్ మోడ్‌లో మాత్రమే)"</string>
     <string name="mock_carrier_roaming_satellite_string" msgid="4796300252858292593">"మాక్ క్యారియర్ శాటిలైట్ మోడ్ (డీబగ్ బిల్డ్ మోడ్‌లో మాత్రమే)"</string>
-    <!-- no translation found for esos_satellite_string (7291726039210940609) -->
-    <skip />
+    <string name="esos_satellite_string" msgid="7274794226125968657">"రియల్ శాటిలైట్ eSOS మోడ్‌ను టెస్ట్ చేయండి (డీబగ్ బిల్డ్ మోడ్‌లో మాత్రమే)"</string>
     <string name="radioInfo_menu_viewADN" msgid="4533179730908559846">"SIM అడ్రస్‌ పుస్తకాన్ని చూడండి"</string>
     <string name="radioInfo_menu_viewFDN" msgid="1847236480527032061">"ఫిక్స్‌డ్ డయలింగ్ నంబర్‌లను చూడండి"</string>
     <string name="radioInfo_menu_viewSDN" msgid="2613431584522392842">"సర్వీస్ డయలింగ్ నంబర్‌లను చూడండి"</string>

@@ -1034,6 +1034,7 @@ abstract class TelephonyConnection extends Connection implements Holdable,
             new ConcurrentHashMap<TelephonyConnectionListener, Boolean>(8, 0.9f, 1));
 
     private Integer mEmergencyServiceCategory = null;
+    private List<String> mEmergencyUrns = null;
 
     protected TelephonyConnection(com.android.internal.telephony.Connection originalConnection,
             String callId, int callDirection) {
@@ -2739,6 +2740,7 @@ abstract class TelephonyConnection extends Connection implements Holdable,
                                     if (numberInfo != null) {
                                         mEmergencyServiceCategory =
                                                 numberInfo.getEmergencyServiceCategoryBitmask();
+                                        mEmergencyUrns = numberInfo.getEmergencyUrns();
                                     } else {
                                         Log.i(this, "mEmergencyServiceCategory no EmergencyNumber");
                                     }
@@ -2746,6 +2748,9 @@ abstract class TelephonyConnection extends Connection implements Holdable,
                                     if (mEmergencyServiceCategory != null) {
                                         Log.i(this, "mEmergencyServiceCategory="
                                                 + mEmergencyServiceCategory);
+                                    }
+                                    if (mEmergencyUrns != null) {
+                                        Log.i(this, "mEmergencyUrns=" + mEmergencyUrns);
                                     }
                                 }
                             }
@@ -4249,5 +4254,22 @@ abstract class TelephonyConnection extends Connection implements Holdable,
         if (mTelephonyConnectionService != null && isImsConnection() && wasHolding) {
             mTelephonyConnectionService.maybeUpdateAllPhoneAccountsHoldCapability();
         }
+    }
+
+    /**
+     * @return a {@link List} of {@link String}s that are the emrgency URNs.
+     */
+    public @Nullable List<String> getEmergencyUrns() {
+        return mEmergencyUrns;
+    }
+
+    /**
+     * Set the emergency URNs.
+     *
+     * @param emergencyUrns The emergency URNs.
+     */
+    @VisibleForTesting
+    public void setEmergencyUrns(@Nullable List<String> emergencyUrns) {
+        mEmergencyUrns = emergencyUrns;
     }
 }

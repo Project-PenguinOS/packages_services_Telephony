@@ -134,6 +134,8 @@
     <string name="updating_title" msgid="6130548922615719689">"Поставки за повици"</string>
     <string name="call_settings_admin_user_only" msgid="7238947387649986286">"Поставките за повик може да ги измени само администраторскиот корисник."</string>
     <string name="phone_account_settings_user_restriction" msgid="9142685151087208396">"Поставките за сметката на телефонот може да ги промени само администраторот или деловниот корисник."</string>
+    <!-- no translation found for phone_account_no_config_mobile_networks (7351062247756521227) -->
+    <skip />
     <string name="call_settings_with_label" msgid="8460230435361579511">"Поставки (<xliff:g id="SUBSCRIPTIONLABEL">%s</xliff:g>)"</string>
     <string name="error_updating_title" msgid="2024290892676808965">"Грешка со поставки на повици"</string>
     <string name="reading_settings" msgid="1605904432450871183">"Се читаат поставките..."</string>
@@ -845,8 +847,7 @@
     <string name="radio_info_radio_power" msgid="8805595022160471587">"Радио-напојување на мобилен"</string>
     <string name="simulate_out_of_service_string" msgid="7787925611727597193">"Симулирање „Надвор од употреба“ (само за верзиите за отстранување грешки)"</string>
     <string name="mock_carrier_roaming_satellite_string" msgid="4796300252858292593">"Симулација на режим на сателит за оператор (само за верзиите за отстранување грешки)"</string>
-    <!-- no translation found for esos_satellite_string (7291726039210940609) -->
-    <skip />
+    <string name="esos_satellite_string" msgid="7274794226125968657">"Тестирајте го реалниот режим на eSOS (само во верзијата за отстранување грешки)"</string>
     <string name="radioInfo_menu_viewADN" msgid="4533179730908559846">"Прикажи именик на SIM-картичката"</string>
     <string name="radioInfo_menu_viewFDN" msgid="1847236480527032061">"Прикажи броеви со ограничено бирање"</string>
     <string name="radioInfo_menu_viewSDN" msgid="2613431584522392842">"Прикажи броеви за бирање служби"</string>
