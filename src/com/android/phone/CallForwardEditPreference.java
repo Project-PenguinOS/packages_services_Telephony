@@ -1,3 +1,9 @@
+/**
+* Changes from Qualcomm Innovation Center, Inc. are provided under the following license:
+* Copyright (c) 2024 Qualcomm Innovation Center, Inc. All rights reserved.
+* SPDX-License-Identifier: BSD-3-Clause-Clear
+*/
+
 package com.android.phone;
 
 import static com.android.phone.TimeConsumingPreferenceActivity.EXCEPTION_ERROR;
@@ -123,6 +129,8 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
                 CommandsInterface.CF_REASON_UNCONDITIONAL);
         a.recycle();
 
+        mExtTelephonyManager = ExtTelephonyManager.getInstance(getContext());
+
         Log.d(LOG_TAG, "mServiceClass=" + mServiceClass + ", reason=" + reason);
     }
 
@@ -141,7 +149,6 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
         Log.d(LOG_TAG,
                 "init :mReplaceInvalidCFNumber " + mReplaceInvalidCFNumber + ", mCallForwardByUssd "
                         + mCallForwardByUssd);
-        mExtTelephonyManager = ExtTelephonyManager.getInstance(getContext());
         if (mCallForwardByUssd) {
             mCfInfo = new HashMap<String, String>();
             TelephonyManager telephonyManager = new TelephonyManager(getContext(),
@@ -184,6 +191,7 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
             mQtiImsExtManager = null;
             mIsCfutEnabled = false;
         }
+        mExtTelephonyManager.unregisterCallback(mExtPhoneCallbackListener);
     }
 
     private boolean isUtUnavailableForVideoCallForward() {

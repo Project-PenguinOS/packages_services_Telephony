@@ -210,6 +210,7 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
         if (support) {
             mPreferences.add(preference);
         } else {
+            preference.deInit();
             prefSet.removePreference(preference);
         }
     }
