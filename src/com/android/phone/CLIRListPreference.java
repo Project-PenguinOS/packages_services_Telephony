@@ -86,6 +86,11 @@ public class CLIRListPreference extends ListPreference {
         }
     }
 
+    void restoreClirInfo(boolean isClirEnabled, CharSequence clirSummary) {
+        setEnabled(isClirEnabled);
+        setSummary(clirSummary);
+    }
+
     /* package */ void handleGetCLIRResult(int tmpClirArray[]) {
         clirArray = tmpClirArray;
         final boolean enabled =

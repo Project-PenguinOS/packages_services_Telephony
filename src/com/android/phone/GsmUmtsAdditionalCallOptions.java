@@ -27,6 +27,11 @@ public class GsmUmtsAdditionalCallOptions extends TimeConsumingPreferenceActivit
     private static final int CW_WARNING_DIALOG = 201;
     private static final int CALLER_ID_WARNING_DIALOG = 202;
 
+    private static final String KEY_IS_CW_ENABLED = "is_cw_enabled";
+    private static final String KEY_IS_CLIR_ENABLED = "is_clir_enabled";
+    private static final String KEY_CLIR_ARRAY = "clir_array";
+    private static final String KEY_CLIR_SUMMARY = "clir_summary";
+
     private CLIRListPreference mCLIRButton;
     private CallWaitingSwitchPreference mCWButton;
 
@@ -111,24 +116,34 @@ public class GsmUmtsAdditionalCallOptions extends TimeConsumingPreferenceActivit
             } else {
                 if (DBG) Log.d(LOG_TAG, "restore stored states");
                 mInitIndex = mPreferences.size();
-                if (mShowCWButton && mCWButton != null && mCWButton.isEnabled()) {
-                    mCWButton.init(this, true, mPhone);
-                }
-                if (mShowCLIRButton && mCLIRButton != null && mCLIRButton.isEnabled()) {
-                    mCLIRButton.init(this, true, mPhone);
-                    int[] clirArray = icicle.getIntArray(mCLIRButton.getKey());
-                    if (clirArray != null) {
-                        if (DBG) {
-                            Log.d(LOG_TAG, "onCreate:  clirArray[0]="
-                                    + clirArray[0] + ", clirArray[1]=" + clirArray[1]);
-                        }
-                        mCLIRButton.handleGetCLIRResult(clirArray);
-                    } else {
-                        if (isUtEnabledToDisableClir()) {
-                            mCLIRButton.setSummary(R.string.sum_default_caller_id);
-                            mCWButton.init(this, false, mPhone);
+                Bundle bundle;
+                for (Preference pref : mPreferences) {
+                    bundle = icicle.getParcelable(pref.getKey());
+                    if (bundle == null) continue;
+                    if ((pref instanceof CallWaitingSwitchPreference) && mShowCWButton) {
+                        ((CallWaitingSwitchPreference) pref).init(this, true, mPhone);
+                        ((CallWaitingSwitchPreference) pref).restoreCallWaitingInfo(
+                                bundle.getBoolean(KEY_IS_CW_ENABLED));
+                    } else if ((pref instanceof CLIRListPreference) && mShowCLIRButton) {
+                        ((CLIRListPreference) pref).init(this, true, mPhone);
+                        ((CLIRListPreference) pref).restoreClirInfo(bundle.getBoolean(
+                                KEY_IS_CLIR_ENABLED),
+                                bundle.getCharSequence(KEY_CLIR_SUMMARY));
+                        int[] clirArray = bundle.getIntArray(KEY_CLIR_ARRAY);
+                        if (clirArray != null) {
+                            if (DBG) {
+                                Log.d(LOG_TAG, "onCreate:  clirArray[0]="
+                                        + clirArray[0] + ", clirArray[1]=" + clirArray[1]);
+                            }
+                            ((CLIRListPreference) pref).handleGetCLIRResult(clirArray);
                         } else {
-                            mCLIRButton.init(this, false, mPhone);
+                            if (isUtEnabledToDisableClir()) {
+                                ((CLIRListPreference) pref).setSummary(
+                                        R.string.sum_default_caller_id);
+                                mCWButton.init(this, false, mPhone);
+                            } else {
+                                ((CLIRListPreference) pref).init(this, false, mPhone);
+                            }
                         }
                     }
                 }
@@ -202,8 +217,18 @@ public class GsmUmtsAdditionalCallOptions extends TimeConsumingPreferenceActivit
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        if (mShowCLIRButton && mCLIRButton.clirArray != null) {
-            outState.putIntArray(mCLIRButton.getKey(), mCLIRButton.clirArray);
+        for (Preference pref : mPreferences) {
+            Bundle bundle = new Bundle();
+            if (mShowCWButton && pref instanceof CallWaitingSwitchPreference) {
+                bundle.putBoolean(KEY_IS_CW_ENABLED, pref.isEnabled());
+            } else if (mShowCLIRButton && pref instanceof CLIRListPreference)  {
+                bundle.putBoolean(KEY_IS_CLIR_ENABLED, pref.isEnabled());
+                bundle.putCharSequence(KEY_CLIR_SUMMARY, pref.getSummary());
+                if (((CLIRListPreference) pref).clirArray != null) {
+                    bundle.putIntArray(KEY_CLIR_ARRAY, ((CLIRListPreference) pref).clirArray);
+                }
+            }
+            outState.putParcelable(pref.getKey(), bundle);
         }
     }
 
