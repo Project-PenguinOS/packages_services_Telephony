@@ -77,6 +77,10 @@ public class CallWaitingSwitchPreference extends SwitchPreference {
         }
     }
 
+    void restoreCallWaitingInfo(boolean isCwEnabled) {
+        setEnabled(isCwEnabled);
+    }
+
     private void queryStatusCallBack(int result) {
         Log.d(LOG_TAG, "queryStatusCallBack: CW state " + result);
         mQueryStatus = result;
