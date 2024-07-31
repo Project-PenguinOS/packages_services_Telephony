@@ -218,12 +218,12 @@ public class CallForwardType extends PreferenceActivity {
         }
         /*set preference state base on whether supplementary service is allowed*/
         setPreferencesState(PhoneUtils.isSuppServiceAllowedInAirplaneMode(mPhone));
+        registerReceiver(mBroadcastReceiver, mIntentFilter);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        registerReceiver(mBroadcastReceiver, mIntentFilter);
         mFeatureConnector.connect();
 
         if (mHideVtCfOption || !(mPhone.isUtEnabled() && mPhone.isVideoEnabled())) {
@@ -236,8 +236,14 @@ public class CallForwardType extends PreferenceActivity {
     protected void onPause() {
         super.onPause();
         mFeatureConnector.disconnect();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
         unregisterReceiver(mBroadcastReceiver);
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         final int itemId = item.getItemId();
