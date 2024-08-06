@@ -14,6 +14,12 @@
      limitations under the License.
 -->
 
+<!--
+ * Changes from Qualcomm Innovation Center, Inc. are provided under the following license:
+ * Copyright (c) 2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause-Clear
+-->
+
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
         package="com.android.phone"
@@ -203,6 +209,9 @@
     <!-- Permission needed to handle intent
          "org.codeaurora.intent.action.ESSENTIAL_RECORDS_LOADED" -->
     <uses-permission android:name="com.qti.permission.RECEIVE_ESSENTIAL_RECORDS_LOADED" />
+
+    <!-- Permission needed to bind com.qualcomm.qcrilmsgtunnel.QcrilMsgTunnelService -->
+    <uses-permission android:name="com.qualcomm.permission.USE_QCRIL_MSG_TUNNEL" />
 
     <permission android:name="com.qti.permission.RECEIVE_MSIM_VOICE_CAPABILITY_CHANGED"
         android:label="Broadcast multi_sim_voice_capability property has changed"
