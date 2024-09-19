@@ -69,7 +69,6 @@ public class CdmaCallOptions extends TimeConsumingPreferenceActivity
     private boolean mUtEnabled = false;
     private boolean mCommon = false;
     private Phone mPhone = null;
-    private boolean mCdmaCfCwEnabled = false;
     private static final String BUTTON_CW_KEY = "button_cw_ut_key";
 
     private static boolean isActivityPresent(Context context, String intentName) {
@@ -164,8 +163,6 @@ public class CdmaCallOptions extends TimeConsumingPreferenceActivity
         Log.d(LOG_TAG, "sub id = " + subInfoHelper.getSubId() + " phone id = " +
                 mPhone.getPhoneId());
 
-        mCdmaCfCwEnabled = carrierConfig
-            .getBoolean(CarrierConfigManager.KEY_CDMA_CW_CF_ENABLED_BOOL);
         PreferenceScreen prefScreen = getPreferenceScreen();
         if (mPhone.getPhoneType() != PhoneConstants.PHONE_TYPE_CDMA ||
                 carrierConfig.getBoolean(CarrierConfigManager.KEY_VOICE_PRIVACY_DISABLE_UI_BOOL)) {
@@ -354,33 +351,6 @@ public class CdmaCallOptions extends TimeConsumingPreferenceActivity
             // kick off the normal process to populate the Call Waiting status.
             mCallWaitingPref.init(this, subInfoHelper.getPhone());
         }
-    }
-
-    @Override
-    public void onFinished(Preference preference, boolean reading) {
-        if (mCdmaCfCwEnabled && mUtEnabled && mPhone != null && !mPhone.isUtEnabled()) {
-            mUtEnabled = false;
-            if (mCWButton != null) {
-                PreferenceScreen prefScreen = getPreferenceScreen();
-                prefScreen.removePreference(mCWButton);
-                prefScreen.addPreference(mPrefCW);
-                if (mPrefCW != null) {
-                    mPrefCW.setOnPreferenceClickListener(
-                            new Preference.OnPreferenceClickListener() {
-                                @Override
-                                public boolean onPreferenceClick(Preference preference) {
-                                    Intent intent = new Intent(CALL_WAITING_INTENT);
-                                    intent.putExtra(
-                                        SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX,
-                                        mPhone.getSubId());
-                                    startActivity(intent);
-                                    return true;
-                                }
-                            });
-                }
-            }
-        }
-        super.onFinished(preference, reading);
     }
 
     @Override
