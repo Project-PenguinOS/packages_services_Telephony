@@ -32,7 +32,7 @@ android_app {
         "telephony-ext",
          "extphonelib",
         "ims-ext-common",
-        "org.apache.http.legacy",
+        "org.apache.http.legacy.stubs.system",
     ],
     enforce_uses_libs: false,
 
