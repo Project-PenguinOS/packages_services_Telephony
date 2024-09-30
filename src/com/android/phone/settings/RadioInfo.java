@@ -54,8 +54,9 @@ import static android.net.ConnectivityManager.NetworkCallback;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
-import android.content.ComponentName;
+import android.annotation.NonNull;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -65,7 +66,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.graphics.Typeface;
-import android.hardware.radio.modem.ImeiInfo;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -148,23 +148,26 @@ import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneFactory;
 import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.euicc.EuiccConnector;
-import com.android.internal.telephony.util.TelephonyUtils;
 import com.android.phone.R;
 import com.android.phone.utils.Utils;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.qti.extphone.ExtTelephonyManager;
 import com.qti.extphone.QtiImeiInfo;
@@ -295,7 +298,6 @@ public class RadioInfo extends AppCompatActivity {
 
     private static final int EVENT_QUERY_SMSC_DONE = 1005;
     private static final int EVENT_UPDATE_SMSC_DONE = 1006;
-    private static final int EVENT_PHYSICAL_CHANNEL_CONFIG_CHANGED = 1007;
     private static final int EVENT_UPDATE_NR_STATS = 1008;
 
     private static final int MENU_ITEM_VIEW_ADN            = 1;
@@ -392,6 +394,8 @@ public class RadioInfo extends AppCompatActivity {
     private boolean mMwiValue = false;
     private boolean mCfiValue = false;
 
+    private boolean mSystemUser = true;
+
     private final PersistableBundle[] mCarrierSatelliteOriginalBundle = new PersistableBundle[2];
     private final PersistableBundle[] mOriginalSystemChannels = new PersistableBundle[2];
     private List<CellInfo> mCellInfoResult = null;
@@ -402,11 +406,18 @@ public class RadioInfo extends AppCompatActivity {
 
     private int mPreferredNetworkTypeResult;
     private int mCellInfoRefreshRateIndex;
-    private int mSelectedPhoneIndex;
+    private int mPhoneId = SubscriptionManager.INVALID_PHONE_INDEX;
+
+    private int mSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
+
     private boolean isExtServiceConnected = false;
 
     private String mActionEsos;
     private String mActionEsosDemo;
+
+    private TelephonyDisplayInfo mDisplayInfo;
+
+    private List<PhysicalChannelConfig> mPhysicalChannelConfigs = new ArrayList<>();
 
     private final NetworkRequest mDefaultNetworkRequest = new NetworkRequest.Builder()
             .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
@@ -459,6 +470,7 @@ public class RadioInfo extends AppCompatActivity {
             TelephonyCallback.CellInfoListener,
             TelephonyCallback.SignalStrengthsListener,
             TelephonyCallback.ServiceStateListener,
+            TelephonyCallback.PhysicalChannelConfigListener,
             TelephonyCallback.DisplayInfoListener {
 
         @Override
@@ -523,16 +535,23 @@ public class RadioInfo extends AppCompatActivity {
 
         @Override
         public void onDisplayInfoChanged(TelephonyDisplayInfo displayInfo) {
+            mDisplayInfo = displayInfo;
             updateNetworkType();
+        }
+
+        @Override
+        public void onPhysicalChannelConfigChanged(@NonNull List<PhysicalChannelConfig> configs) {
+            updatePhysicalChannelConfiguration(configs);
         }
     }
 
     private void updatePhysicalChannelConfiguration(List<PhysicalChannelConfig> configs) {
+        mPhysicalChannelConfigs = configs;
         StringBuilder sb = new StringBuilder();
         String div = "";
         sb.append("{");
-        if (configs != null) {
-            for (PhysicalChannelConfig c : configs) {
+        if (mPhysicalChannelConfigs != null) {
+            for (PhysicalChannelConfig c : mPhysicalChannelConfigs) {
                 sb.append(div).append(c);
                 div = ",";
             }
@@ -551,24 +570,21 @@ public class RadioInfo extends AppCompatActivity {
         mPreferredNetworkType.setSelection(mPreferredNetworkTypeResult, true);
     }
 
-    private void updatePhoneIndex(int phoneIndex, int subId) {
+    private void updatePhoneIndex() {
         // unregister listeners on the old subId
         unregisterPhoneStateListener();
-        mTelephonyManager.setCellInfoListRate(sCellInfoListRateDisabled, mPhone.getSubId());
-
-        if (phoneIndex == SubscriptionManager.INVALID_PHONE_INDEX) {
-            log("Invalid phone index " + phoneIndex + ", subscription ID " + subId);
-            return;
-        }
+        mTelephonyManager.setCellInfoListRate(sCellInfoListRateDisabled, mSubId);
 
         // update the subId
-        mTelephonyManager = mTelephonyManager.createForSubscriptionId(subId);
+        mTelephonyManager = mTelephonyManager.createForSubscriptionId(mSubId);
 
         // update the phoneId
-        mPhone = PhoneFactory.getPhone(phoneIndex);
-        mImsManager = new ImsManager(mPhone.getContext());
+        if (mSystemUser) {
+            mPhone = PhoneFactory.getPhone(mPhoneId);
+        }
+        mImsManager = new ImsManager(this);
         try {
-            mProvisioningManager = ProvisioningManager.createForSubscriptionId(subId);
+            mProvisioningManager = ProvisioningManager.createForSubscriptionId(mSubId);
         } catch (IllegalArgumentException e) {
             log("updatePhoneIndex : IllegalArgumentException " + e.getMessage());
             mProvisioningManager = null;
@@ -597,13 +613,6 @@ public class RadioInfo extends AppCompatActivity {
                         mSmsc.setText("update error");
                     }
                     break;
-                case EVENT_PHYSICAL_CHANNEL_CONFIG_CHANGED:
-                    ar = (AsyncResult) msg.obj;
-                    if (ar.exception != null) {
-                        mPhyChanConfig.setText(("update error"));
-                    }
-                    updatePhysicalChannelConfiguration((List<PhysicalChannelConfig>) ar.result);
-                    break;
                 case EVENT_UPDATE_NR_STATS:
                     log("got EVENT_UPDATE_NR_STATS");
                     updateNrStats();
@@ -620,16 +629,9 @@ public class RadioInfo extends AppCompatActivity {
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         Utils.setupEdgeToEdge(this);
-        try {
-            PhoneFactory.getDefaultPhone();
-        } catch (Exception e) {
-            loge("Do nothing due to getDefaultPhone " + e);
-            finish();
-            return;
-        }
-
-        UserManager userManager =
-                (UserManager) getApplicationContext().getSystemService(Context.USER_SERVICE);
+        mSystemUser = android.os.Process.myUserHandle().isSystem();
+        log("onCreate: mSystemUser=" + mSystemUser);
+        UserManager userManager = getSystemService(UserManager.class);
         if (userManager != null
                 && userManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS)) {
             Log.w(TAG, "User is restricted from configuring mobile networks.");
@@ -638,9 +640,6 @@ public class RadioInfo extends AppCompatActivity {
         }
 
         setContentView(R.layout.radio_info);
-
-        log("Started onCreate");
-
         Resources r = getResources();
         mActionEsos =
             r.getString(
@@ -652,11 +651,15 @@ public class RadioInfo extends AppCompatActivity {
                     com.android.internal.R.string.config_satellite_demo_mode_sos_intent_action);
 
         mQueuedWork = new ThreadPoolExecutor(1, 1, RUNNABLE_TIMEOUT_MS, TimeUnit.MICROSECONDS,
-                new LinkedBlockingDeque<Runnable>());
-        mConnectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
-        mPhone = getPhone(SubscriptionManager.getDefaultSubscriptionId());
-        mTelephonyManager = ((TelephonyManager) getSystemService(TELEPHONY_SERVICE))
-                .createForSubscriptionId(mPhone.getSubId());
+                new LinkedBlockingDeque<>());
+        mConnectivityManager = getSystemService(ConnectivityManager.class);
+        if (mSystemUser) {
+            mPhone = getPhone(SubscriptionManager.getDefaultSubscriptionId());
+        }
+        mSubId = SubscriptionManager.getDefaultSubscriptionId();
+        mPhoneId = SubscriptionManager.getPhoneId(mSubId);
+        mTelephonyManager = getSystemService(TelephonyManager.class)
+                .createForSubscriptionId(mSubId);
         mEuiccManager = getSystemService(EuiccManager.class);
 
         mBroadcastReceiverThread.start();
@@ -664,9 +667,9 @@ public class RadioInfo extends AppCompatActivity {
         IntentFilter filter = new IntentFilter(ACTION_RADIO_POWER_STATE_CHANGED);
         mPhone.getContext().registerReceiver(mBroadcastReceiver, filter, null, scheduler);
 
-        mImsManager = new ImsManager(mPhone.getContext());
+        mImsManager = new ImsManager(this);
         try {
-            mProvisioningManager = ProvisioningManager.createForSubscriptionId(mPhone.getSubId());
+            mProvisioningManager = ProvisioningManager.createForSubscriptionId(mSubId);
         } catch (IllegalArgumentException e) {
             log("onCreate : IllegalArgumentException " + e.getMessage());
             mProvisioningManager = null;
@@ -725,8 +728,10 @@ public class RadioInfo extends AppCompatActivity {
         mPreferredNetworkType.setAdapter(mPreferredNetworkTypeAdapter);
 
         mMockSignalStrength = (Spinner) findViewById(R.id.signalStrength);
-        if (!TelephonyUtils.IS_DEBUGGABLE) {
+        if (!Build.isDebuggable() || !mSystemUser) {
             mMockSignalStrength.setVisibility(View.GONE);
+            findViewById(R.id.signalStrength).setVisibility(View.GONE);
+            findViewById(R.id.signal_strength_label).setVisibility(View.GONE);
         } else {
             ArrayAdapter<Integer> mSignalStrengthAdapter = new ArrayAdapter<>(this,
                     android.R.layout.simple_spinner_item, SIGNAL_STRENGTH_LEVEL);
@@ -736,8 +741,10 @@ public class RadioInfo extends AppCompatActivity {
         }
 
         mMockDataNetworkType = (Spinner) findViewById(R.id.dataNetworkType);
-        if (!TelephonyUtils.IS_DEBUGGABLE) {
+        if (!Build.isDebuggable() || !mSystemUser) {
             mMockDataNetworkType.setVisibility(View.GONE);
+            findViewById(R.id.dataNetworkType).setVisibility(View.GONE);
+            findViewById(R.id.data_network_type_label).setVisibility(View.GONE);
         } else {
             ArrayAdapter<String> mNetworkTypeAdapter = new ArrayAdapter<>(this,
                     android.R.layout.simple_spinner_item, Arrays.stream(MOCK_DATA_NETWORK_TYPE)
@@ -764,7 +771,7 @@ public class RadioInfo extends AppCompatActivity {
         mImsWfcProvisionedSwitch = (Switch) findViewById(R.id.wfc_provisioned_switch);
         mEabProvisionedSwitch = (Switch) findViewById(R.id.eab_provisioned_switch);
 
-        if (!isImsSupportedOnDevice(mPhone.getContext())) {
+        if (!isImsSupportedOnDevice()) {
             mImsVolteProvisionedSwitch.setVisibility(View.GONE);
             mImsVtProvisionedSwitch.setVisibility(View.GONE);
             mImsWfcProvisionedSwitch.setVisibility(View.GONE);
@@ -802,13 +809,13 @@ public class RadioInfo extends AppCompatActivity {
         mRadioPowerOnSwitch = (Switch) findViewById(R.id.radio_power);
 
         mSimulateOutOfServiceSwitch = (Switch) findViewById(R.id.simulate_out_of_service);
-        if (!TelephonyUtils.IS_DEBUGGABLE) {
+        if (!Build.isDebuggable()) {
             mSimulateOutOfServiceSwitch.setVisibility(View.GONE);
         }
 
         mMockSatellite = (Switch) findViewById(R.id.mock_carrier_roaming_satellite);
         mEnforceSatelliteChannel = (Switch) findViewById(R.id.enforce_satellite_channel);
-        if (!TelephonyUtils.IS_DEBUGGABLE) {
+        if (!Build.isDebuggable()) {
             mMockSatellite.setVisibility(View.GONE);
             mEnforceSatelliteChannel.setVisibility(View.GONE);
         }
@@ -823,6 +830,12 @@ public class RadioInfo extends AppCompatActivity {
         mUpdateSmscButton.setOnClickListener(mUpdateSmscButtonHandler);
         mRefreshSmscButton = (Button) findViewById(R.id.refresh_smsc);
         mRefreshSmscButton.setOnClickListener(mRefreshSmscButtonHandler);
+        if (!mSystemUser) {
+            mSmsc.setVisibility(View.GONE);
+            mUpdateSmscButton.setVisibility(View.GONE);
+            mRefreshSmscButton.setVisibility(View.GONE);
+            findViewById(R.id.smsc_label).setVisibility(View.GONE);
+        }
         mCarrierProvisioningButton = (Button) findViewById(R.id.carrier_provisioning);
         if (!TextUtils.isEmpty(getCarrierProvisioningAppString())) {
             mCarrierProvisioningButton.setOnClickListener(mCarrierProvisioningButtonHandler);
@@ -843,13 +856,13 @@ public class RadioInfo extends AppCompatActivity {
         mEsosDemoButton  = (Button) findViewById(R.id.demo_esos_questionnaire);
         mSatelliteEnableNonEmergencyModeButton = (Button) findViewById(
                 R.id.satellite_enable_non_emergency_mode);
-        CarrierConfigManager cm = mPhone.getContext().getSystemService(CarrierConfigManager.class);
-        if (!cm.getConfigForSubId(mPhone.getSubId(),
+        CarrierConfigManager cm = getSystemService(CarrierConfigManager.class);
+        if (!cm.getConfigForSubId(mSubId,
                         CarrierConfigManager.KEY_SATELLITE_ATTACH_SUPPORTED_BOOL)
                 .getBoolean(CarrierConfigManager.KEY_SATELLITE_ATTACH_SUPPORTED_BOOL)) {
             mSatelliteEnableNonEmergencyModeButton.setVisibility(View.GONE);
         }
-        if (!TelephonyUtils.IS_DEBUGGABLE) {
+        if (!Build.isDebuggable()) {
             if (!TextUtils.isEmpty(mActionEsos)) {
                 mEsosButton.setVisibility(View.GONE);
             }
@@ -858,16 +871,13 @@ public class RadioInfo extends AppCompatActivity {
             }
             mSatelliteEnableNonEmergencyModeButton.setVisibility(View.GONE);
         } else {
-            mEsosButton.setOnClickListener(v ->
-                    mPhone.getContext().startActivity(
-                        new Intent(mActionEsos)
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK))
+            mEsosButton.setOnClickListener(v -> startActivity(
+                    new Intent(mActionEsos).addFlags(
+                            Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK))
             );
-            mEsosDemoButton.setOnClickListener(v ->
-                    mPhone.getContext().startActivity(
-                            new Intent(mActionEsosDemo)
-                                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                                            | Intent.FLAG_ACTIVITY_CLEAR_TASK))
+            mEsosDemoButton.setOnClickListener(v -> startActivity(
+                    new Intent(mActionEsosDemo).addFlags(
+                            Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK))
             );
             mSatelliteEnableNonEmergencyModeButton.setOnClickListener(v ->
                     enableSatelliteNonEmergencyMode());
@@ -884,7 +894,6 @@ public class RadioInfo extends AppCompatActivity {
 
         mCellInfoRefreshRateIndex = 0; //disabled
         mPreferredNetworkTypeResult = PREFERRED_NETWORK_LABELS.length - 1; //Unknown
-        mSelectedPhoneIndex = mPhone.getPhoneId();
 
         new Thread(() -> {
             int networkType = (int) mTelephonyManager.getPreferredNetworkTypeBitmask();
@@ -993,7 +1002,7 @@ public class RadioInfo extends AppCompatActivity {
         mCellInfoRefreshRateSpinner.setSelection(mCellInfoRefreshRateIndex);
         // Request cell information update from RIL.
         mTelephonyManager.setCellInfoListRate(CELL_INFO_REFRESH_RATES[mCellInfoRefreshRateIndex],
-                mPhone.getSubId());
+                mSubId);
 
         //set selection before registering to prevent update
         mPreferredNetworkType.setSelection(mPreferredNetworkTypeResult, true);
@@ -1006,23 +1015,23 @@ public class RadioInfo extends AppCompatActivity {
         }).start();
 
         // mock signal strength
-        mMockSignalStrength.setSelection(mSelectedSignalStrengthIndex[mPhone.getPhoneId()]);
+        mMockSignalStrength.setSelection(mSelectedSignalStrengthIndex[mPhoneId]);
         mMockSignalStrength.setOnItemSelectedListener(mOnMockSignalStrengthSelectedListener);
 
         // mock data network type
-        mMockDataNetworkType.setSelection(mSelectedMockDataNetworkTypeIndex[mPhone.getPhoneId()]);
+        mMockDataNetworkType.setSelection(mSelectedMockDataNetworkTypeIndex[mPhoneId]);
         mMockDataNetworkType.setOnItemSelectedListener(mOnMockDataNetworkTypeSelectedListener);
 
         // set phone index
-        mSelectPhoneIndex.setSelection(mSelectedPhoneIndex, true);
+        mSelectPhoneIndex.setSelection(mPhoneId, true);
         mSelectPhoneIndex.setOnItemSelectedListener(mSelectPhoneIndexHandler);
 
         mRadioPowerOnSwitch.setOnCheckedChangeListener(mRadioPowerOnChangeListener);
-        mSimulateOutOfServiceSwitch.setChecked(mSimulateOos[mPhone.getPhoneId()]);
+        mSimulateOutOfServiceSwitch.setChecked(mSimulateOos[mPhoneId]);
         mSimulateOutOfServiceSwitch.setOnCheckedChangeListener(mSimulateOosOnChangeListener);
-        mMockSatellite.setChecked(mCarrierSatelliteOriginalBundle[mPhone.getPhoneId()] != null);
+        mMockSatellite.setChecked(mCarrierSatelliteOriginalBundle[mPhoneId] != null);
         mMockSatellite.setOnCheckedChangeListener(mMockSatelliteListener);
-        updateSatelliteChannelDisplay(mPhone.getPhoneId());
+        updateSatelliteChannelDisplay(mPhoneId);
         mEnforceSatelliteChannel.setOnCheckedChangeListener(mForceSatelliteChannelOnChangeListener);
         mImsVolteProvisionedSwitch.setOnCheckedChangeListener(mImsVolteCheckedChangeListener);
         mImsVtProvisionedSwitch.setOnCheckedChangeListener(mImsVtCheckedChangeListener);
@@ -1036,9 +1045,6 @@ public class RadioInfo extends AppCompatActivity {
 
         unregisterPhoneStateListener();
         registerPhoneStateListener();
-        mPhone.registerForPhysicalChannelConfig(mHandler,
-            EVENT_PHYSICAL_CHANNEL_CONFIG_CHANGED, null);
-
         mConnectivityManager.registerNetworkCallback(
                 mDefaultNetworkRequest, mNetworkCallback, mHandler);
 
@@ -1052,7 +1058,7 @@ public class RadioInfo extends AppCompatActivity {
         log("onPause: unregister phone & data intents");
 
         mTelephonyManager.unregisterTelephonyCallback(mTelephonyCallback);
-        mTelephonyManager.setCellInfoListRate(sCellInfoListRateDisabled, mPhone.getSubId());
+        mTelephonyManager.setCellInfoListRate(sCellInfoListRateDisabled, mSubId);
         mConnectivityManager.unregisterNetworkCallback(mNetworkCallback);
     }
 
@@ -1072,7 +1078,8 @@ public class RadioInfo extends AppCompatActivity {
         mPreferredNetworkTypeResult = b.getInt("mPreferredNetworkTypeResult",
                 PREFERRED_NETWORK_LABELS.length - 1);
 
-        mSelectedPhoneIndex = b.getInt("mSelectedPhoneIndex", 0);
+        mPhoneId = b.getInt("mSelectedPhoneIndex", 0);
+        mSubId = SubscriptionManager.getSubscriptionId(mPhoneId);
 
         mCellInfoRefreshRateIndex = b.getInt("mCellInfoRefreshRateIndex", 0);
     }
@@ -1085,7 +1092,7 @@ public class RadioInfo extends AppCompatActivity {
         outState.putString("mHttpClientTestResult", mHttpClientTestResult);
 
         outState.putInt("mPreferredNetworkTypeResult", mPreferredNetworkTypeResult);
-        outState.putInt("mSelectedPhoneIndex", mSelectedPhoneIndex);
+        outState.putInt("mSelectedPhoneIndex", mPhoneId);
         outState.putInt("mCellInfoRefreshRateIndex", mCellInfoRefreshRateIndex);
 
     }
@@ -1099,7 +1106,7 @@ public class RadioInfo extends AppCompatActivity {
                 R.string.radioInfo_menu_viewFDN).setOnMenuItemClickListener(mViewFDNCallback);
         menu.add(1, MENU_ITEM_VIEW_SDN, 0,
                 R.string.radioInfo_menu_viewSDN).setOnMenuItemClickListener(mViewSDNCallback);
-        if (isImsSupportedOnDevice(mPhone.getContext())) {
+        if (isImsSupportedOnDevice()) {
             menu.add(1, MENU_ITEM_GET_IMS_STATUS,
                     0, R.string.radioInfo_menu_getIMS).setOnMenuItemClickListener(mGetImsStatus);
         }
@@ -1149,21 +1156,23 @@ public class RadioInfo extends AppCompatActivity {
 
     private void clearOverride() {
         for (int phoneId = 0; phoneId < sPhoneIndexLabels.length; phoneId++) {
-            mPhone = PhoneFactory.getPhone(phoneId);
-            if (mSimulateOos[mPhone.getPhoneId()])  {
+            if (mSystemUser) {
+                mPhone = PhoneFactory.getPhone(phoneId);
+            }
+            if (mSimulateOos[mPhoneId])  {
                 mSimulateOosOnChangeListener.onCheckedChanged(mSimulateOutOfServiceSwitch, false);
             }
-            if (mOriginalSystemChannels[mPhone.getPhoneId()] != null) {
+            if (mOriginalSystemChannels[mPhoneId] != null) {
                 mForceSatelliteChannelOnChangeListener
                         .onCheckedChanged(mEnforceSatelliteChannel, false);
             }
-            if (mCarrierSatelliteOriginalBundle[mPhone.getPhoneId()] != null) {
+            if (mCarrierSatelliteOriginalBundle[mPhoneId] != null) {
                 mMockSatelliteListener.onCheckedChanged(mMockSatellite, false);
             }
-            if (mSelectedSignalStrengthIndex[mPhone.getPhoneId()] > 0) {
+            if (mSelectedSignalStrengthIndex[mPhoneId] > 0) {
                 mOnMockSignalStrengthSelectedListener.onItemSelected(null, null, 0/*pos*/, 0);
             }
-            if (mSelectedMockDataNetworkTypeIndex[mPhone.getPhoneId()] > 0) {
+            if (mSelectedMockDataNetworkTypeIndex[mPhoneId] > 0) {
                 mOnMockDataNetworkTypeSelectedListener.onItemSelected(null, null, 0/*pos*/, 0);
             }
         }
@@ -1182,7 +1191,6 @@ public class RadioInfo extends AppCompatActivity {
 
     private void unregisterPhoneStateListener() {
         mTelephonyManager.unregisterTelephonyCallback(mTelephonyCallback);
-        mPhone.unregisterForPhysicalChannelConfig(mHandler);
 
         // clear all fields so they are blank until the next listener event occurs
         mOperatorName.setText("");
@@ -1205,6 +1213,8 @@ public class RadioInfo extends AppCompatActivity {
         mGsmState.setText("");
         mRoamingState.setText("");
         mPhyChanConfig.setText("");
+        mDownlinkKbps.setText("");
+        mUplinkKbps.setText("");
     }
 
     // register mTelephonyCallback for relevant fields using the current TelephonyManager
@@ -1435,7 +1445,7 @@ public class RadioInfo extends AppCompatActivity {
     }
 
     private void updateSubscriptionIds() {
-        mSubscriptionId.setText(Integer.toString(mPhone.getSubId()));
+        mSubscriptionId.setText(String.format(Locale.ROOT, "%d", mSubId));
         mDds.setText(Integer.toString(SubscriptionManager.getDefaultDataSubscriptionId()));
     }
 
@@ -1449,6 +1459,12 @@ public class RadioInfo extends AppCompatActivity {
 
 
     private void updateServiceState(ServiceState serviceState) {
+        if (!SubscriptionManager.isValidSubscriptionId(mSubId)) {
+            // When SIM is absent, we can't listen service state change from absent slot. Need
+            // explicitly get service state from the specific slot.
+            serviceState = mTelephonyManager.getServiceStateForSlot(mPhoneId);
+        }
+        log("Update service state " + serviceState);
         int state = serviceState.getState();
         Resources r = getResources();
         String display = r.getString(R.string.radioInfo_unknown);
@@ -1503,32 +1519,40 @@ public class RadioInfo extends AppCompatActivity {
         Resources r = getResources();
         String display = r.getString(R.string.radioInfo_unknown);
 
-        switch (state) {
-            case TelephonyManager.DATA_CONNECTED:
-                display = r.getString(R.string.radioInfo_data_connected);
-                break;
-            case TelephonyManager.DATA_CONNECTING:
-                display = r.getString(R.string.radioInfo_data_connecting);
-                break;
-            case TelephonyManager.DATA_DISCONNECTED:
-                display = r.getString(R.string.radioInfo_data_disconnected);
-                break;
-            case TelephonyManager.DATA_SUSPENDED:
-                display = r.getString(R.string.radioInfo_data_suspended);
-                break;
+        if (SubscriptionManager.isValidSubscriptionId(mSubId)) {
+            switch (state) {
+                case TelephonyManager.DATA_CONNECTED:
+                    display = r.getString(R.string.radioInfo_data_connected);
+                    break;
+                case TelephonyManager.DATA_CONNECTING:
+                    display = r.getString(R.string.radioInfo_data_connecting);
+                    break;
+                case TelephonyManager.DATA_DISCONNECTED:
+                    display = r.getString(R.string.radioInfo_data_disconnected);
+                    break;
+                case TelephonyManager.DATA_SUSPENDED:
+                    display = r.getString(R.string.radioInfo_data_suspended);
+                    break;
+            }
+        } else {
+            display = r.getString(R.string.radioInfo_data_disconnected);
         }
 
         mGprsState.setText(display);
     }
 
     private void updateNetworkType() {
-        if (mPhone != null) {
+        if (SubscriptionManager.isValidPhoneId(mPhoneId)) {
             mDataNetwork.setText(ServiceState.rilRadioTechnologyToString(
-                    mPhone.getServiceState().getRilDataRadioTechnology()));
+                    mTelephonyManager.getServiceStateForSlot(mPhoneId)
+                            .getRilDataRadioTechnology()));
             mVoiceNetwork.setText(ServiceState.rilRadioTechnologyToString(
-                    mPhone.getServiceState().getRilVoiceRadioTechnology()));
-            int overrideNetwork = mPhone.getDisplayInfoController().getTelephonyDisplayInfo()
-                    .getOverrideNetworkType();
+                    mTelephonyManager.getServiceStateForSlot(mPhoneId)
+                            .getRilVoiceRadioTechnology()));
+            int overrideNetwork = (mDisplayInfo != null
+                    && SubscriptionManager.isValidSubscriptionId(mSubId))
+                    ? mDisplayInfo.getOverrideNetworkType()
+                    : TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NONE;
             mOverrideNetwork.setText(
                     TelephonyDisplayInfo.overrideNetworkTypeToString(overrideNetwork));
         }
@@ -1548,9 +1572,7 @@ public class RadioInfo extends AppCompatActivity {
 
     private void updateRawRegistrationState(ServiceState serviceState) {
         ServiceState ss = serviceState;
-        if (ss == null && mPhone != null) {
-            ss = mPhone.getServiceState();
-        }
+        ss = mTelephonyManager.getServiceStateForSlot(mPhoneId);
 
         mVoiceRawReg.setText(getRawRegistrationStateText(ss, NetworkRegistrationInfo.DOMAIN_CS,
                     AccessNetworkConstants.TRANSPORT_TYPE_WWAN));
@@ -1565,7 +1587,7 @@ public class RadioInfo extends AppCompatActivity {
                 & TelephonyManager.NETWORK_TYPE_BITMASK_NR) == 0) {
             return;
         }
-        ServiceState ss = (mPhone == null) ? null : mPhone.getServiceState();
+        ServiceState ss = mTelephonyManager.getServiceStateForSlot(mPhoneId);
         if (ss != null) {
             NetworkRegistrationInfo nri = ss.getNetworkRegistrationInfo(
                     NetworkRegistrationInfo.DOMAIN_PS, AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
@@ -1605,13 +1627,18 @@ public class RadioInfo extends AppCompatActivity {
         String s;
         Resources r = getResources();
 
-        s = mPhone.getSubscriberId();
-        if (s == null) s = r.getString(R.string.radioInfo_unknown);
+        s = mTelephonyManager.getImei(mPhoneId);
+        mDeviceId.setText(s);
+
+        s = mTelephonyManager.getSubscriberId();
+        if (s == null || !SubscriptionManager.isValidSubscriptionId(mSubId)) {
+            s = r.getString(R.string.radioInfo_unknown);
+        }
 
         mSubscriberId.setText(s);
 
         SubscriptionManager subMgr = getSystemService(SubscriptionManager.class);
-        int subId = mPhone.getSubId();
+        int subId = mSubId;
         s = subMgr.getPhoneNumber(subId)
                 + " { CARRIER:"
                 + subMgr.getPhoneNumber(subId, SubscriptionManager.PHONE_NUMBER_SOURCE_CARRIER)
@@ -1722,9 +1749,8 @@ public class RadioInfo extends AppCompatActivity {
     }
 
     private void refreshSmsc() {
-        mQueuedWork.execute(new Runnable() {
-            public void run() {
-                //FIXME: Replace with a TelephonyManager call
+        mQueuedWork.execute(() -> {
+            if (mSystemUser) {
                 mPhone.getSmscAddress(mHandler.obtainMessage(EVENT_QUERY_SMSC_DONE));
             }
         });
@@ -1835,38 +1861,61 @@ public class RadioInfo extends AppCompatActivity {
 
     private MenuItem.OnMenuItemClickListener mGetImsStatus =
             new MenuItem.OnMenuItemClickListener() {
-        public boolean onMenuItemClick(MenuItem item) {
-            boolean isImsRegistered = mPhone.isImsRegistered();
-            boolean availableVolte = mPhone.isVoiceOverCellularImsEnabled();
-            boolean availableWfc = mPhone.isWifiCallingEnabled();
-            boolean availableVt = mPhone.isVideoEnabled();
-            boolean availableUt = mPhone.isUtEnabled();
+                public boolean onMenuItemClick(MenuItem item) {
+                    boolean isSimValid = SubscriptionManager.isValidSubscriptionId(mSubId);
+                    boolean isImsRegistered = isSimValid && mTelephonyManager.isImsRegistered();
+                    boolean availableVolte = isSimValid && mTelephonyManager.isVolteAvailable();
+                    boolean availableWfc = isSimValid && mTelephonyManager.isWifiCallingAvailable();
+                    boolean availableVt =
+                            isSimValid && mTelephonyManager.isVideoTelephonyAvailable();
+                    AtomicBoolean availableUt = new AtomicBoolean(false);
 
-            final String imsRegString = isImsRegistered
-                    ? getString(R.string.radio_info_ims_reg_status_registered)
-                    : getString(R.string.radio_info_ims_reg_status_not_registered);
+                    if (isSimValid) {
+                        ImsMmTelManager imsMmTelManager = mImsManager.getImsMmTelManager(mSubId);
+                        CountDownLatch latch = new CountDownLatch(1);
+                        try {
+                            HandlerThread handlerThread = new HandlerThread("RadioInfo");
+                            handlerThread.start();
+                            imsMmTelManager.isSupported(
+                                    MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_UT,
+                                    AccessNetworkConstants.TRANSPORT_TYPE_WWAN,
+                                    handlerThread.getThreadExecutor(), (result) -> {
+                                        latch.countDown();
+                                        availableUt.set(result);
+                                    });
+                            latch.await(2, TimeUnit.SECONDS);
+                            handlerThread.quit();
+                        } catch (Exception e) {
+                            loge("Failed to get UT state.");
+                        }
+                    }
 
-            final String available = getString(R.string.radio_info_ims_feature_status_available);
-            final String unavailable = getString(
-                    R.string.radio_info_ims_feature_status_unavailable);
+                    final String imsRegString = isImsRegistered
+                            ? getString(R.string.radio_info_ims_reg_status_registered)
+                            : getString(R.string.radio_info_ims_reg_status_not_registered);
 
-            String imsStatus = getString(R.string.radio_info_ims_reg_status,
-                    imsRegString,
-                    availableVolte ? available : unavailable,
-                    availableWfc ? available : unavailable,
-                    availableVt ? available : unavailable,
-                    availableUt ? available : unavailable);
+                    final String available = getString(
+                            R.string.radio_info_ims_feature_status_available);
+                    final String unavailable = getString(
+                            R.string.radio_info_ims_feature_status_unavailable);
 
-            AlertDialog imsDialog = new AlertDialog.Builder(RadioInfo.this)
-                    .setMessage(imsStatus)
-                    .setTitle(getString(R.string.radio_info_ims_reg_status_title))
-                    .create();
+                    String imsStatus = getString(R.string.radio_info_ims_reg_status,
+                            imsRegString,
+                            availableVolte ? available : unavailable,
+                            availableWfc ? available : unavailable,
+                            availableVt ? available : unavailable,
+                            availableUt.get() ? available : unavailable);
 
-            imsDialog.show();
+                    AlertDialog imsDialog = new AlertDialog.Builder(RadioInfo.this)
+                            .setMessage(imsStatus)
+                            .setTitle(getString(R.string.radio_info_ims_reg_status_title))
+                            .create();
 
-            return true;
-        }
-    };
+                    imsDialog.show();
+
+                    return true;
+                }
+            };
 
     private MenuItem.OnMenuItemClickListener mToggleData =
             new MenuItem.OnMenuItemClickListener() {
@@ -2026,31 +2075,31 @@ public class RadioInfo extends AppCompatActivity {
         if (isChecked) {
             log("Send OOS override broadcast intent.");
             intent.putExtra("data_reg_state", 1);
-            mSimulateOos[mPhone.getPhoneId()] = true;
+            mSimulateOos[mPhoneId] = true;
         } else {
             log("Remove OOS override.");
             intent.putExtra("action", "reset");
-            mSimulateOos[mPhone.getPhoneId()] = false;
+            mSimulateOos[mPhoneId] = false;
         }
+        mPhone.getTelephonyTester().setServiceStateTestIntent(intent);
     };
 
     private static final int SATELLITE_CHANNEL = 8665;
     private final OnCheckedChangeListener mForceSatelliteChannelOnChangeListener =
             (buttonView, isChecked) -> {
-                if (mPhone == null || mPhone.getSubId() < 1) {
-                    loge("Force satellite channel mPhone.getSubId() < 1");
+                if (SubscriptionManager.isValidSubscriptionId(mSubId)) {
+                    loge("Force satellite channel invalid subId " + mSubId);
                     return;
                 }
-                CarrierConfigManager cm = mPhone.getContext()
-                        .getSystemService(CarrierConfigManager.class);
+                CarrierConfigManager cm = getSystemService(CarrierConfigManager.class);
                 if (cm == null) {
                     loge("Force satellite channel cm == null");
                     return;
                 }
-                TelephonyManager tm = mTelephonyManager.createForSubscriptionId(mPhone.getSubId());
+                TelephonyManager tm = mTelephonyManager.createForSubscriptionId(mSubId);
                 // To be used in thread in case mPhone changes.
-                int subId = mPhone.getSubId();
-                int phoneId = mPhone.getPhoneId();
+                int subId = mSubId;
+                int phoneId = mPhoneId;
                 if (isChecked) {
                     (new Thread(() -> {
                         // Override carrier config
@@ -2156,24 +2205,24 @@ public class RadioInfo extends AppCompatActivity {
 
     private final OnCheckedChangeListener mMockSatelliteListener =
             (buttonView, isChecked) -> {
-                if (mPhone != null) {
-                    CarrierConfigManager cm = mPhone.getContext()
-                            .getSystemService(CarrierConfigManager.class);
+                if (SubscriptionManager.isValidPhoneId(mPhoneId)) {
+                    CarrierConfigManager cm = getSystemService(CarrierConfigManager.class);
                     if (cm == null) return;
                     if (isChecked) {
-                        String operatorNumeric = mPhone.getOperatorNumeric();
+                        String operatorNumeric = mTelephonyManager
+                                .getNetworkOperatorForPhone(mPhoneId);
                         TelephonyManager tm;
-                        if (TextUtils.isEmpty(operatorNumeric) && (tm = mPhone.getContext()
-                                .getSystemService(TelephonyManager.class)) != null) {
-                            operatorNumeric = tm.getSimOperatorNumericForPhone(mPhone.getPhoneId());
+                        if (TextUtils.isEmpty(operatorNumeric)
+                                && (tm = getSystemService(TelephonyManager.class)) != null) {
+                            operatorNumeric = tm.getSimOperatorNumericForPhone(mPhoneId);
                         }
                         if (TextUtils.isEmpty(operatorNumeric)) {
                             loge("mMockSatelliteListener: Can't mock because no operator for phone "
-                                    + mPhone.getPhoneId());
+                                    + mPhoneId);
                             mMockSatellite.setChecked(false);
                             return;
                         }
-                        PersistableBundle originalBundle = cm.getConfigForSubId(mPhone.getSubId(),
+                        PersistableBundle originalBundle = cm.getConfigForSubId(mSubId,
                                 CarrierConfigManager.KEY_SATELLITE_ATTACH_SUPPORTED_BOOL,
                                 CarrierConfigManager.KEY_SATELLITE_ENTITLEMENT_SUPPORTED_BOOL,
                                 CarrierConfigManager
@@ -2185,28 +2234,30 @@ public class RadioInfo extends AppCompatActivity {
                         overrideBundle.putBoolean(CarrierConfigManager
                                 .KEY_SATELLITE_ENTITLEMENT_SUPPORTED_BOOL, false);
                         PersistableBundle capableProviderBundle = new PersistableBundle();
-                        capableProviderBundle.putIntArray(mPhone.getOperatorNumeric(), new int[]{
-                                // Currently satellite only supports below
-                                NetworkRegistrationInfo.SERVICE_TYPE_SMS,
-                                NetworkRegistrationInfo.SERVICE_TYPE_EMERGENCY
+                        capableProviderBundle.putIntArray(mTelephonyManager
+                                        .getNetworkOperatorForPhone(mPhoneId),
+                                new int[]{
+                                        // Currently satellite only supports below
+                                        NetworkRegistrationInfo.SERVICE_TYPE_SMS,
+                                        NetworkRegistrationInfo.SERVICE_TYPE_EMERGENCY
                         });
                         overrideBundle.putPersistableBundle(CarrierConfigManager
                                 .KEY_CARRIER_SUPPORTED_SATELLITE_SERVICES_PER_PROVIDER_BUNDLE,
                                 capableProviderBundle);
                         log("mMockSatelliteListener: new " + overrideBundle);
                         log("mMockSatelliteListener: old " + originalBundle);
-                        cm.overrideConfig(mPhone.getSubId(), overrideBundle, false);
-                        mCarrierSatelliteOriginalBundle[mPhone.getPhoneId()] = originalBundle;
+                        cm.overrideConfig(mSubId, overrideBundle, false);
+                        mCarrierSatelliteOriginalBundle[mPhoneId] = originalBundle;
                     } else {
                         try {
-                            cm.overrideConfig(mPhone.getSubId(),
-                                    mCarrierSatelliteOriginalBundle[mPhone.getPhoneId()], false);
-                            mCarrierSatelliteOriginalBundle[mPhone.getPhoneId()] = null;
+                            cm.overrideConfig(mSubId,
+                                    mCarrierSatelliteOriginalBundle[mPhoneId], false);
+                            mCarrierSatelliteOriginalBundle[mPhoneId] = null;
                             log("mMockSatelliteListener: Successfully cleared mock for phone "
-                                    + mPhone.getPhoneId());
+                                    + mPhoneId);
                         } catch (Exception e) {
                             loge("mMockSatelliteListener: Can't clear mock because invalid sub Id "
-                                    + mPhone.getSubId()
+                                    + mSubId
                                     + ", insert SIM and use adb shell cmd phone cc clear-values");
                             // Keep show toggle ON if the view is not destroyed. If destroyed, must
                             // use cmd to reset, because upon creation the view doesn't remember the
@@ -2221,13 +2272,13 @@ public class RadioInfo extends AppCompatActivity {
      * Enable modem satellite for non-emergency mode.
      */
     private void enableSatelliteNonEmergencyMode() {
-        SatelliteManager sm = mPhone.getContext().getSystemService(SatelliteManager.class);
-        CarrierConfigManager cm = mPhone.getContext().getSystemService(CarrierConfigManager.class);
+        SatelliteManager sm = getSystemService(SatelliteManager.class);
+        CarrierConfigManager cm = getSystemService(CarrierConfigManager.class);
         if (sm == null || cm == null) {
             loge("enableSatelliteNonEmergencyMode: sm or cm is null");
             return;
         }
-        if (!cm.getConfigForSubId(mPhone.getSubId(),
+        if (!cm.getConfigForSubId(mSubId,
                 CarrierConfigManager.KEY_SATELLITE_ATTACH_SUPPORTED_BOOL)
                 .getBoolean(CarrierConfigManager.KEY_SATELLITE_ATTACH_SUPPORTED_BOOL)) {
             loge("enableSatelliteNonEmergencyMode: KEY_SATELLITE_ATTACH_SUPPORTED_BOOL is false");
@@ -2315,10 +2366,9 @@ public class RadioInfo extends AppCompatActivity {
     }
 
     private boolean isEabEnabledByPlatform() {
-        if (mPhone != null) {
-            CarrierConfigManager configManager = (CarrierConfigManager)
-                    mPhone.getContext().getSystemService(Context.CARRIER_CONFIG_SERVICE);
-            PersistableBundle b = configManager.getConfigForSubId(mPhone.getSubId());
+        if (SubscriptionManager.isValidPhoneId(mPhoneId)) {
+            CarrierConfigManager configManager = getSystemService(CarrierConfigManager.class);
+            PersistableBundle b = configManager.getConfigForSubId(mSubId);
             if (b != null) {
                 return b.getBoolean(
                         CarrierConfigManager.KEY_USE_RCS_PRESENCE_BOOL, false) || b.getBoolean(
@@ -2330,7 +2380,7 @@ public class RadioInfo extends AppCompatActivity {
     }
 
     private void updateImsProvisionedState() {
-        if (!isImsSupportedOnDevice(mPhone.getContext())) {
+        if (!isImsSupportedOnDevice()) {
             return;
         }
 
@@ -2404,8 +2454,8 @@ public class RadioInfo extends AppCompatActivity {
     OnClickListener mUpdateSmscButtonHandler = new OnClickListener() {
         public void onClick(View v) {
             mUpdateSmscButton.setEnabled(false);
-            mQueuedWork.execute(new Runnable() {
-                public void run() {
+            mQueuedWork.execute(() -> {
+                if (mSystemUser) {
                     mPhone.setSmscAddress(mSmsc.getText().toString(),
                             mHandler.obtainMessage(EVENT_UPDATE_SMSC_DONE));
                 }
@@ -2413,11 +2463,7 @@ public class RadioInfo extends AppCompatActivity {
         }
     };
 
-    OnClickListener mRefreshSmscButtonHandler = new OnClickListener() {
-        public void onClick(View v) {
-            refreshSmsc();
-        }
-    };
+    OnClickListener mRefreshSmscButtonHandler = v -> refreshSmsc();
 
     OnClickListener mCarrierProvisioningButtonHandler = v -> {
         String carrierProvisioningApp = getCarrierProvisioningAppString();
@@ -2465,8 +2511,10 @@ public class RadioInfo extends AppCompatActivity {
 
                 public void onItemSelected(AdapterView<?> parent, View v, int pos, long id) {
                     log("mOnSignalStrengthSelectedListener: " + pos);
-                    mSelectedSignalStrengthIndex[mPhone.getPhoneId()] = pos;
-                    mPhone.getTelephonyTester().setSignalStrength(SIGNAL_STRENGTH_LEVEL[pos]);
+                    mSelectedSignalStrengthIndex[mPhoneId] = pos;
+                    if (mSystemUser) {
+                        mPhone.getTelephonyTester().setSignalStrength(SIGNAL_STRENGTH_LEVEL[pos]);
+                    }
                 }
 
                 public void onNothingSelected(AdapterView<?> parent) {}
@@ -2478,7 +2526,7 @@ public class RadioInfo extends AppCompatActivity {
 
                 public void onItemSelected(AdapterView<?> parent, View v, int pos, long id) {
                     log("mOnMockDataNetworkTypeSelectedListener: " + pos);
-                    mSelectedMockDataNetworkTypeIndex[mPhone.getPhoneId()] = pos;
+                    mSelectedMockDataNetworkTypeIndex[mPhoneId] = pos;
                     Intent intent = new Intent("com.android.internal.telephony.TestServiceState");
                     if (pos > 0) {
                         log("mOnMockDataNetworkTypeSelectedListener: Override RAT: "
@@ -2491,7 +2539,9 @@ public class RadioInfo extends AppCompatActivity {
                         intent.putExtra("action", "reset");
                     }
 
-                    mPhone.getTelephonyTester().setServiceStateTestIntent(intent);
+                    if (mSystemUser) {
+                        mPhone.getTelephonyTester().setServiceStateTestIntent(intent);
+                    }
                 }
 
                 public void onNothingSelected(AdapterView<?> parent) {}
@@ -2500,44 +2550,41 @@ public class RadioInfo extends AppCompatActivity {
     AdapterView.OnItemSelectedListener mSelectPhoneIndexHandler =
             new AdapterView.OnItemSelectedListener() {
 
-        public void onItemSelected(AdapterView parent, View v, int pos, long id) {
-            if (pos >= 0 && pos <= sPhoneIndexLabels.length - 1) {
-                // the array position is equal to the phone index
-                int phoneIndex = pos;
-                Phone[] phones = PhoneFactory.getPhones();
-                if (phones == null || phones.length <= phoneIndex) {
-                    return;
+                public void onItemSelected(AdapterView parent, View v, int pos, long id) {
+                    if (pos >= 0 && pos <= sPhoneIndexLabels.length - 1) {
+                        if (mTelephonyManager.getActiveModemCount() <= pos) {
+                            return;
+                        }
+
+                        mPhoneId = pos;
+                        mSubId = SubscriptionManager.getSubscriptionId(mPhoneId);
+                        log("Updated phone id to " + mPhoneId + ", sub id to " + mSubId);
+                        updatePhoneIndex();
+                    }
                 }
-                // getSubId says it takes a slotIndex, but it actually takes a phone index
-                mSelectedPhoneIndex = phoneIndex;
 
-                updatePhoneIndex(phoneIndex, SubscriptionManager.getSubscriptionId(phoneIndex));
-                updateImei();
-            }
-        }
+                public void onNothingSelected(AdapterView parent) {
+                }
+            };
 
-        public void onNothingSelected(AdapterView parent) {
-        }
-    };
-
-    AdapterView.OnItemSelectedListener mCellInfoRefreshRateHandler  =
+    AdapterView.OnItemSelectedListener mCellInfoRefreshRateHandler =
             new AdapterView.OnItemSelectedListener() {
 
-        public void onItemSelected(AdapterView parent, View v, int pos, long id) {
-            mCellInfoRefreshRateIndex = pos;
-            mTelephonyManager.setCellInfoListRate(CELL_INFO_REFRESH_RATES[pos], mPhone.getSubId());
-            updateAllCellInfo();
-        }
+                public void onItemSelected(AdapterView parent, View v, int pos, long id) {
+                    mCellInfoRefreshRateIndex = pos;
+                    mTelephonyManager.setCellInfoListRate(CELL_INFO_REFRESH_RATES[pos], mPhoneId);
+                    updateAllCellInfo();
+                }
 
-        public void onNothingSelected(AdapterView parent) {
-        }
-    };
+                public void onNothingSelected(AdapterView parent) {
+                }
+            };
 
     private String getCarrierProvisioningAppString() {
-        if (mPhone != null) {
+        if (SubscriptionManager.isValidPhoneId(mPhoneId)) {
             CarrierConfigManager configManager =
-                    mPhone.getContext().getSystemService(CarrierConfigManager.class);
-            PersistableBundle b = configManager.getConfigForSubId(mPhone.getSubId());
+                    getSystemService(CarrierConfigManager.class);
+            PersistableBundle b = configManager.getConfigForSubId(mSubId);
             if (b != null) {
                 return b.getString(
                         CarrierConfigManager.KEY_CARRIER_PROVISIONING_APP_STRING, "");
@@ -2644,18 +2691,17 @@ public class RadioInfo extends AppCompatActivity {
         sendBroadcast(intent);
     }
 
-    private boolean isImsSupportedOnDevice(Context context) {
-        return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY_IMS);
+    private boolean isImsSupportedOnDevice() {
+        return getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY_IMS);
     }
 
     private void updateServiceEnabledByPlatform() {
-        int subId = mPhone.getSubId();
-        if (subId == SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
+        if (!SubscriptionManager.isValidSubscriptionId(mSubId)) {
             log("updateServiceEnabledByPlatform subscription ID is invalid");
             return;
         }
 
-        ImsMmTelManager imsMmTelManager = mImsManager.getImsMmTelManager(subId);
+        ImsMmTelManager imsMmTelManager = mImsManager.getImsMmTelManager(mSubId);
         try {
             imsMmTelManager.isSupported(MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE,
                     AccessNetworkConstants.TRANSPORT_TYPE_WWAN, getMainExecutor(), (result) -> {
