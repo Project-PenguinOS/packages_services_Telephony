@@ -8159,31 +8159,15 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     @Override
     public void uploadCallComposerPicture(int subscriptionId, String callingPackage,
             String contentType, ParcelFileDescriptor fd, ResultReceiver callback) {
-        if (com.android.internal.telephony.flags.Flags.supportPhoneUidCheckForMultiuser()) {
-            enforceCallingPackage(callingPackage, Binder.getCallingUid(),
-                    "Invalid package:" + callingPackage);
-        } else {
-            try {
-                if (!Objects.equals(mApp.getPackageManager().getPackageUid(callingPackage, 0),
-                        Binder.getCallingUid())) {
-                    throw new SecurityException("Invalid package:" + callingPackage);
-                }
-            } catch (PackageManager.NameNotFoundException e) {
-                throw new SecurityException("Invalid package:" + callingPackage);
-            }
-        }
-
+        enforceCallingPackage(callingPackage, Binder.getCallingUid(),
+                "Invalid package:" + callingPackage);
         enforceTelephonyFeatureWithException(callingPackage,
                 PackageManager.FEATURE_TELEPHONY_CALLING, "uploadCallComposerPicture");
 
         RoleManager rm = mApp.getSystemService(RoleManager.class);
         List<String> dialerRoleHolders;
-        if (com.android.internal.telephony.flags.Flags.supportPhoneUidCheckForMultiuser()) {
-            dialerRoleHolders = rm.getRoleHoldersAsUser(RoleManager.ROLE_DIALER,
-                    UserHandle.of(ActivityManager.getCurrentUser()));
-        } else {
-            dialerRoleHolders = rm.getRoleHolders(RoleManager.ROLE_DIALER);
-        }
+        dialerRoleHolders = rm.getRoleHoldersAsUser(RoleManager.ROLE_DIALER,
+                UserHandle.of(ActivityManager.getCurrentUser()));
         if (!dialerRoleHolders.contains(callingPackage)) {
             throw new SecurityException("App must be the dialer role holder to"
                     + " upload a call composer pic");
@@ -14387,6 +14371,39 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         final long identity = Binder.clearCallingIdentity();
         try {
             mSatelliteController.provisionSatellite(list, result);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    /**
+     * This API can be used by only CTS to override the cached value for the device overlay config
+     * value :
+     * config_satellite_gateway_service_package and
+     * config_satellite_carrier_roaming_esos_provisioned_class.
+     * These values are set before sending an intent to broadcast there are any change to list of
+     * subscriber informations.
+     *
+     * @param name the name is one of the following that constitute an intent.
+     * Component package name, or component class name.
+     * @return {@code true} if the setting is successful, {@code false} otherwise.
+     */
+    @Override
+    public boolean setSatelliteSubscriberIdListChangedIntentComponent(String name) {
+        if (!mFeatureFlags.carrierRoamingNbIotNtn()) {
+            Log.d(LOG_TAG, "setSatelliteSubscriberIdListChangedIntentComponent:"
+                    + " carrierRoamingNbIotNtn is disabled");
+            return false;
+        }
+        Log.d(LOG_TAG, "setSatelliteSubscriberIdListChangedIntentComponent");
+        TelephonyPermissions.enforceShellOnly(
+                Binder.getCallingUid(), "setSatelliteSubscriberIdListChangedIntentComponent");
+        TelephonyPermissions.enforceCallingOrSelfModifyPermissionOrCarrierPrivilege(mApp,
+                SubscriptionManager.INVALID_SUBSCRIPTION_ID,
+                "setSatelliteSubscriberIdListChangedIntentComponent");
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return mSatelliteController.setSatelliteSubscriberIdListChangedIntentComponent(name);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
