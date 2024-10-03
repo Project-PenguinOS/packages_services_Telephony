@@ -47,6 +47,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelUuid;
 import android.os.PersistableBundle;
+import android.os.UserHandle;
 import android.telecom.Conference;
 import android.telecom.Conferenceable;
 import android.telecom.Connection;
@@ -1990,7 +1991,7 @@ public class TelephonyConnectionService extends ConnectionService {
                                 simUnlockUiPackage, simUnlockUiClass));
                         simUnlockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         try {
-                            context.startActivity(simUnlockIntent);
+                            context.startActivityAsUser(simUnlockIntent, UserHandle.CURRENT);
                         } catch (ActivityNotFoundException exception) {
                             Log.e(this, exception, "Unable to find SIM unlock UI activity.");
                         }
@@ -3229,7 +3230,7 @@ public class TelephonyConnectionService extends ConnectionService {
             if (SubscriptionManager.isValidSubscriptionId(subId)) {
                 SubscriptionManager.putSubscriptionIdExtra(intent, subId);
             }
-            startActivity(intent);
+            startActivityAsUser(intent, UserHandle.CURRENT);
         }
         return disconnectCause;
     }
@@ -5172,9 +5173,9 @@ public class TelephonyConnectionService extends ConnectionService {
                                                 context.getString(
                                                     R.string.mobile_network_settings_package),
                                                 context.getString(
-                                                    R.string.mobile_network_settings_class));
+                                                    R.string.sims_settings_class));
                                     intent.setComponent(mobileNetworkSettingsComponent);
-                                    context.startActivity(intent);
+                                    context.startActivityAsUser(intent, UserHandle.CURRENT);
                                 }
                             };
                     Dialog dialog = builder.setMessage(message)
