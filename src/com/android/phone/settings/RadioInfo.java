@@ -2087,7 +2087,7 @@ public class RadioInfo extends AppCompatActivity {
     private static final int SATELLITE_CHANNEL = 8665;
     private final OnCheckedChangeListener mForceSatelliteChannelOnChangeListener =
             (buttonView, isChecked) -> {
-                if (SubscriptionManager.isValidSubscriptionId(mSubId)) {
+                if (!SubscriptionManager.isValidSubscriptionId(mSubId)) {
                     loge("Force satellite channel invalid subId " + mSubId);
                     return;
                 }
