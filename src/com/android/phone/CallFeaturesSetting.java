@@ -36,6 +36,7 @@ import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.Looper;
 import android.os.PersistableBundle;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
@@ -250,7 +251,7 @@ public class CallFeaturesSetting extends PreferenceActivity
                                         getString(R.string.mobile_network_settings_package),
                                         getString(R.string.mobile_network_settings_class));
                                 intent.setComponent(mobileNetworkSettingsComponent);
-                                startActivity(intent);
+                                startActivityAsUser(intent, UserHandle.CURRENT);
                             }
                         };
                 builder.setMessage(getResourcesForSubId().getString(
@@ -725,7 +726,7 @@ public class CallFeaturesSetting extends PreferenceActivity
         Intent intent = subscriptionInfoHelper.getIntent(CallFeaturesSetting.class);
         intent.setAction(Intent.ACTION_MAIN);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        activity.startActivity(intent);
+        activity.startActivityAsUser(intent, UserHandle.CURRENT);
         activity.finish();
     }
 

@@ -34,6 +34,7 @@ import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
+import android.os.UserHandle;
 import android.provider.BlockedNumberContract;
 import android.telephony.BarringInfo;
 import android.telephony.CarrierConfigManager;
@@ -1167,7 +1168,8 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
         }
         // Verify that the user is allowed to run the command. Only allowed in rooted device in a
         // non user build.
-        if (Binder.getCallingUid() != Process.ROOT_UID || TelephonyUtils.IS_USER) {
+        if (!UserHandle.isSameApp(Binder.getCallingUid(), Process.ROOT_UID)
+                || TelephonyUtils.IS_USER) {
             errPw.println("cc: Permission denied.");
             return -1;
         }
@@ -1749,14 +1751,15 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
 
     private boolean checkShellUid() {
         // adb can run as root or as shell, depending on whether the device is rooted.
-        return Binder.getCallingUid() == Process.SHELL_UID
-                || Binder.getCallingUid() == Process.ROOT_UID;
+        return UserHandle.isSameApp(Binder.getCallingUid(), Process.SHELL_UID)
+                || UserHandle.isSameApp(Binder.getCallingUid(), Process.ROOT_UID);
     }
 
     private int handleCcCommand() {
         // Verify that the user is allowed to run the command. Only allowed in rooted device in a
         // non user build.
-        if (Binder.getCallingUid() != Process.ROOT_UID || TelephonyUtils.IS_USER) {
+        if (!UserHandle.isSameApp(Binder.getCallingUid(), Process.ROOT_UID)
+                || TelephonyUtils.IS_USER) {
             getErrPrintWriter().println("cc: Permission denied.");
             return -1;
         }
@@ -2312,7 +2315,8 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
     private int handleRestartModemCommand() {
         // Verify that the user is allowed to run the command. Only allowed in rooted device in a
         // non user build.
-        if (Binder.getCallingUid() != Process.ROOT_UID || TelephonyUtils.IS_USER) {
+        if (!UserHandle.isSameApp(Binder.getCallingUid(), Process.ROOT_UID)
+                || TelephonyUtils.IS_USER) {
             getErrPrintWriter().println("RestartModem: Permission denied.");
             return -1;
         }
@@ -2326,7 +2330,8 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
     private int handleGetImei() {
         // Verify that the user is allowed to run the command. Only allowed in rooted device in a
         // non user build.
-        if (Binder.getCallingUid() != Process.ROOT_UID || TelephonyUtils.IS_USER) {
+        if (!UserHandle.isSameApp(Binder.getCallingUid(), Process.ROOT_UID)
+                || TelephonyUtils.IS_USER) {
             getErrPrintWriter().println("Device IMEI: Permission denied.");
             return -1;
         }
@@ -2357,7 +2362,8 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
     private int handleUnattendedReboot() {
         // Verify that the user is allowed to run the command. Only allowed in rooted device in a
         // non user build.
-        if (Binder.getCallingUid() != Process.ROOT_UID || TelephonyUtils.IS_USER) {
+        if (!UserHandle.isSameApp(Binder.getCallingUid(), Process.ROOT_UID)
+                || TelephonyUtils.IS_USER) {
             getErrPrintWriter().println("UnattendedReboot: Permission denied.");
             return -1;
         }
@@ -2371,7 +2377,8 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
     private int handleGetSimSlotsMapping() {
         // Verify that the user is allowed to run the command. Only allowed in rooted device in a
         // non user build.
-        if (Binder.getCallingUid() != Process.ROOT_UID || TelephonyUtils.IS_USER) {
+        if (!UserHandle.isSameApp(Binder.getCallingUid(), Process.ROOT_UID)
+                || TelephonyUtils.IS_USER) {
             getErrPrintWriter().println("GetSimSlotsMapping: Permission denied.");
             return -1;
         }

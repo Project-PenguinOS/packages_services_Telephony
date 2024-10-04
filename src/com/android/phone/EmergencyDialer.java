@@ -41,6 +41,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.PersistableBundle;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.telecom.PhoneAccount;
 import android.telecom.TelecomManager;
@@ -514,7 +515,7 @@ public class EmergencyDialer extends Activity implements View.OnClickListener,
 
         Intent intent = (Intent) button.getTag(R.id.tag_intent);
         if (intent != null) {
-            startActivity(intent);
+            startActivityAsUser(intent, UserHandle.CURRENT);
         }
     }
 

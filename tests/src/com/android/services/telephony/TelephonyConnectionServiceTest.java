@@ -1347,7 +1347,7 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
         callback.getValue().onComplete(null, true);
 
         try {
-            doAnswer(invocation -> null).when(mContext).startActivity(any());
+            doAnswer(invocation -> null).when(mContext).startActivityAsUser(any(), any());
             verify(testPhone).dial(anyString(), any(), any());
         } catch (CallStateException e) {
             // This shouldn't happen
@@ -1462,7 +1462,7 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
         callback.getValue().onComplete(null, true);
 
         try {
-            doAnswer(invocation -> null).when(mContext).startActivity(any());
+            doAnswer(invocation -> null).when(mContext).startActivityAsUser(any(), any());
             verify(testPhone).dial(anyString(), any(), any());
         } catch (CallStateException e) {
             // This shouldn't happen
@@ -2158,7 +2158,7 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
             throws Exception {
         setupForCallTest();
         when(mTelephonyManagerProxy.isConcurrentCallsPossible()).thenReturn(true);
-        doNothing().when(mContext).startActivity(any());
+        doNothing().when(mContext).startActivityAsUser(any(), any());
 
         mBinderStub.createConnection(PHONE_ACCOUNT_HANDLE_1, "TC@1",
                 new ConnectionRequest(PHONE_ACCOUNT_HANDLE_1, Uri.parse("tel:16505551212"),
@@ -2191,7 +2191,7 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
             throws Exception {
         setupForCallTest();
         when(mTelephonyManagerProxy.isConcurrentCallsPossible()).thenReturn(true);
-        doNothing().when(mContext).startActivity(any());
+        doNothing().when(mContext).startActivityAsUser(any(), any());
 
         doReturn(true).when(mTelephonyManagerProxy).isCurrentEmergencyNumber(anyString());
         mBinderStub.createConnection(PHONE_ACCOUNT_HANDLE_1, "TC@1",
@@ -2227,7 +2227,7 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
             throws Exception {
         setupForCallTest();
         when(mTelephonyManagerProxy.isConcurrentCallsPossible()).thenReturn(true);
-        doNothing().when(mContext).startActivity(any());
+        doNothing().when(mContext).startActivityAsUser(any(), any());
 
         doReturn(true).when(mTelephonyManagerProxy).isCurrentEmergencyNumber(anyString());
         getTestContext().getCarrierConfig(0 /*subId*/).putBoolean(
@@ -3682,7 +3682,7 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
     @Test
     public void testDomainSelectionWithMmiCode() {
         //UT domain selection should not be handled by new domain selector.
-        doNothing().when(mContext).startActivity(any());
+        doNothing().when(mContext).startActivityAsUser(any(), any());
         setupForCallTest();
         setupForDialForDomainSelection(mPhone0, 0, false);
         mTestConnectionService.onCreateOutgoingConnection(PHONE_ACCOUNT_HANDLE_1,
@@ -3888,6 +3888,7 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
         ss.setEmergencyOnly(true);
         ss.setState(ServiceState.STATE_EMERGENCY_ONLY);
         when(mockPhone.getServiceState()).thenReturn(ss);
+        when(mPhoneFactoryProxy.getPhones()).thenReturn(new Phone[] {mockPhone});
 
         assertFalse(mTestConnectionService.isAvailableForEmergencyCalls(mockPhone,
                 EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY));
@@ -3910,6 +3911,79 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
         ss.setEmergencyOnly(true);
         ss.setState(ServiceState.STATE_EMERGENCY_ONLY);
         when(mockPhone.getServiceState()).thenReturn(ss);
+
+        when(mPhoneFactoryProxy.getPhones()).thenReturn(new Phone[] {mockPhone});
+
+        assertTrue(mTestConnectionService.isAvailableForEmergencyCalls(mockPhone,
+                EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY));
+        assertFalse(mTestConnectionService.isAvailableForEmergencyCalls(mockPhone,
+                EmergencyNumber.EMERGENCY_CALL_ROUTING_NORMAL));
+        assertTrue(mTestConnectionService.isAvailableForEmergencyCalls(mockPhone,
+                EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN));
+    }
+
+    @Test
+    public void testIsAvailableForEmergencyCallsUsingNTN_CellularAvailable() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG);
+
+        // Call is not supported while using satellite
+        when(mSatelliteController.isInSatelliteModeForCarrierRoaming(any())).thenReturn(true);
+        when(mSatelliteController.getCapabilitiesForCarrierRoamingSatelliteMode(any()))
+                .thenReturn(List.of(NetworkRegistrationInfo.SERVICE_TYPE_DATA));
+
+        Phone mockPhone = Mockito.mock(Phone.class);
+        ServiceState ss = new ServiceState();
+        ss.setEmergencyOnly(true);
+        ss.setState(ServiceState.STATE_EMERGENCY_ONLY);
+        when(mockPhone.getServiceState()).thenReturn(ss);
+
+        // Phone2 is in limited service
+        Phone mockPhone2 = Mockito.mock(Phone.class);
+        ServiceState ss2 = new ServiceState();
+        ss2.setEmergencyOnly(true);
+        ss2.setState(ServiceState.STATE_EMERGENCY_ONLY);
+        when(mockPhone2.getServiceState()).thenReturn(ss2);
+
+        Phone[] phones = {mockPhone, mockPhone2};
+        when(mPhoneFactoryProxy.getPhones()).thenReturn(phones);
+
+        assertFalse(mTestConnectionService.isAvailableForEmergencyCalls(mockPhone,
+                EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY));
+        assertFalse(mTestConnectionService.isAvailableForEmergencyCalls(mockPhone,
+                EmergencyNumber.EMERGENCY_CALL_ROUTING_NORMAL));
+        assertFalse(mTestConnectionService.isAvailableForEmergencyCalls(mockPhone,
+                EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN));
+    }
+
+    @Test
+    public void testIsAvailableForEmergencyCallsUsingNTN_CellularNotAvailable() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG);
+
+        // Call is not supported while using satellite
+        when(mSatelliteController.isInSatelliteModeForCarrierRoaming(any())).thenReturn(true);
+        when(mSatelliteController.getCapabilitiesForCarrierRoamingSatelliteMode(any()))
+                .thenReturn(List.of(NetworkRegistrationInfo.SERVICE_TYPE_DATA));
+
+        NetworkRegistrationInfo nri = new NetworkRegistrationInfo.Builder()
+                .setIsNonTerrestrialNetwork(true)
+                .setAvailableServices(List.of(NetworkRegistrationInfo.SERVICE_TYPE_DATA))
+                .build();
+        Phone mockPhone = Mockito.mock(Phone.class);
+        ServiceState ss = new ServiceState();
+        ss.addNetworkRegistrationInfo(nri);
+        ss.setEmergencyOnly(true);
+        ss.setState(ServiceState.STATE_EMERGENCY_ONLY);
+        when(mockPhone.getServiceState()).thenReturn(ss);
+
+        // Phone2 is out of service
+        Phone mockPhone2 = Mockito.mock(Phone.class);
+        ServiceState ss2 = new ServiceState();
+        ss2.setEmergencyOnly(false);
+        ss2.setState(ServiceState.STATE_OUT_OF_SERVICE);
+        when(mockPhone2.getServiceState()).thenReturn(ss2);
+
+        Phone[] phones = {mockPhone, mockPhone2};
+        when(mPhoneFactoryProxy.getPhones()).thenReturn(phones);
 
         assertTrue(mTestConnectionService.isAvailableForEmergencyCalls(mockPhone,
                 EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY));
