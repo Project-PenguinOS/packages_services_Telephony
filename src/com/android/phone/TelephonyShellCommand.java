@@ -3803,6 +3803,10 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
                     state = "cache_allowed";
                     break;
                 }
+                case "-na": {
+                    state = "cache_not_allowed";
+                    break;
+                }
                 case "-n": {
                     state = "cache_clear_and_not_allowed";
                     break;
