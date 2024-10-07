@@ -442,6 +442,9 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     private PackageManager mPackageManager;
     private final int mVendorApiLevel;
 
+    @Nullable
+    private ComponentName mTestEuiccUiComponent;
+
     /** User Activity */
     private final AtomicBoolean mNotifyUserActivity;
     private static final int USER_ACTIVITY_NOTIFICATION_DELAY = 200;
@@ -14468,5 +14471,32 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
+    }
+
+    /**
+     * This API can be used by only CTS to override the Euicc UI component.
+     *
+     * @param componentName ui component to be launched for testing. {@code null} to reset.
+     *
+     * @hide
+     */
+    @Override
+    public void setTestEuiccUiComponent(@Nullable ComponentName componentName) {
+        enforceModifyPermission();
+        log("setTestEuiccUiComponent: " + componentName);
+        mTestEuiccUiComponent = componentName;
+    }
+
+    /**
+     * This API can be used by only CTS to retrieve the Euicc UI component.
+     *
+     * @return Euicc UI component. {@code null} if not available.
+     * @hide
+     */
+    @Override
+    @Nullable
+    public ComponentName getTestEuiccUiComponent() {
+        enforceReadPrivilegedPermission("getTestEuiccUiComponent");
+        return mTestEuiccUiComponent;
     }
 }
