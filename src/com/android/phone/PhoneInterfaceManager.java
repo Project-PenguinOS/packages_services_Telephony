@@ -13880,6 +13880,22 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     }
 
     /**
+     * This API can be used by only CTS to control ingoring cellular service state event.
+     *
+     * @param enabled Whether to enable boolean config.
+     * @return {@code true} if the value is set successfully, {@code false} otherwise.
+     */
+    public boolean setSatelliteIgnoreCellularServiceState(boolean enabled) {
+        Log.d(LOG_TAG, "setSatelliteIgnoreServiceState - " + enabled);
+        TelephonyPermissions.enforceShellOnly(
+                Binder.getCallingUid(), "setSatelliteIgnoreServiceState");
+        TelephonyPermissions.enforceCallingOrSelfModifyPermissionOrCarrierPrivilege(mApp,
+                SubscriptionManager.INVALID_SUBSCRIPTION_ID,
+                "setSatelliteIgnoreServiceState");
+        return mSatelliteController.setSatelliteIgnoreCellularServiceState(enabled);
+    }
+
+    /**
      * This API can be used by only CTS to override the timeout durations used by the
      * DatagramController module.
      *
