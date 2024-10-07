@@ -478,7 +478,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     public static final String RESET_NETWORK_ERASE_MODEM_CONFIG_ENABLED =
             "reset_network_erase_modem_config_enabled";
 
-    private static final int SET_NETWORK_SELECTION_MODE_AUTOMATIC_TIMEOUT_MS = 2000; // 2 seconds
+    private static final int BLOCKING_REQUEST_DEFAULT_TIMEOUT_MS = 2000; // 2 seconds
 
     private static final int MODEM_ACTIVITY_TIME_OFFSET_CORRECTION_MS = 50;
 
@@ -4236,8 +4236,12 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
 
         final long identity = Binder.clearCallingIdentity();
         try {
-            Boolean success = (Boolean) sendRequest(CMD_SET_VOICEMAIL_NUMBER,
-                    new Pair<String, String>(alphaTag, number), new Integer(subId));
+            Boolean success = (Boolean) sendRequest(
+                    CMD_SET_VOICEMAIL_NUMBER,
+                    new Pair<String, String>(alphaTag, number),
+                    new Integer(subId),
+                    BLOCKING_REQUEST_DEFAULT_TIMEOUT_MS);
+            if (success == null) return false; // most likely due to a timeout
             return success;
         } finally {
             Binder.restoreCallingIdentity(identity);
@@ -6807,7 +6811,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
             }
             if (DBG) log("setNetworkSelectionModeAutomatic: subId " + subId);
             sendRequest(CMD_SET_NETWORK_SELECTION_MODE_AUTOMATIC, null, subId,
-                    SET_NETWORK_SELECTION_MODE_AUTOMATIC_TIMEOUT_MS);
+                    BLOCKING_REQUEST_DEFAULT_TIMEOUT_MS);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
