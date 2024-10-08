@@ -442,6 +442,9 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     private PackageManager mPackageManager;
     private final int mVendorApiLevel;
 
+    @Nullable
+    private ComponentName mTestEuiccUiComponent;
+
     /** User Activity */
     private final AtomicBoolean mNotifyUserActivity;
     private static final int USER_ACTIVITY_NOTIFICATION_DELAY = 200;
@@ -475,7 +478,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     public static final String RESET_NETWORK_ERASE_MODEM_CONFIG_ENABLED =
             "reset_network_erase_modem_config_enabled";
 
-    private static final int SET_NETWORK_SELECTION_MODE_AUTOMATIC_TIMEOUT_MS = 2000; // 2 seconds
+    private static final int BLOCKING_REQUEST_DEFAULT_TIMEOUT_MS = 2000; // 2 seconds
 
     private static final int MODEM_ACTIVITY_TIME_OFFSET_CORRECTION_MS = 50;
 
@@ -4233,8 +4236,12 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
 
         final long identity = Binder.clearCallingIdentity();
         try {
-            Boolean success = (Boolean) sendRequest(CMD_SET_VOICEMAIL_NUMBER,
-                    new Pair<String, String>(alphaTag, number), new Integer(subId));
+            Boolean success = (Boolean) sendRequest(
+                    CMD_SET_VOICEMAIL_NUMBER,
+                    new Pair<String, String>(alphaTag, number),
+                    new Integer(subId),
+                    BLOCKING_REQUEST_DEFAULT_TIMEOUT_MS);
+            if (success == null) return false; // most likely due to a timeout
             return success;
         } finally {
             Binder.restoreCallingIdentity(identity);
@@ -6804,7 +6811,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
             }
             if (DBG) log("setNetworkSelectionModeAutomatic: subId " + subId);
             sendRequest(CMD_SET_NETWORK_SELECTION_MODE_AUTOMATIC, null, subId,
-                    SET_NETWORK_SELECTION_MODE_AUTOMATIC_TIMEOUT_MS);
+                    BLOCKING_REQUEST_DEFAULT_TIMEOUT_MS);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -9620,7 +9627,15 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     }
 
     private WorkSource getWorkSource(int uid) {
-        String packageName = mApp.getPackageManager().getNameForUid(uid);
+        PackageManager pm;
+        if (mFeatureFlags.hsumPackageManager()) {
+            pm = mApp.getBaseContext().createContextAsUser(UserHandle.getUserHandleForUid(uid), 0)
+                    .getPackageManager();
+        } else {
+            pm = mApp.getPackageManager();
+        }
+
+        String packageName = pm.getNameForUid(uid);
         if (UserHandle.isSameApp(uid, Process.ROOT_UID) && packageName == null) {
             // Downstream WorkSource attribution inside the RIL requires both a UID and package name
             // to be set for wakelock tracking, otherwise RIL requests fail with a runtime
@@ -10890,9 +10905,16 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
      */
     @Override
     public @Nullable String getCurrentPackageName() {
-        PackageManager pm = mApp.getPackageManager();
-        String[] packageNames = pm == null ? null : pm.getPackagesForUid(Binder.getCallingUid());
-        return packageNames == null ? null : packageNames[0];
+        if (mFeatureFlags.hsumPackageManager()) {
+            PackageManager pm = mApp.getBaseContext().createContextAsUser(
+                    Binder.getCallingUserHandle(), 0).getPackageManager();
+            if (pm == null) return null;
+            String[] callingUids = pm.getPackagesForUid(Binder.getCallingUid());
+            return (callingUids == null) ? null : callingUids[0];
+        }
+        if (mPackageManager == null) return null;
+        String[] callingUids = mPackageManager.getPackagesForUid(Binder.getCallingUid());
+        return (callingUids == null) ? null : callingUids[0];
     }
 
     /**
@@ -10902,7 +10924,13 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
      * Note: This is for logging purposes only and should not be used for security checks.
      */
     private String getCurrentPackageNameOrPhone() {
-        PackageManager pm = mApp.getPackageManager();
+        PackageManager pm;
+        if (mFeatureFlags.hsumPackageManager()) {
+            pm = mApp.getBaseContext().createContextAsUser(
+                    Binder.getCallingUserHandle(), 0).getPackageManager();
+        } else {
+            pm = mApp.getPackageManager();
+        }
         String uidName = pm == null ? null : pm.getNameForUid(Binder.getCallingUid());
         if (uidName != null && !uidName.isEmpty()) return uidName;
         return getCurrentPackageName();
@@ -12578,8 +12606,13 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
 
         String callingProcess;
         try {
-            callingProcess = mApp.getPackageManager().getApplicationInfo(
-                    getCurrentPackageName(), 0).processName;
+            if (mFeatureFlags.hsumPackageManager()) {
+                callingProcess = mApp.getPackageManager().getApplicationInfoAsUser(
+                        getCurrentPackageName(), 0, Binder.getCallingUserHandle()).processName;
+            } else {
+                callingProcess = mApp.getPackageManager().getApplicationInfo(
+                        getCurrentPackageName(), 0).processName;
+            }
         } catch (PackageManager.NameNotFoundException e) {
             callingProcess = getCurrentPackageName();
         }
@@ -12867,15 +12900,31 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
 
         Context context = getPhoneFromSubIdOrDefault(subId).getContext();
 
-        UserHandle userHandle = null;
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            userHandle = TelephonyUtils.getSubscriptionUserHandle(context, subId);
-        } finally {
-            Binder.restoreCallingIdentity(identity);
+        if (mTelecomFeatureFlags.telecomMainUserInGetRespondMessageApp()){
+            UserHandle mainUser = null;
+            Context userContext = null;
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mainUser = mUserManager.getMainUser();
+                userContext = context.createContextAsUser(mainUser, 0);
+                Log.d(LOG_TAG, "getDefaultRespondViaMessageApplication: mainUser = " + mainUser);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+            return SmsApplication.getDefaultRespondViaMessageApplicationAsUser(userContext,
+                    updateIfNeeded, mainUser);
+        } else {
+            UserHandle userHandle = null;
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                userHandle = TelephonyUtils.getSubscriptionUserHandle(context, subId);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+            return SmsApplication.getDefaultRespondViaMessageApplicationAsUser(context,
+                    updateIfNeeded, userHandle);
         }
-        return SmsApplication.getDefaultRespondViaMessageApplicationAsUser(context,
-                updateIfNeeded, userHandle);
+
     }
 
     /**
@@ -13835,6 +13884,22 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     }
 
     /**
+     * This API can be used by only CTS to control ingoring cellular service state event.
+     *
+     * @param enabled Whether to enable boolean config.
+     * @return {@code true} if the value is set successfully, {@code false} otherwise.
+     */
+    public boolean setSatelliteIgnoreCellularServiceState(boolean enabled) {
+        Log.d(LOG_TAG, "setSatelliteIgnoreServiceState - " + enabled);
+        TelephonyPermissions.enforceShellOnly(
+                Binder.getCallingUid(), "setSatelliteIgnoreServiceState");
+        TelephonyPermissions.enforceCallingOrSelfModifyPermissionOrCarrierPrivilege(mApp,
+                SubscriptionManager.INVALID_SUBSCRIPTION_ID,
+                "setSatelliteIgnoreServiceState");
+        return mSatelliteController.setSatelliteIgnoreCellularServiceState(enabled);
+    }
+
+    /**
      * This API can be used by only CTS to override the timeout durations used by the
      * DatagramController module.
      *
@@ -14426,5 +14491,32 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
+    }
+
+    /**
+     * This API can be used by only CTS to override the Euicc UI component.
+     *
+     * @param componentName ui component to be launched for testing. {@code null} to reset.
+     *
+     * @hide
+     */
+    @Override
+    public void setTestEuiccUiComponent(@Nullable ComponentName componentName) {
+        enforceModifyPermission();
+        log("setTestEuiccUiComponent: " + componentName);
+        mTestEuiccUiComponent = componentName;
+    }
+
+    /**
+     * This API can be used by only CTS to retrieve the Euicc UI component.
+     *
+     * @return Euicc UI component. {@code null} if not available.
+     * @hide
+     */
+    @Override
+    @Nullable
+    public ComponentName getTestEuiccUiComponent() {
+        enforceReadPrivilegedPermission("getTestEuiccUiComponent");
+        return mTestEuiccUiComponent;
     }
 }

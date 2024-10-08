@@ -20,7 +20,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.OutcomeReceiver;
-import android.os.UserHandle;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.satellite.EnableRequestAttributes;
@@ -59,8 +58,10 @@ public class SatelliteControl extends Activity {
         mSubscriptionManager = getSystemService(SubscriptionManager.class);
 
         setContentView(R.layout.activity_SatelliteControl);
-        findViewById(R.id.enableSatellite)
-                .setOnClickListener(this::enableSatelliteApp);
+        findViewById(R.id.enableSatelliteDemoMode)
+                .setOnClickListener(v -> enableSatelliteApp(/* isDemoMode */ true));
+        findViewById(R.id.enableSatelliteRealMode)
+                .setOnClickListener(v -> enableSatelliteApp(/* isDemoMode */ false));
         findViewById(R.id.disableSatellite)
                 .setOnClickListener(this::disableSatelliteApp);
         findViewById(R.id.requestIsSatelliteEnabled)
@@ -96,16 +97,17 @@ public class SatelliteControl extends Activity {
         findViewById(R.id.Back).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivityAsUser(new Intent(SatelliteControl.this, SatelliteTestApp.class),
-                        UserHandle.CURRENT);
+                startActivity(new Intent(SatelliteControl.this, SatelliteTestApp.class));
             }
         });
     }
 
-    private void enableSatelliteApp(View view) {
+    private void enableSatelliteApp(boolean isDemoMode) {
         LinkedBlockingQueue<Integer> error = new LinkedBlockingQueue<>(1);
         mSatelliteManager.requestEnabled(
-                new EnableRequestAttributes.Builder(true).setDemoMode(true).setEmergencyMode(true)
+                new EnableRequestAttributes.Builder(true)
+                        .setDemoMode(isDemoMode)
+                        .setEmergencyMode(true)
                         .build(), Runnable::run, error::offer);
         TextView textView = findViewById(R.id.text_id);
         try {
