@@ -1242,14 +1242,6 @@ public class SatelliteAccessController extends Handler {
 
     private void executeLocationQuery() {
         plogd("executeLocationQuery");
-        synchronized (mPossibleChangeInSatelliteAllowedRegionLock) {
-            if (isSatelliteAllowedRegionPossiblyChanged()) {
-                mLastLocationQueryForPossibleChangeInAllowedRegionTimeNanos =
-                        getElapsedRealtimeNanos();
-                plogd("mLastLocationQueryForPossibleChangeInAllowedRegionTimeNanos is set "
-                        + mLastLocationQueryForPossibleChangeInAllowedRegionTimeNanos);
-            }
-        }
         synchronized (mLock) {
             mFreshLastKnownLocation = getFreshLastKnownLocation();
             checkSatelliteAccessRestrictionUsingOnDeviceData();
@@ -1321,6 +1313,16 @@ public class SatelliteAccessController extends Handler {
                         + "Request for current location was already sent to LocationManager");
                 return;
             }
+
+            synchronized (mPossibleChangeInSatelliteAllowedRegionLock) {
+                if (isSatelliteAllowedRegionPossiblyChanged()) {
+                    mLastLocationQueryForPossibleChangeInAllowedRegionTimeNanos =
+                            getElapsedRealtimeNanos();
+                    plogd("mLastLocationQueryForPossibleChangeInAllowedRegionTimeNanos is set "
+                            + mLastLocationQueryForPossibleChangeInAllowedRegionTimeNanos);
+                }
+            }
+
             mLocationRequestCancellationSignal = new CancellationSignal();
             mLocationQueryStartTimeMillis = System.currentTimeMillis();
             mLocationManager.getCurrentLocation(LocationManager.FUSED_PROVIDER,
@@ -2018,6 +2020,32 @@ public class SatelliteAccessController extends Handler {
         } catch (RuntimeException e) {
             return false;
         }
+    }
+
+    /**
+     * This API can be used only for test purpose to override the carrier roaming Ntn eligibility
+     *
+     * @param state        to update Ntn Eligibility.
+     * @param resetRequired to reset the overridden flag in satellite controller.
+     * @return {@code true} if the shell command is successful, {@code false} otherwise.
+     */
+    public boolean overrideCarrierRoamingNtnEligibilityChanged(boolean state,
+            boolean resetRequired) {
+        if (!mFeatureFlags.carrierRoamingNbIotNtn()) {
+            logd("overrideCarrierRoamingNtnEligibilityChanged: "
+                    + "carrierRoamingNbIotNtn is disabled");
+            return false;
+        }
+
+        if (!isMockModemAllowed()) {
+            logd("overrideCarrierRoamingNtnEligibilityChanged: "
+                    + "mock modem not allowed.");
+            return false;
+        }
+
+        logd("calling overrideCarrierRoamingNtnEligibilityChanged");
+        return mSatelliteController.overrideCarrierRoamingNtnEligibilityChanged(state,
+                resetRequired);
     }
 
     private void plogv(@NonNull String log) {

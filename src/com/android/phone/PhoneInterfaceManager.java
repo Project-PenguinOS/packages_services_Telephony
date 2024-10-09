@@ -3679,9 +3679,6 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
             return null;
         }
 
-        enforceTelephonyFeatureWithException(callingPackage,
-                PackageManager.FEATURE_TELEPHONY_GSM, "getImeiForSlot");
-
         final long identity = Binder.clearCallingIdentity();
         try {
             return phone.getImei();
@@ -3698,9 +3695,6 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
             throw new SecurityException("Caller does not have permission");
         }
 
-        enforceTelephonyFeatureWithException(callingPackage,
-                PackageManager.FEATURE_TELEPHONY_GSM, "getPrimaryImei");
-
         final long identity = Binder.clearCallingIdentity();
         try {
             for (Phone phone : PhoneFactory.getPhones()) {
@@ -3716,9 +3710,6 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
 
     @Override
     public String getTypeAllocationCodeForSlot(int slotIndex) {
-        enforceTelephonyFeatureWithException(getCurrentPackageName(),
-                PackageManager.FEATURE_TELEPHONY_GSM, "getTypeAllocationCodeForSlot");
-
         Phone phone = PhoneFactory.getPhone(slotIndex);
         String tac = null;
         if (phone != null) {
@@ -7746,6 +7737,12 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     @Override
     public List<String> getPackagesWithCarrierPrivileges(int phoneId) {
         enforceReadPrivilegedPermission("getPackagesWithCarrierPrivileges");
+
+        enforceTelephonyFeatureWithException(
+                getCurrentPackageName(),
+                PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION,
+                "getPackagesWithCarrierPrivileges");
+
         Phone phone = PhoneFactory.getPhone(phoneId);
         if (phone == null) {
             return Collections.emptyList();
@@ -11717,10 +11714,10 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     @Override
     public boolean setBoundGbaServiceOverride(int subId, String packageName) {
         enforceModifyPermission();
-
+        int userId = ActivityManager.getCurrentUser();
         final long identity = Binder.clearCallingIdentity();
         try {
-            return getGbaManager(subId).overrideServicePackage(packageName);
+            return getGbaManager(subId).overrideServicePackage(packageName, userId);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -14461,6 +14458,26 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     }
 
     /**
+     * Deliver the list of deprovisioned satellite subscriber ids.
+     *
+     * @param list List of deprovisioned satellite subscriber ids.
+     * @param result The result receiver that returns whether deliver success or fail.
+     *
+     * @throws SecurityException if the caller doesn't have the required permission.
+     */
+    @Override
+    public void deprovisionSatellite(@NonNull List<SatelliteSubscriberInfo> list,
+            @NonNull ResultReceiver result) {
+        enforceSatelliteCommunicationPermission("deprovisionSatellite");
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            mSatelliteController.deprovisionSatellite(list, result);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    /**
      * This API can be used by only CTS to override the cached value for the device overlay config
      * value :
      * config_satellite_gateway_service_package and
@@ -14518,5 +14535,18 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     public ComponentName getTestEuiccUiComponent() {
         enforceReadPrivilegedPermission("getTestEuiccUiComponent");
         return mTestEuiccUiComponent;
+    }
+
+    /**
+     * This API can be used only for test purpose to override the carrier roaming Ntn eligibility
+     *
+     * @param state        to update Ntn Eligibility.
+     * @param resetRequired to reset the overridden flag in satellite controller.
+     * @return {@code true} if the shell command is successful, {@code false} otherwise.
+     */
+    public boolean overrideCarrierRoamingNtnEligibilityChanged(boolean state,
+            boolean resetRequired) {
+        return mSatelliteAccessController.overrideCarrierRoamingNtnEligibilityChanged(state,
+                resetRequired);
     }
 }
