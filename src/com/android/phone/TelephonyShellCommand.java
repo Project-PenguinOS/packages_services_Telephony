@@ -214,6 +214,9 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
     private static final String SET_SATELLITE_SUBSCRIBERID_LIST_CHANGED_INTENT_COMPONENT =
             "set-satellite-subscriberid-list-changed-intent-component";
 
+    private static final String SET_SATELLITE_ACCESS_RESTRICTION_CHECKING_RESULT =
+            "set-satellite-access-restriction-checking-result";
+
     private static final String DOMAIN_SELECTION_SUBCOMMAND = "domainselection";
     private static final String DOMAIN_SELECTION_SET_SERVICE_OVERRIDE = "set-dss-override";
     private static final String DOMAIN_SELECTION_CLEAR_SERVICE_OVERRIDE = "clear-dss-override";
@@ -430,6 +433,8 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
                 return handleSetIsSatelliteCommunicationAllowedForCurrentLocationCache();
             case SET_SATELLITE_SUBSCRIBERID_LIST_CHANGED_INTENT_COMPONENT:
                 return handleSetSatelliteSubscriberIdListChangedIntentComponent();
+            case SET_SATELLITE_ACCESS_RESTRICTION_CHECKING_RESULT:
+                return handleOverrideCarrierRoamingNtnEligibilityChanged();
             default: {
                 return handleDefaultCommands(cmd);
             }
@@ -3780,7 +3785,6 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
         PrintWriter errPw = getErrPrintWriter();
         String opt;
         String state;
-
         if ((opt = getNextArg()) == null) {
             errPw.println(
                     "adb shell cmd phone set-is-satellite-communication-allowed-for-current"
@@ -4134,5 +4138,49 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
                 jSonString = null;
         }
         return jSonString;
+    }
+
+    /**
+     * This method override the check for carrier roaming Ntn eligibility.
+     * <ul>
+     * <li> `adb shell cmd phone set-satellite-access-restriction-checking-result true` will set
+     * override eligibility to true.</li>
+     * <li> `adb shell cmd phone set-satellite-access-restriction-checking-result false` will
+     * override eligibility to false.</li>
+     * <li> `adb shell cmd phone set-satellite-access-restriction-checking-result` will reset the
+     * override data set through adb command.</li>
+     * </ul>
+     *
+     * @return {@code true} is command executed successfully otherwise {@code false}.
+     */
+    private int handleOverrideCarrierRoamingNtnEligibilityChanged() {
+        PrintWriter errPw = getErrPrintWriter();
+        String opt;
+        boolean state = false;
+        boolean isRestRequired = false;
+        try {
+            if ((opt = getNextArg()) == null) {
+                isRestRequired = true;
+            } else {
+                if ("true".equalsIgnoreCase(opt)) {
+                    state = true;
+                }
+            }
+            boolean result = mInterface.overrideCarrierRoamingNtnEligibilityChanged(state,
+                    isRestRequired);
+            if (VDBG) {
+                Log.v(LOG_TAG, "handleSetSatelliteAccessRestrictionCheckingResult "
+                        + "returns: "
+                        + result);
+            }
+            getOutPrintWriter().println(result);
+        } catch (RemoteException e) {
+            Log.w(LOG_TAG, "handleSetSatelliteAccessRestrictionCheckingResult("
+                    + state + "), error = " + e.getMessage());
+            errPw.println("Exception: " + e.getMessage());
+            return -1;
+        }
+        Log.d(LOG_TAG, "handleSetSatelliteAccessRestrictionCheckingResult(" + state + ")");
+        return 0;
     }
 }
