@@ -11714,10 +11714,10 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     @Override
     public boolean setBoundGbaServiceOverride(int subId, String packageName) {
         enforceModifyPermission();
-
+        int userId = ActivityManager.getCurrentUser();
         final long identity = Binder.clearCallingIdentity();
         try {
-            return getGbaManager(subId).overrideServicePackage(packageName);
+            return getGbaManager(subId).overrideServicePackage(packageName, userId);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
