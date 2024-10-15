@@ -49,9 +49,7 @@ public class CdmaCallOptions extends TimeConsumingPreferenceActivity {
     private static final String CALL_FORWARDING_KEY = "call_forwarding_key";
     private static final String CALL_WAITING_KEY = "call_waiting_key";
 
-    private CallWaitingSwitchPreference mCWButton;
     private boolean mCommon = false;
-    private static final String BUTTON_CW_KEY = "button_cw_ut_key";
 
     private class UtCallback extends ImsMmTelManager.CapabilityCallback {
         @Override
@@ -91,9 +89,6 @@ public class CdmaCallOptions extends TimeConsumingPreferenceActivity {
         CdmaVoicePrivacySwitchPreference buttonVoicePrivacy =
             (CdmaVoicePrivacySwitchPreference) findPreference(BUTTON_VP_KEY);
         buttonVoicePrivacy.setPhone(phone);
-
-        mCWButton = (CallWaitingSwitchPreference) findPreference(BUTTON_CW_KEY);
-        mCWButton.init(this, false, subInfoHelper.getPhone());
 
         // If mobile network configs are restricted, then hide the mCallForwardingPref and
         // mCallWaitingPref.
