@@ -484,7 +484,7 @@ public class SatelliteAccessController extends Handler {
         }
         mAccessControllerMetricsStats.setTriggeringEvent(TRIGGERING_EVENT_EXTERNAL_REQUEST);
         sendRequestAsync(CMD_IS_SATELLITE_COMMUNICATION_ALLOWED,
-                new Pair<>(mSatelliteController.getSatellitePhone().getSubId(), result));
+                new Pair<>(mSatelliteController.getSelectedSatelliteSubId(), result));
     }
 
     /**
