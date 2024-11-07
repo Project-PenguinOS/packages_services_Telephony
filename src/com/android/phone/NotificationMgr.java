@@ -14,7 +14,15 @@
  * limitations under the License.
  */
 
+/*
+ * Changes from Qualcomm Innovation Center, Inc. are provided under the following license:
+ * Copyright (c) 2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause-Clear
+ */
+
 package com.android.phone;
+
+import static com.qti.extphone.ExtTelephonyManager.FEATURE_TDSCDMA_SUPPORT;
 
 import static android.Manifest.permission.READ_PHONE_STATE;
 
@@ -68,6 +76,8 @@ import com.android.internal.telephony.flags.FeatureFlags;
 import com.android.internal.telephony.flags.FeatureFlagsImpl;
 import com.android.internal.telephony.util.NotificationChannelController;
 import com.android.phone.settings.VoicemailSettingsActivity;
+
+import com.qti.extphone.ExtTelephonyManager;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -151,6 +161,8 @@ public class NotificationMgr {
     // feature flags
     private final FeatureFlags mFeatureFlags;
 
+    private static ExtTelephonyManager sExtTelephonyManager;
+
     private final Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -182,6 +194,7 @@ public class NotificationMgr {
         mSubscriptionManager = SubscriptionManager.from(mContext);
         mTelecomManager = app.getSystemService(TelecomManager.class);
         mTelephonyManager = (TelephonyManager) app.getSystemService(Context.TELEPHONY_SERVICE);
+        sExtTelephonyManager = ExtTelephonyManager.getInstance(mContext);
         mFeatureFlags = new FeatureFlagsImpl();
     }
 
@@ -1082,6 +1095,10 @@ public class NotificationMgr {
 
     private static boolean isTdscdmaSupported(@NonNull TelephonyManager telephonyManager,
             @NonNull PersistableBundle carrierConfig) {
+        if (!sExtTelephonyManager.isFeatureSupported(FEATURE_TDSCDMA_SUPPORT)) {
+            return false;
+        }
+
         if (carrierConfig.getBoolean(CarrierConfigManager.KEY_SUPPORT_TDSCDMA_BOOL)) {
             return true;
         }
