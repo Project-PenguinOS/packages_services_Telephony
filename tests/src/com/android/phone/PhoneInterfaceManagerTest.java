@@ -44,11 +44,13 @@ import android.os.Build;
 import android.os.UserHandle;
 import android.permission.flags.Flags;
 import android.platform.test.flag.junit.SetFlagsRule;
+import android.preference.PreferenceManager;
 import android.telephony.RadioAccessFamily;
 import android.telephony.TelephonyManager;
 
 import androidx.test.annotation.UiThreadTest;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.TelephonyTestBase;
 import com.android.internal.telephony.IIntegerConsumer;
@@ -56,6 +58,7 @@ import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.flags.FeatureFlags;
 import com.android.internal.telephony.subscription.SubscriptionManagerService;
+import com.android.phone.satellite.accesscontrol.SatelliteAccessController;
 
 import libcore.junit.util.compat.CoreCompatChangeRule.EnableCompatChanges;
 
@@ -65,6 +68,7 @@ import org.junit.Test;
 import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -107,6 +111,16 @@ public class PhoneInterfaceManagerTest extends TelephonyTestBase {
         super.setUp();
         doReturn(sDebugPackageName).when(mPhoneGlobals).getOpPackageName();
 
+        replaceInstance(SatelliteAccessController.class, "sInstance", null,
+                Mockito.mock(SatelliteAccessController.class));
+
+        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(
+                InstrumentationRegistry.getInstrumentation().getTargetContext());
+        doReturn(mSharedPreferences).when(mPhoneGlobals)
+                .getSharedPreferences(anyString(), anyInt());
+        mSharedPreferences.edit().remove(Phone.PREF_NULL_CIPHER_AND_INTEGRITY_ENABLED).commit();
+        mSharedPreferences.edit().remove(Phone.PREF_NULL_CIPHER_NOTIFICATIONS_ENABLED).commit();
+
         // Note that PhoneInterfaceManager is a singleton. Calling init gives us a handle to the
         // global singleton, but the context that is passed in is unused if the phone app is already
         // alive on a test devices. You must use the spy to mock behavior. Mocks stemming from the
@@ -118,9 +132,6 @@ public class PhoneInterfaceManagerTest extends TelephonyTestBase {
         doReturn(mSubscriptionManagerService).when(mPhoneInterfaceManager)
                 .getSubscriptionManagerService();
         TelephonyManager.setupISubForTest(mSubscriptionManagerService);
-        mSharedPreferences = mPhoneInterfaceManager.getSharedPreferences();
-        mSharedPreferences.edit().remove(Phone.PREF_NULL_CIPHER_AND_INTEGRITY_ENABLED).commit();
-        mSharedPreferences.edit().remove(Phone.PREF_NULL_CIPHER_NOTIFICATIONS_ENABLED).commit();
 
         // In order not to affect the existing implementation, define a telephony features
         // and disabled enforce_telephony_feature_mapping_for_public_apis feature flag
@@ -128,7 +139,9 @@ public class PhoneInterfaceManagerTest extends TelephonyTestBase {
         doReturn(false).when(mFeatureFlags).enforceTelephonyFeatureMappingForPublicApis();
         doReturn(true).when(mFeatureFlags).hsumPackageManager();
         mPhoneInterfaceManager.setPackageManager(mPackageManager);
+        doReturn(mPackageManager).when(mPhoneGlobals).getPackageManager();
         doReturn(true).when(mPackageManager).hasSystemFeature(anyString());
+        doReturn(new String[]{sDebugPackageName}).when(mPackageManager).getPackagesForUid(anyInt());
 
         mPhoneInterfaceManager.setAppOpsManager(mAppOps);
     }
