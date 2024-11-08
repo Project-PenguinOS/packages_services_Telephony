@@ -20,7 +20,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -82,7 +81,7 @@ public class PhoneInterfaceManagerTest extends TelephonyTestBase {
 
     private PhoneInterfaceManager mPhoneInterfaceManager;
     private SharedPreferences mSharedPreferences;
-    private IIntegerConsumer mIIntegerConsumer;
+    @Mock private IIntegerConsumer mIIntegerConsumer;
     private static final String sDebugPackageName =
             PhoneInterfaceManagerTest.class.getPackageName();
 
@@ -122,7 +121,6 @@ public class PhoneInterfaceManagerTest extends TelephonyTestBase {
         mSharedPreferences = mPhoneInterfaceManager.getSharedPreferences();
         mSharedPreferences.edit().remove(Phone.PREF_NULL_CIPHER_AND_INTEGRITY_ENABLED).commit();
         mSharedPreferences.edit().remove(Phone.PREF_NULL_CIPHER_NOTIFICATIONS_ENABLED).commit();
-        mIIntegerConsumer = mock(IIntegerConsumer.class);
 
         // In order not to affect the existing implementation, define a telephony features
         // and disabled enforce_telephony_feature_mapping_for_public_apis feature flag
@@ -491,15 +489,11 @@ public class PhoneInterfaceManagerTest extends TelephonyTestBase {
         mPhoneInterfaceManager.setFeatureFlags(mFeatureFlags);
         doNothing().when(mPhoneInterfaceManager).enforceModifyPermission();
 
-        try {
-            // FEATURE_TELEPHONY_CALLING
-            mPhoneInterfaceManager.handlePinMmiForSubscriber(1, "123456789");
+        // FEATURE_TELEPHONY_CALLING
+        mPhoneInterfaceManager.handlePinMmiForSubscriber(1, "123456789");
 
-            // FEATURE_TELEPHONY_RADIO_ACCESS
-            mPhoneInterfaceManager.toggleRadioOnOffForSubscriber(1);
-        } catch (Exception e) {
-            fail("Not expect exception " + e.getMessage());
-        }
+        // FEATURE_TELEPHONY_RADIO_ACCESS
+        mPhoneInterfaceManager.toggleRadioOnOffForSubscriber(1);
     }
 
     @Test
