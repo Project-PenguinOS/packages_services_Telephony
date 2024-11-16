@@ -13739,6 +13739,29 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     }
 
     /**
+     * Request to get satellite access configuration for the current location.
+     *
+     * @param result The result receiver that returns the satellite access configuration
+     *               for the current location if the request is successful or an error code
+     *               if the request failed.
+     *
+     * @throws SecurityException if the caller doesn't have the required permission.
+     */
+    @Override
+    public void requestSatelliteAccessConfigurationForCurrentLocation(
+            @NonNull ResultReceiver result) {
+        enforceSatelliteCommunicationPermission(
+                "requestSatelliteAccessConfigurationForCurrentLocation");
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            mSatelliteAccessController
+                    .requestSatelliteAccessConfigurationForCurrentLocation(result);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    /**
      * Request to get the time after which the satellite will be visible.
      *
      * @param result The result receiver that returns the time after which the satellite will
