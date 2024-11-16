@@ -19,6 +19,11 @@ package com.android.phone.satellite.accesscontrol;
 import static android.telephony.satellite.SatelliteManager.KEY_SATELLITE_COMMUNICATION_ALLOWED;
 import static android.telephony.satellite.SatelliteManager.KEY_SATELLITE_PROVISIONED;
 import static android.telephony.satellite.SatelliteManager.KEY_SATELLITE_SUPPORTED;
+import static android.telephony.satellite.SatelliteManager.SATELLITE_DISALLOWED_REASON_NOT_SUPPORTED;
+import static android.telephony.satellite.SatelliteManager.SATELLITE_DISALLOWED_REASON_NOT_PROVISIONED;
+import static android.telephony.satellite.SatelliteManager.SATELLITE_DISALLOWED_REASON_NOT_IN_ALLOWED_REGION;
+import static android.telephony.satellite.SatelliteManager.SATELLITE_DISALLOWED_REASON_UNSUPPORTED_DEFAULT_MSG_APP;
+import static android.telephony.satellite.SatelliteManager.SATELLITE_DISALLOWED_REASON_LOCATION_DISABLED;
 import static android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_LOCATION_DISABLED;
 import static android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_LOCATION_NOT_AVAILABLE;
 import static android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_NOT_SUPPORTED;
@@ -34,7 +39,11 @@ import static com.android.internal.telephony.satellite.SatelliteController.SATEL
 import android.annotation.ArrayRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -56,14 +65,17 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.telecom.TelecomManager;
 import android.telephony.AnomalyReporter;
 import android.telephony.DropBoxManagerLoggerBackend;
+import android.telephony.NetworkRegistrationInfo;
 import android.telephony.PersistentLogger;
 import android.telephony.Rlog;
 import android.telephony.SubscriptionManager;
 import android.telephony.satellite.ISatelliteCommunicationAllowedStateCallback;
+import android.telephony.satellite.ISatelliteDisallowedReasonsCallback;
 import android.telephony.satellite.ISatelliteProvisionStateCallback;
 import android.telephony.satellite.ISatelliteSupportedStateCallback;
 import android.telephony.satellite.SatelliteManager;
@@ -76,6 +88,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneFactory;
+import com.android.internal.telephony.SmsApplication;
 import com.android.internal.telephony.TelephonyCountryDetector;
 import com.android.internal.telephony.flags.FeatureFlags;
 import com.android.internal.telephony.satellite.SatelliteConfig;
@@ -97,6 +110,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -146,6 +160,56 @@ public class SatelliteAccessController extends Handler {
     protected static final int EVENT_LOCATION_SETTINGS_ENABLED = 6;
 
     public static final int DEFAULT_REGIONAL_SATELLITE_CONFIG_ID = 0;
+
+    private static final String KEY_AVAILABLE_NOTIFICATION_SHOWN = "available_notification_shown";
+    private static final String KEY_UNAVAILABLE_NOTIFICATION_SHOWN =
+            "unavailable_notification_shown";
+    private static final String NOTIFICATION_TAG = "SatelliteAccessController";
+    private static final int NOTIFICATION_ID = 1;
+    private static final String NOTIFICATION_CHANNEL = "satelliteChannel";
+    private static final String NOTIFICATION_CHANNEL_ID = "satellite";
+    private static final int SATELLITE_DISALLOWED_REASON_NONE = -1;
+    private static final List<Integer> DISALLOWED_REASONS_TO_BE_RESET =
+            Arrays.asList(SATELLITE_DISALLOWED_REASON_NOT_IN_ALLOWED_REGION,
+            SATELLITE_DISALLOWED_REASON_LOCATION_DISABLED);
+
+    private static final HashMap<Integer, Pair<Integer, Integer>>
+            SATELLITE_SOS_UNAVAILABLE_REASONS = new HashMap<>(Map.of(
+            SATELLITE_DISALLOWED_REASON_NOT_SUPPORTED, new Pair<>(
+                    R.string.satellite_sos_not_supported_notification_title,
+                    R.string.satellite_sos_not_supported_notification_summary),
+            SATELLITE_DISALLOWED_REASON_NOT_PROVISIONED, new Pair<>(
+                    R.string.satellite_sos_not_provisioned_notification_title,
+                    R.string.satellite_sos_not_provisioned_notification_summary),
+            SATELLITE_DISALLOWED_REASON_NOT_IN_ALLOWED_REGION, new Pair<>(
+                    R.string.satellite_sos_not_in_allowed_region_notification_title,
+                    R.string.satellite_sos_not_in_allowed_region_notification_summary),
+            SATELLITE_DISALLOWED_REASON_UNSUPPORTED_DEFAULT_MSG_APP, new Pair<>(
+                    R.string.satellite_sos_unsupported_default_sms_app_notification_title,
+                    R.string.satellite_sos_unsupported_default_sms_app_notification_summary),
+            SATELLITE_DISALLOWED_REASON_LOCATION_DISABLED, new Pair<>(
+                    R.string.satellite_sos_location_disabled_notification_title,
+                    R.string.satellite_sos_location_disabled_notification_summary)
+    ));
+
+    private static final HashMap<Integer, Pair<Integer, Integer>>
+            SATELLITE_MESSAGING_UNAVAILABLE_REASONS = new HashMap<>(Map.of(
+            SATELLITE_DISALLOWED_REASON_NOT_SUPPORTED, new Pair<>(
+                    R.string.satellite_messaging_not_supported_notification_title,
+                    R.string.satellite_messaging_not_supported_notification_summary),
+            SATELLITE_DISALLOWED_REASON_NOT_PROVISIONED, new Pair<>(
+                    R.string.satellite_messaging_not_provisioned_notification_title,
+                    R.string.satellite_messaging_not_provisioned_notification_summary),
+            SATELLITE_DISALLOWED_REASON_NOT_IN_ALLOWED_REGION, new Pair<>(
+                    R.string.satellite_messaging_not_in_allowed_region_notification_title,
+                    R.string.satellite_messaging_not_in_allowed_region_notification_summary),
+            SATELLITE_DISALLOWED_REASON_UNSUPPORTED_DEFAULT_MSG_APP, new Pair<>(
+                    R.string.satellite_messaging_unsupported_default_sms_app_notification_title,
+                    R.string.satellite_messaging_unsupported_default_sms_app_notification_summary),
+            SATELLITE_DISALLOWED_REASON_LOCATION_DISABLED, new Pair<>(
+                    R.string.satellite_messaging_location_disabled_notification_title,
+                    R.string.satellite_messaging_location_disabled_notification_summary)
+    ));
 
     private static SatelliteAccessController sInstance;
 
@@ -268,6 +332,10 @@ public class SatelliteAccessController extends Handler {
     @GuardedBy("mSatelliteCommunicationAllowStateLock")
     protected boolean mCurrentSatelliteAllowedState = false;
 
+    private final ConcurrentHashMap<IBinder, ISatelliteDisallowedReasonsCallback>
+            mSatelliteDisallowedReasonsChangedListeners = new ConcurrentHashMap<>();
+    private final Object mSatelliteDisallowedReasonsLock = new Object();
+
     protected static final long ALLOWED_STATE_CACHE_VALID_DURATION_NANOS =
             TimeUnit.HOURS.toNanos(4);
 
@@ -277,6 +345,13 @@ public class SatelliteAccessController extends Handler {
     private long mLocationQueryStartTimeMillis;
     private long mOnDeviceLookupStartTimeMillis;
     private long mTotalCheckingStartTimeMillis;
+
+    private final boolean mNotifySatelliteAvailabilityEnabled;
+    private Notification mSatelliteAvailableNotification;
+    // Key: SatelliteManager#SatelliteDisallowedReason; Value: Notification
+    private final Map<Integer, Notification> mSatelliteUnAvailableNotifications = new HashMap<>();
+    private NotificationManager mNotificationManager;
+    private final List<Integer> mSatelliteDisallowedReasons = new ArrayList<>();
 
     protected BroadcastReceiver mLocationModeChangedBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -358,6 +433,9 @@ public class SatelliteAccessController extends Handler {
         };
 
         mConfigUpdaterMetricsStats = ConfigUpdaterMetricsStats.getOrCreateInstance();
+        mNotifySatelliteAvailabilityEnabled =
+                context.getResources().getBoolean(
+                        R.bool.config_satellite_should_notify_availability);
 
         mInternalSatelliteSupportedStateCallback = new ISatelliteSupportedStateCallback.Stub() {
             @Override
@@ -371,6 +449,19 @@ public class SatelliteAccessController extends Handler {
                                     // do nothing
                                 }
                             }, false);
+                    if (mSatelliteDisallowedReasons.contains(
+                            Integer.valueOf(SATELLITE_DISALLOWED_REASON_NOT_SUPPORTED))) {
+                        mSatelliteDisallowedReasons.remove(
+                                Integer.valueOf(SATELLITE_DISALLOWED_REASON_NOT_SUPPORTED));
+                        handleEventDisallowedReasonsChanged();
+                    }
+                } else {
+                    if (!mSatelliteDisallowedReasons.contains(
+                            Integer.valueOf(SATELLITE_DISALLOWED_REASON_NOT_SUPPORTED))) {
+                        mSatelliteDisallowedReasons.add(
+                                Integer.valueOf(SATELLITE_DISALLOWED_REASON_NOT_SUPPORTED));
+                        handleEventDisallowedReasonsChanged();
+                    }
                 }
             }
         };
@@ -389,6 +480,19 @@ public class SatelliteAccessController extends Handler {
                                     // do nothing
                                 }
                             }, false);
+                    if (mSatelliteDisallowedReasons.contains(
+                            SATELLITE_DISALLOWED_REASON_NOT_PROVISIONED)) {
+                        mSatelliteDisallowedReasons.remove(
+                                Integer.valueOf(SATELLITE_DISALLOWED_REASON_NOT_PROVISIONED));
+                        handleEventDisallowedReasonsChanged();
+                    }
+                } else {
+                    if (!mSatelliteDisallowedReasons.contains(
+                            SATELLITE_DISALLOWED_REASON_NOT_PROVISIONED)) {
+                        mSatelliteDisallowedReasons.add(
+                                SATELLITE_DISALLOWED_REASON_NOT_PROVISIONED);
+                        handleEventDisallowedReasonsChanged();
+                    }
                 }
             }
 
@@ -404,7 +508,9 @@ public class SatelliteAccessController extends Handler {
 
         // Init the SatelliteOnDeviceAccessController so that the S2 level can be cached
         initSatelliteOnDeviceAccessController();
+        initializeSatelliteSystemNotification(context);
         registerLocationModeChangedBroadcastReceiver(context);
+        registerDefaultSmsAppChangedBroadcastReceiver(context);
     }
 
     private void updateCurrentSatelliteAllowedState(boolean isAllowed) {
@@ -951,6 +1057,18 @@ public class SatelliteAccessController extends Handler {
         }
     }
 
+    private void registerDefaultSmsAppChangedBroadcastReceiver(Context context) {
+        if (!mFeatureFlags.oemEnabledSatelliteFlag()) {
+            plogd("registerDefaultSmsAppChangedBroadcastReceiver: Flag "
+                    + "oemEnabledSatellite is disabled");
+            return;
+        }
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
+        intentFilter.addDataScheme("package");
+        context.registerReceiver(mDefaultSmsAppChangedBroadcastReceiver, intentFilter);
+    }
+
     private void registerLocationModeChangedBroadcastReceiver(Context context) {
         if (!mFeatureFlags.oemEnabledSatelliteFlag()) {
             plogd("registerLocationModeChangedBroadcastReceiver: Flag "
@@ -1054,7 +1172,7 @@ public class SatelliteAccessController extends Handler {
     }
 
     private void sendSatelliteAllowResultToReceivers(int resultCode, Bundle resultData,
-            boolean allowed) {
+                                                     boolean allowed) {
         plogd("sendSatelliteAllowResultToReceivers : resultCode is " + resultCode);
         if (resultCode == SATELLITE_RESULT_SUCCESS) {
             updateCurrentSatelliteAllowedState(allowed);
@@ -1068,10 +1186,93 @@ public class SatelliteAccessController extends Handler {
         if (!shouldRetryValidatingPossibleChangeInAllowedRegion(resultCode)) {
             setIsSatelliteAllowedRegionPossiblyChanged(false);
         }
+        Integer disallowedReason = getDisallowedReason(resultCode, allowed);
+        boolean isChanged = false;
+        if (disallowedReason != SATELLITE_DISALLOWED_REASON_NONE) {
+            if (!mSatelliteDisallowedReasons.contains(disallowedReason)) {
+                isChanged = true;
+            }
+        } else {
+            if (mSatelliteDisallowedReasons.contains(
+                    SATELLITE_DISALLOWED_REASON_NOT_IN_ALLOWED_REGION)
+                    || mSatelliteDisallowedReasons.contains(
+                    SATELLITE_DISALLOWED_REASON_LOCATION_DISABLED)) {
+                isChanged = true;
+            }
+        }
+        mSatelliteDisallowedReasons.removeAll(DISALLOWED_REASONS_TO_BE_RESET);
+        if (disallowedReason != SATELLITE_DISALLOWED_REASON_NONE) {
+            mSatelliteDisallowedReasons.add(disallowedReason);
+        }
+        if (isChanged) {
+            handleEventDisallowedReasonsChanged();
+        }
         synchronized (mIsAllowedCheckBeforeEnablingSatelliteLock) {
             mIsAllowedCheckBeforeEnablingSatellite = false;
         }
         reportMetrics(resultCode, allowed);
+    }
+
+    private int getDisallowedReason(int resultCode, boolean allowed) {
+        if (resultCode == SATELLITE_RESULT_SUCCESS) {
+            if (!allowed) {
+                return SATELLITE_DISALLOWED_REASON_NOT_IN_ALLOWED_REGION;
+            }
+        } else if (resultCode == SATELLITE_RESULT_LOCATION_DISABLED) {
+            return SATELLITE_DISALLOWED_REASON_LOCATION_DISABLED;
+        }
+        return SATELLITE_DISALLOWED_REASON_NONE;
+    }
+
+    private void handleEventDisallowedReasonsChanged() {
+        logd("mSatelliteDisallowedReasons:"
+                + String.join(", ", mSatelliteDisallowedReasons.toString()));
+        notifySatelliteDisallowedReasonsChanged();
+        if (mNotifySatelliteAvailabilityEnabled) {
+            showSatelliteSystemNotification();
+        }
+    }
+
+    private void showSatelliteSystemNotification() {
+        if (mSatelliteDisallowedReasons.isEmpty()) {
+            if (!hasAlreadyNotified(KEY_AVAILABLE_NOTIFICATION_SHOWN, 0)) {
+                mNotificationManager.notifyAsUser(
+                        NOTIFICATION_TAG,
+                        NOTIFICATION_ID,
+                        mSatelliteAvailableNotification,
+                        UserHandle.ALL
+                );
+                markAsNotified(KEY_AVAILABLE_NOTIFICATION_SHOWN, 0);
+            }
+        } else {
+            for (Integer reason : mSatelliteDisallowedReasons) {
+                if (!hasAlreadyNotified(KEY_UNAVAILABLE_NOTIFICATION_SHOWN, reason)) {
+                    mNotificationManager.notifyAsUser(
+                            NOTIFICATION_TAG,
+                            NOTIFICATION_ID,
+                            mSatelliteUnAvailableNotifications.get(reason),
+                            UserHandle.ALL
+                    );
+                    markAsNotified(KEY_UNAVAILABLE_NOTIFICATION_SHOWN, reason);
+                    break;
+                }
+            }
+        }
+    }
+
+    private boolean hasAlreadyNotified(String key, int reason) {
+        Set<String> reasons = mSharedPreferences.getStringSet(key, new HashSet<>());
+        return reasons.contains(String.valueOf(reason));
+    }
+
+    private void markAsNotified(String key, int reason) {
+        Set<String> reasons = mSharedPreferences.getStringSet(key, new HashSet<>());
+        if (!reasons.contains(String.valueOf(reason))) {
+            reasons.add(String.valueOf(reason));
+            SharedPreferences.Editor editor = mSharedPreferences.edit();
+            editor.putStringSet(key, reasons);
+            editor.apply();
+        }
     }
 
     /**
@@ -1136,6 +1337,122 @@ public class SatelliteAccessController extends Handler {
             }
         };
     }
+
+    private void initializeSatelliteSystemNotification(@NonNull Context context) {
+        final NotificationChannel notificationChannel = new NotificationChannel(
+                NOTIFICATION_CHANNEL_ID,
+                NOTIFICATION_CHANNEL,
+                NotificationManager.IMPORTANCE_DEFAULT
+        );
+        notificationChannel.setSound(null, null);
+        mNotificationManager = context.getSystemService(NotificationManager.class);
+        mNotificationManager.createNotificationChannel(notificationChannel);
+
+        createAvailableNotifications(context);
+        createUnavailableNotifications(context);
+    }
+
+    private Notification createNotification(@NonNull Context context,
+                                            String title,
+                                            String content) {
+        Notification.Builder notificationBuilder = new Notification.Builder(context)
+                .setContentTitle(title)
+                .setContentText(content)
+                .setSmallIcon(R.drawable.ic_android_satellite_24px)
+                .setChannelId(NOTIFICATION_CHANNEL_ID)
+                .setAutoCancel(true)
+                .setColor(context.getColor(
+                        com.android.internal.R.color.system_notification_accent_color))
+                .setVisibility(Notification.VISIBILITY_PUBLIC);
+
+        return notificationBuilder.build();
+    }
+
+    private void createAvailableNotifications(Context context) {
+        int subId = mSatelliteController.getSelectedSatelliteSubId();
+        int titleId;
+        int summaryId;
+
+        if (mSatelliteController.isSatelliteServiceSupportedByCarrier(
+                subId, NetworkRegistrationInfo.SERVICE_TYPE_SMS)) {
+            titleId = R.string.satellite_messaging_available_notification_title;
+            summaryId = R.string.satellite_messaging_available_notification_summary;
+        } else {
+            titleId = R.string.satellite_sos_available_notification_title;
+            summaryId = R.string.satellite_sos_available_notification_summary;
+        }
+
+        mSatelliteAvailableNotification = createNotification(
+                context,
+                context.getResources().getString(titleId),
+                context.getResources().getString(summaryId));
+    }
+
+    private void createUnavailableNotifications(Context context) {
+        int subId = mSatelliteController.getSelectedSatelliteSubId();
+
+        HashMap<Integer, Pair<Integer, Integer>> unavailableReasons;
+        if (mSatelliteController.isSatelliteServiceSupportedByCarrier(
+                subId, NetworkRegistrationInfo.SERVICE_TYPE_SMS)) {
+            unavailableReasons = SATELLITE_MESSAGING_UNAVAILABLE_REASONS;
+        } else {
+            unavailableReasons = SATELLITE_SOS_UNAVAILABLE_REASONS;
+        }
+
+        for (int reason : unavailableReasons.keySet()) {
+            Pair<Integer, Integer> notificationString =
+                    unavailableReasons.getOrDefault(reason, null);
+            if (notificationString != null) {
+                mSatelliteUnAvailableNotifications.put(reason,
+                        createNotification(
+                                context,
+                                context.getResources().getString(notificationString.first),
+                                context.getResources().getString(notificationString.second)));
+            }
+        }
+    }
+
+    private final BroadcastReceiver mDefaultSmsAppChangedBroadcastReceiver =
+            new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if (intent.getAction()
+                            .equals(Intent.ACTION_PACKAGE_CHANGED)) {
+                        boolean isDefaultMsgAppSupported = false;
+                        ComponentName componentName =
+                                SmsApplication.getDefaultSmsApplicationAsUser(
+                                        context, true, context.getUser());
+                        logd("Current default SMS app:" + componentName);
+                        if (componentName != null) {
+                            String packageName = componentName.getPackageName();
+                            List<String> supportedMsgApps =
+                                    mSatelliteController.getSatelliteSupportedMsgApps(
+                                            mSatelliteController.getSelectedSatelliteSubId());
+                            if (supportedMsgApps.contains(packageName)) {
+                                isDefaultMsgAppSupported = true;
+                            }
+                        } else {
+                            logd("No default SMS app");
+                        }
+
+                        if (isDefaultMsgAppSupported) {
+                            if (mSatelliteDisallowedReasons.contains(Integer.valueOf(
+                                    SATELLITE_DISALLOWED_REASON_UNSUPPORTED_DEFAULT_MSG_APP))) {
+                                mSatelliteDisallowedReasons.remove(Integer.valueOf(
+                                        SATELLITE_DISALLOWED_REASON_UNSUPPORTED_DEFAULT_MSG_APP));
+                                handleEventDisallowedReasonsChanged();
+                            }
+                        } else {
+                            if (!mSatelliteDisallowedReasons.contains(Integer.valueOf(
+                                    SATELLITE_DISALLOWED_REASON_UNSUPPORTED_DEFAULT_MSG_APP))) {
+                                mSatelliteDisallowedReasons.add(Integer.valueOf(
+                                        SATELLITE_DISALLOWED_REASON_UNSUPPORTED_DEFAULT_MSG_APP));
+                                handleEventDisallowedReasonsChanged();
+                            }
+                        }
+                    }
+                }
+            };
 
     private void handleSatelliteAllowedRegionPossiblyChanged(int handleEvent) {
         if (!mFeatureFlags.oemEnabledSatelliteFlag()) {
@@ -1912,6 +2229,74 @@ public class SatelliteAccessController extends Handler {
     }
 
     /**
+     * Returns integer array of disallowed reasons of satellite.
+     *
+     * @return Integer array of disallowed reasons of satellite.
+     *
+     */
+    @NonNull public List<Integer> getSatelliteDisallowedReasons() {
+        if (!mFeatureFlags.carrierRoamingNbIotNtn()) {
+            plogd("getSatelliteDisallowedReasons: carrierRoamingNbIotNtn is disabled");
+            return new ArrayList<>();
+        }
+
+        synchronized (mSatelliteDisallowedReasonsLock) {
+            return mSatelliteDisallowedReasons;
+        }
+    }
+
+    /**
+     * Registers for disallowed reasons change event from satellite service.
+     *
+     * @param callback The callback to handle disallowed reasons changed event.
+     *
+     */
+    public void registerForSatelliteDisallowedReasonsChanged(
+            @NonNull ISatelliteDisallowedReasonsCallback callback) {
+        if (!mFeatureFlags.carrierRoamingNbIotNtn()) {
+            plogd("registerForSatelliteDisallowedReasonsChanged: carrierRoamingNbIotNtn is "
+                    + "disabled");
+            return;
+        }
+
+        mSatelliteDisallowedReasonsChangedListeners.put(callback.asBinder(), callback);
+
+        this.post(() -> {
+            try {
+                synchronized (mSatelliteDisallowedReasonsLock) {
+                    callback.onSatelliteDisallowedReasonsChanged(
+                            mSatelliteDisallowedReasons.stream()
+                                    .mapToInt(Integer::intValue)
+                                    .toArray());
+                    logd("registerForSatelliteDisallowedReasonsChanged: "
+                            + "mSatelliteDisallowedReasons " + mSatelliteDisallowedReasons.size());
+                }
+            } catch (RemoteException ex) {
+                ploge("registerForSatelliteDisallowedReasonsChanged: RemoteException ex=" + ex);
+            }
+        });
+    }
+
+    /**
+     * Unregisters for disallowed reasons change event from satellite service.
+     * If callback was not registered before, the request will be ignored.
+     *
+     * @param callback The callback that was passed to
+     *                 {@link #registerForSatelliteDisallowedReasonsChanged(
+     *                 ISatelliteDisallowedReasonsCallback)}.
+     */
+    public void unregisterForSatelliteDisallowedReasonsChanged(
+            @NonNull ISatelliteDisallowedReasonsCallback callback) {
+        if (!mFeatureFlags.carrierRoamingNbIotNtn()) {
+            plogd("unregisterForSatelliteDisallowedReasonsChanged: "
+                    + "carrierRoamingNbIotNtn is disabled");
+            return;
+        }
+
+        mSatelliteDisallowedReasonsChangedListeners.remove(callback.asBinder());
+    }
+
+    /**
      * This API can be used by only CTS to set the cache whether satellite communication is allowed.
      *
      * @param state a state indicates whether satellite access allowed state should be cached and
@@ -1974,6 +2359,26 @@ public class SatelliteAccessController extends Handler {
         });
         deadCallersList.forEach(listener -> {
             mSatelliteCommunicationAllowedStateChangedListeners.remove(listener.asBinder());
+        });
+    }
+
+    private void notifySatelliteDisallowedReasonsChanged() {
+        plogd("notifySatelliteDisallowedReasonsChanged");
+
+        List<ISatelliteDisallowedReasonsCallback> deadCallersList = new ArrayList<>();
+        mSatelliteDisallowedReasonsChangedListeners.values().forEach(listener -> {
+            try {
+                listener.onSatelliteDisallowedReasonsChanged(
+                        mSatelliteDisallowedReasons.stream()
+                                .mapToInt(Integer::intValue)
+                                .toArray());
+            } catch (RemoteException e) {
+                plogd("notifySatelliteDisallowedReasonsChanged RemoteException: " + e);
+                deadCallersList.add(listener);
+            }
+        });
+        deadCallersList.forEach(listener -> {
+            mSatelliteDisallowedReasonsChangedListeners.remove(listener.asBinder());
         });
     }
 

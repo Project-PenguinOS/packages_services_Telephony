@@ -158,6 +158,7 @@ import android.telephony.satellite.INtnSignalStrengthCallback;
 import android.telephony.satellite.ISatelliteCapabilitiesCallback;
 import android.telephony.satellite.ISatelliteCommunicationAllowedStateCallback;
 import android.telephony.satellite.ISatelliteDatagramCallback;
+import android.telephony.satellite.ISatelliteDisallowedReasonsCallback;
 import android.telephony.satellite.ISatelliteModemStateCallback;
 import android.telephony.satellite.ISatelliteProvisionStateCallback;
 import android.telephony.satellite.ISatelliteSupportedStateCallback;
@@ -13239,8 +13240,14 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
                             return;
                         }
                         if (isAllowed) {
-                            mSatelliteController.requestSatelliteEnabled(
-                                    enableSatellite, enableDemoMode, isEmergency, callback);
+                            if (mFeatureFlags.carrierRoamingNbIotNtn()
+                                    && !mSatelliteAccessController.getSatelliteDisallowedReasons()
+                                    .isEmpty()) {
+                                result.accept(SATELLITE_RESULT_ACCESS_BARRED);
+                            } else {
+                                mSatelliteController.requestSatelliteEnabled(
+                                        enableSatellite, enableDemoMode, isEmergency, callback);
+                            }
                         } else {
                             result.accept(SATELLITE_RESULT_ACCESS_BARRED);
                         }
@@ -13642,6 +13649,64 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         try {
             mSatelliteController.sendDatagram(datagramType, datagram, needFullScreenPointingUI,
                     callback);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    /**
+     * Returns integer array of disallowed reasons of satellite.
+     *
+     * @return Integer array of disallowed reasons of satellite.
+     *
+     * @throws SecurityException if the caller doesn't have the required permission.
+     */
+    @NonNull public int[] getSatelliteDisallowedReasons() {
+        enforceSatelliteCommunicationPermission("getSatelliteDisallowedReasons");
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return mSatelliteAccessController.getSatelliteDisallowedReasons()
+                    .stream().mapToInt(Integer::intValue).toArray();
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    /**
+     * Registers for disallowed reasons change event from satellite service.
+     *
+     * @param callback The callback to handle disallowed reasons changed event.
+     *
+     * @throws SecurityException if the caller doesn't have the required permission.
+     */
+    @Override
+    public void registerForSatelliteDisallowedReasonsChanged(
+            @NonNull ISatelliteDisallowedReasonsCallback callback) {
+        enforceSatelliteCommunicationPermission("registerForSatelliteDisallowedReasonsChanged");
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            mSatelliteAccessController.registerForSatelliteDisallowedReasonsChanged(callback);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    /**
+     * Unregisters for disallowed reasons change event from satellite service.
+     * If callback was not registered before, the request will be ignored.
+     *
+     * @param callback The callback to handle disallowed reasons changed event.
+     *                 {@link #registerForSatelliteDisallowedReasonsChanged(
+     *                 ISatelliteDisallowedReasonsCallback)}.
+     * @throws SecurityException if the caller doesn't have the required permission.
+     */
+    @Override
+    public void unregisterForSatelliteDisallowedReasonsChanged(
+            @NonNull ISatelliteDisallowedReasonsCallback callback) {
+        enforceSatelliteCommunicationPermission("unregisterForSatelliteDisallowedReasonsChanged");
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            mSatelliteAccessController.unregisterForSatelliteDisallowedReasonsChanged(callback);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

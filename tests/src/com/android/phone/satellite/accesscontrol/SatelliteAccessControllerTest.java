@@ -63,16 +63,21 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.annotation.Nullable;
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.location.Location;
 import android.location.LocationManager;
 import android.location.LocationRequest;
 import android.os.AsyncResult;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.DropBoxManager;
@@ -81,8 +86,10 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ResultReceiver;
+import android.os.UserHandle;
 import android.telecom.TelecomManager;
 import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyManager;
 import android.telephony.satellite.SatelliteManager;
 import android.testing.TestableLooper;
 import android.util.Log;
@@ -189,6 +196,17 @@ public class SatelliteAccessControllerTest {
     private Set<ResultReceiver> mMockSatelliteAllowResultReceivers;
     @Mock
     private ResultReceiver mMockSatelliteSupportedResultReceiver;
+    @Mock
+    private TelephonyManager mMockTelephonyManager;
+    @Mock
+    private PackageManager mMockPackageManager;
+    @Mock
+    private List<ResolveInfo> mMockResolveInfoList;
+    @Mock
+    private NotificationManager mMockNotificationManager;
+    @Mock
+    private ApplicationInfo mMockApplicationInfo;
+
 
     private Looper mLooper;
     private TestableLooper mTestableLooper;
@@ -343,6 +361,22 @@ public class SatelliteAccessControllerTest {
         when(mMockFeatureFlags.oemEnabledSatelliteFlag()).thenReturn(true);
         when(mMockFeatureFlags.carrierRoamingNbIotNtn()).thenReturn(true);
 
+        when(mMockContext.getSystemService(Context.TELEPHONY_SERVICE))
+                .thenReturn(mMockTelephonyManager);
+        when(mMockTelephonyManager.isSmsCapable()).thenReturn(true);
+        when(mMockContext.getPackageManager()).thenReturn(mMockPackageManager);
+        mMockResolveInfoList = new ArrayList<>();
+        when(mMockPackageManager.queryBroadcastReceiversAsUser(any(Intent.class), anyInt(), any(
+                UserHandle.class)))
+                .thenReturn(mMockResolveInfoList);
+        when(mMockContext.getSystemServiceName(
+                NotificationManager.class)).thenReturn(Context.NOTIFICATION_SERVICE);
+        when(mMockContext.getSystemService(Context.NOTIFICATION_SERVICE))
+                .thenReturn(mMockNotificationManager);
+        when(mMockContext.getApplicationInfo()).thenReturn(mMockApplicationInfo);
+        mMockApplicationInfo.targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE;
+        when(mMockPackageManager.getApplicationInfo(anyString(), anyInt()))
+                .thenReturn(mMockApplicationInfo);
         mSatelliteAccessControllerUT = new TestSatelliteAccessController(mMockContext,
                 mMockFeatureFlags, mLooper, mMockLocationManager, mMockTelecomManager,
                 mMockSatelliteOnDeviceAccessController, mMockSatS2File);
@@ -1148,11 +1182,9 @@ public class SatelliteAccessControllerTest {
         mSatelliteAccessControllerUT.elapsedRealtimeNanos = TEST_LOCATION_FRESH_DURATION_NANOS + 1;
 
         // Captor and Verify if the mockReceiver and mocContext is registered well
-        verify(mMockContext).registerReceiver(mLocationBroadcastReceiverCaptor.capture(),
+        verify(mMockContext, times(2))
+                .registerReceiver(mLocationBroadcastReceiverCaptor.capture(),
                 mIntentFilterCaptor.capture());
-        assertSame(mSatelliteAccessControllerUT.getLocationBroadcastReceiver(),
-                mLocationBroadcastReceiverCaptor.getValue());
-        assertSame(MODE_CHANGED_ACTION, mIntentFilterCaptor.getValue().getAction(0));
 
         // When the intent action is not MODE_CHANGED_ACTION,
         // verify if the location manager never invoke isLocationEnabled()
