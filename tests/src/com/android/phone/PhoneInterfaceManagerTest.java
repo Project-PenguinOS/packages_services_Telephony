@@ -92,8 +92,6 @@ public class PhoneInterfaceManagerTest extends TelephonyTestBase {
             PhoneInterfaceManagerTest.class.getPackageName();
 
     @Mock
-    PhoneGlobals mPhoneGlobals;
-    @Mock
     Phone mPhone;
     @Mock
     FeatureFlags mFeatureFlags;

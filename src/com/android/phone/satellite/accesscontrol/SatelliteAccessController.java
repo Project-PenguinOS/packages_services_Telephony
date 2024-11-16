@@ -425,6 +425,9 @@ public class SatelliteAccessController extends Handler {
                 handleIsSatelliteSupportedResult(resultCode, resultData);
             }
         };
+        mSatelliteController.incrementResultReceiverCount(
+                "SAC:mInternalSatelliteSupportedResultReceiver");
+
         mInternalSatelliteProvisionedResultReceiver = new ResultReceiver(this) {
             @Override
             protected void onReceiveResult(int resultCode, Bundle resultData) {
@@ -442,13 +445,16 @@ public class SatelliteAccessController extends Handler {
             public void onSatelliteSupportedStateChanged(boolean isSupported) {
                 logd("onSatelliteSupportedStateChanged: isSupported=" + isSupported);
                 if (isSupported) {
+                    final String caller = "SAC:onSatelliteSupportedStateChanged";
                     requestIsCommunicationAllowedForCurrentLocation(
                             new ResultReceiver(null) {
                                 @Override
                                 protected void onReceiveResult(int resultCode, Bundle resultData) {
+                                    mSatelliteController.decrementResultReceiverCount(caller);
                                     // do nothing
                                 }
                             }, false);
+                    mSatelliteController.incrementResultReceiverCount(caller);
                     if (mSatelliteDisallowedReasons.contains(
                             Integer.valueOf(SATELLITE_DISALLOWED_REASON_NOT_SUPPORTED))) {
                         mSatelliteDisallowedReasons.remove(
@@ -473,13 +479,16 @@ public class SatelliteAccessController extends Handler {
             public void onSatelliteProvisionStateChanged(boolean isProvisioned) {
                 logd("onSatelliteProvisionStateChanged: isProvisioned=" + isProvisioned);
                 if (isProvisioned) {
+                    final String caller = "SAC:onSatelliteProvisionStateChanged";
                     requestIsCommunicationAllowedForCurrentLocation(
                             new ResultReceiver(null) {
                                 @Override
                                 protected void onReceiveResult(int resultCode, Bundle resultData) {
+                                    mSatelliteController.decrementResultReceiverCount(caller);
                                     // do nothing
                                 }
                             }, false);
+                    mSatelliteController.incrementResultReceiverCount(caller);
                     if (mSatelliteDisallowedReasons.contains(
                             SATELLITE_DISALLOWED_REASON_NOT_PROVISIONED)) {
                         mSatelliteDisallowedReasons.remove(
@@ -591,6 +600,8 @@ public class SatelliteAccessController extends Handler {
         mAccessControllerMetricsStats.setTriggeringEvent(TRIGGERING_EVENT_EXTERNAL_REQUEST);
         sendRequestAsync(CMD_IS_SATELLITE_COMMUNICATION_ALLOWED,
                 new Pair<>(mSatelliteController.getSelectedSatelliteSubId(), result));
+        mSatelliteController.incrementResultReceiverCount(
+                "SAC:requestIsCommunicationAllowedForCurrentLocation");
     }
 
     /**
@@ -1180,6 +1191,8 @@ public class SatelliteAccessController extends Handler {
         synchronized (mLock) {
             for (ResultReceiver resultReceiver : mSatelliteAllowResultReceivers) {
                 resultReceiver.send(resultCode, resultData);
+                mSatelliteController.decrementResultReceiverCount(
+                        "SAC:requestIsCommunicationAllowedForCurrentLocation");
             }
             mSatelliteAllowResultReceivers.clear();
         }
