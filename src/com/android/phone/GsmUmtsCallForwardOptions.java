@@ -32,6 +32,7 @@ import android.telephony.CarrierConfigManager;
 import android.telephony.ims.feature.ImsFeature;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -221,6 +222,18 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
         }
     }
 
+    private boolean hasDefaultAPNType(String apnType) {
+        if (TextUtils.isEmpty(apnType)) {
+            return false;
+        }
+        for (String str : apnType.split(",")) {
+            if (str.equals(PhoneConstants.APN_TYPE_DEFAULT)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Receiver for intent broadcasts the Phone app cares about.
      */
@@ -233,7 +246,7 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
                 final String apnType = intent.getStringExtra(PhoneConstants.DATA_APN_TYPE_KEY);
                 Log.d(LOG_TAG, "apntype is: " + apnType + " state is: " + state);
                 if (PhoneConstants.DataState.DISCONNECTED.name().equals(state) &&
-                            PhoneConstants.APN_TYPE_DEFAULT.equals(apnType)) {
+                            hasDefaultAPNType(apnType)) {
                     Log.d(LOG_TAG, "default data is disconnected.");
                     checkDataStatus();
                 }
