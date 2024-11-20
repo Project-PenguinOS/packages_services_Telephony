@@ -14764,6 +14764,24 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         }
     }
 
+
+    /**
+     * Inform whether application supports NTN SMS in satellite mode.
+     *
+     * This method is used by default messaging application to inform framework whether it supports
+     * NTN SMS or not.
+     *
+     * @param ntnSmsSupported {@code true} If application supports NTN SMS, else {@code false}.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     */
+    @Override
+    public void setNtnSmsSupported(boolean ntnSmsSupported) {
+        enforceSatelliteCommunicationPermission("setNtnSmsSupported");
+        enforceSendSmsPermission();
+        mSatelliteController.setNtnSmsSupportedByMessagesApp(ntnSmsSupported);
+    }
+
     /**
      * This API can be used by only CTS to override the cached value for the device overlay config
      * value :

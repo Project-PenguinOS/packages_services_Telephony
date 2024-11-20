@@ -76,6 +76,7 @@ import com.android.internal.telephony.SimultaneousCallingTracker;
 import com.android.internal.telephony.flags.Flags;
 import com.android.internal.telephony.subscription.SubscriptionManagerService;
 import com.android.phone.PhoneGlobals;
+import com.android.phone.PhoneInterfaceManager;
 import com.android.phone.PhoneUtils;
 import com.android.phone.R;
 import com.android.telephony.Rlog;
@@ -1140,8 +1141,10 @@ public class TelecomAccountRegistry {
 
             boolean hasVoiceAvailability = isImsVoiceAvailable();
 
-            boolean isRttSupported = PhoneGlobals.getInstance().phoneMgr
-                    .isRttEnabled(mPhone.getSubId());
+            PhoneInterfaceManager phoneMgr = PhoneGlobals.getInstance()
+                .phoneMgr;
+            boolean isRttSupported = (phoneMgr != null) ?
+                phoneMgr.isRttEnabled(mPhone.getSubId()) : false;
             boolean isUserRttSettingOn = isUserRttSettingOn();
 
             boolean isRoaming = mTelephonyManager.isNetworkRoaming(mPhone.getSubId());
