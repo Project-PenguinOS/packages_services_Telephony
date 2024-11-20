@@ -103,6 +103,11 @@ public class TestContext extends MockContext {
     }
 
     @Override
+    public String getOpPackageName() {
+        return getPackageName();
+    }
+
+    @Override
     public String getAttributionTag() {
         return "";
     }
