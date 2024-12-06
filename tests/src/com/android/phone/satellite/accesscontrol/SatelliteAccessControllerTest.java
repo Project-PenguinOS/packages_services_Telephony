@@ -27,6 +27,7 @@ import static android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_LOCA
 import static android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_LOCATION_NOT_AVAILABLE;
 import static android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_MODEM_ERROR;
 import static android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_NOT_SUPPORTED;
+import static android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_NO_RESOURCES;
 import static android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_REQUEST_NOT_SUPPORTED;
 import static android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_SUCCESS;
 
@@ -619,10 +620,9 @@ public class SatelliteAccessControllerTest extends TelephonyTestBase {
 
         verify(mockResultReceiver, times(1)).send(resultCodeCaptor.capture(),
                 bundleCaptor.capture());
-        assertEquals(SATELLITE_RESULT_SUCCESS, (int) resultCodeCaptor.getValue());
-        assertTrue(bundleCaptor.getValue().containsKey(KEY_SATELLITE_ACCESS_CONFIGURATION));
-        assertNull(bundleCaptor.getValue().getParcelable(KEY_SATELLITE_ACCESS_CONFIGURATION,
-                SatelliteAccessConfiguration.class));
+        assertEquals(SATELLITE_RESULT_NO_RESOURCES, (int) resultCodeCaptor.getValue());
+        assertNull(bundleCaptor.getValue());
+
         verify(mockSatelliteAllowedStateCallback, times(1))
                 .onSatelliteAccessConfigurationChanged(
                         satelliteAccessConfigurationCaptor.capture());
@@ -1408,6 +1408,33 @@ public class SatelliteAccessControllerTest extends TelephonyTestBase {
         assertTrue(mSatelliteAccessControllerUT
                 .getRetryCountPossibleChangeInSatelliteAllowedRegion() == 0);
     }
+
+    @Test
+    public void testLoadSatelliteAccessConfigurationFromDeviceConfig() {
+        when(mMockFeatureFlags.oemEnabledSatelliteFlag()).thenReturn(false);
+        assertNull(mSatelliteAccessControllerUT
+                .getSatelliteConfigurationFileNameFromOverlayConfig(mMockContext));
+
+        when(mMockFeatureFlags.oemEnabledSatelliteFlag()).thenReturn(true);
+        when(mMockContext.getResources()).thenReturn(mMockResources);
+        when(mMockResources
+                .getString(eq(com.android.internal.R.string.satellite_access_config_file)))
+                .thenReturn("test_satellite_file.json");
+        assertEquals("test_satellite_file.json", mSatelliteAccessControllerUT
+                .getSatelliteConfigurationFileNameFromOverlayConfig(mMockContext));
+
+        when(mMockResources
+                .getString(eq(com.android.internal.R.string.satellite_access_config_file)))
+                .thenReturn(null);
+        assertNull(mSatelliteAccessControllerUT
+                .getSatelliteConfigurationFileNameFromOverlayConfig(mMockContext));
+        try {
+            mSatelliteAccessControllerUT.loadSatelliteAccessConfigurationFromDeviceConfig();
+        } catch (Exception e) {
+            fail("Unexpected exception thrown: " + e.getMessage());
+        }
+    }
+
 
     @Test
     public void testUpdateSatelliteConfigData() throws Exception {
