@@ -13241,14 +13241,17 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
                             return;
                         }
                         if (isAllowed) {
-                            if (mFeatureFlags.carrierRoamingNbIotNtn()
-                                    && !mSatelliteAccessController.getSatelliteDisallowedReasons()
-                                    .isEmpty()) {
-                                result.accept(SATELLITE_RESULT_ACCESS_BARRED);
-                            } else {
-                                mSatelliteController.requestSatelliteEnabled(
+                            ResultReceiver resultReceiver = new ResultReceiver(mMainThreadHandler) {
+                                @Override
+                                protected void onReceiveResult(int resultCode, Bundle resultData) {
+                                    Log.d(LOG_TAG, "updateSystemSelectionChannels resultCode="
+                                            + resultCode);
+                                    mSatelliteController.requestSatelliteEnabled(
                                         enableSatellite, enableDemoMode, isEmergency, callback);
-                            }
+                                }
+                            };
+                            mSatelliteAccessController.updateSystemSelectionChannels(
+                                    resultReceiver);
                         } else {
                             result.accept(SATELLITE_RESULT_ACCESS_BARRED);
                         }
