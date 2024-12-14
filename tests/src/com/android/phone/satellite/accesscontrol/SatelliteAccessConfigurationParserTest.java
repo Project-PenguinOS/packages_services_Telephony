@@ -301,7 +301,10 @@ public class SatelliteAccessConfigurationParserTest {
             for (int j = 0; j < satelliteInfoArray.length(); j++) {
                 JSONObject infoJson = satelliteInfoArray.getJSONObject(i);
                 assertNull(parseSatelliteId(infoJson));
-                assertNull(parseSatellitePosition(infoJson));
+                SatellitePosition satellitePosition = parseSatellitePosition(infoJson);
+                assertNotNull(satellitePosition);
+                assertTrue(Double.isNaN(satellitePosition.getLongitudeDegrees()));
+                assertTrue(Double.isNaN(satellitePosition.getAltitudeKm()));
                 assertTrue(parseSatelliteEarfcnRangeList(infoJson).isEmpty());
                 assertNotNull(parseSatelliteBandList(infoJson));
                 assertEquals(0, parseSatelliteBandList(infoJson).size());
