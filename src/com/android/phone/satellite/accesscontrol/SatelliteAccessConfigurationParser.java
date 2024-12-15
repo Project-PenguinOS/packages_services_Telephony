@@ -60,7 +60,6 @@ public class SatelliteAccessConfigurationParser {
     public static final String SATELLITE_BANDS = "bands";
     public static final String SATELLITE_TAG_ID_LIST = "tag_ids";
 
-
     /**
      * Parses a JSON file containing satellite access configurations.
      *
@@ -193,15 +192,17 @@ public class SatelliteAccessConfigurationParser {
         return satelliteId;
     }
 
-    @Nullable
+    @NonNull
     protected static SatellitePosition parseSatellitePosition(
             @NonNull JSONObject satelliteInfoJson) {
         JSONObject jsonObject = satelliteInfoJson.optJSONObject(SATELLITE_POSITION);
+        SatellitePosition satellitePosition = new SatellitePosition(Double.NaN, Double.NaN);
+
         if (jsonObject == null) {
             loge("parseSatellitePosition: jsonObject is null");
-            return null;
+            return satellitePosition;
         }
-        SatellitePosition satellitePosition;
+
         try {
             double longitude = jsonObject.getDouble(SATELLITE_LONGITUDE);
             double altitude = jsonObject.getDouble(SATELLITE_ALTITUDE);
@@ -209,11 +210,11 @@ public class SatelliteAccessConfigurationParser {
                 satellitePosition = new SatellitePosition(longitude, altitude);
             } else {
                 loge("parseSatellitePosition: invalid value: " + longitude + " | " + altitude);
-                return null;
+                return satellitePosition;
             }
         } catch (JSONException e) {
             loge("parseSatellitePosition: json parsing error " + e.getMessage());
-            return null;
+            return satellitePosition;
         }
 
         logd("parseSatellitePosition: " + satellitePosition);

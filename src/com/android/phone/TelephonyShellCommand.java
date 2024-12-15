@@ -234,6 +234,7 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
             "set-allowed-network-types-for-users";
     private static final String GET_IMEI = "get-imei";
     private static final String GET_SIM_SLOTS_MAPPING = "get-sim-slots-mapping";
+    private static final String COMMAND_DELETE_IMSI_KEY = "delete_imsi_key";
     // Take advantage of existing methods that already contain permissions checks when possible.
     private final ITelephony mInterface;
 
@@ -435,6 +436,8 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
                 return handleSetSatelliteSubscriberIdListChangedIntentComponent();
             case SET_SATELLITE_ACCESS_RESTRICTION_CHECKING_RESULT:
                 return handleOverrideCarrierRoamingNtnEligibilityChanged();
+            case COMMAND_DELETE_IMSI_KEY:
+                return handleDeleteTestImsiKey();
             default: {
                 return handleDefaultCommands(cmd);
             }
@@ -3654,9 +3657,11 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
         String s2CellFile = null;
         long locationFreshDurationNanos = 0;
         List<String> satelliteCountryCodes = null;
+        String satelliteAccessConfigurationFile = null;
 
         String opt;
         while ((opt = getNextOption()) != null) {
+            Log.d(LOG_TAG, "handleSetSatelliteAccessControlOverlayConfigs: opt=" + opt);
             switch (opt) {
                 case "-r": {
                     reset = true;
@@ -3679,16 +3684,22 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
                     satelliteCountryCodes = Arrays.asList(countryCodeStr.split(","));
                     break;
                 }
+                case "-g": {
+                    satelliteAccessConfigurationFile = getNextArgRequired();
+                    break;
+                }
             }
         }
         Log.d(LOG_TAG, "handleSetSatelliteAccessControlOverlayConfigs: reset=" + reset
                 + ", isAllowed=" + isAllowed + ", s2CellFile=" + s2CellFile
                 + ", locationFreshDurationNanos=" + locationFreshDurationNanos
-                + ", satelliteCountryCodes=" + satelliteCountryCodes);
+                + ", satelliteCountryCodes=" + satelliteCountryCodes
+                + ", satelliteAccessConfigurationFile=" + satelliteAccessConfigurationFile);
 
         try {
             boolean result = mInterface.setSatelliteAccessControlOverlayConfigs(reset, isAllowed,
-                    s2CellFile, locationFreshDurationNanos, satelliteCountryCodes);
+                    s2CellFile, locationFreshDurationNanos, satelliteCountryCodes,
+                    satelliteAccessConfigurationFile);
             if (VDBG) {
                 Log.v(LOG_TAG, "setSatelliteAccessControlOverlayConfigs result =" + result);
             }
@@ -4195,5 +4206,23 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
         }
         Log.d(LOG_TAG, "handleSetSatelliteAccessRestrictionCheckingResult(" + state + ")");
         return 0;
+    }
+
+    private int handleDeleteTestImsiKey() {
+        if (!(checkShellUid())) {
+                Log.v(LOG_TAG,
+                    "handleCarrierRestrictionStatusCommand, MockModem service check fails or "
+                            + " checkShellUid fails");
+            return -1;
+        }
+
+        Phone phone = PhoneFactory.getDefaultPhone();
+        if (phone == null) {
+            Log.e(LOG_TAG,
+                    "handleCarrierRestrictionStatusCommand" + "No default Phone available");
+            return SubscriptionManager.INVALID_SUBSCRIPTION_ID;
+        }
+        phone.resetCarrierKeysForImsiEncryption(true);
+        return 1;
     }
 }

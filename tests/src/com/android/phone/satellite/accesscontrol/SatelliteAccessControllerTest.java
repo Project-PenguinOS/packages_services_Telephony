@@ -22,6 +22,7 @@ import static android.telephony.satellite.SatelliteManager.KEY_SATELLITE_ACCESS_
 import static android.telephony.satellite.SatelliteManager.KEY_SATELLITE_COMMUNICATION_ALLOWED;
 import static android.telephony.satellite.SatelliteManager.KEY_SATELLITE_PROVISIONED;
 import static android.telephony.satellite.SatelliteManager.KEY_SATELLITE_SUPPORTED;
+import static android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_ACCESS_BARRED;
 import static android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_ERROR;
 import static android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_LOCATION_DISABLED;
 import static android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_LOCATION_NOT_AVAILABLE;
@@ -44,6 +45,7 @@ import static com.android.phone.satellite.accesscontrol.SatelliteAccessControlle
 import static com.android.phone.satellite.accesscontrol.SatelliteAccessController.GOOGLE_US_SAN_SAT_S2_FILE_NAME;
 import static com.android.phone.satellite.accesscontrol.SatelliteAccessController.UNKNOWN_REGIONAL_SATELLITE_CONFIG_ID;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -54,6 +56,7 @@ import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -62,6 +65,7 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -98,10 +102,13 @@ import android.os.UserHandle;
 import android.telecom.TelecomManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.telephony.satellite.EarfcnRange;
 import android.telephony.satellite.ISatelliteCommunicationAllowedStateCallback;
 import android.telephony.satellite.SatelliteAccessConfiguration;
 import android.telephony.satellite.SatelliteInfo;
 import android.telephony.satellite.SatelliteManager;
+import android.telephony.satellite.SatellitePosition;
+import android.telephony.satellite.SystemSelectionSpecifier;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.Log;
@@ -136,11 +143,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /** Unit test for {@link SatelliteAccessController} */
 @RunWith(AndroidTestingRunner.class)
@@ -225,6 +235,7 @@ public class SatelliteAccessControllerTest extends TelephonyTestBase {
     @Mock
     private ConcurrentHashMap<IBinder, ISatelliteCommunicationAllowedStateCallback>
             mSatelliteCommunicationAllowedStateCallbackMap;
+    private SatelliteInfo mSatelliteInfo;
 
     private TestableLooper mTestableLooper;
     private Phone[] mPhones;
@@ -284,6 +295,22 @@ public class SatelliteAccessControllerTest extends TelephonyTestBase {
                 mSatelliteAllowedSemaphore.release();
             } catch (Exception ex) {
                 fail("mSatelliteAllowedReceiver: Got exception in releasing semaphore, ex=" + ex);
+            }
+        }
+    };
+
+    private int mQueriedSystemSelectionChannelUpdatedResultCode = SATELLITE_RESULT_SUCCESS;
+    private Semaphore mSystemSelectionChannelUpdatedSemaphore = new Semaphore(0);
+    private ResultReceiver mSystemSelectionChannelUpdatedReceiver = new ResultReceiver(null) {
+        @Override
+        protected void onReceiveResult(int resultCode, Bundle resultData) {
+            mQueriedSystemSelectionChannelUpdatedResultCode = resultCode;
+            try {
+                mSystemSelectionChannelUpdatedSemaphore.release();
+            } catch (Exception ex) {
+                fail("mSystemSelectionChannelUpdatedReceiver: Got exception in releasing "
+                        + "semaphore, ex="
+                        + ex);
             }
         }
     };
@@ -397,6 +424,13 @@ public class SatelliteAccessControllerTest extends TelephonyTestBase {
         mMockApplicationInfo.targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE;
         when(mMockPackageManager.getApplicationInfo(anyString(), anyInt()))
                 .thenReturn(mMockApplicationInfo);
+
+        mSatelliteInfo = new SatelliteInfo(
+                UUID.randomUUID(),
+                new SatellitePosition(10, 15),
+                new ArrayList<>(Arrays.asList(5, 30)),
+                new ArrayList<>(Arrays.asList(new EarfcnRange(0, 250))));
+
         mSatelliteAccessControllerUT = new TestSatelliteAccessController(mMockContext,
                 mMockFeatureFlags, mTestableLooper.getLooper(), mMockLocationManager,
                 mMockTelecomManager, mMockSatelliteOnDeviceAccessController, mMockSatS2File);
@@ -633,7 +667,7 @@ public class SatelliteAccessControllerTest extends TelephonyTestBase {
         Parcel satelliteAccessconfigParcel = Parcel.obtain();
 
         List<SatelliteInfo> satelliteInfoList = new ArrayList<>();
-        satelliteInfoList.add(mock(SatelliteInfo.class));
+        satelliteInfoList.add(mSatelliteInfo);
         satelliteAccessconfigParcel.writeTypedList(satelliteInfoList);
 
         List<Integer> tagIds = new ArrayList<>(List.of(1, 2));
@@ -1451,7 +1485,7 @@ public class SatelliteAccessControllerTest extends TelephonyTestBase {
 
         // These APIs are executed during loadRemoteConfigs
         verify(mMockSharedPreferences, times(1)).getStringSet(anyString(), any());
-        verify(mMockSharedPreferences, times(1)).getBoolean(anyString(), anyBoolean());
+        verify(mMockSharedPreferences, times(5)).getBoolean(anyString(), anyBoolean());
 
         // satelliteConfig is null
         SatelliteConfigParser spyConfigParser =
@@ -1530,7 +1564,7 @@ public class SatelliteAccessControllerTest extends TelephonyTestBase {
         // Captor and Verify if the mockReceiver and mocContext is registered well
         verify(mMockContext, times(2))
                 .registerReceiver(mLocationBroadcastReceiverCaptor.capture(),
-                mIntentFilterCaptor.capture());
+                        mIntentFilterCaptor.capture());
 
         // When the intent action is not MODE_CHANGED_ACTION,
         // verify if the location manager never invoke isLocationEnabled()
@@ -1710,6 +1744,314 @@ public class SatelliteAccessControllerTest extends TelephonyTestBase {
                 any(Consumer.class));
     }
 
+    @Test
+    public void testUpdateSystemSelectionChannels() {
+        // Set non-emergency case
+        when(mMockFeatureFlags.oemEnabledSatelliteFlag()).thenReturn(true);
+        when(mMockFeatureFlags.carrierRoamingNbIotNtn()).thenReturn(true);
+
+        setUpResponseForRequestIsSatelliteSupported(true, SATELLITE_RESULT_SUCCESS);
+        setUpResponseForRequestIsSatelliteProvisioned(true, SATELLITE_RESULT_SUCCESS);
+        when(mMockCountryDetector.getCurrentNetworkCountryIso()).thenReturn(EMPTY_STRING_LIST);
+
+        // Invoke when regional config ID is not set.
+        mSatelliteAccessControllerUT.setRegionalConfigId(null);
+        mSatelliteAccessControllerUT.updateSystemSelectionChannels(
+                mSystemSelectionChannelUpdatedReceiver);
+        mTestableLooper.processAllMessages();
+        assertTrue(waitForRequestUpdateSystemSelectionChannelResult(
+                mSystemSelectionChannelUpdatedSemaphore, 1));
+        assertEquals(SATELLITE_RESULT_ACCESS_BARRED,
+                mQueriedSystemSelectionChannelUpdatedResultCode);
+
+        // Invoke when mSatelliteAccessConfigMap does not have data for given regional config ID
+        int satelliteRegionalConfigId = DEFAULT_REGIONAL_SATELLITE_CONFIG_ID;
+        mSatelliteAccessControllerUT.setRegionalConfigId(satelliteRegionalConfigId);
+        mSatelliteAccessControllerUT.resetSatelliteAccessConfigMap();
+        mSatelliteAccessControllerUT.updateSystemSelectionChannels(
+                mSystemSelectionChannelUpdatedReceiver);
+        mTestableLooper.processAllMessages();
+        assertTrue(waitForRequestUpdateSystemSelectionChannelResult(
+                mSystemSelectionChannelUpdatedSemaphore, 1));
+        assertEquals(SATELLITE_RESULT_ACCESS_BARRED,
+                mQueriedSystemSelectionChannelUpdatedResultCode);
+
+        // Invoke when mSatelliteAccessConfigMap does not have data and given data is old format.
+        satelliteRegionalConfigId = UNKNOWN_REGIONAL_SATELLITE_CONFIG_ID;
+        mSatelliteAccessControllerUT.setRegionalConfigId(satelliteRegionalConfigId);
+        mSatelliteAccessControllerUT.resetSatelliteAccessConfigMap();
+        mSatelliteAccessControllerUT.updateSystemSelectionChannels(
+                mSystemSelectionChannelUpdatedReceiver);
+        mTestableLooper.processAllMessages();
+        assertTrue(waitForRequestUpdateSystemSelectionChannelResult(
+                mSystemSelectionChannelUpdatedSemaphore, 1));
+        assertEquals(SATELLITE_RESULT_ACCESS_BARRED,
+                mQueriedSystemSelectionChannelUpdatedResultCode);
+
+        satelliteRegionalConfigId = DEFAULT_REGIONAL_SATELLITE_CONFIG_ID;
+        // Return success when SatelliteController.updateSystemSelectionChannels was invoked
+        setupResponseForUpdateSystemSelectionChannels(SATELLITE_RESULT_SUCCESS);
+
+        // Invoke updateSystemSelectionChannels when there is corresponding satellite access config.
+        // Create satellite info 1
+        String seed1 = "test-seed-satellite1";
+        UUID uuid1 = UUID.nameUUIDFromBytes(seed1.getBytes());
+        SatellitePosition satellitePosition1 = new SatellitePosition(0, 35876);
+        int[] bands1 = {200, 201, 202};
+        EarfcnRange earfcnRange1 = new EarfcnRange(300, 301);
+        EarfcnRange earfcnRange2 = new EarfcnRange(310, 311);
+        List<EarfcnRange> earfcnRangeList1 = new ArrayList<>(
+                Arrays.asList(earfcnRange1, earfcnRange2));
+        SatelliteInfo satelliteInfo1 = new SatelliteInfo(uuid1, satellitePosition1, Arrays.stream(
+                bands1).boxed().collect(Collectors.toList()), earfcnRangeList1);
+        // Create satellite info 2
+        String seed2 = "test-seed-satellite2";
+        UUID uuid2 = UUID.nameUUIDFromBytes(seed2.getBytes());
+        SatellitePosition satellitePosition2 = new SatellitePosition(120, 35876);
+        int[] bands2 = {210, 211, 212};
+        EarfcnRange earfcnRange3 = new EarfcnRange(320, 321);
+        EarfcnRange earfcnRange4 = new EarfcnRange(330, 331);
+        List<EarfcnRange> earfcnRangeList2 = new ArrayList<>(
+                Arrays.asList(earfcnRange3, earfcnRange4));
+        SatelliteInfo satelliteInfo2 = new SatelliteInfo(uuid2, satellitePosition2, Arrays.stream(
+                bands2).boxed().collect(Collectors.toList()), earfcnRangeList2);
+        // Create satellite info 3
+        String seed3 = "test-seed-satellite3";
+        UUID uuid3 = UUID.nameUUIDFromBytes(seed3.getBytes());
+        SatellitePosition satellitePosition3 = new SatellitePosition(120, 35876);
+        int[] bands3 = {220, 221, 222};
+        EarfcnRange earfcnRange5 = new EarfcnRange(340, 341);
+        EarfcnRange earfcnRange6 = new EarfcnRange(350, 351);
+        List<EarfcnRange> earfcnRangeList3 = new ArrayList<>(
+                Arrays.asList(earfcnRange5, earfcnRange6));
+        SatelliteInfo satelliteInfo3 = new SatelliteInfo(uuid3, satellitePosition3, Arrays.stream(
+                bands3).boxed().collect(Collectors.toList()), earfcnRangeList3);
+
+        int[] tagIds = {1, 2, 3};
+        SatelliteAccessConfiguration satelliteAccessConfiguration =
+                new SatelliteAccessConfiguration(new ArrayList<>(
+                        Arrays.asList(satelliteInfo1, satelliteInfo2, satelliteInfo3)),
+                        Arrays.stream(tagIds).boxed().collect(Collectors.toList()));
+
+        // Add satellite access configuration to map
+        mSatelliteAccessControllerUT.setSatelliteAccessConfigMap(satelliteRegionalConfigId,
+                satelliteAccessConfiguration);
+
+        // Invoke updateSystemSelectionChannel
+        mSatelliteAccessControllerUT.updateSystemSelectionChannels(
+                mSystemSelectionChannelUpdatedReceiver);
+        mTestableLooper.processAllMessages();
+        assertTrue(waitForRequestUpdateSystemSelectionChannelResult(
+                mSystemSelectionChannelUpdatedSemaphore, 1));
+        assertEquals(SATELLITE_RESULT_SUCCESS,
+                mQueriedSystemSelectionChannelUpdatedResultCode);
+        ArgumentCaptor<List<SystemSelectionSpecifier>> systemSelectionSpecifierListCaptor =
+                ArgumentCaptor.forClass(List.class);
+        verify(mMockSatelliteController, times(1)).updateSystemSelectionChannels(
+                systemSelectionSpecifierListCaptor.capture(), any(ResultReceiver.class));
+        List<SystemSelectionSpecifier> capturedList = systemSelectionSpecifierListCaptor.getValue();
+        SystemSelectionSpecifier systemSelectionSpecifier = capturedList.getFirst();
+
+        // Verify the fields value of given systemSelectionSpecifier matched with expected.
+        int[] expectedBandsArray = IntStream.concat(
+                IntStream.concat(Arrays.stream(bands1), Arrays.stream(bands2)),
+                Arrays.stream(bands3)).toArray();
+        int[] actualBandsArray = systemSelectionSpecifier.getBands();
+        assertArrayEquals(expectedBandsArray, actualBandsArray);
+
+        int[] expectedEarfcnsArray = {300, 301, 310, 311, 320, 321, 330, 331, 340, 341, 350, 351};
+        int[] actualEarfcnsArray = systemSelectionSpecifier.getEarfcns();
+        assertArrayEquals(expectedEarfcnsArray, actualEarfcnsArray);
+
+        SatelliteInfo[] expectedSatelliteInfos = {satelliteInfo1, satelliteInfo2, satelliteInfo3};
+        assertArrayEquals(expectedSatelliteInfos,
+                systemSelectionSpecifier.getSatelliteInfos().toArray(new SatelliteInfo[0]));
+
+        int[] actualTagIdArray = systemSelectionSpecifier.getTagIds();
+        assertArrayEquals(tagIds, actualTagIdArray);
+
+        // Verify backward compatibility when there is valid data for default regional config ID
+        satelliteRegionalConfigId = UNKNOWN_REGIONAL_SATELLITE_CONFIG_ID;
+        mSatelliteAccessControllerUT.setRegionalConfigId(satelliteRegionalConfigId);
+        mSatelliteAccessControllerUT.updateSystemSelectionChannels(
+                mSystemSelectionChannelUpdatedReceiver);
+        mTestableLooper.processAllMessages();
+
+        // updateSelectionChannelResult will be invoked with the data for default regional config ID
+        assertTrue(waitForRequestUpdateSystemSelectionChannelResult(
+                mSystemSelectionChannelUpdatedSemaphore, 1));
+        systemSelectionSpecifierListCaptor = ArgumentCaptor.forClass(List.class);
+        verify(mMockSatelliteController, times(2)).updateSystemSelectionChannels(
+                systemSelectionSpecifierListCaptor.capture(), any(ResultReceiver.class));
+        capturedList = systemSelectionSpecifierListCaptor.getValue();
+        systemSelectionSpecifier = capturedList.getFirst();
+
+        // Data will be same with default regional config ID
+
+        // Verify the fields value of given systemSelectionSpecifier matched with expected.
+        actualBandsArray = systemSelectionSpecifier.getBands();
+        assertArrayEquals(expectedBandsArray, actualBandsArray);
+
+        actualEarfcnsArray = systemSelectionSpecifier.getEarfcns();
+        assertArrayEquals(expectedEarfcnsArray, actualEarfcnsArray);
+
+        assertArrayEquals(expectedSatelliteInfos,
+                systemSelectionSpecifier.getSatelliteInfos().toArray(new SatelliteInfo[0]));
+
+        actualTagIdArray = systemSelectionSpecifier.getTagIds();
+        assertArrayEquals(tagIds, actualTagIdArray);
+
+        mSatelliteAccessControllerUT.resetSatelliteAccessConfigMap();
+    }
+
+    @Test
+    public void testUpdateSystemSelectionChannels_HandleInvalidInput() {
+        // Set non-emergency case
+        when(mMockFeatureFlags.oemEnabledSatelliteFlag()).thenReturn(true);
+        when(mMockFeatureFlags.carrierRoamingNbIotNtn()).thenReturn(true);
+
+        setUpResponseForRequestIsSatelliteSupported(true, SATELLITE_RESULT_SUCCESS);
+        setUpResponseForRequestIsSatelliteProvisioned(true, SATELLITE_RESULT_SUCCESS);
+        when(mMockCountryDetector.getCurrentNetworkCountryIso()).thenReturn(EMPTY_STRING_LIST);
+        int satelliteRegionalConfigId = DEFAULT_REGIONAL_SATELLITE_CONFIG_ID;
+        mSatelliteAccessControllerUT.setRegionalConfigId(satelliteRegionalConfigId);
+        // Set return success when SatelliteController.updateSystemSelectionChannels was invoked
+        setupResponseForUpdateSystemSelectionChannels(SATELLITE_RESULT_SUCCESS);
+
+        // Create satellite info in which satellite position is null.
+        String seed1 = "test-seed-satellite1";
+        UUID uuid1 = UUID.nameUUIDFromBytes(seed1.getBytes());
+        SatellitePosition satellitePosition1 = null;
+        List<Integer> bandList1 = new ArrayList<>(List.of(200, 201, 202));
+        EarfcnRange earfcnRange1 = new EarfcnRange(300, 301);
+        EarfcnRange earfcnRange2 = new EarfcnRange(310, 311);
+        List<EarfcnRange> earfcnRangeList1 = new ArrayList<>(
+                Arrays.asList(earfcnRange1, earfcnRange2));
+        SatelliteInfo satelliteInfo1 = new SatelliteInfo(uuid1, satellitePosition1, bandList1,
+                earfcnRangeList1);
+
+        // Create satellite info in which band list is empty
+        String seed2 = "test-seed-satellite2";
+        UUID uuid2 = UUID.nameUUIDFromBytes(seed2.getBytes());
+        SatellitePosition satellitePosition2 = new SatellitePosition(120, 35876);
+        List<Integer> bandList2 = new ArrayList<>();
+        EarfcnRange earfcnRange3 = new EarfcnRange(320, 321);
+        EarfcnRange earfcnRange4 = new EarfcnRange(330, 331);
+        List<EarfcnRange> earfcnRangeList2 = new ArrayList<>(
+                Arrays.asList(earfcnRange3, earfcnRange4));
+        SatelliteInfo satelliteInfo2 = new SatelliteInfo(uuid2, satellitePosition2, bandList2,
+                earfcnRangeList2);
+
+        // Create satellite info 3, every field is valid
+        String seed3 = "test-seed-satellite3";
+        UUID uuid3 = UUID.nameUUIDFromBytes(seed3.getBytes());
+        SatellitePosition satellitePosition3 = new SatellitePosition(120, 35876);
+        List<Integer> bandList3 = new ArrayList<>(List.of(220, 221, 222));
+        EarfcnRange earfcnRange5 = new EarfcnRange(340, 341);
+        EarfcnRange earfcnRange6 = new EarfcnRange(350, 351);
+        List<EarfcnRange> earfcnRangeList3 = new ArrayList<>(
+                Arrays.asList(earfcnRange5, earfcnRange6));
+        SatelliteInfo satelliteInfo3 = new SatelliteInfo(uuid3, satellitePosition3, bandList3,
+                earfcnRangeList3);
+        // Add empty tagId list
+        List<Integer> tagIdList = new ArrayList<>();
+
+        // Create satelliteAccessConfiguration with some of files of added Satellite info are empty.
+        SatelliteAccessConfiguration satelliteAccessConfiguration1 =
+                new SatelliteAccessConfiguration(new ArrayList<>(
+                        Arrays.asList(satelliteInfo1, satelliteInfo2, satelliteInfo3)), tagIdList);
+
+        // Add satellite access configuration to map
+        mSatelliteAccessControllerUT.setSatelliteAccessConfigMap(satelliteRegionalConfigId,
+                satelliteAccessConfiguration1);
+
+        // Invoke updateSystemSelectionChannel
+        mSatelliteAccessControllerUT.updateSystemSelectionChannels(
+                mSystemSelectionChannelUpdatedReceiver);
+        mTestableLooper.processAllMessages();
+        assertTrue(waitForRequestUpdateSystemSelectionChannelResult(
+                mSystemSelectionChannelUpdatedSemaphore, 1));
+        assertEquals(SATELLITE_RESULT_SUCCESS,
+                mQueriedSystemSelectionChannelUpdatedResultCode);
+        ArgumentCaptor<List<SystemSelectionSpecifier>> systemSelectionSpecifierListCaptor =
+                ArgumentCaptor.forClass(List.class);
+        verify(mMockSatelliteController, times(1)).updateSystemSelectionChannels(
+                systemSelectionSpecifierListCaptor.capture(), any(ResultReceiver.class));
+        List<SystemSelectionSpecifier> capturedList = systemSelectionSpecifierListCaptor.getValue();
+        SystemSelectionSpecifier systemSelectionSpecifier = capturedList.getFirst();
+
+        // Verify the fields value of given systemSelectionSpecifier matched with expected.
+        List<Integer> expectedBandList = new ArrayList<>(bandList1);
+        expectedBandList.addAll(bandList2);
+        expectedBandList.addAll(bandList3);
+
+        List<Integer> actualBandList = Arrays.stream(systemSelectionSpecifier.getBands()).boxed()
+                .collect(Collectors.toList());
+        assertEquals(expectedBandList, actualBandList);
+
+        List<Integer> expectedEarfcnList = new ArrayList<>(
+                List.of(300, 301, 310, 311, 320, 321, 330, 331, 340, 341, 350, 351));
+        List<Integer> actualEarfcnList = Arrays.stream(systemSelectionSpecifier.getEarfcns())
+                .boxed().collect(Collectors.toList());
+        assertEquals(expectedEarfcnList, actualEarfcnList);
+
+        assertEquals(satelliteInfo1, systemSelectionSpecifier.getSatelliteInfos().get(0));
+        assertEquals(satelliteInfo2, systemSelectionSpecifier.getSatelliteInfos().get(1));
+        assertEquals(satelliteInfo3, systemSelectionSpecifier.getSatelliteInfos().get(2));
+
+        List<Integer> actualTagIdList = Arrays.stream(systemSelectionSpecifier.getTagIds()).boxed()
+                .collect(Collectors.toList());
+        assertEquals(tagIdList, actualTagIdList);
+
+        // Create satelliteAccessConfiguration with empty list of SatelliteInfo.
+        SatelliteAccessConfiguration satelliteAccessConfiguration2 =
+                new SatelliteAccessConfiguration(new ArrayList<>(), tagIdList);
+        mSatelliteAccessControllerUT.setSatelliteAccessConfigMap(
+                DEFAULT_REGIONAL_SATELLITE_CONFIG_ID, satelliteAccessConfiguration2);
+
+        // Invoke updateSystemSelectionChannel
+        mSatelliteAccessControllerUT.updateSystemSelectionChannels(
+                mSystemSelectionChannelUpdatedReceiver);
+        mTestableLooper.processAllMessages();
+        assertTrue(waitForRequestUpdateSystemSelectionChannelResult(
+                mSystemSelectionChannelUpdatedSemaphore, 1));
+        assertEquals(SATELLITE_RESULT_SUCCESS,
+                mQueriedSystemSelectionChannelUpdatedResultCode);
+        systemSelectionSpecifierListCaptor = ArgumentCaptor.forClass(List.class);
+        verify(mMockSatelliteController, times(2)).updateSystemSelectionChannels(
+                systemSelectionSpecifierListCaptor.capture(), any(ResultReceiver.class));
+        capturedList = systemSelectionSpecifierListCaptor.getValue();
+        systemSelectionSpecifier = capturedList.getFirst();
+
+        // Verify the fields value of given systemSelectionSpecifier matched with expected.
+        assertEquals(0, systemSelectionSpecifier.getBands().length);
+        assertEquals(0, systemSelectionSpecifier.getEarfcns().length);
+
+        SatelliteInfo[] expectedSatelliteInfoArray = new SatelliteInfo[0];
+        assertArrayEquals(expectedSatelliteInfoArray,
+                systemSelectionSpecifier.getSatelliteInfos().toArray(new SatelliteInfo[0]));
+
+        actualTagIdList = Arrays.stream(systemSelectionSpecifier.getTagIds()).boxed().collect(
+                Collectors.toList());
+        assertEquals(tagIdList, actualTagIdList);
+
+        mSatelliteAccessControllerUT.resetSatelliteAccessConfigMap();
+    }
+
+    @Test
+    public void testCheckSharedPreferenceException() {
+        doReturn(mMockSharedPreferencesEditor).when(mMockSharedPreferencesEditor)
+                .remove(anyString());
+        doThrow(new ClassCastException()).when(mMockSharedPreferences)
+                .getBoolean(anyString(), eq(false));
+
+        mSatelliteAccessControllerUT = new TestSatelliteAccessController(mMockContext,
+                mMockFeatureFlags, mTestableLooper.getLooper(), mMockLocationManager,
+                mMockTelecomManager, mMockSatelliteOnDeviceAccessController, mMockSatS2File);
+
+        verify(mMockSharedPreferencesEditor, times(4)).remove(anyString());
+    }
+
     private void sendSatelliteCommunicationAllowedEvent() {
         Pair<Integer, ResultReceiver> requestPair =
                 new Pair<>(DEFAULT_SUBSCRIPTION_ID,
@@ -1720,7 +2062,6 @@ public class SatelliteAccessControllerTest extends TelephonyTestBase {
         msg.sendToTarget();
         mTestableLooper.processAllMessages();
     }
-
 
     private void sendConfigUpdateChangedEvent(Context context) {
         Message msg = mSatelliteAccessControllerUT.obtainMessage(EVENT_CONFIG_DATA_UPDATED);
@@ -1774,6 +2115,24 @@ public class SatelliteAccessControllerTest extends TelephonyTestBase {
         return true;
     }
 
+    private boolean waitForRequestUpdateSystemSelectionChannelResult(Semaphore semaphore,
+            int expectedNumberOfEvents) {
+        for (int i = 0; i < expectedNumberOfEvents; i++) {
+            try {
+                if (!semaphore.tryAcquire(TIMEOUT, TimeUnit.MILLISECONDS)) {
+                    logd("Timeout to receive "
+                            + "updateSystemSelectionChannel()"
+                            + " callback");
+                    return false;
+                }
+            } catch (Exception ex) {
+                logd("updateSystemSelectionChannel: Got exception=" + ex);
+                return false;
+            }
+        }
+        return true;
+    }
+
     private void sendLocationRequestResult(Location location) {
         mLocationRequestConsumerCaptor.getValue().accept(location);
         mTestableLooper.processAllMessages();
@@ -1808,6 +2167,16 @@ public class SatelliteAccessControllerTest extends TelephonyTestBase {
             }
             return null;
         }).when(mMockSatelliteController).requestIsSatelliteProvisioned(any(ResultReceiver.class));
+    }
+
+    private void setupResponseForUpdateSystemSelectionChannels(
+            @SatelliteManager.SatelliteResult int error) {
+        doAnswer(invocation -> {
+            ResultReceiver resultReceiver = invocation.getArgument(1);
+            resultReceiver.send(error, null);
+            return null;
+        }).when(mMockSatelliteController).updateSystemSelectionChannels(anyList(),
+                any(ResultReceiver.class));
     }
 
     @SafeVarargs
@@ -1923,6 +2292,26 @@ public class SatelliteAccessControllerTest extends TelephonyTestBase {
         public void setRegionalConfigId(@Nullable Integer regionalConfigId) {
             synchronized (mLock) {
                 mRegionalConfigId = regionalConfigId;
+            }
+        }
+
+        public void setSatelliteAccessConfigMap(int regionalConfigId,
+                SatelliteAccessConfiguration satelliteAccessConfiguration) {
+            synchronized (mLock) {
+                if (mSatelliteAccessConfigMap == null) {
+                    mSatelliteAccessConfigMap = new HashMap<>();
+                }
+                mSatelliteAccessConfigMap.put(regionalConfigId, satelliteAccessConfiguration);
+            }
+        }
+
+        public void resetSatelliteAccessConfigMap() {
+            synchronized (mLock) {
+                if (mSatelliteAccessConfigMap == null) {
+                    mSatelliteAccessConfigMap = new HashMap<>();
+                } else {
+                    mSatelliteAccessConfigMap.clear();
+                }
             }
         }
     }
