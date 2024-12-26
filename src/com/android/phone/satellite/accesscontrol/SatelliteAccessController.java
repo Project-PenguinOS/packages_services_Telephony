@@ -85,7 +85,6 @@ import android.telephony.satellite.EarfcnRange;
 import android.telephony.satellite.ISatelliteCommunicationAllowedStateCallback;
 import android.telephony.satellite.ISatelliteDisallowedReasonsCallback;
 import android.telephony.satellite.ISatelliteProvisionStateCallback;
-import android.telephony.satellite.ISatelliteSupportedStateCallback;
 import android.telephony.satellite.SatelliteAccessConfiguration;
 import android.telephony.satellite.SatelliteInfo;
 import android.telephony.satellite.SatelliteManager;
@@ -98,6 +97,7 @@ import android.util.Pair;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.telephony.IBooleanConsumer;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneFactory;
 import com.android.internal.telephony.SmsApplication;
@@ -259,7 +259,7 @@ public class SatelliteAccessController extends Handler {
     @NonNull
     private final ResultReceiver mInternalSatelliteProvisionedResultReceiver;
     @NonNull
-    private final ISatelliteSupportedStateCallback mInternalSatelliteSupportedStateCallback;
+    private final IBooleanConsumer mInternalSatelliteSupportedStateCallback;
     @NonNull
     private final ISatelliteProvisionStateCallback mInternalSatelliteProvisionStateCallback;
     @NonNull
@@ -505,9 +505,9 @@ public class SatelliteAccessController extends Handler {
         initializeSatelliteSystemNotification(context);
         registerDefaultSmsAppChangedBroadcastReceiver(context);
 
-        mInternalSatelliteSupportedStateCallback = new ISatelliteSupportedStateCallback.Stub() {
+        mInternalSatelliteSupportedStateCallback = new IBooleanConsumer.Stub() {
             @Override
-            public void onSatelliteSupportedStateChanged(boolean isSupported) {
+            public void accept(boolean isSupported) {
                 logd("onSatelliteSupportedStateChanged: isSupported=" + isSupported);
                 if (isSupported) {
                     final String caller = "SAC:onSatelliteSupportedStateChanged";
