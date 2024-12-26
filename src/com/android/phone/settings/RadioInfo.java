@@ -59,6 +59,8 @@ import static android.telephony.ims.stub.ImsRegistrationImplBase.REGISTRATION_TE
 import static android.telephony.ims.stub.ImsRegistrationImplBase.REGISTRATION_TECH_LTE;
 import static android.telephony.ims.stub.ImsRegistrationImplBase.REGISTRATION_TECH_NR;
 
+import static com.qti.extphone.ExtTelephonyManager.FEATURE_TDSCDMA_SUPPORT;
+
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 import android.annotation.NonNull;
@@ -176,6 +178,9 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.IntStream;
 
 import com.qti.extphone.ExtTelephonyManager;
 import com.qti.extphone.QtiImeiInfo;
@@ -229,6 +234,8 @@ public class RadioInfo extends AppCompatActivity {
             "NR/LTE/TDSCDMA/CDMA/EvDo/GSM/WCDMA",
             "Unknown"
     };
+    private String[] mUpdatedPrefNwLabels;
+    private final HashMap<String, Integer> mPrefNwLabelToIntMap = new HashMap<>();
 
     private static final Integer[] SIGNAL_STRENGTH_LEVEL = new Integer[] {
             -1 /*clear mock*/,
@@ -575,11 +582,18 @@ public class RadioInfo extends AppCompatActivity {
     private void updatePreferredNetworkType(int type) {
         if (type >= PREFERRED_NETWORK_LABELS.length || type < 0) {
             log("Network type: unknown type value=" + type);
-            type = PREFERRED_NETWORK_LABELS.length - 1; //set to Unknown
+            mPreferredNetworkTypeResult = mUpdatedPrefNwLabels.length - 1; //set to Unknown
+        } else {
+            mPreferredNetworkTypeResult = getPrefNwTypeIndexFromUpdatedArray(type);
         }
-        mPreferredNetworkTypeResult = type;
-
         mPreferredNetworkType.setSelection(mPreferredNetworkTypeResult, true);
+    }
+
+    private int getPrefNwTypeIndexFromUpdatedArray(int type) {
+        return IntStream.range(0, mUpdatedPrefNwLabels.length)
+                .filter(i -> mUpdatedPrefNwLabels[i].equals(PREFERRED_NETWORK_LABELS[type]))
+                .findFirst()
+                .orElse(-1);
     }
 
     private void updatePhoneIndex() {
@@ -678,10 +692,6 @@ public class RadioInfo extends AppCompatActivity {
             mPhoneId = DEFAULT_PHONE_ID;
         }
 
-        mTelephonyManager = getSystemService(TelephonyManager.class)
-                .createForSubscriptionId(mSubId);
-        mEuiccManager = getSystemService(EuiccManager.class);
-
         mBroadcastReceiverThread.start();
         Handler scheduler = new Handler(mBroadcastReceiverThread.getLooper());
         IntentFilter filter = new IntentFilter(ACTION_RADIO_POWER_STATE_CHANGED);
@@ -694,8 +704,6 @@ public class RadioInfo extends AppCompatActivity {
             log("onCreate : IllegalArgumentException " + e.getMessage());
             mProvisioningManager = null;
         }
-
-        sPhoneIndexLabels = getPhoneIndexLabels(mTelephonyManager);
 
         mDeviceId = (TextView) findViewById(R.id.imei);
         mLine1Number = (TextView) findViewById(R.id.number);
@@ -734,15 +742,24 @@ public class RadioInfo extends AppCompatActivity {
         mNetworkSlicingConfig = (TextView) findViewById(R.id.network_slicing_config);
         mEuiccInfo = (TextView) findViewById(R.id.euicc_info);
 
+        mTelephonyManager = getSystemService(TelephonyManager.class)
+                .createForSubscriptionId(mSubId);
+        mEuiccManager = getSystemService(EuiccManager.class);
+        mExtTelephonyManager = ExtTelephonyManager.getInstance(this);
+        mExtTelephonyManager.connectService(mServiceCallback);
+
+        sPhoneIndexLabels = getPhoneIndexLabels(mTelephonyManager);
+
         // hide 5G stats on devices that don't support 5G
         if ((mTelephonyManager.getSupportedRadioAccessFamily()
                 & TelephonyManager.NETWORK_TYPE_BITMASK_NR) == 0) {
             setNrStatsVisibility(View.GONE);
         }
 
+        mUpdatedPrefNwLabels = getUpdatedPrefNwLabels();
         mPreferredNetworkType = (Spinner) findViewById(R.id.preferredNetworkType);
         ArrayAdapter<String> mPreferredNetworkTypeAdapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_item, PREFERRED_NETWORK_LABELS);
+                android.R.layout.simple_spinner_item, mUpdatedPrefNwLabels);
         mPreferredNetworkTypeAdapter
                 .setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mPreferredNetworkType.setAdapter(mPreferredNetworkTypeAdapter);
@@ -916,7 +933,7 @@ public class RadioInfo extends AppCompatActivity {
         }
 
         mCellInfoRefreshRateIndex = 0; //disabled
-        mPreferredNetworkTypeResult = PREFERRED_NETWORK_LABELS.length - 1; //Unknown
+        mPreferredNetworkTypeResult = mUpdatedPrefNwLabels.length - 1; //Unknown
 
         new Thread(() -> {
             int networkType = (int) mTelephonyManager.getPreferredNetworkTypeBitmask();
@@ -924,11 +941,36 @@ public class RadioInfo extends AppCompatActivity {
                     RadioAccessFamily.getNetworkTypeFromRaf(networkType)));
         }).start();
         restoreFromBundle(icicle);
+    }
 
-        mExtTelephonyManager = ExtTelephonyManager.getInstance(this);
-        mExtTelephonyManager.connectService(mServiceCallback);
-        Log.d(TAG, "Connect to ExtTelephony bound service...");
+    private String[] getUpdatedPrefNwLabels() {
+        final ArrayList<String> updatedPrefdNwLabels = new ArrayList<>();
+        final boolean tdscdmaSupported = isTdscdmaSupported();
+        final boolean cdmaSupported = isCdmaSupported();
+        log("tdscdmaSupported " + tdscdmaSupported + ", cdmaSupported " + cdmaSupported);
+        // Exclude CDMA/TDSCDMA RATs if unsupported
+        final Pattern pattern = Pattern.compile("(?<!W|TDS)CDMA|EvDo");
+        for (int i = 0; i < PREFERRED_NETWORK_LABELS.length; i++) {
+            String entry = PREFERRED_NETWORK_LABELS[i];
+            mPrefNwLabelToIntMap.put(entry, i);
+            Matcher matcher = pattern.matcher(entry);
+            if (cdmaSupported || !matcher.find()) {
+                updatedPrefdNwLabels.add(entry);
+            }
+            if (!tdscdmaSupported && entry.contains("TDSCDMA")) {
+                updatedPrefdNwLabels.remove(entry);
+            }
+        }
+        return updatedPrefdNwLabels.toArray(new String[updatedPrefdNwLabels.size()]);
+    }
 
+    private boolean isTdscdmaSupported() {
+        return mExtTelephonyManager.isFeatureSupported(FEATURE_TDSCDMA_SUPPORT);
+    }
+
+    private boolean isCdmaSupported() {
+        final PackageManager pm = getPackageManager();
+        return pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY_CDMA);
     }
 
     boolean shouldHideButton(String action) {
@@ -970,7 +1012,7 @@ public class RadioInfo extends AppCompatActivity {
 
         @Override
         public void onConnected() {
-          Log.d(TAG, "ExtTelephony Service connected");
+          Log.d(TAG, "ExtTelephony service connected");
           isExtServiceConnected = true;
           //get imei
           updateImei();
@@ -978,7 +1020,7 @@ public class RadioInfo extends AppCompatActivity {
 
         @Override
         public void onDisconnected() {
-            Log.d(TAG, "ExtTelephony Service disconnected...");
+            Log.d(TAG, "ExtTelephony service disconnected...");
             isExtServiceConnected = false;
         }
     };
@@ -1123,7 +1165,7 @@ public class RadioInfo extends AppCompatActivity {
         mHttpClientTest.setText(mHttpClientTestResult);
 
         mPreferredNetworkTypeResult = b.getInt("mPreferredNetworkTypeResult",
-                PREFERRED_NETWORK_LABELS.length - 1);
+                mUpdatedPrefNwLabels.length - 1);
 
         mPhoneId = b.getInt("mSelectedPhoneIndex", 0);
         mSubId = SubscriptionManager.getSubscriptionId(mPhoneId);
@@ -2644,8 +2686,9 @@ public class RadioInfo extends AppCompatActivity {
 
         public void onItemSelected(AdapterView parent, View v, int pos, long id) {
             if (mPreferredNetworkTypeResult != pos && pos >= 0
-                    && pos <= PREFERRED_NETWORK_LABELS.length - 2) {
-                mPreferredNetworkTypeResult = pos;
+                    && pos <= mUpdatedPrefNwLabels.length - 2) {
+                final String prefNwLabel = mUpdatedPrefNwLabels[pos];
+                mPreferredNetworkTypeResult = mPrefNwLabelToIntMap.get(prefNwLabel);
                 new Thread(() -> {
                     mTelephonyManager.setAllowedNetworkTypesForReason(
                             TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_USER,
