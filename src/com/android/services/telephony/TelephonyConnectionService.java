@@ -166,9 +166,6 @@ public class TelephonyConnectionService extends ConnectionService {
     private static final String DISCONNECT_REASON_CARRIER_ROAMING_SATELLITE_MODE =
             "CARRIER_ROAMING_SATELLITE_MODE";
 
-    // Max Size of the Short Code (aka Short String from TS 22.030 6.5.2)
-    private static final int MAX_LENGTH_SHORT_CODE = 2;
-
     private final TelephonyConnectionServiceProxy mTelephonyConnectionServiceProxy =
             new TelephonyConnectionServiceProxy() {
         @Override
@@ -1666,8 +1663,7 @@ public class TelephonyConnectionService extends ConnectionService {
 
             if (!isEmergencyNumber) {
                 boolean disableSwap = false;
-                if (isDsdaOrDsdsTransitionMode() && !isMmiCode(number)
-                        && !isShortCodeUssd(number)) {
+                if (isDsdaOrDsdsTransitionMode()) {
                     Connection conn = getRingingOrDialingConnection();
                     if (conn != null && !Objects.equals(
                             request.getAccountHandle(), conn.getPhoneAccountHandle())) {
@@ -3130,6 +3126,14 @@ public class TelephonyConnectionService extends ConnectionService {
                         getActiveDsdaConnectionPhoneAccountPair();
                 TelephonyConnection connToHold = pairToHold.first;
 
+                if (!isEmergency && isDsdaOrDsdsTransitionMode()
+                    && isRingingCallPresentOnOtherSub(connection.getPhoneAccountHandle())) {
+                   // Do not allow call to be dialed when there is a ringing call on the
+                   // other SUB. Same SUB is handled in PhoneCallTracker
+                   throw new CallStateException(CallStateException.ERROR_CALL_RINGING,
+                           "Can't place a call while another is ringing.");
+                }
+
                 if (mTelephonyManagerProxy.isDsdsTransitionMode()
                     && (connToHold == null || !Objects.equals(pairToHold.second,
                             connection.getPhoneAccountHandle())))  {
@@ -3326,7 +3330,8 @@ public class TelephonyConnectionService extends ConnectionService {
 
         String dialPart = PhoneNumberUtils.extractNetworkPortionAlt(
                 PhoneNumberUtils.stripSeparators(number));
-        boolean isMmiCode = isMmiCode(number);
+        boolean isMmiCode = (dialPart.startsWith("*") || dialPart.startsWith("#"))
+                && dialPart.endsWith("#");
         boolean isSuppServiceCode = ImsPhoneMmiCode.isSuppServiceCodes(dialPart, phone);
         boolean isPotentialUssdCode = isMmiCode && !isSuppServiceCode;
 
@@ -5688,25 +5693,6 @@ public class TelephonyConnectionService extends ConnectionService {
 
     private static boolean isTelephonyConferenceBase(Conference conn) {
         return conn instanceof TelephonyConferenceBase;
-    }
-
-    private boolean isMmiCode(String number) {
-        String dialPart = PhoneNumberUtils.extractNetworkPortionAlt(
-                PhoneNumberUtils.stripSeparators(number));
-        return (dialPart.startsWith("*") || dialPart.startsWith("#"))
-                && dialPart.endsWith("#");
-    }
-
-    private boolean isShortCodeUssd(String number) {
-        String dialPart = PhoneNumberUtils.extractNetworkPortionAlt(
-                PhoneNumberUtils.stripSeparators(number));
-        if (dialPart != null && dialPart.length() <= MAX_LENGTH_SHORT_CODE) {
-            if (dialPart.length() != MAX_LENGTH_SHORT_CODE ||
-                    dialPart.charAt(0) != '1') {
-                return true;
-            }
-        }
-        return false;
     }
 
     /* Returns a pair of the active TelephonyConnection and PhoneAccountHandle for DSDA.
