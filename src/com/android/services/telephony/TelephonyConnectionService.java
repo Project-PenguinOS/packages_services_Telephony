@@ -5644,11 +5644,9 @@ public class TelephonyConnectionService extends ConnectionService {
     // Helper function to check if there are multiple held calls
     private boolean hasMultipleHeldCalls() {
         int numHeldCalls = 0;
-        // Individual telephony connections show up as HELD when CS conference call is held
         for (Connection current : getAllConnections()) {
             if (isTelephonyConnection(current) &&
-                    (current.getState() == Connection.STATE_HOLDING) &&
-                    (current.getConference() == null)) {
+                    (current.getState() == Connection.STATE_HOLDING)) {
                 numHeldCalls++;
             }
         }
