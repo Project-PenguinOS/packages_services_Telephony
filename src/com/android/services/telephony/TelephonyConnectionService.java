@@ -983,14 +983,8 @@ public class TelephonyConnectionService extends ConnectionService {
                     hasConnectedVideoCallOnOtherSub(accountHandle)) {
                 return;
             }
-            /*
-              At this stage, if video call hold is not allowed, update
-              EXTRA_DISABLE_SWAP_CALL when call becomes active based on
-              if the connection is a video call
-            */
-            if (!isVideoCallHoldAllowed(conn.getPhone())) {
-                disableSwap(conn, VideoProfile.isVideo(conn.getVideoState()));
-            }
+            // Update EXTRA_DISABLE_SWAP_CALL when call state becomes to active
+            disableSwap(conn, VideoProfile.isVideo(conn.getVideoState()));
         }
 
         @Override
@@ -1030,14 +1024,7 @@ public class TelephonyConnectionService extends ConnectionService {
                     hasConnectedVideoCallOnOtherSub(accountHandle)) {
                 return;
             }
-            /*
-              At this stage, if video call hold is not allowed, then the swap
-              button should be enabled or disabled depending on whether the call
-              was upgraded to video call or downgraded to voice call.
-            */
-            if (!isVideoCallHoldAllowed(conn.getPhone())) {
-                disableSwap(conn, VideoProfile.isVideo(videoState));
-            }
+            disableSwap(conn, VideoProfile.isVideo(videoState));
         }
     };
 
