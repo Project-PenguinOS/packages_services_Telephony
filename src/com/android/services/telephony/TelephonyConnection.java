@@ -2069,10 +2069,8 @@ abstract class TelephonyConnection extends Connection implements Holdable,
                     for (com.android.internal.telephony.Connection conn : connections) {
                         if (conn instanceof ImsPhoneConnection) {
                             ImsCall bgCall = ((ImsPhoneConnection)conn).getImsCall();
-                            if (bgCall != null) {
-                                isCurrentBgVideoCall |= bgCall.isVideoCall();
-                                wasBgVideoCall |= bgCall.wasVideoCall();
-                            }
+                            isCurrentBgVideoCall |= bgCall.isVideoCall();
+                            wasBgVideoCall |= bgCall.wasVideoCall();
                         }
                     }
 
