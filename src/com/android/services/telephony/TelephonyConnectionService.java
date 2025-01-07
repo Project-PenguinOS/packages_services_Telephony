@@ -5295,11 +5295,6 @@ public class TelephonyConnectionService extends ConnectionService {
             return;
         }
 
-        if (mTelephonyManagerProxy.isDsdsMode() &&
-                mTelephonyManagerProxy.isDsdsTransitionSupported()) {
-            return;
-        }
-
         if (isCallPresentOnOtherSub(phoneAccountHandle)) {
             if (mTelephonyManagerProxy.isConcurrentCallsPossible()
                     && allCallsSupportHold(connection)) {
