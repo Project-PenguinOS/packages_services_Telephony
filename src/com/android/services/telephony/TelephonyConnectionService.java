@@ -387,18 +387,6 @@ public class TelephonyConnectionService extends ConnectionService {
          * configuration. Returns 1 for DSDS, 2 for DSDA.
          */
         int getMaxNumberOfSimultaneouslyActiveSims();
-
-        /**
-         * Returns true if Multi SIM voice cpability is DSDS.
-         * Returns false for other cases.
-         */
-        boolean isDsdsMode();
-
-        /**
-         *  Returns true if on multisim devices, DSDA features are supported in non-DSDA modes
-         *  Returns false otherwise.
-         */
-        boolean isDsdsTransitionSupported();
     }
 
     private TelephonyManagerProxy mTelephonyManagerProxy;
@@ -448,24 +436,6 @@ public class TelephonyConnectionService extends ConnectionService {
             try {
                 return mTelephonyManager.isConcurrentCallsPossible()
                     || mTelephonyManager.getPhoneCapability().getMaxActiveVoiceSubscriptions() > 1;
-            } catch (IllegalStateException ise) {
-                return false;
-            }
-        }
-
-        @Override
-        public boolean isDsdsMode() {
-            try {
-                return mTelephonyManager.isDsdsMode();
-            } catch (IllegalStateException ise) {
-                return false;
-            }
-        }
-
-        @Override
-        public boolean isDsdsTransitionSupported() {
-            try {
-                return mTelephonyManager.isDsdsTransitionSupported();
             } catch (IllegalStateException ise) {
                 return false;
             }
