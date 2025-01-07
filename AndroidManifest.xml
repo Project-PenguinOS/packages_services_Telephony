@@ -44,10 +44,6 @@
     <protected-broadcast android:name= "org.codeaurora.intent.action.SMS_CALLBACK_MODE_CHANGED" />
     <protected-broadcast android:name= "org.codeaurora.intent.action.SHOW_NOTICE_SCM_BLOCK_OTHERS" />
     <protected-broadcast android:name= "org.codeaurora.telephony.VOWIFI_ENABLED" />
-    <!-- Intent sent to notify clients that the voice capability has changed and the property
-         has been modified -->
-    <protected-broadcast android:name=
-            "org.codeaurora.intent.action.MSIM_VOICE_CAPABILITY_CHANGED" />
 
     <protected-broadcast android:name = "org.codeaurora.intent.action.ESSENTIAL_RECORDS_LOADED" />
 
@@ -201,9 +197,6 @@
     <!-- Allows us to know if concurrent calls on both subs are possible by handling broadcast
          intent "org.codeaurora.intent.action.MSIM_VOICE_CAPABILITY".-->
     <uses-permission android:name="com.qti.permission.RECEIVE_MSIM_VOICE_CAPABILITY" />
-    <!-- Permission needed to handle receiving
-         intent "org.codeaurora.intent.action.MSIM_VOICE_CAPABILITY_CHANGED".-->
-    <uses-permission android:name="com.qti.permission.RECEIVE_MSIM_VOICE_CAPABILITY_CHANGED" />
 
     <!-- Permission needed to handle intent
          "org.codeaurora.intent.action.ESSENTIAL_RECORDS_LOADED" -->
@@ -211,10 +204,6 @@
 
     <!-- Permission needed to bind com.qualcomm.qcrilmsgtunnel.QcrilMsgTunnelService -->
     <uses-permission android:name="com.qualcomm.permission.USE_QCRIL_MSG_TUNNEL" />
-
-    <permission android:name="com.qti.permission.RECEIVE_MSIM_VOICE_CAPABILITY_CHANGED"
-        android:label="Broadcast multi_sim_voice_capability property has changed"
-        android:protectionLevel="signature|system"/>
 
     <permission android:name="com.qti.permission.RECEIVE_ESSENTIAL_RECORDS_LOADED"
         android:label="Broadcast essential records loaded"
