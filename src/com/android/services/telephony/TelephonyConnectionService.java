@@ -3126,8 +3126,8 @@ public class TelephonyConnectionService extends ConnectionService {
                         getActiveDsdaConnectionPhoneAccountPair();
                 TelephonyConnection connToHold = pairToHold.first;
 
-                if (!isEmergency && isDsdaOrDsdsTransitionMode()
-                    && isRingingCallPresentOnOtherSub(connection.getPhoneAccountHandle())) {
+                if (isDsdaOrDsdsTransitionMode()
+                   && isRingingCallPresentOnOtherSub(connection.getPhoneAccountHandle())) {
                    // Do not allow call to be dialed when there is a ringing call on the
                    // other SUB. Same SUB is handled in PhoneCallTracker
                    throw new CallStateException(CallStateException.ERROR_CALL_RINGING,
