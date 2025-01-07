@@ -5532,8 +5532,7 @@ public class TelephonyConnectionService extends ConnectionService {
             if (connToAnswer.getExtras() != null &&
                 connToAnswer.getExtras().getBoolean(
                     Connection.EXTRA_ANSWERING_DROPS_FG_CALL, false)) {
-                // used in when answering DSDA call to indicate disconnect calls on other SUBS
-                // ie VT call hold is not supported and there is a VT call on other SUB
+                // Pseudo DSDA use case
                 setupAnswerAndReleaseHandler(connToAnswer, videoState, false);
                 return;
             }

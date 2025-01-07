@@ -32,7 +32,6 @@ package com.android.services.telephony;
 import android.os.Bundle;
 import android.telecom.Conference;
 import android.telecom.Connection;
-import android.telecom.PhoneAccountHandle;
 import android.telecom.StatusHints;
 import android.telecom.VideoProfile;
 
@@ -41,15 +40,12 @@ import com.android.ims.internal.ConferenceParticipant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
   * This class is used to support Pseudo DSDA in telephony that will handle BT / headset
-  * scenarios and DSDA mode for handling:
-  *     1) Dialing + incoming scenarios.
-  *     2) Disconnecting calls on other SUB, ie VT call hold is not supported
+  * scenarios and DSDA mode for handling Dialing + incoming scenarios.
   *
   */
 public class AnswerAndReleaseHandler extends TelephonyConnection.TelephonyConnectionListener {
@@ -121,7 +117,6 @@ public class AnswerAndReleaseHandler extends TelephonyConnection.TelephonyConnec
 
     public void checkAndAnswer(Collection<Connection> allConnections,
             Collection<Conference> allConferences) {
-        PhoneAccountHandle handle = mIncomingConnection.getPhoneAccountHandle();
         for (Connection current : allConnections) {
             // Connection list could contain other types like conference
             // participant connections which need to be ignored
@@ -137,10 +132,7 @@ public class AnswerAndReleaseHandler extends TelephonyConnection.TelephonyConnec
             synchronized(mConnectionList) {
                 containsConnection = mConnectionList.contains(current);
             }
-            boolean samePhoneAccountHandle = Objects.equals(
-                    handle, current.getPhoneAccountHandle());
-            // only disconnect connections on other phone account
-            if (!containsConnection && !samePhoneAccountHandle) {
+            if (!containsConnection) {
                 addConnection(current);
                 TelephonyConnection conn = (TelephonyConnection) current;
                 conn.addTelephonyConnectionListener(this);
@@ -160,10 +152,7 @@ public class AnswerAndReleaseHandler extends TelephonyConnection.TelephonyConnec
             synchronized(mConferenceList) {
                 containsConference = mConferenceList.contains(current);
             }
-            boolean samePhoneAccountHandle = Objects.equals(
-                    handle, current.getPhoneAccountHandle());
-            // only disconnect conferences on other phone account
-            if (!containsConference && !samePhoneAccountHandle) {
+            if (!containsConference) {
                 addConference(current);
                 TelephonyConferenceBase conf = (TelephonyConferenceBase) current;
                 conf.addTelephonyConferenceListener(mTelephonyConferenceListener);
