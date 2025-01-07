@@ -57,7 +57,7 @@ public class HoldAndAnswerHandler extends HoldHandlerBase {
     public void accept() {
         Log.i(this, "hold " + mConnToHold.getTelecomCallId() + " to answer " +
                 mConnToAnswer.getTelecomCallId());
-        mConnToHold.performHoldAcrossSub();
+        mConnToHold.onHold();
     }
 
     private void cleanup() {
