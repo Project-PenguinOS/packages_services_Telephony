@@ -69,7 +69,7 @@ public class ImsConferenceController {
             if (conference instanceof ImsConference) {
                 // Ims Conference call ended, so UE may now have the ability to initiate
                 // an Adhoc Conference call. Hence, try enabling adhoc conference capability
-                if(isDsdaOrDsdsTransitionMode((ImsConference)conference)){
+                if(TelephonyManager.isConcurrentCallsPossible()){
                     mTelecomAccountRegistry.refreshAdhocConferenceForAccount(true,
                             conference.getPhoneAccountHandle());
                 } else {
@@ -315,7 +315,7 @@ public class ImsConferenceController {
             // Since UE cannot host two conference calls, remove the ability to initiate
             // another conference call as there already exists a conference call, which
             // is hosted on this device.
-            if(isDsdaOrDsdsTransitionMode(conference)){
+            if(TelephonyManager.isConcurrentCallsPossible()){
                 mTelecomAccountRegistry.refreshAdhocConferenceForAccount(false,
                         conference.getPhoneAccountHandle());
             } else {
@@ -562,12 +562,5 @@ public class ImsConferenceController {
                     .setFilterOutConferenceHost(filterOutConferenceHost);
         }
         return config.build();
-    }
-
-    private boolean isDsdaOrDsdsTransitionMode(ImsConference conference) {
-        Connection connection = conference.getConferenceHost();
-        if (!(connection instanceof TelephonyConnection)) return false;
-        Context context = ((TelephonyConnection)connection).getPhone().getContext();
-        return TelephonyManager.from(context).isDsdaOrDsdsTransitionMode();
     }
 }

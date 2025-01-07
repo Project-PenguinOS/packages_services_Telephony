@@ -16,7 +16,6 @@
 
 package com.android.services.telephony;
 
-import android.content.Context;
 import android.telecom.PhoneAccountHandle;
 import android.telephony.TelephonyManager;
 
@@ -30,11 +29,9 @@ import java.util.Map;
  */
 public class HoldTracker {
     private final Map<PhoneAccountHandle, List<Holdable>> mHoldables;
-    private Context mContext;
 
-    public HoldTracker(Context context) {
+    public HoldTracker() {
         mHoldables = new HashMap<>();
-        mContext = context;
     }
 
     /**
@@ -83,8 +80,8 @@ public class HoldTracker {
         }
 
         Log.d(this, "topHoldableCount = " + topHoldableCount);
-        final int maxHoldableCallCount = TelephonyManager.from(mContext).
-                isDsdaOrDsdsTransitionMode() ? 2 /* DSDA/DSDS transition */ : 1;
+        final int maxHoldableCallCount = TelephonyManager.isConcurrentCallsPossible() ?
+                2 /* DSDA */ : 1 /* otherwise */;
 
         boolean isHoldable = topHoldableCount <= maxHoldableCallCount;
         for (Holdable holdable : holdables) {

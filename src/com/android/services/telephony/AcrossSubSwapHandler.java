@@ -39,10 +39,10 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /* Handles DSDA across sub call swap use case */
-public class AcrossSubSwapHandler extends AcrossSubHandlerBase {
+public class HoldAndSwapHandler extends HoldHandlerBase {
     private TelephonyConnection mConnToResume = null;
 
-    public AcrossSubSwapHandler(TelephonyConnection connToHold, TelephonyConnection connToResume) {
+    public HoldAndSwapHandler(TelephonyConnection connToHold, TelephonyConnection connToResume) {
         mConnToResume = connToResume;
         mConnToHold = connToHold;
         mConnToHold.addTelephonyConnectionListener(this);
