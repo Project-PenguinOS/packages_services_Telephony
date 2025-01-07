@@ -226,9 +226,6 @@ public class TelephonyConnectionService extends ConnectionService {
                             ringingConnection.getPhoneAccountHandle());
                 }
                 // TODO: Handle pseudo DSDA-> DSDA transition
-
-                // recalculate conferenceable connections
-                mImsConferenceController.recalculateConferenceable();
             }
         }
     };
@@ -2311,7 +2308,7 @@ public class TelephonyConnectionService extends ConnectionService {
 
     private void updateAnsweringDropsFgCallExtra() {
         // Check for DSDA mode
-        if (!isDsdaOrDsdsTransitionMode()) {
+        if (!isConcurrentCallsPossible()) {
             return;
         }
 
