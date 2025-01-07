@@ -1734,46 +1734,18 @@ public class TelecomAccountRegistry {
         return null;
     }
 
-    /**
-     * Updates the adhoc conference capability for all phone accounts
-     */
     public void refreshAdhocConference(boolean isEnableAdhocConf) {
         synchronized (mAccountsLock) {
             Log.v(this, "refreshAdhocConference isEnable = " + isEnableAdhocConf);
             for (AccountEntry entry : mAccounts) {
-                refreshAdhocConferenceForAccountEntry(isEnableAdhocConf, entry);
-            }
-        }
-    }
-
-    /**
-     * Updates the adhoc conference capability per phone account.
-     */
-    public void refreshAdhocConferenceForAccount(boolean isEnableAdhocConf,
-            PhoneAccountHandle handle) {
-        synchronized (mAccountsLock) {
-            Log.v(this, "refreshAdhocConference isEnable = " + isEnableAdhocConf +
-                    " PhoneAccountHandle = " + handle);
-            for (AccountEntry entry : mAccounts) {
-                if (entry.getPhoneAccountHandle().equals(handle)) {
-                    refreshAdhocConferenceForAccountEntry(isEnableAdhocConf, entry);
-                    break;
+                boolean hasAdhocConfCapability = entry.mAccount.hasCapabilities(
+                        PhoneAccount.CAPABILITY_ADHOC_CONFERENCE_CALLING);
+                if (!isEnableAdhocConf && hasAdhocConfCapability) {
+                    entry.updateAdhocConfCapability(isEnableAdhocConf);
+                } else if (isEnableAdhocConf && !hasAdhocConfCapability) {
+                    entry.updateAdhocConfCapability(entry.mPhone.isImsRegistered());
                 }
             }
-        }
-    }
-
-    /**
-     * Updates the adhoc conference capability per Account entry.
-     */
-    private void refreshAdhocConferenceForAccountEntry(boolean isEnableAdhocConf,
-            AccountEntry entry) {
-        boolean hasAdhocConfCapability = entry.mAccount.hasCapabilities(
-                PhoneAccount.CAPABILITY_ADHOC_CONFERENCE_CALLING);
-        if (!isEnableAdhocConf && hasAdhocConfCapability) {
-            entry.updateAdhocConfCapability(isEnableAdhocConf);
-        } else if (isEnableAdhocConf && !hasAdhocConfCapability) {
-            entry.updateAdhocConfCapability(entry.mPhone.isImsRegistered());
         }
     }
 

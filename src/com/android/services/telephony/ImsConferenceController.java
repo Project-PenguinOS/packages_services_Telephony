@@ -26,7 +26,6 @@ import android.telecom.ConnectionService;
 import android.telecom.DisconnectCause;
 import android.telecom.PhoneAccountHandle;
 import android.telephony.CarrierConfigManager;
-import android.telephony.TelephonyManager;
 
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneConstants;
@@ -69,12 +68,7 @@ public class ImsConferenceController {
             if (conference instanceof ImsConference) {
                 // Ims Conference call ended, so UE may now have the ability to initiate
                 // an Adhoc Conference call. Hence, try enabling adhoc conference capability
-                if(TelephonyManager.isConcurrentCallsPossible()){
-                    mTelecomAccountRegistry.refreshAdhocConferenceForAccount(true,
-                            conference.getPhoneAccountHandle());
-                } else {
-                     mTelecomAccountRegistry.refreshAdhocConference(true);
-                }
+                mTelecomAccountRegistry.refreshAdhocConference(true);
             }
             mImsConferences.remove(conference);
         }
@@ -315,12 +309,8 @@ public class ImsConferenceController {
             // Since UE cannot host two conference calls, remove the ability to initiate
             // another conference call as there already exists a conference call, which
             // is hosted on this device.
-            if(TelephonyManager.isConcurrentCallsPossible()){
-                mTelecomAccountRegistry.refreshAdhocConferenceForAccount(false,
-                        conference.getPhoneAccountHandle());
-            } else {
-                mTelecomAccountRegistry.refreshAdhocConference(false);
-            }
+            mTelecomAccountRegistry.refreshAdhocConference(false);
+
             switch (conference.getState()) {
                 case Connection.STATE_ACTIVE:
                     //fall through
