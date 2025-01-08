@@ -1047,7 +1047,7 @@ public class TelephonyConnectionService extends ConnectionService {
             }
             // Get connection to hold if any
             Pair<TelephonyConnection, PhoneAccountHandle> pairToHold =
-                    getActiveDsdaConnectionPhoneAccountPair();
+                    getActiveConnectionPhoneAccountPair();
             TelephonyConnection connToHold = pairToHold.first;
             if (connToHold == null || Objects.equals(pairToHold.second,
                     conferenceHostConnection.getPhoneAccountHandle())) {
@@ -2905,7 +2905,7 @@ public class TelephonyConnectionService extends ConnectionService {
 
                 // Get connection to hold if any
                 Pair<TelephonyConnection, PhoneAccountHandle> pairToHold =
-                        getActiveDsdaConnectionPhoneAccountPair();
+                        getActiveConnectionPhoneAccountPair();
                 TelephonyConnection connToHold = pairToHold.first;
                 if (connToHold == null || Objects.equals(pairToHold.second,
                         connection.getPhoneAccountHandle())) {
@@ -5160,7 +5160,7 @@ public class TelephonyConnectionService extends ConnectionService {
 
             // Get connection to hold if any
             Pair<TelephonyConnection, PhoneAccountHandle> pairToHold =
-                    getActiveDsdaConnectionPhoneAccountPair();
+                    getActiveConnectionPhoneAccountPair();
             TelephonyConnection connToHold = pairToHold.first;
             if (connToHold == null || Objects.equals(pairToHold.second,
                     pairToResume.second)) {
@@ -5198,7 +5198,7 @@ public class TelephonyConnectionService extends ConnectionService {
             }
             // Get connection to hold if any
             Pair<TelephonyConnection, PhoneAccountHandle> pairToHold =
-                    getActiveDsdaConnectionPhoneAccountPair();
+                    getActiveConnectionPhoneAccountPair();
             TelephonyConnection connToHold = pairToHold.first;
             if (connToHold == null || Objects.equals(pairToHold.second,
                     pairToAnswer.second)) {
@@ -5232,20 +5232,16 @@ public class TelephonyConnectionService extends ConnectionService {
      */
     private Connection getActiveConnection() {
         for (Connection current : getAllConnections()) {
-            if (isTelephonyConnection(current) && current.getState() == Connection.STATE_ACTIVE) {
+            if (current.getState() == Connection.STATE_ACTIVE) {
                 return current;
             }
         }
         return null;
     }
 
-    /*
-     * Returns the instance of TelephonyConferenceBase with ACTIVE state.
-     */
     private Conference getActiveConference() {
         for (Conference current : getAllConferences()) {
-            if (isTelephonyConferenceBase(current) &&
-                    current.getState() == Connection.STATE_ACTIVE) {
+            if (current.getState() == Connection.STATE_ACTIVE) {
                 return current;
             }
         }
@@ -5304,47 +5300,41 @@ public class TelephonyConnectionService extends ConnectionService {
         return mHoldHandler != null;
     }
 
-    private static boolean isConcurrentCallsPossible() {
+    private boolean isConcurrentCallsPossible() {
         return TelephonyManager.isConcurrentCallsPossible();
     }
 
-    private static boolean isTelephonyConnection(Connection conn) {
+    private boolean isTelephonyConnection(Connection conn) {
         return conn instanceof TelephonyConnection;
     }
 
-    private static boolean isImsConference(Conference conf) {
+    private boolean isImsConference(Conference conf) {
         return conf instanceof ImsConference;
     }
 
-    private static boolean isTelephonyConferenceBase(Conference conn) {
-        return conn instanceof TelephonyConferenceBase;
-    }
-
-    /* Returns a pair of the active TelephonyConnection and PhoneAccountHandle for DSDA.
+    /* Returns a pair of the active TelephonyConnection and PhoneAccountHandle
      * Throws CallStateException when conference is not an ImsConference or
-     * when Connection is not a TelephonyConnection.
+     * when Connection is not a TelephonyConnection
      */
-    private Pair<TelephonyConnection, PhoneAccountHandle> getActiveDsdaConnectionPhoneAccountPair()
+    private Pair<TelephonyConnection, PhoneAccountHandle> getActiveConnectionPhoneAccountPair()
             throws CallStateException {
-        //If non-DSDA use case, follow legacy behavior.
-        if (!isConcurrentCallsPossible()) {
-            return new Pair<>(null, null);
-        }
         PhoneAccountHandle handle = null;
         Connection activeConn = getActiveConnection();
         Conference activeConf = getActiveConference();
         if (activeConf != null) {
             if (!isImsConference(activeConf)) {
-                throw new CallStateException("Not an instance of ImsConference.");
+                throw new CallStateException("Not an instance of TelephonyConnection or" +
+                        "ImsConference");
             }
             activeConn = ((ImsConference)activeConf).getConferenceHost();
             handle = activeConf.getPhoneAccountHandle();
-            Log.d(this, "hold conference call.") ;
+            Log.d(this, "hold conference call ") ;
         } else if (activeConn != null) {
             handle = activeConn.getPhoneAccountHandle();
         }
         if (activeConn != null && !isTelephonyConnection(activeConn)) {
-            throw new CallStateException("Not an instance of TelephonyConnection.");
+            throw new CallStateException("Not an instance of TelephonyConnection or" +
+                    "ImsConference");
         }
         return new Pair<>((TelephonyConnection)activeConn, handle);
     }
