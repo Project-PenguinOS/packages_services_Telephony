@@ -352,7 +352,6 @@ public class ImsConferenceController {
 
                 ((Connection) c).setConferenceables(conferenceables);
             } else if (c instanceof ImsConference) {
-                PhoneAccountHandle handle = getPhoneAccountHandle(c);
                 ImsConference imsConference = (ImsConference) c;
 
                 // If the conference is full, don't allow anything to be conferenced with it.
@@ -365,7 +364,6 @@ public class ImsConferenceController {
                 List<Connection> connections = conferenceableSet
                         .stream()
                         .filter(conferenceable -> conferenceable instanceof Connection &&
-                        Objects.equals(handle, getPhoneAccountHandle(conferenceable)) &&
                         isSamePhoneAccountHandle(c, conferenceable))
                         .map(conferenceable -> (Connection) conferenceable)
                         .collect(Collectors.toList());
