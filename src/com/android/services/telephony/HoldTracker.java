@@ -17,7 +17,6 @@
 package com.android.services.telephony;
 
 import android.telecom.PhoneAccountHandle;
-import android.telephony.TelephonyManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -80,10 +79,7 @@ public class HoldTracker {
         }
 
         Log.d(this, "topHoldableCount = " + topHoldableCount);
-        final int maxHoldableCallCount = TelephonyManager.isConcurrentCallsPossible() ?
-                2 /* DSDA */ : 1 /* otherwise */;
-
-        boolean isHoldable = topHoldableCount <= maxHoldableCallCount;
+        boolean isHoldable = topHoldableCount < 2;
         for (Holdable holdable : holdables) {
             holdable.setHoldable(holdable.isChildHoldable() ? false : isHoldable);
         }
