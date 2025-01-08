@@ -172,12 +172,6 @@ abstract class TelephonyConnection extends Connection implements Holdable,
 
     private SuppServiceNotification mSsNotification = null;
 
-    /* Flag indicates if context based swap is disabled
-     * @param true means DSDA specific APIs should be invoked
-     * @param false means ImsPhoneCallTracker can use context to swap (legacy behavior)
-     */
-    private boolean mContextBasedSwapDisabled = false;
-
     private final Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
@@ -1363,16 +1357,9 @@ abstract class TelephonyConnection extends Connection implements Holdable,
     public void performAnswer(int videoState) {
         Log.v(this, "performAnswer");
         if (isValidRingingCall() && getPhone() != null) {
-            if (TelephonyManager.isConcurrentCallsPossible()) {
-                // Disconnect dialing call when incoming call is accepted.
-                // Follow AOSP's approach for now. TODO:answer after disconnect completes
-                mTelephonyConnectionService.maybeDisconnectDialingCallsOnOtherSubs(
-                        getPhoneAccountHandle());
-            } else {
+            try {
                 mTelephonyConnectionService.maybeDisconnectCallsOnOtherSubs(
                             getPhoneAccountHandle(), answeringDropsFgCalls());
-            }
-            try {
                 getPhone().acceptCall(videoState);
             } catch (CallStateException e) {
                 Log.e(this, e, "Failed to accept call.");
@@ -1412,14 +1399,7 @@ abstract class TelephonyConnection extends Connection implements Holdable,
                     // New behavior for IMS -- don't use the clunky switchHoldingAndActive logic.
                     if (phone.getPhoneType() == PhoneConstants.PHONE_TYPE_IMS) {
                         ImsPhone imsPhone = (ImsPhone) phone;
-                        if (isContextBasedSwapDisabled()) {
-                            // Invoke new API for DSDA only. This API makes sure that the
-                            // connection is only held and not swapped if there is another held
-                            // connection on that sub
-                            imsPhone.holdActiveCallOnly();
-                        } else {
-                            imsPhone.holdActiveCall();
-                        }
+                        imsPhone.holdActiveCall();
                         if (!com.android.server.telecom.flags.Flags.enableCallSequencing()) {
                             mTelephonyConnectionService.maybeUnholdCallsOnOtherSubs(
                                     getPhoneAccountHandle());
@@ -1446,20 +1426,7 @@ abstract class TelephonyConnection extends Connection implements Holdable,
                 // New behavior for IMS -- don't use the clunky switchHoldingAndActive logic.
                 if (phone.getPhoneType() == PhoneConstants.PHONE_TYPE_IMS) {
                     ImsPhone imsPhone = (ImsPhone) phone;
-                    if (isContextBasedSwapDisabled()) {
-                        if (hasActiveCallOnThisSub(imsPhone)) {
-                            // Same sub swap use case: Mimic CallsManager behavior of calling hold
-                            // and letting ImsPhoneCallTracker manage swap
-                            imsPhone.holdActiveCall();
-                        } else {
-                            // Unhold specific connection in single unhold or across sub swap use
-                            // case where hold already has been completed by
-                            // TelephonyConnectionService
-                            imsPhone.unholdHeldCall((ImsPhoneConnection)mOriginalConnection);
-                        }
-                    } else { // legacy unhold
-                        imsPhone.unholdHeldCall();
-                    }
+                    imsPhone.unholdHeldCall();
                     return;
                 }
                 // Here's the deal--Telephony hold/unhold is weird because whenever there exists
@@ -4069,11 +4036,6 @@ abstract class TelephonyConnection extends Connection implements Holdable,
                         .KEY_SUPPORTS_SDP_NEGOTIATION_OF_D2D_RTP_HEADER_EXTENSIONS_BOOL);
     }
 
-    private boolean hasActiveCallOnThisSub(ImsPhone imsPhone) {
-        // Active foreground call on same sub means same sub swap
-        return imsPhone.getForegroundCall().getState() == Call.State.ACTIVE;
-    }
-
     /**
      * Handles a device to device message which a {@link CallDiagnostics} wishes to send.
      * @param extras the call event extras bundle.
@@ -4146,16 +4108,6 @@ abstract class TelephonyConnection extends Connection implements Holdable,
     @VisibleForTesting
     public void setEmergencyServiceCategory(int eccCategory) {
         mEmergencyServiceCategory = eccCategory;
-    }
-
-    /* Disables context based swap to make use of new DSDA hold APIs */
-    public void disableContextBasedSwap(boolean contextBasedSwapDisabled) {
-        mContextBasedSwapDisabled = contextBasedSwapDisabled;
-    }
-
-    /* Determines if context based swap is disabled */
-    public boolean isContextBasedSwapDisabled() {
-        return mContextBasedSwapDisabled;
     }
 
     /**
