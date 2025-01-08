@@ -366,28 +366,13 @@ public class ImsConferenceController {
                         .stream()
                         .filter(conferenceable -> conferenceable instanceof Connection &&
                         Objects.equals(handle, getPhoneAccountHandle(conferenceable)) &&
-                        isSamePhoneAccountHandle(c, conferenceable) &&
-                        !(isHeld(c) && isHeld(conferenceable)))
+                        isSamePhoneAccountHandle(c, conferenceable))
                         .map(conferenceable -> (Connection) conferenceable)
                         .collect(Collectors.toList());
                 // Conference equivalent to setConferenceables that only accepts Connections
                 imsConference.setConferenceableConnections(connections);
             }
         }
-    }
-
-    /*
-     * Checks if the Connection is in HELD state
-     */
-    private static boolean isHeld(Conferenceable conn) {
-        return conn instanceof Connection ?
-                isHoldingState(((Connection) conn).getState()) :
-                conn instanceof ImsConference ?
-                isHoldingState(((ImsConference) conn).getState()) : false;
-    }
-
-    private static boolean isHoldingState(int state) {
-        return state == Connection.STATE_HOLDING;
     }
 
     /**
