@@ -1472,8 +1472,7 @@ abstract class TelephonyConnection extends Connection implements Holdable,
                         } else {
                             imsPhone.holdActiveCall();
                         }
-                        if (!getPhone().getContext().getResources().getBoolean(
-                                com.android.internal.R.bool.config_disable_aosp_dsda_logic)) {
+                        if (!com.android.server.telecom.flags.Flags.enableCallSequencing()) {
                             mTelephonyConnectionService.maybeUnholdCallsOnOtherSubs(
                                     getPhoneAccountHandle());
                         }
