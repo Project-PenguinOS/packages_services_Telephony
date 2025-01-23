@@ -398,7 +398,7 @@ public class TelephonyConnectionService extends ConnectionService {
         @Override
         public boolean isConcurrentCallsPossible() {
             try {
-                return mTelephonyManager.isConcurrentCallsPossible()
+                return getMaxNumberOfSimultaneouslyActiveSims() > 1
                     || mTelephonyManager.getPhoneCapability().getMaxActiveVoiceSubscriptions() > 1;
             } catch (IllegalStateException ise) {
                 return false;
