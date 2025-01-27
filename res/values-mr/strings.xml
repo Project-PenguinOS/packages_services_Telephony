@@ -561,7 +561,7 @@
     <string name="incall_error_supp_service_hold" msgid="8535056414643540997">"कॉल सुरू ठेवू शकत नाही."</string>
     <string name="incall_error_wfc_only_no_wireless_network" msgid="5860742792811400109">"कॉल करण्‍यासाठी वायरलेस नेटवर्कशी कनेक्‍ट करा."</string>
     <string name="incall_error_promote_wfc" msgid="9164896813931363415">"कॉल करण्यासाठी वाय-फाय कॉलिंग सक्षम करा."</string>
-    <string name="incall_error_satellite_enabled" msgid="5247740814607087814">"कॉल करण्यासाठी, सर्वप्रथम उपग्रह कनेक्शन बंद करा."</string>
+    <string name="incall_error_satellite_enabled" msgid="5247740814607087814">"कॉल करण्यासाठी, सर्वप्रथम सॅटेलाइट कनेक्शन बंद करा."</string>
     <string name="incall_error_carrier_roaming_satellite_mode" msgid="678603203562886361">"तुम्ही मोबाइल किंवा वाय-फाय नेटवर्कशिवाय मेसेज पाठवू आणि मिळवू शकता."</string>
     <string name="emergency_information_hint" msgid="9208897544917793012">"अतिमहत्त्वाची माहिती"</string>
     <string name="emergency_information_owner_hint" msgid="6256909888049185316">"मालक"</string>
@@ -848,14 +848,11 @@
     <string name="simulate_out_of_service_string" msgid="7787925611727597193">"सेवा बंद आहे सिम्युलेट करा (फक्त डीबगचा बिल्‍ड)"</string>
     <string name="enforce_satellite_channel_string" msgid="295306734591329892">"फोर्स कॅम्प सॅटेलाइट LTE चॅनल (फक्त डीबग बिल्ड)"</string>
     <string name="mock_carrier_roaming_satellite_string" msgid="4796300252858292593">"नमुना वाहकाचा उपग्रह मोड (फक्त डीबग बिल्ड)"</string>
-    <!-- no translation found for choose_satellite_data_mode (6560390801660626218) -->
+    <!-- no translation found for choose_satellite_data_mode (7526640708482601423) -->
     <skip />
-    <!-- no translation found for satellite_data_restricted_string (8729402021843670205) -->
-    <skip />
-    <!-- no translation found for satellite_data_constrained_string (4594481912792241881) -->
-    <skip />
-    <!-- no translation found for satellite_data_unConstrained_string (3957333012703408141) -->
-    <skip />
+    <string name="satellite_data_restricted_string" msgid="8729402021843670205">"प्रतिबंधित"</string>
+    <string name="satellite_data_constrained_string" msgid="4594481912792241881">"मर्यादित"</string>
+    <string name="satellite_data_unConstrained_string" msgid="3957333012703408141">"UnLimited"</string>
     <string name="esos_satellite_string" msgid="7274794226125968657">"प्रत्यक्ष सॅटेलाइट eSOS मोडची चाचणी करा (फक्त डीबग बिल्ड)"</string>
     <string name="satellite_enable_non_emergency_mode_string" msgid="9005332650950637932">"eSOS नसलेल्या वास्तविक सॅटेलाइट मोडची चाचणी करा (फक्त डीबग बिल्ड)"</string>
     <string name="demo_esos_satellite_string" msgid="2941811482168709730">"डेमो सॅटेलाइट eSOS मोडची चाचणी करा (फक्त डीबग बिल्ड)"</string>
