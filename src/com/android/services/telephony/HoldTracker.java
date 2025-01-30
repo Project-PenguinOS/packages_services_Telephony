@@ -14,103 +14,57 @@
  * limitations under the License.
  */
 
-/**
-* Changes from Qualcomm Innovation Center, Inc. are provided under the following license:
-* Copyright (c) 2024 Qualcomm Innovation Center, Inc. All rights reserved.
-* SPDX-License-Identifier: BSD-3-Clause-Clear
-*/
-
 package com.android.services.telephony;
 
-import android.content.Context;
-import android.telecom.PhoneAccountHandle;
-import android.telephony.TelephonyManager;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
+ * Tracks and updates the hold capability of every call or conference across PhoneAccountHandles.
+ *
  * @hide
  */
 public class HoldTracker {
-    private final Map<PhoneAccountHandle, List<Holdable>> mHoldables;
-    private Context mContext;
-    private TelephonyConnectionService mTelephonyConnectionService;
+    private final Set<Holdable> mHoldables;
 
-    private static final int DSDS_MAX_HOLDABLE_CALLS = 1;
-    private static final int DSDA_MAX_HOLDABLE_CALLS = 2;
-
-    public HoldTracker(TelephonyConnectionService service, Context context) {
-        mHoldables = new HashMap<>();
-        mTelephonyConnectionService = service;
-        mContext = context;
+    public HoldTracker() {
+        mHoldables = new HashSet<>();
     }
 
     /**
-     * Adds the holdable associated with the {@code phoneAccountHandle}, this method may update
-     * the hold state for all holdable associated with the {@code phoneAccountHandle}.
+     * Adds the holdable, and updates the hold capability for all holdables.
      */
-    public void addHoldable(PhoneAccountHandle phoneAccountHandle, Holdable holdable) {
-        if (!mHoldables.containsKey(phoneAccountHandle)) {
-            mHoldables.put(phoneAccountHandle, new ArrayList<>(1));
-        }
-        List<Holdable> holdables = mHoldables.get(phoneAccountHandle);
-        if (!holdables.contains(holdable)) {
-            holdables.add(holdable);
-            updateHoldCapability(phoneAccountHandle);
+    public void addHoldable(Holdable holdable) {
+        if (!mHoldables.contains(holdable)) {
+            mHoldables.add(holdable);
+            updateHoldCapability();
         }
     }
 
     /**
-     * Removes the holdable associated with the {@code phoneAccountHandle}, this method may update
-     * the hold state for all holdable associated with the {@code phoneAccountHandle}.
+     * Removes the holdable, and updates the hold capability for all holdable.
      */
-    public void removeHoldable(PhoneAccountHandle phoneAccountHandle, Holdable holdable) {
-        if (!mHoldables.containsKey(phoneAccountHandle)) {
-            return;
-        }
-
-        if (mHoldables.get(phoneAccountHandle).remove(holdable)) {
-            updateHoldCapability(phoneAccountHandle);
-        }
-    }
-
-     /**
-     * Updates the hold capability for holdables for all phone account handles
-     */
-    public void updateAllPhoneAccountHoldCapability() {
-        for (PhoneAccountHandle handle : mHoldables.keySet()) {
-            updateHoldCapability(handle);
+    public void removeHoldable(Holdable holdable) {
+        if (mHoldables.remove(holdable)) {
+            updateHoldCapability();
         }
     }
 
     /**
-     * Updates the hold capability for all holdables associated with the {@code phoneAccountHandle}.
+     * Updates the hold capability for all tracked holdables.
      */
-    public void updateHoldCapability(PhoneAccountHandle phoneAccountHandle) {
-        if (!mHoldables.containsKey(phoneAccountHandle)) {
-            return;
-        }
-
-        List<Holdable> holdables = mHoldables.get(phoneAccountHandle);
+    public void updateHoldCapability() {
         int topHoldableCount = 0;
-        for (Holdable holdable : holdables) {
+        for (Holdable holdable : mHoldables) {
             if (!holdable.isChildHoldable()) {
                 ++topHoldableCount;
             }
         }
 
-        // if there are multiple held calls in DSDS mode then use DSDA max holdable logic
-        int maxHoldableCallCount = (TelephonyManager.from(mContext).isDsdaOrDsdsTransitionMode() ||
-                mTelephonyConnectionService.hasMultipleHeldCallsInDsds() ?
-                DSDA_MAX_HOLDABLE_CALLS : DSDS_MAX_HOLDABLE_CALLS);
-        Log.v(this, "topHoldableCount = " + topHoldableCount +
-                " , maxHoldableCallCount = " + maxHoldableCallCount);
-
-        boolean isHoldable = topHoldableCount <= maxHoldableCallCount;
-        for (Holdable holdable : holdables) {
+        Log.d(this, "updateHoldCapability(): topHoldableCount = "
+                + topHoldableCount);
+        boolean isHoldable = topHoldableCount < 2;
+        for (Holdable holdable : mHoldables) {
             holdable.setHoldable(holdable.isChildHoldable() ? false : isHoldable);
         }
     }

@@ -26,7 +26,6 @@ import android.telecom.ConnectionService;
 import android.telecom.DisconnectCause;
 import android.telecom.PhoneAccountHandle;
 import android.telephony.CarrierConfigManager;
-import android.telephony.TelephonyManager;
 
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneConstants;
@@ -69,12 +68,7 @@ public class ImsConferenceController {
             if (conference instanceof ImsConference) {
                 // Ims Conference call ended, so UE may now have the ability to initiate
                 // an Adhoc Conference call. Hence, try enabling adhoc conference capability
-                if(isDsdaOrDsdsTransitionMode((ImsConference)conference)){
-                    mTelecomAccountRegistry.refreshAdhocConferenceForAccount(true,
-                            conference.getPhoneAccountHandle());
-                } else {
-                     mTelecomAccountRegistry.refreshAdhocConference(true);
-                }
+                mTelecomAccountRegistry.refreshAdhocConference(true);
             }
             mImsConferences.remove(conference);
         }
@@ -257,7 +251,7 @@ public class ImsConferenceController {
      * Calculates the conference-capable state of all GSM connections in this connection service.
      * Connections from different {@link PhoneAccountHandle}s shall not be conferenceable.
      */
-    void recalculateConferenceable() {
+    private void recalculateConferenceable() {
         Log.v(this, "recalculateConferenceable : %d", mTelephonyConnections.size());
         HashSet<Conferenceable> conferenceableSet = new HashSet<>(mTelephonyConnections.size() +
                 mImsConferences.size());
@@ -315,12 +309,8 @@ public class ImsConferenceController {
             // Since UE cannot host two conference calls, remove the ability to initiate
             // another conference call as there already exists a conference call, which
             // is hosted on this device.
-            if(isDsdaOrDsdsTransitionMode(conference)){
-                mTelecomAccountRegistry.refreshAdhocConferenceForAccount(false,
-                        conference.getPhoneAccountHandle());
-            } else {
-                mTelecomAccountRegistry.refreshAdhocConference(false);
-            }
+            mTelecomAccountRegistry.refreshAdhocConference(false);
+
             switch (conference.getState()) {
                 case Connection.STATE_ACTIVE:
                     //fall through
@@ -362,7 +352,6 @@ public class ImsConferenceController {
 
                 ((Connection) c).setConferenceables(conferenceables);
             } else if (c instanceof ImsConference) {
-                PhoneAccountHandle handle = getPhoneAccountHandle(c);
                 ImsConference imsConference = (ImsConference) c;
 
                 // If the conference is full, don't allow anything to be conferenced with it.
@@ -375,29 +364,13 @@ public class ImsConferenceController {
                 List<Connection> connections = conferenceableSet
                         .stream()
                         .filter(conferenceable -> conferenceable instanceof Connection &&
-                        Objects.equals(handle, getPhoneAccountHandle(conferenceable)) &&
-                        isSamePhoneAccountHandle(c, conferenceable) &&
-                        !(isHeld(c) && isHeld(conferenceable)))
+                        isSamePhoneAccountHandle(c, conferenceable))
                         .map(conferenceable -> (Connection) conferenceable)
                         .collect(Collectors.toList());
                 // Conference equivalent to setConferenceables that only accepts Connections
                 imsConference.setConferenceableConnections(connections);
             }
         }
-    }
-
-    /*
-     * Checks if the Connection is in HELD state
-     */
-    private static boolean isHeld(Conferenceable conn) {
-        return conn instanceof Connection ?
-                isHoldingState(((Connection) conn).getState()) :
-                conn instanceof ImsConference ?
-                isHoldingState(((ImsConference) conn).getState()) : false;
-    }
-
-    private static boolean isHoldingState(int state) {
-        return state == Connection.STATE_HOLDING;
     }
 
     /**
@@ -562,12 +535,5 @@ public class ImsConferenceController {
                     .setFilterOutConferenceHost(filterOutConferenceHost);
         }
         return config.build();
-    }
-
-    private boolean isDsdaOrDsdsTransitionMode(ImsConference conference) {
-        Connection connection = conference.getConferenceHost();
-        if (!(connection instanceof TelephonyConnection)) return false;
-        Context context = ((TelephonyConnection)connection).getPhone().getContext();
-        return TelephonyManager.from(context).isDsdaOrDsdsTransitionMode();
     }
 }
