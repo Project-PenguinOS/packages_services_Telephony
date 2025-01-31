@@ -534,6 +534,9 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
                 case CommandsInterface.CF_REASON_NOT_REACHABLE:
                     mButtonCFNRc.onPickActivityResult(cursor.getString(0));
                     break;
+                case CommandsInterface.CF_REASON_NOT_LOGGED_IN:
+                    mButtonCFNL.onPickActivityResult(cursor.getString(0));
+                    break;
                 default:
                     // TODO: may need exception here.
             }
