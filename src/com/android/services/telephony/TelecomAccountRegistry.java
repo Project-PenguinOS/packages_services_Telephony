@@ -2123,8 +2123,7 @@ public class TelecomAccountRegistry {
             if ((defaultPhoneAccount == null)
                         && (mTelephonyManager.getActiveModemCount() > Count.ONE.ordinal())
                         && (activeCount == Count.ONE.ordinal())
-                        && (areAllSimAccountsFound()) && (isRadioInValidState(phones))
-                        && !isSubIdCreationPending()) {
+                        && (areAllSimAccountsFound()) && (isRadioInValidState(phones))) {
                 PhoneAccountHandle phoneAccountHandle =
                         subscriptionIdToPhoneAccountHandle(activeSubscriptionId);
                 if (phoneAccountHandle != null) {
@@ -2133,17 +2132,6 @@ public class TelecomAccountRegistry {
                 }
             }
         }
-    }
-
-    // FIXME
-    private boolean isSubIdCreationPending() {
-        Log.i(this, "isSubIdCreationPending");
-
-        if (SubscriptionManagerService.getInstance() == null) {
-            Log.i(this, "isSubIdCreationPending: SMVC instance is null");
-            return false;
-        }
-        return SubscriptionManagerService.getInstance().isSubIdCreationPending();
     }
 
     private boolean areAllSimAccountsFound() {

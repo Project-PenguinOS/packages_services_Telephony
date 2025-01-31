@@ -298,20 +298,11 @@ public class IccNetworkDepersonalizationPanel extends IccPanel {
                 return;
             }
 
-            int persoState = mPersoSubState.getState();
-            log("Requesting De-Personalization for subtype " + mPersoSubtype
-                    + " subtype val " + persoState);
+            log("Requesting De-Personalization for subtype " + mPersoSubtype);
 
             try {
-                // If 1.5 or above HAL Version, then functionality uses IRadio.hal
-                // else follow legacy procedure
-                if(mPhone.getHalVersion().greaterOrEqual(RIL.RADIO_HAL_VERSION_1_5)) {
-                    mPhone.getIccCard().supplySimDepersonalization(mPersoSubState,pin,
-                           Message.obtain(mHandler, EVENT_ICC_NTWRK_DEPERSONALIZATION_RESULT));
-                } else {
-                    PhoneUtils.getExtTelManager().supplyIccDepersonalization(pin,
-                            Integer.toString(persoState), mCallback, mPhone.getPhoneId());
-                }
+                mPhone.getIccCard().supplySimDepersonalization(mPersoSubState,pin,
+                       Message.obtain(mHandler, EVENT_ICC_NTWRK_DEPERSONALIZATION_RESULT));
             } catch (NullPointerException ex) {
                 log("NullPointerException @supplyIccDepersonalization" + ex);
             }
