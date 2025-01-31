@@ -16,7 +16,7 @@
 
 /**
 * Changes from Qualcomm Innovation Center, Inc. are provided under the following license:
-* Copyright (c) 2024 Qualcomm Innovation Center, Inc. All rights reserved.
+* Copyright (c) 2024-2025 Qualcomm Innovation Center, Inc. All rights reserved.
 * SPDX-License-Identifier: BSD-3-Clause-Clear
 */
 
@@ -76,6 +76,7 @@ import com.qti.extphone.Status;
 
 
 import java.lang.ref.WeakReference;
+import java.util.concurrent.Executor;
 
 /**
  * This preference represents the status of call barring options, enabling/disabling
@@ -105,6 +106,8 @@ public class CallBarringEditPreference extends EditPinPreference {
     private QtiImsExtManager mQtiImsExtManager;
     private SetCallBarringReqInfo mSetCallBarringReqInfo = new SetCallBarringReqInfo(false, null);
     private static final int PW_LENGTH = 4;
+    private Executor mExecutor;
+    private QtiImsExtListenerBaseImpl mImsInterfaceListener;
 
     /**
      * CallBarringEditPreference constructor.
@@ -132,6 +135,28 @@ public class CallBarringEditPreference extends EditPinPreference {
         typedArray.recycle();
 
         mExtTelephonyManager = ExtTelephonyManager.getInstance(getContext());
+        mExecutor = context.getMainExecutor();
+        mImsInterfaceListener = new QtiImsExtListenerBaseImpl(mExecutor) {
+            @Override
+            public void onUTReqFailed(int phoneId, int errCode, String errString) {
+                if (DBG) Log.d(LOG_TAG, "onUTReqFailed phoneId=" + phoneId + " errCode= "
+                        + errCode + "errString ="+ errString);
+                if (errCode == ImsReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED) {
+                    getCallBarringWithExpectMore();
+                } else {
+                    Message msg = mHandler.obtainMessage(MyHandler.MESSAGE_GET_CALL_BARRING);
+                    AsyncResult.forMessage(msg, null, PhoneUtils.getCommandException(errCode));
+                    msg.sendToTarget();
+                }
+            }
+
+            @Override
+            public void queryCallBarringResponse(int[] response) {
+                Message msg = mHandler.obtainMessage(MyHandler.MESSAGE_GET_CALL_BARRING);
+                AsyncResult.forMessage(msg, response, null);
+                msg.sendToTarget();
+            }
+        };
     }
 
     /**
@@ -142,30 +167,6 @@ public class CallBarringEditPreference extends EditPinPreference {
     public CallBarringEditPreference(Context context) {
         this(context, null);
     }
-
-    private QtiImsExtListenerBaseImpl imsInterfaceListener =
-            new QtiImsExtListenerBaseImpl() {
-                @Override
-                public void onUTReqFailed(int phoneId, int errCode, String errString) {
-                    if (DBG) Log.d(LOG_TAG, "onUTReqFailed phoneId=" + phoneId + " errCode= "
-                            +errCode + "errString ="+ errString);
-
-                    if (errCode == ImsReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED) {
-                        getCallBarringWithExpectMore();
-                    } else {
-                        Message msg = mHandler.obtainMessage(MyHandler.MESSAGE_GET_CALL_BARRING);
-                        AsyncResult.forMessage(msg, null, PhoneUtils.getCommandException(errCode));
-                        msg.sendToTarget();
-                    }
-                }
-
-                @Override
-                public void queryCallBarringResponse(int[] response) {
-                    Message msg = mHandler.obtainMessage(MyHandler.MESSAGE_GET_CALL_BARRING);
-                    AsyncResult.forMessage(msg, response, null);
-                    msg.sendToTarget();
-                }
-            };
 
     private void createQtiImsExtConnector(Context context) {
         try {
@@ -246,7 +247,7 @@ public class CallBarringEditPreference extends EditPinPreference {
         try {
             mQtiImsExtManager.queryCallBarring(mPhone.getPhoneId(),
                     getCBTypeFromFacility(mFacility), "", getServiceClassForCallBarring(mPhone),
-                    mExpectMore, imsInterfaceListener);
+                    mExpectMore, mImsInterfaceListener);
         } catch (QtiImsException e) {
             Log.d(LOG_TAG, "queryCallForwardStatus failed. " +
                     "Exception = " + e);

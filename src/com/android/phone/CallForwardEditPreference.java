@@ -1,6 +1,6 @@
 /**
 * Changes from Qualcomm Innovation Center, Inc. are provided under the following license:
-* Copyright (c) 2024 Qualcomm Innovation Center, Inc. All rights reserved.
+* Copyright (c) 2024-2025 Qualcomm Innovation Center, Inc. All rights reserved.
 * SPDX-License-Identifier: BSD-3-Clause-Clear
 */
 
@@ -62,6 +62,7 @@ import com.qti.extphone.IExtPhoneCallback;
 import com.qti.extphone.QtiCallForwardInfo;
 import com.qti.extphone.Status;
 
+import java.util.concurrent.Executor;
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -115,13 +116,15 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
     private ExtTelephonyManager mExtTelephonyManager;
     private Client mClient;
     private Context mContext;
+    private Executor mExecutor;
+    private QtiImsExtListenerBaseImpl mImsInterfaceListener;
 
     public CallForwardEditPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
 
         mSummaryOnTemplate = this.getSummaryOn();
         mContext = context;
-
+        mExecutor = mContext.getMainExecutor();
         TypedArray a = context.obtainStyledAttributes(attrs,
                 R.styleable.CallForwardEditPreference, 0, R.style.EditPhoneNumberPreference);
         reason = a.getInt(R.styleable.CallForwardEditPreference_reason,
@@ -129,6 +132,108 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
         a.recycle();
 
         mExtTelephonyManager = ExtTelephonyManager.getInstance(getContext());
+        mImsInterfaceListener = new QtiImsExtListenerBaseImpl(mExecutor) {
+            @Override
+            public void onSetCallForwardUncondTimer(int phoneId, int status) {
+                if (DBG) Log.d(LOG_TAG, "onSetCallForwardTimer phoneId= " + phoneId +" status= "
+                                        +status);
+                try {
+                    mQtiImsExtManager.getCallForwardUncondTimer(phoneId,
+                            reason,
+                            mServiceClass,
+                            mImsInterfaceListener);
+                } catch (QtiImsException e) {
+                    if (DBG) Log.d(LOG_TAG, "setCallForwardUncondTimer exception! ");
+                }
+            }
+
+            @Override
+            public void onGetCallForwardUncondTimer(int phoneId, int startHour, int endHour,
+                    int startMinute, int endMinute, int reason, int status, String number,
+                    int service) {
+                Log.d(LOG_TAG,"onGetCallForwardUncondTimer phoneId=" + phoneId + " startHour= "
+                        + startHour + " endHour = " + endHour + "endMinute = " + endMinute
+                        + "status = " + status + "number = " + number + "service= " +service);
+                mStartHour = startHour;
+                mStartMinute = startMinute;
+                mEndHour = endHour;
+                mEndMinute = endMinute;
+                mStatus = status;
+                mNumber = number;
+
+                mHandler.sendMessage(mHandler.obtainMessage(mHandler.MESSAGE_GET_CFUT));
+            }
+
+            @Override
+            public void queryCallForwardStatusResponse(int phoneId, ImsCallForwardInfo[] cfInfoList)
+            {
+                Log.d(LOG_TAG, "queryCallForwardStatusResponse phoneId=" + phoneId);
+
+                int size = cfInfoList.length;
+                CallForwardInfo[] cfInfo = new CallForwardInfo[size];
+                for (int i = 0; i < size; i++) {
+                    cfInfo[i] = new CallForwardInfo();
+                    cfInfo[i].status = cfInfoList[i].getStatus();
+                    cfInfo[i].reason = cfInfoList[i].getCondition();
+                    cfInfo[i].toa = cfInfoList[i].getToA();
+                    cfInfo[i].number = cfInfoList[i].getNumber();
+                    cfInfo[i].timeSeconds = cfInfoList[i].getTimeSeconds();
+
+                    //Check if the service class signifies Video call forward
+                    //As per 3GPP TS 29002 MAP Specification : Section 17.7.10,
+                    //the BearerServiceCode for "allDataCircuitAsynchronous"
+                    //is '01010000' ( i.e. 80). Hence, SERVICE_CLASS_DATA_SYNC
+                    //(1<<4) and SERVICE_CLASS_PACKET (1<<6) together make
+                    //video service class.
+
+                    if (cfInfoList[i].getServiceClass() ==
+                                    (CommandsInterface.SERVICE_CLASS_DATA_SYNC +
+                            CommandsInterface.SERVICE_CLASS_PACKET)) {
+                        cfInfo[i].serviceClass = cfInfoList[i].getServiceClass();
+                    } else {
+                        cfInfo[i].serviceClass = CommandsInterface.SERVICE_CLASS_VOICE;
+                    }
+
+                    updateCallForwardingPreference(cfInfo[i]);
+                }
+
+                Message msg = mHandler.obtainMessage(MyHandler.MESSAGE_GET_CF,
+                        // unused in this case
+                        CommandsInterface.CF_ACTION_DISABLE, MyHandler.MESSAGE_GET_CF, null);
+                AsyncResult.forMessage(msg, cfInfo, null);
+                msg.sendToTarget();
+            }
+
+            @Override
+            public void onUTReqFailed(int phoneId, int errCode, String errString) {
+                if (DBG) Log.d(LOG_TAG, "onUTReqFailed phoneId=" + phoneId + " errCode= "
+                        + errCode + "errString =" + errString);
+                Message msg;
+                if (reason == CommandsInterface.CF_REASON_UNCONDITIONAL && mIsCfutEnabled) {
+                    msg = mHandler.obtainMessage(mHandler.MESSAGE_GET_UT_FAILED);
+                    msg.arg1 = errCode;
+                    msg.sendToTarget();
+                } else {
+                    if (errCode == ImsReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED) {
+                        queryCallForwardStatus();
+                    } else {
+                        msg = mHandler.obtainMessage(MyHandler.MESSAGE_GET_CF,
+                                // unused in this case
+                                CommandsInterface.CF_ACTION_DISABLE, MyHandler.MESSAGE_GET_CF,
+                                null);
+                        if (errCode == QtiCallConstants.CODE_UT_CF_SERVICE_NOT_REGISTERED) {
+                            AsyncResult.forMessage(msg, null,
+                                    new QtiImsException("Service Not Registered", errCode));
+                        } else {
+                            AsyncResult.forMessage(msg, null,
+                                                   PhoneUtils.getCommandException(errCode));
+                        }
+                        msg.sendToTarget();
+                    }
+                }
+
+            }
+        };
 
         Log.d(LOG_TAG, "mServiceClass=" + mServiceClass + ", reason=" + reason);
     }
@@ -391,7 +496,7 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
                                 reason,
                                 mServiceClass,
                                 number,
-                                imsInterfaceListener);
+                                mImsInterfaceListener);
                     } catch (QtiImsException e) {
                         Log.d(LOG_TAG, "setCallForwardUncondTimer exception!" +e);
                     }
@@ -602,10 +707,10 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
                         mIsCfutEnabled) {
                     setTimeSettingVisibility(true);
                     mQtiImsExtManager.getCallForwardUncondTimer(mPhone.getPhoneId(),
-                            reason, mServiceClass, imsInterfaceListener);
+                            reason, mServiceClass, mImsInterfaceListener);
                 } else {
                     mQtiImsExtManager.queryCallForwardStatus(mPhone.getPhoneId(),
-                            reason, mServiceClass, mExpectMore, imsInterfaceListener);
+                            reason, mServiceClass, mExpectMore, mImsInterfaceListener);
                 }
             } catch (QtiImsException e){
                 Log.d(LOG_TAG, "queryCallForwardStatus failed. " +
@@ -669,106 +774,6 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
         }
         return telephonyManager.getNetworkCountryIso().toUpperCase(Locale.ROOT);
     }
-
-    private QtiImsExtListenerBaseImpl imsInterfaceListener =
-            new QtiImsExtListenerBaseImpl() {
-
-        @Override
-        public void onSetCallForwardUncondTimer(int phoneId, int status) {
-            if (DBG) Log.d(LOG_TAG, "onSetCallForwardTimer phoneId=" + phoneId +" status= "+status);
-
-            try {
-                mQtiImsExtManager.getCallForwardUncondTimer(phoneId,
-                        reason,
-                        mServiceClass,
-                        imsInterfaceListener);
-            } catch (QtiImsException e) {
-                if (DBG) Log.d(LOG_TAG, "setCallForwardUncondTimer exception! ");
-            }
-        }
-
-        @Override
-        public void onGetCallForwardUncondTimer(int phoneId, int startHour, int endHour,
-                int startMinute, int endMinute, int reason, int status, String number,
-                int service) {
-            Log.d(LOG_TAG,"onGetCallForwardUncondTimer phoneId=" + phoneId + " startHour= "
-                    + startHour + " endHour = " + endHour + "endMinute = " + endMinute
-                    + "status = " + status + "number = " + number + "service= " +service);
-            mStartHour = startHour;
-            mStartMinute = startMinute;
-            mEndHour = endHour;
-            mEndMinute = endMinute;
-            mStatus = status;
-            mNumber = number;
-
-            mHandler.sendMessage(mHandler.obtainMessage(mHandler.MESSAGE_GET_CFUT));
-        }
-
-        @Override
-        public void queryCallForwardStatusResponse(int phoneId, ImsCallForwardInfo[] cfInfoList) {
-            Log.d(LOG_TAG, "queryCallForwardStatusResponse phoneId=" + phoneId);
-
-            int size = cfInfoList.length;
-            CallForwardInfo[] cfInfo = new CallForwardInfo[size];
-            for (int i = 0; i < size; i++) {
-                cfInfo[i] = new CallForwardInfo();
-                cfInfo[i].status = cfInfoList[i].getStatus();
-                cfInfo[i].reason = cfInfoList[i].getCondition();
-                cfInfo[i].toa = cfInfoList[i].getToA();
-                cfInfo[i].number = cfInfoList[i].getNumber();
-                cfInfo[i].timeSeconds = cfInfoList[i].getTimeSeconds();
-
-                //Check if the service class signifies Video call forward
-                //As per 3GPP TS 29002 MAP Specification : Section 17.7.10, the BearerServiceCode
-                // for "allDataCircuitAsynchronous" is '01010000' ( i.e. 80).
-                //Hence, SERVICE_CLASS_DATA_SYNC (1<<4) and SERVICE_CLASS_PACKET (1<<6)
-                //together make video service class.
-
-                if (cfInfoList[i].getServiceClass() == (CommandsInterface.SERVICE_CLASS_DATA_SYNC +
-                        CommandsInterface.SERVICE_CLASS_PACKET)) {
-                    cfInfo[i].serviceClass = cfInfoList[i].getServiceClass();
-                } else {
-                    cfInfo[i].serviceClass = CommandsInterface.SERVICE_CLASS_VOICE;
-                }
-
-                updateCallForwardingPreference(cfInfo[i]);
-            }
-
-            Message msg = mHandler.obtainMessage(MyHandler.MESSAGE_GET_CF,
-                    // unused in this case
-                    CommandsInterface.CF_ACTION_DISABLE, MyHandler.MESSAGE_GET_CF, null);
-            AsyncResult.forMessage(msg, cfInfo, null);
-            msg.sendToTarget();
-        }
-
-        @Override
-        public void onUTReqFailed(int phoneId, int errCode, String errString) {
-            if (DBG) Log.d(LOG_TAG, "onUTReqFailed phoneId=" + phoneId + " errCode= "
-                    + errCode + "errString =" + errString);
-            Message msg;
-            if (reason == CommandsInterface.CF_REASON_UNCONDITIONAL && mIsCfutEnabled) {
-                msg = mHandler.obtainMessage(mHandler.MESSAGE_GET_UT_FAILED);
-                msg.arg1 = errCode;
-                msg.sendToTarget();
-            } else {
-                if (errCode == ImsReasonInfo.CODE_LOCAL_CALL_CS_RETRY_REQUIRED) {
-                    queryCallForwardStatus();
-                } else {
-                    msg = mHandler.obtainMessage(MyHandler.MESSAGE_GET_CF,
-                            // unused in this case
-                            CommandsInterface.CF_ACTION_DISABLE, MyHandler.MESSAGE_GET_CF, null);
-                    if (errCode == QtiCallConstants.CODE_UT_CF_SERVICE_NOT_REGISTERED) {
-                        AsyncResult.forMessage(msg, null,
-                                new QtiImsException("Service Not Registered", errCode));
-                    } else {
-                        AsyncResult.forMessage(msg, null, PhoneUtils.getCommandException(errCode));
-                    }
-                    msg.sendToTarget();
-                }
-            }
-
-        }
-    };
 
     private void handleUtReqFailed(int errCode) {
         if (mAllowSetCallFwding) {
