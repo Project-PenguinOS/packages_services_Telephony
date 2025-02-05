@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+/*
+ * Changes from Qualcomm Innovation Center, Inc. are provided under the following license:
+ * Copyright (c) 2025 Qualcomm Innovation Center, Inc. All rights reserved.
+ * SPDX-License-Identifier: BSD-3-Clause-Clear
+ */
+
 package com.android.phone;
 
 import android.app.ActionBar;
@@ -441,6 +447,11 @@ public class CallFeaturesSetting extends PreferenceActivity
         Preference gsmOptions = prefSet.findPreference(BUTTON_GSM_UMTS_OPTIONS);
         Preference fdnButton = prefSet.findPreference(BUTTON_FDN_KEY);
         fdnButton.setIntent(mSubscriptionInfoHelper.getIntent(FdnSetting.class));
+
+        if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY_CDMA)) {
+            prefSet.removePreference(cdmaOptions);
+        }
+
         if (carrierConfig.getBoolean(CarrierConfigManager.KEY_WORLD_PHONE_BOOL)) {
             if (carrierConfig.getBoolean("config_common_callsettings_support_bool")) {
                 prefSet.removePreference(cdmaOptions);
