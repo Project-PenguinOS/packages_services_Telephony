@@ -22,6 +22,8 @@
 
 package com.android.phone;
 
+import static com.qti.extphone.ExtTelephonyManager.FEATURE_BACK_TO_BACK_SUPPLEMENTARY_SERVICE_REQ;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -121,7 +123,6 @@ public class PhoneUtils {
 
     private static final int INVALID = -1;
     private static int mBackToBackSSFeature = INVALID;
-    private static final int BACK_BACK_SS_REQ = 1;
 
     /**
      * Theme to use for dialogs displayed by utility methods in this class. This is needed
@@ -997,7 +998,8 @@ public class PhoneUtils {
     static boolean isBacktoBackSSFeatureSupported() {
         if (mBackToBackSSFeature == INVALID) {
             mBackToBackSSFeature =
-                   (mExtTelephonyManager.isFeatureSupported(BACK_BACK_SS_REQ)) ? 1 : 0;
+                   (mExtTelephonyManager.isFeatureSupported(
+                   FEATURE_BACK_TO_BACK_SUPPLEMENTARY_SERVICE_REQ)) ? 1 : 0;
         }
         return (mBackToBackSSFeature == 1);
     }
