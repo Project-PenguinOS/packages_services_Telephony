@@ -14492,11 +14492,6 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
      * @return {@code true} if the operation is successful, {@code false} otherwise.
      */
     public boolean setShouldSendDatagramToModemInDemoMode(boolean shouldSendToModemInDemoMode) {
-        if (!mFeatureFlags.oemEnabledSatelliteFlag()) {
-            Log.d(LOG_TAG, "shouldSendDatagramToModemInDemoMode: oemEnabledSatelliteFlag is "
-                    + "disabled");
-            return false;
-        }
         Log.d(LOG_TAG, "setShouldSendDatagramToModemInDemoMode");
         TelephonyPermissions.enforceShellOnly(
                 Binder.getCallingUid(), "setShouldSendDatagramToModemInDemoMode");
@@ -14520,12 +14515,6 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
      * @return {@code true} if the setting is successful, {@code false} otherwise.
      */
     public boolean setIsSatelliteCommunicationAllowedForCurrentLocationCache(String state) {
-        if (!mFeatureFlags.oemEnabledSatelliteFlag()) {
-            Log.d(LOG_TAG, "setIsSatelliteCommunicationAllowedForCurrentLocationCache: "
-                    + "oemEnabledSatelliteFlag is disabled");
-            return false;
-        }
-
         Log.d(LOG_TAG, "setIsSatelliteCommunicationAllowedForCurrentLocationCache: "
                 + "state=" + state);
         TelephonyPermissions.enforceShellOnly(
