@@ -1472,9 +1472,11 @@ public class TelephonyConnectionService extends ConnectionService {
                     }
                     return resultConnection;
                 } else {
-// QTI_BEGIN: 2025-01-30: Telephony: Revert "DSDA: Bypass AOSP DSDA logic for add call"
-                    if (mTelephonyManagerProxy.isConcurrentCallsPossible()) {
-// QTI_END: 2025-01-30: Telephony: Revert "DSDA: Bypass AOSP DSDA logic for add call"
+                    // If call sequencing is enabled, Telecom will take care of holding calls across
+                    // subscriptions if needed before delegating the connection creation over to
+                    // Telephony.
+                    if (mTelephonyManagerProxy.isConcurrentCallsPossible()
+                            && !mTelecomFlags.enableCallSequencing()) {
                         Conferenceable c = maybeHoldCallsOnOtherSubs(request.getAccountHandle());
                         if (c != null) {
                             delayDialForOtherSubHold(phone, c, (success) -> {
