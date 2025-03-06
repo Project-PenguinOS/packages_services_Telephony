@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
 <!-- Copyright (C) 2007 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,12 +16,16 @@
      limitations under the License.
 -->
 
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
 <!--
  * Changes from Qualcomm Innovation Center, Inc. are provided under the following license:
  * Copyright (c) 2024 Qualcomm Innovation Center, Inc. All rights reserved.
  * SPDX-License-Identifier: BSD-3-Clause-Clear
 -->
 
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
         package="com.android.phone"
@@ -28,183 +34,481 @@
         android:sharedUserLabel="@string/phoneAppLabel">
 
     <!-- Allows broadcasting for SlicePurchaseController events. -->
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <protected-broadcast android:name="com.android.phone.slice.action.START_SLICE_PURCHASE_APP" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <protected-broadcast android:name="com.android.phone.slice.action.SLICE_PURCHASE_APP_RESPONSE_TIMEOUT" />
 
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <original-package android:name="com.android.phone" />
 
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <protected-broadcast android:name= "org.codeaurora.intent.action.SUBSCRIPTION_INFO_RECORD_ADDED" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <protected-broadcast android:name= "org.codeaurora.intent.action.PRIMARY_CARD_CHANGED_IN_SERVICE" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <protected-broadcast android:name= "org.codeaurora.intent.action.ACTION_SET_PRIMARY_CARD_DONE" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <protected-broadcast android:name= "codeaurora.intent.action.ACTION_LTE_CONFIGURE" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <protected-broadcast android:name= "org.codeaurora.intent.action.ACTION_UICC_MANUAL_PROVISION_STATUS_CHANGED" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <protected-broadcast android:name= "org.codeaurora.intent.action.ACTION_RADIO_CAPABILITY_UPDATED" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <protected-broadcast android:name= "org.codeaurora.intent.action.ACTION_NETWORK_SPECIFIER_SET" />
+<!-- QTI_BEGIN: 2021-02-23: Telephony: Mark radio state changed broadcast as protected-->
+<!-- QTI_END: 2021-02-23: Telephony: Mark radio state changed broadcast as protected-->
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <protected-broadcast android:name= "org.codeaurora.intent.action.RADIO_POWER_STATE" />
+<!-- QTI_BEGIN: 2021-12-29: Telephony: Add exit SCBM support-->
+<!-- QTI_END: 2021-12-29: Telephony: Add exit SCBM support-->
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <protected-broadcast android:name= "org.codeaurora.intent.action.SMS_CALLBACK_MODE_CHANGED" />
+<!-- QTI_BEGIN: 2021-12-29: Telephony: Add exit SCBM support-->
+<!-- QTI_END: 2021-12-29: Telephony: Add exit SCBM support-->
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <protected-broadcast android:name= "org.codeaurora.intent.action.SHOW_NOTICE_SCM_BLOCK_OTHERS" />
+<!-- QTI_BEGIN: 2020-05-28: Telephony: VoWifi Emergency Call Notification-->
+<!-- QTI_END: 2020-05-28: Telephony: VoWifi Emergency Call Notification-->
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <protected-broadcast android:name= "org.codeaurora.telephony.VOWIFI_ENABLED" />
 
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_BEGIN: 2022-12-16: Telephony: IMS: Broadcast essential records loaded-->
+<!-- QTI_END: 2022-12-16: Telephony: IMS: Broadcast essential records loaded-->
     <protected-broadcast android:name = "org.codeaurora.intent.action.ESSENTIAL_RECORDS_LOADED" />
 
     <!-- Allows granting runtime permissions to telephony related components. -->
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.GRANT_RUNTIME_PERMISSIONS_TO_TELEPHONY_DEFAULTS" />
 
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.BROADCAST_STICKY" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.CALL_PHONE" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.CALL_PRIVILEGED" />
     <!-- TELEPHONY_SECRET_CODE used to be sent by the Dialer app, but is now sent by
          the phone process through an API added in O. Since the broadcast was unprotected prior to
          O, apps may have required this permission (which only Dialer has) in their receivers.
          So, declare this permission here for backwards compatibility so the phone process can send
          the broadcasts to those same receivers. -->
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.CONTROL_INCALL_EXPERIENCE" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.DOWNLOAD_WITHOUT_NOTIFICATION" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.READ_CONTACTS" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.READ_CALL_LOG" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.WRITE_CONTACTS" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.WRITE_CALL_LOG" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.INTERNAL_SYSTEM_WINDOW" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.VIBRATE" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.REORDER_TASKS" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.CHANGE_CONFIGURATION" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.STATUS_BAR" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.STATUS_BAR_SERVICE" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.READ_SMS" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.WRITE_SMS" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.SEND_SMS" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.SEND_RESPOND_VIA_MESSAGE" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.SUGGEST_TELEPHONY_TIME_AND_ZONE" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.MODIFY_PHONE_STATE" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.ACCESS_IMS_CALL_SERVICE" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.DEVICE_POWER" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.INTERNET" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.LOCATION_BYPASS" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.WRITE_APN_SETTINGS" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.BROADCAST_SMS"/>
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.BROADCAST_WAP_PUSH"/>
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.SHUTDOWN" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.PERFORM_CDMA_PROVISIONING" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.USE_SIP" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.REBOOT" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.UPDATE_LOCK" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="com.android.smspush.WAPPUSH_MANAGER_BIND" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.MANAGE_USERS" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.UPDATE_APP_OPS_STATS" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.READ_CARRIER_APP_INFO" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.MANAGE_APP_OPS_MODES" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.NETWORK_FACTORY" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.OBSERVE_NETWORK_POLICY" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.SET_PREFERRED_APPLICATIONS" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.READ_SEARCH_INDEXABLES" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.DUMP" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.REGISTER_CALL_PROVIDER" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.REGISTER_SIM_SUBSCRIPTION" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.BIND_IMS_SERVICE" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.BIND_CARRIER_SERVICES" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.BIND_EUICC_SERVICE" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.BIND_TELEPHONY_NETWORK_SERVICE" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.BIND_CELL_BROADCAST_SERVICE" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="com.android.voicemail.permission.ADD_VOICEMAIL" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="com.android.voicemail.permission.WRITE_VOICEMAIL" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="com.android.voicemail.permission.READ_VOICEMAIL" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.BIND_VISUAL_VOICEMAIL_SERVICE"/>
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.LOCAL_MAC_ADDRESS" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.CHANGE_COMPONENT_ENABLED_STATE" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.READ_SYSTEM_GRAMMATICAL_GENDER" />
     <!-- Needed to block messages. -->
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.READ_BLOCKED_NUMBERS" />
     <!-- Needed for emergency contact notification. -->
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.WRITE_BLOCKED_NUMBERS" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.NETWORK_SETTINGS" />
 
     <!-- Needed to register puller to statsd. -->
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.REGISTER_STATS_PULL_ATOM" />
 
     <!-- This tells the activity manager to not delay any of our activity
          start requests, even if they happen immediately after the user
          presses home. -->
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.STOP_APP_SWITCHES" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.UPDATE_DEVICE_STATS" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.MANAGE_NETWORK_POLICY" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.READ_NETWORK_USAGE_HISTORY" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.BIND_TELEPHONY_DATA_SERVICE" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.BIND_SATELLITE_GATEWAY_SERVICE" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.BIND_SATELLITE_SERVICE" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.SATELLITE_COMMUNICATION" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.READ_PRECISE_PHONE_STATE" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.MANAGE_ROLE_HOLDERS" />
     <!-- Allows us to allow list receivers of the
          ACTION_SIM_SLOT_STATUS_CHANGED broadcast to start activities
          from the background.  -->
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.START_ACTIVITIES_FROM_BACKGROUND" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.NETWORK_STATS_PROVIDER" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.MANAGE_SUBSCRIPTION_PLANS"/>
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.OBSERVE_ROLE_HOLDERS"/>
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.BIND_GBA_SERVICE"/>
     <!-- Permissions required for reading and logging compat changes -->
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.LOG_COMPAT_CHANGE"/>
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.READ_COMPAT_CHANGE_CONFIG"/>
 
     <!-- Needed to listen to changes in projection state. -->
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.READ_PROJECTION_STATE"/>
     <!-- Needed to access TelephonyProvider SIMINFO table. -->
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.ACCESS_TELEPHONY_SIMINFO_DB"/>
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <!-- Needed to set user association to a certain sim -->
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.MANAGE_SUBSCRIPTION_USER_ASSOCIATION"/>
 
     <!-- Needed to register for UWB state changes for satellite communication -->
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.UWB_PRIVILEGED"/>
 
     <!-- Needed to initiate configuration update -->
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="android.permission.UPDATE_CONFIG"/>
 
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="com.qti.permission.BIND_QTI_IMS_SERVICE" />
+<!-- QTI_BEGIN: 2021-01-20: Telephony: Add manifest permission-->
+<!-- QTI_END: 2021-01-20: Telephony: Add manifest permission-->
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="com.qualcomm.qti.permission.USE_EXT_TELEPHONY_SERVICE" />
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_BEGIN: 2021-03-18: AndroidCore: IMS: Add permission to receive SCBM broadcast-->
+<!-- QTI_END: 2021-03-18: AndroidCore: IMS: Add permission to receive SCBM broadcast-->
     <uses-permission android:name="com.qti.permission.RECEIVE_SMS_CALLBACK_MODE" />
+<!-- QTI_BEGIN: 2021-07-13: Telephony: IMS: Add permission to receive voice capability broadcast-->
+<!-- QTI_END: 2021-07-13: Telephony: IMS: Add permission to receive voice capability broadcast-->
     <!-- Allows us to know if concurrent calls on both subs are possible by handling broadcast
          intent "org.codeaurora.intent.action.MSIM_VOICE_CAPABILITY".-->
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_BEGIN: 2021-07-13: Telephony: IMS: Add permission to receive voice capability broadcast-->
+<!-- QTI_END: 2021-07-13: Telephony: IMS: Add permission to receive voice capability broadcast-->
     <uses-permission android:name="com.qti.permission.RECEIVE_MSIM_VOICE_CAPABILITY" />
 
+<!-- QTI_BEGIN: 2022-12-16: Telephony: IMS: Broadcast essential records loaded-->
+<!-- QTI_END: 2022-12-16: Telephony: IMS: Broadcast essential records loaded-->
     <!-- Permission needed to handle intent
          "org.codeaurora.intent.action.ESSENTIAL_RECORDS_LOADED" -->
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_BEGIN: 2022-12-16: Telephony: IMS: Broadcast essential records loaded-->
+<!-- QTI_END: 2022-12-16: Telephony: IMS: Broadcast essential records loaded-->
     <uses-permission android:name="com.qti.permission.RECEIVE_ESSENTIAL_RECORDS_LOADED" />
 
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <!-- Permission needed to bind com.qualcomm.qcrilmsgtunnel.QcrilMsgTunnelService -->
+<!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
+<!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
     <uses-permission android:name="com.qualcomm.permission.USE_QCRIL_MSG_TUNNEL" />
 
+<!-- QTI_BEGIN: 2022-12-16: Telephony: IMS: Broadcast essential records loaded-->
+<!-- QTI_END: 2022-12-16: Telephony: IMS: Broadcast essential records loaded-->
     <permission android:name="com.qti.permission.RECEIVE_ESSENTIAL_RECORDS_LOADED"
         android:label="Broadcast essential records loaded"
         android:protectionLevel="signature|system"/>
@@ -469,7 +773,11 @@
         <service android:name="EmergencyCallbackModeService">
         </service>
 
+<!-- QTI_BEGIN: 2021-12-29: Telephony: Add exit SCBM support-->
+<!-- QTI_END: 2021-12-29: Telephony: Add exit SCBM support-->
         <service android:name="SmsCallbackModeService">
+<!-- QTI_BEGIN: 2021-12-29: Telephony: Add exit SCBM support-->
+<!-- QTI_END: 2021-12-29: Telephony: Add exit SCBM support-->
         </service>
 
         <!-- service to dump telephony information -->
@@ -568,16 +876,28 @@
             </intent-filter>
         </activity>
 
+<!-- QTI_BEGIN: 2021-12-29: Telephony: Add exit SCBM support-->
+<!-- QTI_END: 2021-12-29: Telephony: Add exit SCBM support-->
         <activity android:name="SmsCallbackModeExitDialog"
             android:excludeFromRecents="true"
             android:label="@string/scm_exit_dialog"
             android:launchMode="singleTop"
             android:exported="true"
             android:theme="@android:style/Theme.Translucent.NoTitleBar">
+<!-- QTI_BEGIN: 2021-12-29: Telephony: Add exit SCBM support-->
+<!-- QTI_END: 2021-12-29: Telephony: Add exit SCBM support-->
             <intent-filter>
+<!-- QTI_BEGIN: 2021-12-29: Telephony: Add exit SCBM support-->
+<!-- QTI_END: 2021-12-29: Telephony: Add exit SCBM support-->
                 <action android:name="org.codeaurora.intent.action.ACTION_SHOW_SCM_EXIT_DIALOG" />
+<!-- QTI_BEGIN: 2021-12-29: Telephony: Add exit SCBM support-->
+<!-- QTI_END: 2021-12-29: Telephony: Add exit SCBM support-->
                 <action android:name="org.codeaurora.intent.action.SHOW_NOTICE_SCM_BLOCK_OTHERS" />
+<!-- QTI_BEGIN: 2021-12-29: Telephony: Add exit SCBM support-->
+<!-- QTI_END: 2021-12-29: Telephony: Add exit SCBM support-->
                 <category android:name="android.intent.category.DEFAULT" />
+<!-- QTI_BEGIN: 2021-12-29: Telephony: Add exit SCBM support-->
+<!-- QTI_END: 2021-12-29: Telephony: Add exit SCBM support-->
             </intent-filter>
         </activity>
         <activity android:name="MMIDialogActivity"
@@ -730,6 +1050,8 @@
         </service>
 
         <uses-library android:name="ims-ext-common"/>
+<!-- QTI_BEGIN: 2021-02-10: Telephony: Move IExtTelephony to IExtPhone-->
+<!-- QTI_END: 2021-02-10: Telephony: Move IExtTelephony to IExtPhone-->
         <uses-library android:name="com.qti.extphone.extphonelib"/>
     </application>
 </manifest>

@@ -29,9 +29,11 @@ import android.telecom.StatusHints;
 import android.telecom.TelecomManager;
 import android.telecom.VideoProfile;
 import android.telephony.PhoneNumberUtils;
+// QTI_BEGIN: 2018-03-09: Telephony: Fix for Wi-Fi Call to show Sub Information
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+// QTI_END: 2018-03-09: Telephony: Fix for Wi-Fi Call to show Sub Information
 import android.text.TextUtils;
 import android.util.Pair;
 
@@ -489,6 +491,7 @@ public class ImsConference extends TelephonyConferenceBase implements Holdable {
 
         // Specify the connection time of the conference to be the connection time of the original
         // connection.
+// QTI_BEGIN: 2022-02-17: Telephony: IMS: Fix the crashes in MT conference call
         com.android.internal.telephony.Connection originalConnection =
                 conferenceHost.getOriginalConnection();
         //In MT IMS conference call, it will cleanup TelephonyConnection which backed the original
@@ -500,6 +503,7 @@ public class ImsConference extends TelephonyConferenceBase implements Holdable {
             connectTime = originalConnection.getConnectTime();
             connectElapsedTime = originalConnection.getConnectTimeReal();
         }
+// QTI_END: 2022-02-17: Telephony: IMS: Fix the crashes in MT conference call
         setConnectionTime(connectTime);
         setConnectionStartElapsedRealtimeMillis(connectElapsedTime);
         // Set the connectTime in the connection as well.
@@ -511,7 +515,9 @@ public class ImsConference extends TelephonyConferenceBase implements Holdable {
         setVideoProvider(conferenceHost, conferenceHost.getVideoProvider());
 
         int capabilities = Connection.CAPABILITY_MUTE |
+// QTI_BEGIN: 2020-03-19: Telephony: Ims: Clean-up old ConfURI implementation
                 Connection.CAPABILITY_CONFERENCE_HAS_NO_CHILDREN;
+// QTI_END: 2020-03-19: Telephony: Ims: Clean-up old ConfURI implementation
         if (mCarrierConfig.isHoldAllowed()) {
             capabilities |= Connection.CAPABILITY_SUPPORT_HOLD | Connection.CAPABILITY_HOLD;
             mIsHoldable = true;
@@ -1098,7 +1104,9 @@ public class ImsConference extends TelephonyConferenceBase implements Holdable {
                             // Track the identity of the conference host; its useful to know when
                             // we look at the CEP in the future.
                             mHostParticipantIdentity = userEntity;
+// QTI_BEGIN: 2018-03-14: Telephony: IMS: Disable filtering out conference host for some carriers
                         }
+// QTI_END: 2018-03-14: Telephony: IMS: Disable filtering out conference host for some carriers
                     } else {
                         ConferenceParticipantConnection connection =
                                 mConferenceParticipantConnections.get(userEntity);
@@ -1114,7 +1122,9 @@ public class ImsConference extends TelephonyConferenceBase implements Holdable {
                             handleConnectionDestruction(connection);
                         }
                         connection.setVideoState(parent.getVideoState());
+// QTI_BEGIN: 2018-03-14: Telephony: IMS: Disable filtering out conference host for some carriers
                     }
+// QTI_END: 2018-03-14: Telephony: IMS: Disable filtering out conference host for some carriers
                 }
 
                 // Set state of new participants.
@@ -1322,8 +1332,10 @@ public class ImsConference extends TelephonyConferenceBase implements Holdable {
         // active call.
         ConferenceParticipantConnection connection = new ConferenceParticipantConnection(
                 parent.getOriginalConnection(), participant,
+// QTI_BEGIN: 2020-12-01: Telephony: IMS: Set property PROPERTY_IS_PARTICIPANT_HOST
                 !isConferenceHost() /* isRemotelyHosted */,
                 isParticipantHost(mConferenceHostAddress, participant.getHandle()));
+// QTI_END: 2020-12-01: Telephony: IMS: Set property PROPERTY_IS_PARTICIPANT_HOST
 
         if (participant.getConnectTime() == 0) {
             connection.setConnectTimeMillis(parent.getConnectTimeMillis());
@@ -1526,7 +1538,9 @@ public class ImsConference extends TelephonyConferenceBase implements Holdable {
                         c.getConnectionProperties() | Connection.PROPERTY_IS_DOWNGRADED_CONFERENCE);
                 c.updateState();
                 // Copy the connect time from the conferenceHost
+// QTI_BEGIN: 2018-03-08: Telephony: IMS: Allow placeCall with uri number
                 c.setConnectTimeMillis(originalConnection.getConnectTime());
+// QTI_END: 2018-03-08: Telephony: IMS: Allow placeCall with uri number
                 c.setConnectionStartElapsedRealtimeMillis(
                         mConferenceHost.getConnectionStartElapsedRealtimeMillis());
                 mTelephonyConnectionService.addExistingConnection(phoneAccountHandle, c);
@@ -1566,20 +1580,32 @@ public class ImsConference extends TelephonyConferenceBase implements Holdable {
                 if (mConferenceHost == null) {
                     disconnectCause = new DisconnectCause(DisconnectCause.CANCELED);
                 } else {
+// QTI_BEGIN: 2022-02-17: Telephony: IMS: Fix the crashes in MT conference call
                     com.android.internal.telephony.Connection originalConnection =
                                 mConferenceHost.getOriginalConnection();
+// QTI_END: 2022-02-17: Telephony: IMS: Fix the crashes in MT conference call
+// QTI_BEGIN: 2018-03-14: Telephony: IMS: No option to merge calls in VoWIFI
                     if (mConferenceHost.getPhone() != null) {
+// QTI_END: 2018-03-14: Telephony: IMS: No option to merge calls in VoWIFI
+// QTI_BEGIN: 2022-02-17: Telephony: IMS: Fix the crashes in MT conference call
                         disconnectCause = originalConnection != null ?
                                 DisconnectCauseUtil.toTelecomDisconnectCause(
                                 originalConnection.getDisconnectCause(),
                                 null, mConferenceHost.getPhone().getPhoneId())
                                 : new DisconnectCause(DisconnectCause.UNKNOWN);
+// QTI_END: 2022-02-17: Telephony: IMS: Fix the crashes in MT conference call
+// QTI_BEGIN: 2018-03-14: Telephony: IMS: No option to merge calls in VoWIFI
                     } else {
+// QTI_END: 2018-03-14: Telephony: IMS: No option to merge calls in VoWIFI
+// QTI_BEGIN: 2022-02-17: Telephony: IMS: Fix the crashes in MT conference call
                         disconnectCause = originalConnection != null ?
                                 DisconnectCauseUtil.toTelecomDisconnectCause(
                                 originalConnection.getDisconnectCause())
                                 : new DisconnectCause(DisconnectCause.UNKNOWN);
+// QTI_END: 2022-02-17: Telephony: IMS: Fix the crashes in MT conference call
+// QTI_BEGIN: 2018-03-14: Telephony: IMS: No option to merge calls in VoWIFI
                     }
+// QTI_END: 2018-03-14: Telephony: IMS: No option to merge calls in VoWIFI
                 }
                 setDisconnected(disconnectCause);
                 disconnectConferenceParticipants();
@@ -1614,8 +1640,11 @@ public class ImsConference extends TelephonyConferenceBase implements Holdable {
             Phone phone = mConferenceHost.getPhone();
             if (phone != null) {
                 Context context = phone.getContext();
+// QTI_BEGIN: 2018-03-09: Telephony: Fix for Wi-Fi Call to show Sub Information
                 String displaySubId = "";
+// QTI_END: 2018-03-09: Telephony: Fix for Wi-Fi Call to show Sub Information
                 if (TelephonyManager.getDefault().getActiveModemCount() > 1) {
+// QTI_BEGIN: 2018-03-09: Telephony: Fix for Wi-Fi Call to show Sub Information
                     final int phoneId = mConferenceHost.getPhone().getPhoneId();
                     SubscriptionInfo sub = SubscriptionManager.from(
                             mConferenceHost.getPhone().getContext())
@@ -1625,8 +1654,11 @@ public class ImsConference extends TelephonyConferenceBase implements Holdable {
                         displaySubId  = " " + displaySubId;
                     }
                 }
+// QTI_END: 2018-03-09: Telephony: Fix for Wi-Fi Call to show Sub Information
                 StatusHints hints = new StatusHints(
+// QTI_BEGIN: 2018-03-09: Telephony: Fix for Wi-Fi Call to show Sub Information
                         context.getString(R.string.status_hint_label_wifi_call) + displaySubId,
+// QTI_END: 2018-03-09: Telephony: Fix for Wi-Fi Call to show Sub Information
                         Icon.createWithResource(
                                 context, R.drawable.ic_signal_wifi_4_bar_24dp),
                         null /* extras */);
@@ -1726,14 +1758,18 @@ public class ImsConference extends TelephonyConferenceBase implements Holdable {
         return sb.toString();
     }
 
+// QTI_BEGIN: 2020-02-07: Telephony: IMS: Do not skip adding conference to conferenceable set
     /**
      * @return {@code true} if the carrier associated with the conference supports multianchor
      * conference, {@code false} otherwise.
      */
     public boolean isMultiAnchorConferenceSupported() {
+// QTI_END: 2020-02-07: Telephony: IMS: Do not skip adding conference to conferenceable set
         return mCarrierConfig.isMultiAnchorConferenceSupported();
+// QTI_BEGIN: 2020-02-07: Telephony: IMS: Do not skip adding conference to conferenceable set
     }
 
+// QTI_END: 2020-02-07: Telephony: IMS: Do not skip adding conference to conferenceable set
     /**
      * @return The number of participants in the conference.
      */

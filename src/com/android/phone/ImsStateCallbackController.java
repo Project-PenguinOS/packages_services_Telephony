@@ -168,9 +168,11 @@ public class ImsStateCallbackController {
             if (intent == null) {
                 return;
             }
+// QTI_BEGIN: 2022-12-16: Telephony: IMS: Broadcast essential records loaded
             if (CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED.equals(intent.getAction()) ||
                     CarrierConfigManager.ACTION_ESSENTIAL_RECORDS_LOADED.
                     equals(intent.getAction())) {
+// QTI_END: 2022-12-16: Telephony: IMS: Broadcast essential records loaded
                 Bundle bundle = intent.getExtras();
                 if (bundle == null) {
                     return;
@@ -181,14 +183,18 @@ public class ImsStateCallbackController {
                         SubscriptionManager.INVALID_SUBSCRIPTION_ID);
 
                 if (slotId <= SubscriptionManager.INVALID_SIM_SLOT_INDEX) {
+// QTI_BEGIN: 2022-12-16: Telephony: IMS: Broadcast essential records loaded
                     loge("onReceive ACTION_CARRIER_CONFIG_CHANGED/ACTION_ESSENTIAL_RECORDS_LOADED "
                            + "invalid slotId");
+// QTI_END: 2022-12-16: Telephony: IMS: Broadcast essential records loaded
                     return;
                 }
 
                 if (subId <= SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
+// QTI_BEGIN: 2022-12-16: Telephony: IMS: Broadcast essential records loaded
                     loge("onReceive ACTION_CARRIER_CONFIG_CHANGED/ACTION_ESSENTIAL_RECORDS_LOADED "
                            + "invalid subId");
+// QTI_END: 2022-12-16: Telephony: IMS: Broadcast essential records loaded
                     //subscription changed will be notified by mSubChangedListener
                     return;
                 }
@@ -755,10 +761,12 @@ public class ImsStateCallbackController {
         PhoneConfigurationManager.registerForMultiSimConfigChange(mHandler,
                 EVENT_MSIM_CONFIGURATION_CHANGE, null);
 
+// QTI_BEGIN: 2022-12-16: Telephony: IMS: Broadcast essential records loaded
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED);
         intentFilter.addAction(CarrierConfigManager.ACTION_ESSENTIAL_RECORDS_LOADED);
         mApp.registerReceiver(mReceiver, intentFilter);
+// QTI_END: 2022-12-16: Telephony: IMS: Broadcast essential records loaded
 
         onSubChanged();
     }

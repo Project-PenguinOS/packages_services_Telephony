@@ -157,7 +157,9 @@ public class CdmaCallForwardOptions extends TimeConsumingPreferenceActivity {
         super.onResume();
 
         // TODO(b/168714925) this variable is a placeholder
+// QTI_BEGIN: 2022-04-21: Telephony: Update call forwarding summary properly under CDMA call setting.
         int tempServiceClass = CommandsInterface.SERVICE_CLASS_VOICE;
+// QTI_END: 2022-04-21: Telephony: Update call forwarding summary properly under CDMA call setting.
 
         if (mFirstResume) {
             if (mIcicle == null) {
@@ -204,7 +206,9 @@ public class CdmaCallForwardOptions extends TimeConsumingPreferenceActivity {
     @Override
     public void onFinished(Preference preference, boolean reading) {
         // TODO(b/168714925) this variable is a placeholder
+// QTI_BEGIN: 2022-04-21: Telephony: Update call forwarding summary properly under CDMA call setting.
         int tempServiceClass = CommandsInterface.SERVICE_CLASS_VOICE;
+// QTI_END: 2022-04-21: Telephony: Update call forwarding summary properly under CDMA call setting.
 
         if (mInitIndex < mPreferences.size()-1 && !isFinishing()) {
             mInitIndex++;

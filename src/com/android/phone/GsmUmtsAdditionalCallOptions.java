@@ -2,13 +2,19 @@ package com.android.phone;
 
 import android.app.ActionBar;
 import android.app.Dialog;
+// QTI_BEGIN: 2018-07-06: Telephony: Skip reading the CLIR over Ut
 import android.content.Context;
 import android.content.Intent;
+// QTI_END: 2018-07-06: Telephony: Skip reading the CLIR over Ut
 import android.os.Bundle;
+// QTI_BEGIN: 2018-07-06: Telephony: Skip reading the CLIR over Ut
 import android.os.PersistableBundle;
+// QTI_END: 2018-07-06: Telephony: Skip reading the CLIR over Ut
 import android.preference.Preference;
 import android.preference.PreferenceScreen;
+// QTI_BEGIN: 2018-07-06: Telephony: Skip reading the CLIR over Ut
 import android.telephony.CarrierConfigManager;
+// QTI_END: 2018-07-06: Telephony: Skip reading the CLIR over Ut
 import android.util.Log;
 import android.view.MenuItem;
 
@@ -27,11 +33,13 @@ public class GsmUmtsAdditionalCallOptions extends TimeConsumingPreferenceActivit
     private static final int CW_WARNING_DIALOG = 201;
     private static final int CALLER_ID_WARNING_DIALOG = 202;
 
+// QTI_BEGIN: 2024-07-09: Telephony: IMS: Save/restore InstanceStates for CW and CLIR during language changed
     private static final String KEY_IS_CW_ENABLED = "is_cw_enabled";
     private static final String KEY_IS_CLIR_ENABLED = "is_clir_enabled";
     private static final String KEY_CLIR_ARRAY = "clir_array";
     private static final String KEY_CLIR_SUMMARY = "clir_summary";
 
+// QTI_END: 2024-07-09: Telephony: IMS: Save/restore InstanceStates for CW and CLIR during language changed
     private CLIRListPreference mCLIRButton;
     private CallWaitingSwitchPreference mCWButton;
 
@@ -96,9 +104,13 @@ public class GsmUmtsAdditionalCallOptions extends TimeConsumingPreferenceActivit
                 } else {
                     mPreferences.add(mCLIRButton);
                 }
+// QTI_BEGIN: 2018-07-06: Telephony: Skip reading the CLIR over Ut
             } else {
+// QTI_END: 2018-07-06: Telephony: Skip reading the CLIR over Ut
                 prefSet.removePreference(mCLIRButton);
+// QTI_BEGIN: 2018-07-06: Telephony: Skip reading the CLIR over Ut
             }
+// QTI_END: 2018-07-06: Telephony: Skip reading the CLIR over Ut
         }
 
         if (mCWButton != null) {
@@ -120,6 +132,7 @@ public class GsmUmtsAdditionalCallOptions extends TimeConsumingPreferenceActivit
             } else {
                 if (DBG) Log.d(LOG_TAG, "restore stored states");
                 mInitIndex = mPreferences.size();
+// QTI_BEGIN: 2024-07-09: Telephony: IMS: Save/restore InstanceStates for CW and CLIR during language changed
                 Bundle bundle;
                 for (Preference pref : mPreferences) {
                     bundle = icicle.getParcelable(pref.getKey());
@@ -140,7 +153,9 @@ public class GsmUmtsAdditionalCallOptions extends TimeConsumingPreferenceActivit
                                         + clirArray[0] + ", clirArray[1]=" + clirArray[1]);
                             }
                             ((CLIRListPreference) pref).handleGetCLIRResult(clirArray);
+// QTI_END: 2024-07-09: Telephony: IMS: Save/restore InstanceStates for CW and CLIR during language changed
                         } else {
+// QTI_BEGIN: 2024-07-09: Telephony: IMS: Save/restore InstanceStates for CW and CLIR during language changed
                             if (isUtEnabledToDisableClir()) {
                                 ((CLIRListPreference) pref).setSummary(
                                         R.string.sum_default_caller_id);
@@ -148,6 +163,7 @@ public class GsmUmtsAdditionalCallOptions extends TimeConsumingPreferenceActivit
                             } else {
                                 ((CLIRListPreference) pref).init(this, false, mPhone);
                             }
+// QTI_END: 2024-07-09: Telephony: IMS: Save/restore InstanceStates for CW and CLIR during language changed
                         }
                     }
                 }
@@ -161,6 +177,7 @@ public class GsmUmtsAdditionalCallOptions extends TimeConsumingPreferenceActivit
         }
     }
 
+// QTI_BEGIN: 2018-07-06: Telephony: Skip reading the CLIR over Ut
     private boolean isUtEnabledToDisableClir() {
         boolean skipClir = false;
         CarrierConfigManager configManager = (CarrierConfigManager)
@@ -171,6 +188,7 @@ public class GsmUmtsAdditionalCallOptions extends TimeConsumingPreferenceActivit
         }
         return mPhone.isUtEnabled() && skipClir;
     }
+// QTI_END: 2018-07-06: Telephony: Skip reading the CLIR over Ut
     @Override
     public void onResume() {
         super.onResume();
@@ -221,6 +239,7 @@ public class GsmUmtsAdditionalCallOptions extends TimeConsumingPreferenceActivit
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
+// QTI_BEGIN: 2024-07-09: Telephony: IMS: Save/restore InstanceStates for CW and CLIR during language changed
         for (Preference pref : mPreferences) {
             Bundle bundle = new Bundle();
             if (mShowCWButton && pref instanceof CallWaitingSwitchPreference) {
@@ -233,12 +252,15 @@ public class GsmUmtsAdditionalCallOptions extends TimeConsumingPreferenceActivit
                 }
             }
             outState.putParcelable(pref.getKey(), bundle);
+// QTI_END: 2024-07-09: Telephony: IMS: Save/restore InstanceStates for CW and CLIR during language changed
         }
     }
 
     @Override
     public void onFinished(Preference preference, boolean reading) {
+// QTI_BEGIN: 2019-05-07: Telephony: IMS: Query call waiting after CLIR grey out
         doNextPreferenceInit();
+// QTI_END: 2019-05-07: Telephony: IMS: Query call waiting after CLIR grey out
         super.onFinished(preference, reading);
     }
 
@@ -252,6 +274,7 @@ public class GsmUmtsAdditionalCallOptions extends TimeConsumingPreferenceActivit
         return super.onOptionsItemSelected(item);
     }
 
+// QTI_BEGIN: 2019-05-07: Telephony: IMS: Query call waiting after CLIR grey out
     private void doNextPreferenceInit() {
         if (mInitIndex < mPreferences.size()-1 && !isFinishing()) {
             mInitIndex++;
@@ -259,18 +282,25 @@ public class GsmUmtsAdditionalCallOptions extends TimeConsumingPreferenceActivit
         }
     }
 
+// QTI_END: 2019-05-07: Telephony: IMS: Query call waiting after CLIR grey out
     private void doPreferenceInit(int index) {
         if (mPreferences.size() > index) {
             Preference pref = mPreferences.get(index);
             if (pref instanceof CallWaitingSwitchPreference) {
                 ((CallWaitingSwitchPreference) pref).init(this, false, mPhone);
             } else if (pref instanceof CLIRListPreference) {
+// QTI_BEGIN: 2019-02-18: Telephony: Avoid sending two CLIR requests while enter additional settings
                 if (isUtEnabledToDisableClir()) {
                   ((CLIRListPreference) pref).setSummary(R.string.sum_default_caller_id);
+// QTI_END: 2019-02-18: Telephony: Avoid sending two CLIR requests while enter additional settings
+// QTI_BEGIN: 2019-05-07: Telephony: IMS: Query call waiting after CLIR grey out
                   doNextPreferenceInit();
+// QTI_END: 2019-05-07: Telephony: IMS: Query call waiting after CLIR grey out
+// QTI_BEGIN: 2019-02-18: Telephony: Avoid sending two CLIR requests while enter additional settings
                 } else {
                   ((CLIRListPreference) pref).init(this, false, mPhone);
                 }
+// QTI_END: 2019-02-18: Telephony: Avoid sending two CLIR requests while enter additional settings
             }
         }
     }

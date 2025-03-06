@@ -17,7 +17,9 @@
 package com.android.phone.settings.fdn;
 
 import android.app.ActionBar;
+// QTI_BEGIN: 2024-05-21: Telephony: Use dialog to instead of toast when showing pin2 error.
 import android.app.AlertDialog;
+// QTI_END: 2024-05-21: Telephony: Use dialog to instead of toast when showing pin2 error.
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
@@ -36,7 +38,9 @@ import com.android.internal.telephony.CommandException;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.flags.Flags;
 import com.android.phone.CallFeaturesSetting;
+// QTI_BEGIN: 2024-05-21: Telephony: Use dialog to instead of toast when showing pin2 error.
 import com.android.phone.FrameworksUtils;
+// QTI_END: 2024-05-21: Telephony: Use dialog to instead of toast when showing pin2 error.
 import com.android.phone.PhoneGlobals;
 import com.android.phone.R;
 import com.android.phone.SubscriptionInfoHelper;
@@ -379,10 +383,12 @@ public class FdnSetting extends PreferenceActivity
             }
         }
         log("displayMessage: attemptsRemaining=" + attemptsRemaining + " s=" + s);
+// QTI_BEGIN: 2024-05-21: Telephony: Use dialog to instead of toast when showing pin2 error.
         AlertDialog dialog = FrameworksUtils.makeAlertDialogBuilder(this)
             .setMessage(s)
             .create();
         dialog.show();
+// QTI_END: 2024-05-21: Telephony: Use dialog to instead of toast when showing pin2 error.
     }
 
     private void displayMessage(int strId) {

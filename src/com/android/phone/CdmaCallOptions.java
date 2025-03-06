@@ -16,40 +16,56 @@
 
 package com.android.phone;
 
+// QTI_BEGIN: 2018-03-30: Telephony: TeleService: Add CDMA call forwarding/waiting function.
 import android.content.Context;
+// QTI_END: 2018-03-30: Telephony: TeleService: Add CDMA call forwarding/waiting function.
 import android.content.DialogInterface;
+// QTI_BEGIN: 2018-03-30: Telephony: TeleService: Add CDMA call forwarding/waiting function.
 import android.content.Intent;
+// QTI_END: 2018-03-30: Telephony: TeleService: Add CDMA call forwarding/waiting function.
 import android.os.AsyncResult;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.os.UserManager;
 import android.preference.Preference;
 import android.preference.PreferenceScreen;
+// QTI_BEGIN: 2020-04-28: Telephony: Redirect to AOSP ACTION_NETWORK_OPERATOR_SETTINGS
 import android.provider.Settings;
+// QTI_END: 2020-04-28: Telephony: Redirect to AOSP ACTION_NETWORK_OPERATOR_SETTINGS
 import android.telephony.CarrierConfigManager;
 import android.telephony.ims.feature.ImsFeature;
 import android.telephony.ims.ImsException;
 import android.telephony.ims.ImsManager;
 import android.telephony.ims.ImsMmTelManager;
 import android.telephony.ims.feature.MmTelFeature;
+// QTI_BEGIN: 2024-10-15: RIL: Revert "TeleService: Add CDMA call forwarding/waiting function."
 import android.telephony.SubscriptionManager;
+// QTI_END: 2024-10-15: RIL: Revert "TeleService: Add CDMA call forwarding/waiting function."
 import android.util.Log;
 import android.view.MenuItem;
 
+// QTI_BEGIN: 2018-03-30: Telephony: TeleService: Add CDMA call forwarding/waiting function.
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneConstants;
+// QTI_END: 2018-03-30: Telephony: TeleService: Add CDMA call forwarding/waiting function.
 import com.android.internal.telephony.flags.Flags;
+// QTI_BEGIN: 2018-03-30: Telephony: TeleService: Add CDMA call forwarding/waiting function.
 
 import java.util.List;
 
+// QTI_END: 2018-03-30: Telephony: TeleService: Add CDMA call forwarding/waiting function.
+// QTI_BEGIN: 2024-10-15: RIL: Revert "TeleService: Add CDMA call forwarding/waiting function."
 public class CdmaCallOptions extends TimeConsumingPreferenceActivity {
+// QTI_END: 2024-10-15: RIL: Revert "TeleService: Add CDMA call forwarding/waiting function."
     private static final String LOG_TAG = "CdmaCallOptions";
 
     private static final String BUTTON_VP_KEY = "button_voice_privacy_key";
     private static final String CALL_FORWARDING_KEY = "call_forwarding_key";
     private static final String CALL_WAITING_KEY = "call_waiting_key";
 
+// QTI_BEGIN: 2019-04-28: Telephony: FR54939: Common call setting for specific operator
     private boolean mCommon = false;
+// QTI_END: 2019-04-28: Telephony: FR54939: Common call setting for specific operator
 
     private class UtCallback extends ImsMmTelManager.CapabilityCallback {
         @Override
@@ -84,15 +100,21 @@ public class CdmaCallOptions extends TimeConsumingPreferenceActivity {
             subId = SubscriptionManager.getDefaultSubscriptionId();
         }
         carrierConfig = PhoneGlobals.getInstance().getCarrierConfigForSubId(subId);
+// QTI_BEGIN: 2019-04-28: Telephony: FR54939: Common call setting for specific operator
         mCommon = carrierConfig.getBoolean("config_common_callsettings_support_bool");
         subInfoHelper.setActionBarTitle(
                 getActionBar(), getResources(),
                 mCommon ? R.string.labelCommonMore_with_label : R.string.labelCdmaMore_with_label);
+// QTI_END: 2019-04-28: Telephony: FR54939: Common call setting for specific operator
 
+// QTI_BEGIN: 2024-10-15: RIL: Revert "TeleService: Add CDMA call forwarding/waiting function."
         Phone phone = subInfoHelper.getPhone();
+// QTI_END: 2024-10-15: RIL: Revert "TeleService: Add CDMA call forwarding/waiting function."
         CdmaVoicePrivacySwitchPreference buttonVoicePrivacy =
             (CdmaVoicePrivacySwitchPreference) findPreference(BUTTON_VP_KEY);
+// QTI_BEGIN: 2024-10-15: RIL: Revert "TeleService: Add CDMA call forwarding/waiting function."
         buttonVoicePrivacy.setPhone(phone);
+// QTI_END: 2024-10-15: RIL: Revert "TeleService: Add CDMA call forwarding/waiting function."
 
         // If mobile network configs are restricted, then hide the mCallForwardingPref and
         // mCallWaitingPref.
@@ -105,8 +127,12 @@ public class CdmaCallOptions extends TimeConsumingPreferenceActivity {
         }
 
         mCallForwardingPref = getPreferenceScreen().findPreference(CALL_FORWARDING_KEY);
+// QTI_BEGIN: 2024-10-15: RIL: Revert "TeleService: Add CDMA call forwarding/waiting function."
         if (phone.getPhoneType() == PhoneConstants.PHONE_TYPE_CDMA
+// QTI_END: 2024-10-15: RIL: Revert "TeleService: Add CDMA call forwarding/waiting function."
+// QTI_BEGIN: 2022-04-21: Telephony: Update call forwarding summary properly under CDMA call setting.
                 && carrierConfig != null && carrierConfig.getBoolean(
+// QTI_END: 2022-04-21: Telephony: Update call forwarding summary properly under CDMA call setting.
                 CarrierConfigManager.KEY_CALL_FORWARDING_VISIBILITY_BOOL) &&
                 (!mobileNetworkConfigsRestricted ||
                         !Flags.ensureAccessToCallSettingsIsRestricted())) {
@@ -119,8 +145,12 @@ public class CdmaCallOptions extends TimeConsumingPreferenceActivity {
 
         mCallWaitingPref = (CdmaCallWaitingPreference) getPreferenceScreen()
                 .findPreference(CALL_WAITING_KEY);
+// QTI_BEGIN: 2024-10-15: RIL: Revert "TeleService: Add CDMA call forwarding/waiting function."
         if (phone.getPhoneType() != PhoneConstants.PHONE_TYPE_CDMA
+// QTI_END: 2024-10-15: RIL: Revert "TeleService: Add CDMA call forwarding/waiting function."
+// QTI_BEGIN: 2022-04-21: Telephony: Update call forwarding summary properly under CDMA call setting.
                 || carrierConfig == null || !carrierConfig.getBoolean(
+// QTI_END: 2022-04-21: Telephony: Update call forwarding summary properly under CDMA call setting.
                 CarrierConfigManager.KEY_ADDITIONAL_SETTINGS_CALL_WAITING_VISIBILITY_BOOL) ||
                 (Flags.ensureAccessToCallSettingsIsRestricted() &&
                         mobileNetworkConfigsRestricted)) {

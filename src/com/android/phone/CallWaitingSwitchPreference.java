@@ -9,7 +9,9 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.PersistableBundle;
 import android.preference.SwitchPreference;
+// QTI_BEGIN: 2018-06-21: Telephony: IMS: Auto Retry CFU after CSFB
 import android.telephony.CarrierConfigManager;
+// QTI_END: 2018-06-21: Telephony: IMS: Auto Retry CFU after CSFB
 import android.telephony.TelephonyManager;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -74,10 +76,12 @@ public class CallWaitingSwitchPreference extends SwitchPreference {
         }
     }
 
+// QTI_BEGIN: 2024-07-09: Telephony: IMS: Save/restore InstanceStates for CW and CLIR during language changed
     void restoreCallWaitingInfo(boolean isCwEnabled) {
         setEnabled(isCwEnabled);
     }
 
+// QTI_END: 2024-07-09: Telephony: IMS: Save/restore InstanceStates for CW and CLIR during language changed
     private void queryStatusCallBack(int result) {
         Log.d(LOG_TAG, "queryStatusCallBack: CW state " + result);
         mQueryStatus = result;
@@ -152,7 +156,9 @@ public class CallWaitingSwitchPreference extends SwitchPreference {
                         error = EXCEPTION_ERROR;
                         break;
                 }
+// QTI_BEGIN: 2024-10-15: RIL: Revert "IMS: Auto Retry CFU after CSFB"
                 if (mTcpListener != null) {
+// QTI_END: 2024-10-15: RIL: Revert "IMS: Auto Retry CFU after CSFB"
                     mTcpListener.onError(CallWaitingSwitchPreference.this, error);
                 }
                 handleCwFallbackOnError();

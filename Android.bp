@@ -31,7 +31,9 @@ android_app {
         "app-compat-annotations",
         "unsupportedappusage",
         "telephony-ext",
+// QTI_BEGIN: 2021-02-10: Telephony: Move IExtTelephony to IExtPhone
          "extphonelib",
+// QTI_END: 2021-02-10: Telephony: Move IExtTelephony to IExtPhone
         "ims-ext-common",
         "org.apache.http.legacy.stubs.system",
     ],

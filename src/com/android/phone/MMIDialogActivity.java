@@ -102,7 +102,9 @@ public class MMIDialogActivity extends Activity {
             final MmiCode mmiCode = codes.get(0);
             final Message message = Message.obtain(mHandler, PhoneGlobals.MMI_CANCEL);
             Log.d(TAG, "showMMIDialog: mmiCode = " + mmiCode);
+// QTI_BEGIN: 2021-11-03: Telephony: Add SIM info to USSD sessions on UI
             mMMIDialog = PhoneUtils.displayMMIInitiate(mPhone, this, mmiCode, message, mMMIDialog);
+// QTI_END: 2021-11-03: Telephony: Add SIM info to USSD sessions on UI
         } else {
             Log.d(TAG, "showMMIDialog: no pending MMIs; finishing");
             finish();

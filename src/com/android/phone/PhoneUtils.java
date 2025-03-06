@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
+// QTI_BEGIN: 2024-06-13: Telephony: Fix call forwarding alert issue in airplane mode
 /**
 * Changes from Qualcomm Innovation Center, Inc. are provided under the following license:
 * Copyright (c) 2024 Qualcomm Innovation Center, Inc. All rights reserved.
 * SPDX-License-Identifier: BSD-3-Clause-Clear
 */
 
+// QTI_END: 2024-06-13: Telephony: Fix call forwarding alert issue in airplane mode
 package com.android.phone;
 
+// QTI_BEGIN: 2025-02-10: Telephony: Expect more flag not enabled for back to back SS requests
 import static com.qti.extphone.ExtTelephonyManager.FEATURE_BACK_TO_BACK_SUPPLEMENTARY_SERVICE_REQ;
 
+// QTI_END: 2025-02-10: Telephony: Expect more flag not enabled for back to back SS requests
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -41,23 +45,35 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
+// QTI_BEGIN: 2018-02-23: Telephony: Enable proprietary MobileNetworkSettings
 import android.os.ServiceManager;
+// QTI_END: 2018-02-23: Telephony: Enable proprietary MobileNetworkSettings
 import android.os.SystemProperties;
 import android.os.PersistableBundle;
 import android.os.UserHandle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+// QTI_BEGIN: 2024-06-13: Telephony: Fix call forwarding alert issue in airplane mode
 import android.provider.Settings;
+// QTI_END: 2024-06-13: Telephony: Fix call forwarding alert issue in airplane mode
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
+// QTI_BEGIN: 2021-11-03: Telephony: Add SIM info to USSD sessions on UI
 import android.telecom.TelecomManager;
+// QTI_END: 2021-11-03: Telephony: Add SIM info to USSD sessions on UI
 import android.telecom.VideoProfile;
 import android.telephony.CarrierConfigManager;
+// QTI_BEGIN: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
 import android.telephony.ims.ImsReasonInfo;
+// QTI_END: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
 import android.telephony.PhoneNumberUtils;
+// QTI_BEGIN: 2023-01-19: Telephony: IMS : Move RTT downgrade and upgrade logic completely to AOSP.
 import android.telephony.SubscriptionInfo;
+// QTI_END: 2023-01-19: Telephony: IMS : Move RTT downgrade and upgrade logic completely to AOSP.
 import android.telephony.SubscriptionManager;
+// QTI_BEGIN: 2021-11-03: Telephony: Add SIM info to USSD sessions on UI
 import android.telephony.TelephonyManager;
+// QTI_END: 2021-11-03: Telephony: Add SIM info to USSD sessions on UI
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
@@ -70,11 +86,15 @@ import android.widget.Toast;
 
 import com.android.internal.telephony.Call;
 import com.android.internal.telephony.CallStateException;
+// QTI_BEGIN: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
 import com.android.internal.telephony.CommandException;
+// QTI_END: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
 import com.android.internal.telephony.Connection;
+// QTI_BEGIN: 2023-03-16: Telephony: Enable telephony FDN check for side car SS requests.
 import com.android.internal.telephony.FdnUtils;
 import com.android.internal.telephony.gsm.GsmMmiCode;
 import com.android.internal.telephony.gsm.SsData;
+// QTI_END: 2023-03-16: Telephony: Enable telephony FDN check for side car SS requests.
 import com.android.internal.telephony.IccCard;
 import com.android.internal.telephony.MmiCode;
 import com.android.internal.telephony.Phone;
@@ -82,19 +102,29 @@ import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.PhoneFactory;
 import com.android.internal.telephony.TelephonyCapabilities;
 import com.android.phone.settings.SuppServicesUiUtil;
+// QTI_BEGIN: 2023-01-19: Telephony: IMS : Move RTT downgrade and upgrade logic completely to AOSP.
 import com.android.services.telephony.TelecomAccountRegistry;
+// QTI_END: 2023-01-19: Telephony: IMS : Move RTT downgrade and upgrade logic completely to AOSP.
 import com.android.telephony.Rlog;
 
+// QTI_BEGIN: 2021-02-10: Telephony: Move IExtTelephony to IExtPhone
 import com.qti.extphone.ExtTelephonyManager;
 import com.qti.extphone.ServiceCallback;
 
+// QTI_END: 2021-02-10: Telephony: Move IExtTelephony to IExtPhone
 import java.io.IOException;
+// QTI_BEGIN: 2023-03-16: Telephony: Enable telephony FDN check for side car SS requests.
 import java.util.ArrayList;
+// QTI_END: 2023-03-16: Telephony: Enable telephony FDN check for side car SS requests.
 import java.util.List;
+// QTI_BEGIN: 2023-03-16: Telephony: Enable telephony FDN check for side car SS requests.
 import java.util.Locale;
+// QTI_END: 2023-03-16: Telephony: Enable telephony FDN check for side car SS requests.
 
+// QTI_BEGIN: 2018-02-23: Telephony: Enable proprietary MobileNetworkSettings
 import org.codeaurora.internal.IExtTelephony;
 
+// QTI_END: 2018-02-23: Telephony: Enable proprietary MobileNetworkSettings
 /**
  * Misc utilities for the Phone app.
  */
@@ -121,9 +151,11 @@ public class PhoneUtils {
     /** Define for default vibrate pattern if res cannot be found */
     private static final long[] DEFAULT_VIBRATE_PATTERN = {0, 250, 250, 250};
 
+// QTI_BEGIN: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
     private static final int INVALID = -1;
     private static int mBackToBackSSFeature = INVALID;
 
+// QTI_END: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
     /**
      * Theme to use for dialogs displayed by utility methods in this class. This is needed
      * because these dialogs are displayed using the application context, which does not resolve
@@ -131,16 +163,24 @@ public class PhoneUtils {
      */
     private static final int THEME = com.android.internal.R.style.Theme_DeviceDefault_Dialog_Alert;
 
+// QTI_BEGIN: 2018-03-30: Telephony: IMS: Add UT interface to query CF setting for service class.
     /** Extra key to identify the service class voice or video */
     public static final String SERVICE_CLASS = "service_class";
+// QTI_END: 2018-03-30: Telephony: IMS: Add UT interface to query CF setting for service class.
 
+// QTI_BEGIN: 2018-06-13: Telephony: MSIM: Emergency account handle support
     private static final int PRIMARY_STACK_MODEM_ID = 0;
 
+// QTI_END: 2018-06-13: Telephony: MSIM: Emergency account handle support
     /** USSD information used to aggregate all USSD messages */
     private static StringBuilder sUssdMsg = new StringBuilder();
+// QTI_BEGIN: 2021-02-10: Telephony: Move IExtTelephony to IExtPhone
     private static ExtTelephonyManager mExtTelephonyManager;
+// QTI_END: 2021-02-10: Telephony: Move IExtTelephony to IExtPhone
+// QTI_BEGIN: 2021-11-03: Telephony: Add SIM info to USSD sessions on UI
     private static TelephonyManager sTelephonyManager;
     private static TelecomManager sTelecomManager;
+// QTI_END: 2021-11-03: Telephony: Add SIM info to USSD sessions on UI
 
     private static final ComponentName PSTN_CONNECTION_SERVICE_COMPONENT =
             new ComponentName("com.android.phone",
@@ -266,15 +306,19 @@ public class PhoneUtils {
      * Handle the MMIInitiate message and put up an alert that lets
      * the user cancel the operation, if applicable.
      *
+// QTI_BEGIN: 2021-11-03: Telephony: Add SIM info to USSD sessions on UI
      * @param phone the Phone object.
+// QTI_END: 2021-11-03: Telephony: Add SIM info to USSD sessions on UI
      * @param context context to get strings.
      * @param mmiCode the MmiCode object being started.
      * @param buttonCallbackMessage message to post when button is clicked.
      * @param previousAlert a previous alert used in this activity.
      * @return the dialog handle
      */
+// QTI_BEGIN: 2021-11-03: Telephony: Add SIM info to USSD sessions on UI
     static Dialog displayMMIInitiate(Phone phone,
                                           Context context,
+// QTI_END: 2021-11-03: Telephony: Add SIM info to USSD sessions on UI
                                           MmiCode mmiCode,
                                           Message buttonCallbackMessage,
                                           Dialog previousAlert) {
@@ -325,6 +369,7 @@ public class PhoneUtils {
 
             // create the indeterminate progress dialog and display it.
             ProgressDialog pd = new ProgressDialog(context, THEME);
+// QTI_BEGIN: 2021-11-03: Telephony: Add SIM info to USSD sessions on UI
             if (isMultiSimMode() && phone != null) {
                 pd.setTitle(context.getText(R.string.ussdinitiated_title));
                 PhoneAccount account = getPhoneAccount(phone.getSubId());
@@ -332,6 +377,7 @@ public class PhoneUtils {
                     pd.setIcon(account.getIcon().loadDrawable(context));
                 }
             }
+// QTI_END: 2021-11-03: Telephony: Add SIM info to USSD sessions on UI
             pd.setMessage(context.getText(R.string.ussdRunning));
             pd.setCancelable(false);
             pd.setIndeterminate(true);
@@ -528,6 +574,7 @@ public class PhoneUtils {
                         .setCancelable(false)
                         .create();
 
+// QTI_BEGIN: 2021-11-03: Telephony: Add SIM info to USSD sessions on UI
                 if (isMultiSimMode() && phone != null) {
                     PhoneAccount account = getPhoneAccount(phone.getSubId());
                     if (account != null && account.getIcon() != null) {
@@ -542,6 +589,7 @@ public class PhoneUtils {
                     }
                 }
 
+// QTI_END: 2021-11-03: Telephony: Add SIM info to USSD sessions on UI
                 // attach the key listener to the dialog's input field and make
                 // sure focus is set.
                 final View.OnKeyListener mUSSDDialogInputListener =
@@ -679,12 +727,14 @@ public class PhoneUtils {
             ussdDialog
                     .setTitle(app.getResources().getString(R.string.default_carrier_mmi_msg_title));
         }
+// QTI_BEGIN: 2021-11-03: Telephony: Add SIM info to USSD sessions on UI
         if (isMultiSimMode() && phone != null) {
             PhoneAccount account = getPhoneAccount(phone.getSubId());
             if (account != null && account.getIcon() != null) {
                 ussdDialog.setIcon(account.getIcon().loadDrawable(context));
             }
         }
+// QTI_END: 2021-11-03: Telephony: Add SIM info to USSD sessions on UI
         sUssdMsg.insert(0, text);
         ussdDialog.setMessage(sUssdMsg.toString());
         ussdDialog.show();
@@ -782,6 +832,7 @@ public class PhoneUtils {
 
     public static PhoneAccountHandle makePstnPhoneAccountHandleWithPrefix(
             Phone phone, String prefix, boolean isEmergency, UserHandle userHandle) {
+// QTI_BEGIN: 2023-02-23: Telephony: IMS : Fix for phone process in guest mode
         // To determine this as an emergency only, we are checking the simless case
         // and updating the id based on that.
 
@@ -791,9 +842,12 @@ public class PhoneUtils {
         if (telecomAccountRegistry != null) {
             subList = telecomAccountRegistry.getActiveSubscriptionInfoList();
         }
+// QTI_END: 2023-02-23: Telephony: IMS : Fix for phone process in guest mode
+// QTI_BEGIN: 2023-01-19: Telephony: IMS : Move RTT downgrade and upgrade logic completely to AOSP.
 
         boolean isEmergencyOnlyAccount = subList != null && subList.size() == 0;
         String id = (isEmergency || isEmergencyOnlyAccount) ? EMERGENCY_ACCOUNT_HANDLE_ID : prefix +
+// QTI_END: 2023-01-19: Telephony: IMS : Move RTT downgrade and upgrade logic completely to AOSP.
                 String.valueOf((phone != null) ? phone.getSubId() : null);
         return makePstnPhoneAccountHandleWithId(id, userHandle);
     }
@@ -831,11 +885,13 @@ public class PhoneUtils {
         return null;
     }
 
+// QTI_BEGIN: 2018-06-13: Telephony: MSIM: Emergency account handle support
     public static boolean isValidPhoneAccountHandle(PhoneAccountHandle phoneAccountHandle) {
         return phoneAccountHandle != null && !TextUtils.isEmpty(phoneAccountHandle.getId())
                 && !phoneAccountHandle.getId().equals("null");
     }
 
+// QTI_END: 2018-06-13: Telephony: MSIM: Emergency account handle support
     /**
      * Determine if a given phone account corresponds to an active SIM
      *
@@ -917,8 +973,13 @@ public class PhoneUtils {
         }
     }
 
+// QTI_BEGIN: 2018-03-07: Telephony: Emergency Number Implementation for SS & DS
     private static IExtTelephony getIExtTelephony() {
+// QTI_END: 2018-03-07: Telephony: Emergency Number Implementation for SS & DS
+// QTI_BEGIN: 2020-03-19: Telephony: SEPolicy: Update telephony SELinux policies to avoid name collision.
         return IExtTelephony.Stub.asInterface(ServiceManager.getService("qti.radio.extphone"));
+// QTI_END: 2020-03-19: Telephony: SEPolicy: Update telephony SELinux policies to avoid name collision.
+// QTI_BEGIN: 2018-03-07: Telephony: Emergency Number Implementation for SS & DS
     }
 
     public static int getPhoneIdForECall() {
@@ -932,6 +993,8 @@ public class PhoneUtils {
         }
         return phoneId;
     }
+// QTI_END: 2018-03-07: Telephony: Emergency Number Implementation for SS & DS
+// QTI_BEGIN: 2018-06-13: Telephony: MSIM: Emergency account handle support
 
     public static int getPrimaryStackPhoneId() {
         String modemUuId = null;
@@ -950,6 +1013,7 @@ public class PhoneUtils {
             // Select the phone id based on modemUuid
             // if modemUuid is 0 for any phone instance, primary stack is mapped
             // to it so return the phone id as the primary stack phone id.
+// QTI_END: 2018-06-13: Telephony: MSIM: Emergency account handle support
             int modemUuIdValue = PRIMARY_STACK_MODEM_ID;
             try {
                 modemUuIdValue = Integer.parseInt(modemUuId);
@@ -957,6 +1021,7 @@ public class PhoneUtils {
                 Log.w(LOG_TAG, "modemUuId is not an integer: " + modemUuId);
             }
             if (modemUuIdValue == PRIMARY_STACK_MODEM_ID) {
+// QTI_BEGIN: 2018-06-13: Telephony: MSIM: Emergency account handle support
                 primayStackPhoneId = phone.getPhoneId();
                 Log.d(LOG_TAG, "Primay Stack phone id: " + primayStackPhoneId + " selected");
                 break;
@@ -971,6 +1036,8 @@ public class PhoneUtils {
 
         return primayStackPhoneId;
     }
+// QTI_END: 2018-06-13: Telephony: MSIM: Emergency account handle support
+// QTI_BEGIN: 2021-02-10: Telephony: Move IExtTelephony to IExtPhone
 
     public static void connectExtTelephonyManager(Context context) {
         mExtTelephonyManager = ExtTelephonyManager.getInstance(context);
@@ -995,11 +1062,17 @@ public class PhoneUtils {
         }
     };
 
+// QTI_END: 2021-02-10: Telephony: Move IExtTelephony to IExtPhone
+// QTI_BEGIN: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
     static boolean isBacktoBackSSFeatureSupported() {
         if (mBackToBackSSFeature == INVALID) {
             mBackToBackSSFeature =
+// QTI_END: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_BEGIN: 2025-02-10: Telephony: Expect more flag not enabled for back to back SS requests
                    (mExtTelephonyManager.isFeatureSupported(
                    FEATURE_BACK_TO_BACK_SUPPLEMENTARY_SERVICE_REQ)) ? 1 : 0;
+// QTI_END: 2025-02-10: Telephony: Expect more flag not enabled for back to back SS requests
+// QTI_BEGIN: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
         }
         return (mBackToBackSSFeature == 1);
     }
@@ -1038,7 +1111,9 @@ public class PhoneUtils {
 
         return new CommandException(error);
     }
+// QTI_END: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
 
+// QTI_BEGIN: 2023-03-16: Telephony: Enable telephony FDN check for side car SS requests.
     public static boolean isRequestBlockedByFDN(SsData.RequestType requestType,
             SsData.ServiceType serviceType, int phoneId, Context context) {
         TelephonyManager telephonyManager =
@@ -1049,6 +1124,8 @@ public class PhoneUtils {
         ArrayList<String> controlStrings = GsmMmiCode.getControlStrings(requestType, serviceType);
         return FdnUtils.isSuppServiceRequestBlockedByFdn(phoneId, controlStrings, countryIso);
     }
+// QTI_END: 2023-03-16: Telephony: Enable telephony FDN check for side car SS requests.
+// QTI_BEGIN: 2024-06-13: Telephony: Fix call forwarding alert issue in airplane mode
     /**
      * To check whether supplementary service is allowed in airplane mode.
      */
@@ -1070,7 +1147,9 @@ public class PhoneUtils {
                 == PhoneGlobals.AIRPLANE_ON;
         return !isAirplaneModeOn || phone.isWifiCallingEnabled() && phone.isImsRegistered();
     }
+// QTI_END: 2024-06-13: Telephony: Fix call forwarding alert issue in airplane mode
 
+// QTI_BEGIN: 2021-11-03: Telephony: Add SIM info to USSD sessions on UI
     /**
      * To get the phone account using subscription ID.
      */
@@ -1107,4 +1186,5 @@ public class PhoneUtils {
         }
         return sTelecomManager;
     }
+// QTI_END: 2021-11-03: Telephony: Add SIM info to USSD sessions on UI
 }

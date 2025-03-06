@@ -38,11 +38,15 @@ import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.HandlerThread;
 import android.os.Looper;
+// QTI_BEGIN: 2022-05-10: Telephony: Fix incoming call issue after SS to DSDS transition
 import android.os.Message;
+// QTI_END: 2022-05-10: Telephony: Fix incoming call issue after SS to DSDS transition
 import android.os.PersistableBundle;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+// QTI_BEGIN: 2018-02-22: Telephony: Fixes related to manul provisioning
 import android.provider.Settings;
+// QTI_END: 2018-02-22: Telephony: Fixes related to manul provisioning
 import android.provider.Telephony;
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
@@ -63,15 +67,25 @@ import android.telephony.ims.feature.MmTelFeature;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
 import android.text.TextUtils;
 
+// QTI_BEGIN: 2020-08-10: Telephony: IMS: Fix 4g conference call option not seen at times.
 import com.android.ims.FeatureConnector;
+// QTI_END: 2020-08-10: Telephony: IMS: Fix 4g conference call option not seen at times.
 import com.android.ims.ImsManager;
 import com.android.internal.telephony.ExponentialBackoff;
 import com.android.internal.telephony.Phone;
+// QTI_BEGIN: 2022-05-10: Telephony: Fix incoming call issue after SS to DSDS transition
 import com.android.internal.telephony.PhoneConfigurationManager;
+// QTI_END: 2022-05-10: Telephony: Fix incoming call issue after SS to DSDS transition
+// QTI_BEGIN: 2018-06-13: Telephony: MSIM: Emergency account handle support
 import com.android.internal.telephony.PhoneConstants;
+// QTI_END: 2018-06-13: Telephony: MSIM: Emergency account handle support
 import com.android.internal.telephony.PhoneFactory;
+// QTI_BEGIN: 2021-07-19: Telephony: MSIM: Fix for default voice subscription change
 import com.android.internal.telephony.RIL;
+// QTI_END: 2021-07-19: Telephony: MSIM: Fix for default voice subscription change
+// QTI_BEGIN: 2022-01-17: Telephony: IMS : Add logic for RTT UPON REQUEST upgrade button in e911 simless calls
 import com.android.internal.telephony.util.QtiImsUtils;
+// QTI_END: 2022-01-17: Telephony: IMS : Add logic for RTT UPON REQUEST upgrade button in e911 simless calls
 import com.android.internal.telephony.SimultaneousCallingTracker;
 import com.android.internal.telephony.flags.Flags;
 import com.android.internal.telephony.subscription.SubscriptionManagerService;
@@ -82,12 +96,16 @@ import com.android.phone.R;
 import com.android.telephony.Rlog;
 
 import java.util.Arrays;
+// QTI_BEGIN: 2018-02-22: Telephony: Fixes related to manul provisioning
 import java.util.Iterator;
+// QTI_END: 2018-02-22: Telephony: Fixes related to manul provisioning
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+// QTI_BEGIN: 2023-07-20: Telephony: Replace SIM PhoneAccounts when the associated UserHandle changes
 import java.util.Objects;
+// QTI_END: 2023-07-20: Telephony: Replace SIM PhoneAccounts when the associated UserHandle changes
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -139,9 +157,12 @@ public class TelecomAccountRegistry {
 
     private Handler mHandler;
 
+// QTI_BEGIN: 2018-02-22: Telephony: Fixes related to manul provisioning
     // Flag which decides whether SIM should power down due to APM,
     private static final String APM_SIM_NOT_PWDN_PROPERTY = "persist.vendor.radio.apm_sim_not_pwdn";
 
+// QTI_END: 2018-02-22: Telephony: Fixes related to manul provisioning
+// QTI_BEGIN: 2023-01-19: Telephony: IMS : Move RTT downgrade and upgrade logic completely to AOSP.
     /**
     * Rtt downgrade supported key to fetch the current status of carrier or the stored cache of
     * previous sim
@@ -151,12 +172,15 @@ public class TelecomAccountRegistry {
 
     private static final int RTT_DOWNGRADE_NOT_SUPPORTED = 0;
 
+// QTI_END: 2023-01-19: Telephony: IMS : Move RTT downgrade and upgrade logic completely to AOSP.
+// QTI_BEGIN: 2018-02-22: Telephony: Fixes related to manul provisioning
     private enum Count {
         ZERO,
         ONE,
         TWO
     }
 
+// QTI_END: 2018-02-22: Telephony: Fixes related to manul provisioning
     final class AccountEntry implements PstnPhoneCapabilitiesNotifier.Listener {
         private final Phone mPhone;
         private PhoneAccount mAccount;
@@ -183,8 +207,12 @@ public class TelecomAccountRegistry {
         private boolean mIsManageImsConferenceCallSupported;
         private boolean mIsUsingSimCallManager;
         private boolean mIsShowPreciseFailedCause;
+// QTI_BEGIN: 2020-08-10: Telephony: IMS: Fix 4g conference call option not seen at times.
         private final FeatureConnector<ImsManager> mImsManagerConnector;
+// QTI_END: 2020-08-10: Telephony: IMS: Fix 4g conference call option not seen at times.
+// QTI_BEGIN: 2023-07-20: Telephony: Fix subid matching for PhoneAccounts
         private int mSubId;
+// QTI_END: 2023-07-20: Telephony: Fix subid matching for PhoneAccounts
         private Set<Integer> mSimultaneousCallSupportedSubIds;
 
         AccountEntry(Phone phone, boolean isEmergency, boolean isTest) {
@@ -198,9 +226,11 @@ public class TelecomAccountRegistry {
                         mSCT.getSubIdsSupportingSimultaneousCalling(mPhone.getSubId());
             }
             mAccount = registerPstnPhoneAccount(isEmergency, isTest);
+// QTI_BEGIN: 2023-07-20: Telephony: Fix subid matching for PhoneAccounts
             mSubId = getSubId();
             Log.i(this, "Registered phoneAccount: %s with handle: %s, subId: %d",
                     mAccount, mAccount.getAccountHandle(), mSubId);
+// QTI_END: 2023-07-20: Telephony: Fix subid matching for PhoneAccounts
             mPhoneCapabilitiesNotifier = new PstnPhoneCapabilitiesNotifier((Phone) mPhone,
                     this);
             mImsManagerConnector = ImsManager.getConnector(
@@ -214,7 +244,9 @@ public class TelecomAccountRegistry {
                     public void connectionUnavailable(int reason) {
                         unregisterImsRegistrationCallback();
                     }
+// QTI_BEGIN: 2020-11-23: Telephony: IMS: Fix phone process crash
                 }, mPhone.getContext().getMainExecutor());
+// QTI_END: 2020-11-23: Telephony: IMS: Fix phone process crash
 
             if (mIsTestAccount || isEmergency) {
                 // For test and emergency entries, there is no sub ID that can be assigned, so do
@@ -260,7 +292,9 @@ public class TelecomAccountRegistry {
                     updateAdhocConfCapability(false);
                 }
             };
+// QTI_BEGIN: 2020-08-10: Telephony: IMS: Fix 4g conference call option not seen at times.
             mImsManagerConnector.connect();
+// QTI_END: 2020-08-10: Telephony: IMS: Fix 4g conference call option not seen at times.
 
             if (Flags.simultaneousCallingIndications()) {
                 //Register SimultaneousCallingTracker listener:
@@ -280,20 +314,28 @@ public class TelecomAccountRegistry {
 
         void teardown() {
             mPhoneCapabilitiesNotifier.teardown();
+// QTI_BEGIN: 2020-08-10: Telephony: IMS: Fix 4g conference call option not seen at times.
             if (mMmTelManager != null && mMmtelCapabilityCallback != null) {
                 mMmTelManager.unregisterMmTelCapabilityCallback(mMmtelCapabilityCallback);
+// QTI_END: 2020-08-10: Telephony: IMS: Fix 4g conference call option not seen at times.
             }
             if (Flags.simultaneousCallingIndications()) {
                 SimultaneousCallingTracker.getInstance()
                         .removeListener(mSimultaneousCallingTrackerListener);
             }
+// QTI_BEGIN: 2020-08-10: Telephony: IMS: Fix 4g conference call option not seen at times.
             mImsManagerConnector.disconnect();
+// QTI_END: 2020-08-10: Telephony: IMS: Fix 4g conference call option not seen at times.
         }
 
+// QTI_BEGIN: 2023-07-20: Telephony: Fix subid matching for PhoneAccounts
         private boolean isSameSubId(SubscriptionInfo subInfo) {
             return mSubId == subInfo.getSubscriptionId();
+// QTI_END: 2023-07-20: Telephony: Fix subid matching for PhoneAccounts
+// QTI_BEGIN: 2021-10-30: Telephony: Fix phone account isn't associated
         }
 
+// QTI_END: 2021-10-30: Telephony: Fix phone account isn't associated
         private void registerMmTelCapabilityCallback() {
             if (mMmTelManager == null || mMmtelCapabilityCallback == null) {
                 // The subscription id associated with this account is invalid or not associated
@@ -323,7 +365,9 @@ public class TelecomAccountRegistry {
             try {
                 mMmTelManager.registerImsRegistrationCallback(mContext.getMainExecutor(),
                         mImsRegistrationCallback);
+// QTI_BEGIN: 2020-08-10: Telephony: IMS: Fix 4g conference call option not seen at times.
                 Log.v(this, "registerImsRegistrationCallback: registration success");
+// QTI_END: 2020-08-10: Telephony: IMS: Fix 4g conference call option not seen at times.
             } catch (ImsException e) {
                 Log.w(this, "registerImsRegistrationCallback: registration failed, no ImsService"
                         + " available. Exception: " + e.getMessage());
@@ -335,6 +379,7 @@ public class TelecomAccountRegistry {
             }
         }
 
+// QTI_BEGIN: 2020-08-10: Telephony: IMS: Fix 4g conference call option not seen at times.
         private void unregisterImsRegistrationCallback() {
             if (mMmTelManager == null || mImsRegistrationCallback == null) {
                 return;
@@ -342,6 +387,8 @@ public class TelecomAccountRegistry {
             mMmTelManager.unregisterImsRegistrationCallback(mImsRegistrationCallback);
         }
 
+// QTI_END: 2020-08-10: Telephony: IMS: Fix 4g conference call option not seen at times.
+// QTI_BEGIN: 2023-07-20: Telephony: Replace SIM PhoneAccounts when the associated UserHandle changes
         // UserHandle associated with a subiscription can change after PhoneAccount was created.
         // Check if the account is having same UserHandle as the sub.
         private boolean isSameUserHandle() {
@@ -350,6 +397,7 @@ public class TelecomAccountRegistry {
             return Objects.equals(accountUserHandle, mPhone.getUserHandle());
         }
 
+// QTI_END: 2023-07-20: Telephony: Replace SIM PhoneAccounts when the associated UserHandle changes
         /**
          * Trigger re-registration of this account.
          */
@@ -480,15 +528,19 @@ public class TelecomAccountRegistry {
                 mIsRttCapable = false;
             }
 
+// QTI_BEGIN: 2023-01-19: Telephony: IMS : Move RTT downgrade and upgrade logic completely to AOSP.
             if (isRttDowngradeSupported()) {
                 capabilities |= PhoneAccount.CAPABILITY_DOWNGRADE_RTT;
             }
 
+// QTI_END: 2023-01-19: Telephony: IMS : Move RTT downgrade and upgrade logic completely to AOSP.
             if (mIsCallComposerCapable) {
                 capabilities |= PhoneAccount.CAPABILITY_CALL_COMPOSER;
             }
 
+// QTI_BEGIN: 2019-06-14: Telephony: Revert "Disable VT when RTT capability is on"
             mIsVideoCapable = mPhone.isVideoEnabled();
+// QTI_END: 2019-06-14: Telephony: Revert "Disable VT when RTT capability is on"
             boolean isVideoEnabledByPlatform = ImsManager.getInstance(mPhone.getContext(),
                     mPhone.getPhoneId()).isVtEnabledByPlatform();
 
@@ -953,10 +1005,12 @@ public class TelecomAccountRegistry {
                     // time we get here, the original phone account could have been torn down.
                     return;
                 }
+// QTI_BEGIN: 2021-11-22: Telephony: Remove the redundant RTT check code
                 if (isVideoCapable != mIsVideoCapable) {
                     mIsVideoCapable = isVideoCapable;
                     mAccount = registerPstnPhoneAccount(mIsEmergency, mIsTestAccount);
                 }
+// QTI_END: 2021-11-22: Telephony: Remove the redundant RTT check code
             }
         }
 
@@ -1025,35 +1079,46 @@ public class TelecomAccountRegistry {
         }
 
         public void updateRttCapability() {
+// QTI_BEGIN: 2022-02-24: Telephony: IMS : Fix for Unknown Phone account issue
             synchronized (mAccountsLock) {
                 if (!mAccounts.contains(this)) {
                     // Account has already been torn down, don't try to register it again.
+// QTI_END: 2022-02-24: Telephony: IMS : Fix for Unknown Phone account issue
                     // This handles the case where teardown has already happened, and we got a Ims
                     // registartion update that lost the race for the mAccountsLock.  In such a
                     // scenario by the time we get here, the original phone account could have been
                     // torn down.
+// QTI_BEGIN: 2022-02-24: Telephony: IMS : Fix for Unknown Phone account issue
                     return;
                 }
+// QTI_END: 2022-02-24: Telephony: IMS : Fix for Unknown Phone account issue
 
+// QTI_BEGIN: 2022-02-24: Telephony: IMS : Fix for Unknown Phone account issue
                 boolean isRttEnabled = isRttCurrentlySupported();
                 if (isRttEnabled != mIsRttCapable) {
                     Log.i(this, "updateRttCapability - changed, new value: " + isRttEnabled);
                     mAccount = registerPstnPhoneAccount(mIsEmergency, mIsTestAccount);
                 }
+// QTI_END: 2022-02-24: Telephony: IMS : Fix for Unknown Phone account issue
             }
         }
 
         public void updateCallComposerCapability(MmTelFeature.MmTelCapabilities capabilities) {
+// QTI_BEGIN: 2022-02-24: Telephony: IMS : Fix for Unknown Phone account issue
             synchronized (mAccountsLock) {
                 if (!mAccounts.contains(this)) {
+// QTI_END: 2022-02-24: Telephony: IMS : Fix for Unknown Phone account issue
                     // Account has already been torn down, don't try to register it again.
                     // This handles the case where teardown has already happened, and we got a Ims
                     // registartion update that lost the race for the mAccountsLock.  In such a
                     // scenario by the time we get here, the original phone account could have been
                     // torn down.
+// QTI_BEGIN: 2022-02-24: Telephony: IMS : Fix for Unknown Phone account issue
                     return;
                 }
+// QTI_END: 2022-02-24: Telephony: IMS : Fix for Unknown Phone account issue
 
+// QTI_BEGIN: 2022-02-24: Telephony: IMS : Fix for Unknown Phone account issue
                 boolean isCallComposerCapable = capabilities.isCapable(
                         MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_CALL_COMPOSER);
                 if (isCallComposerCapable != mIsCallComposerCapable) {
@@ -1062,6 +1127,7 @@ public class TelecomAccountRegistry {
                             + isCallComposerCapable);
                     mAccount = registerPstnPhoneAccount(mIsEmergency, mIsTestAccount);
                 }
+// QTI_END: 2022-02-24: Telephony: IMS : Fix for Unknown Phone account issue
             }
         }
 
@@ -1086,6 +1152,7 @@ public class TelecomAccountRegistry {
             }
         }
 
+// QTI_BEGIN: 2023-01-19: Telephony: IMS : Move RTT downgrade and upgrade logic completely to AOSP.
         /**
          * Determines whether RTT downgrade is supported given the current state of the
          * device.
@@ -1104,6 +1171,7 @@ public class TelecomAccountRegistry {
             return simLessRttDowngradeSupported != RTT_DOWNGRADE_NOT_SUPPORTED;
         }
 
+// QTI_END: 2023-01-19: Telephony: IMS : Move RTT downgrade and upgrade logic completely to AOSP.
         /**
          * Determines whether RTT is supported given the current state of the
          * device.
@@ -1128,9 +1196,15 @@ public class TelecomAccountRegistry {
 
                 String[] supportedCountries = mContext.getResources().getStringArray(
                         R.array.config_simless_emergency_rtt_supported_countries);
+// QTI_BEGIN: 2022-01-17: Telephony: IMS : Add logic for RTT UPON REQUEST upgrade button in e911 simless calls
                 if ((supportedCountries == null || Arrays.stream(supportedCountries).noneMatch(
+// QTI_END: 2022-01-17: Telephony: IMS : Add logic for RTT UPON REQUEST upgrade button in e911 simless calls
+// QTI_BEGIN: 2023-02-28: Telephony: IMS : Fix the simless RTT Upgrade condition.
                         Predicate.isEqual(country))) || !(QtiImsUtils.isSimLessRttSupported(
+// QTI_END: 2023-02-28: Telephony: IMS : Fix the simless RTT Upgrade condition.
+// QTI_BEGIN: 2023-01-19: Telephony: IMS : Move RTT downgrade and upgrade logic completely to AOSP.
                         mPhone.getPhoneId(), mPhone.getContext()) && isUserRttSettingOn())) {
+// QTI_END: 2023-01-19: Telephony: IMS : Move RTT downgrade and upgrade logic completely to AOSP.
                     Log.i(this, "isRttCurrentlySupported -- emergency acct and"
                             + " not supported in this country: " + country);
                     return false;
@@ -1145,13 +1219,17 @@ public class TelecomAccountRegistry {
                 .phoneMgr;
             boolean isRttSupported = (phoneMgr != null) ?
                 phoneMgr.isRttEnabled(mPhone.getSubId()) : false;
+// QTI_BEGIN: 2021-04-12: Telephony: IMS: Remove RTT capability if RTT user setting is OFF.
             boolean isUserRttSettingOn = isUserRttSettingOn();
+// QTI_END: 2021-04-12: Telephony: IMS: Remove RTT capability if RTT user setting is OFF.
 
             boolean isRoaming = mTelephonyManager.isNetworkRoaming(mPhone.getSubId());
             boolean isOnWfc = mPhone.getImsRegistrationTech()
+// QTI_BEGIN: 2023-06-14: Telephony: Support place RTT call when C_IWLAN is registered
                     == ImsRegistrationImplBase.REGISTRATION_TECH_IWLAN
                     ||  mPhone.getImsRegistrationTech()
                     == ImsRegistrationImplBase.REGISTRATION_TECH_CROSS_SIM;
+// QTI_END: 2023-06-14: Telephony: Support place RTT call when C_IWLAN is registered
             boolean alwaysAllowWhileRoaming = isCarrierAllowRttWhenRoaming();
 
             boolean shouldDisableBecauseRoamingOffWfc =
@@ -1160,11 +1238,14 @@ public class TelecomAccountRegistry {
             Log.i(this, "isRttCurrentlySupported -- regular acct,"
                     + " hasVoiceAvailability: " + hasVoiceAvailability + "\n"
                     + " isRttSupported: " + isRttSupported + "\n"
+// QTI_BEGIN: 2021-04-12: Telephony: IMS: Remove RTT capability if RTT user setting is OFF.
                     + " isUserRttSettingOn: " + isUserRttSettingOn + "\n"
+// QTI_END: 2021-04-12: Telephony: IMS: Remove RTT capability if RTT user setting is OFF.
                     + " alwaysAllowWhileRoaming: " + alwaysAllowWhileRoaming + "\n"
                     + " isRoaming: " + isRoaming + "\n"
                     + " isOnWfc: " + isOnWfc + "\n");
 
+// QTI_BEGIN: 2021-04-12: Telephony: IMS: Remove RTT capability if RTT user setting is OFF.
             return hasVoiceAvailability && isRttSupported && !shouldDisableBecauseRoamingOffWfc
                     && isUserRttSettingOn;
         }
@@ -1175,6 +1256,7 @@ public class TelecomAccountRegistry {
                     Settings.Secure.RTT_CALLING_MODE
                     + convertRttPhoneId(mPhone.getPhoneId()) , 0);
             return rttSetting != 0;
+// QTI_END: 2021-04-12: Telephony: IMS: Remove RTT capability if RTT user setting is OFF.
         }
 
         /**
@@ -1268,10 +1350,12 @@ public class TelecomAccountRegistry {
                             ImsRegistrationImplBase.REGISTRATION_TECH_CROSS_SIM,
                     MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE);
         }
+// QTI_BEGIN: 2021-10-30: Telephony: Fix phone account isn't associated
 
         private boolean isSubAccount() {
             return !(mIsTestAccount || mIsEmergency);
         }
+// QTI_END: 2021-10-30: Telephony: Fix phone account isn't associated
     }
 
     private OnSubscriptionsChangedListener mOnSubscriptionsChangedListener =
@@ -1284,13 +1368,18 @@ public class TelecomAccountRegistry {
             }
             mSubscriptionListenerState = LISTENER_STATE_REGISTERED;
 
+// QTI_BEGIN: 2021-10-30: Telephony: Fix phone account isn't associated
             List<SubscriptionInfo> subList =
                     mSubscriptionManager.getActiveSubscriptionInfoList();
 
             boolean isTearingDownNeeded = subList == null;
+// QTI_END: 2021-10-30: Telephony: Fix phone account isn't associated
+// QTI_BEGIN: 2023-07-20: Telephony: Replace SIM PhoneAccounts when the associated UserHandle changes
 
             isTearingDownNeeded |= hasAnyUserHandleChanged();
 
+// QTI_END: 2023-07-20: Telephony: Replace SIM PhoneAccounts when the associated UserHandle changes
+// QTI_BEGIN: 2021-10-30: Telephony: Fix phone account isn't associated
             if (!isTearingDownNeeded) {
                 int subAccountCnt = subList.size();
                 synchronized (mAccountsLock) {
@@ -1318,6 +1407,7 @@ public class TelecomAccountRegistry {
                     }
                 }
             }
+// QTI_END: 2021-10-30: Telephony: Fix phone account isn't associated
         }
 
         @Override
@@ -1356,8 +1446,10 @@ public class TelecomAccountRegistry {
                 tearDownAccounts();
                 setupAccounts();
             } else if (CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED.equals(
+// QTI_BEGIN: 2022-12-16: Telephony: IMS: Broadcast essential records loaded
                     intent.getAction()) || CarrierConfigManager.ACTION_ESSENTIAL_RECORDS_LOADED.
                     equals(intent.getAction())) {
+// QTI_END: 2022-12-16: Telephony: IMS: Broadcast essential records loaded
                 Log.i(this, "TelecomAccountRegistry: Carrier-config changed, "
                         + "checking for phone account updates.");
                 int subId = intent.getIntExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX,
@@ -1493,8 +1585,13 @@ public class TelecomAccountRegistry {
         }
     }
 
+// QTI_BEGIN: 2022-05-10: Telephony: Fix incoming call issue after SS to DSDS transition
     private int mSimCount;
+// QTI_END: 2022-05-10: Telephony: Fix incoming call issue after SS to DSDS transition
+// QTI_BEGIN: 2021-10-30: Telephony: Fix phone account isn't associated
     private PstnIncomingCallNotifier[] mPstnIncomingCallNotifiers;
+// QTI_END: 2021-10-30: Telephony: Fix phone account isn't associated
+// QTI_BEGIN: 2022-05-10: Telephony: Fix incoming call issue after SS to DSDS transition
     private static final int EVENT_MSIM_CONFIGURATION_CHANGED = 1000;
 
     private final class EventHandler extends Handler {
@@ -1513,6 +1610,7 @@ public class TelecomAccountRegistry {
             }
         }
     }
+// QTI_END: 2022-05-10: Telephony: Fix incoming call issue after SS to DSDS transition
 
     TelecomAccountRegistry(Context context) {
         mContext = context;
@@ -1521,7 +1619,9 @@ public class TelecomAccountRegistry {
         mTelephonyManager = TelephonyManager.from(context);
         mSubscriptionManager = SubscriptionManager.from(context);
         mHandlerThread.start();
+// QTI_BEGIN: 2022-05-10: Telephony: Fix incoming call issue after SS to DSDS transition
         mHandler = new EventHandler(Looper.getMainLooper());
+// QTI_END: 2022-05-10: Telephony: Fix incoming call issue after SS to DSDS transition
         mRegisterSubscriptionListenerBackoff = new ExponentialBackoff(
                 REGISTER_START_DELAY_MS,
                 REGISTER_MAXIMUM_DELAY_MS,
@@ -1710,6 +1810,7 @@ public class TelecomAccountRegistry {
         return mSubscriptionManager;
     }
 
+// QTI_BEGIN: 2023-01-19: Telephony: IMS : Move RTT downgrade and upgrade logic completely to AOSP.
     /**
      * @return List of active subscription list.
      */
@@ -1717,6 +1818,7 @@ public class TelecomAccountRegistry {
         return mSubscriptionManager.getActiveSubscriptionInfoList();
     }
 
+// QTI_END: 2023-01-19: Telephony: IMS : Move RTT downgrade and upgrade logic completely to AOSP.
     /**
      * Returns the address (e.g. the phone number) associated with a subscription.
      *
@@ -1738,12 +1840,14 @@ public class TelecomAccountRegistry {
         synchronized (mAccountsLock) {
             Log.v(this, "refreshAdhocConference isEnable = " + isEnableAdhocConf);
             for (AccountEntry entry : mAccounts) {
+// QTI_BEGIN: 2025-01-30: Telephony: Revert "IMS-DSDA: Update Adhoc conference capability per phone account"
                 boolean hasAdhocConfCapability = entry.mAccount.hasCapabilities(
                         PhoneAccount.CAPABILITY_ADHOC_CONFERENCE_CALLING);
                 if (!isEnableAdhocConf && hasAdhocConfCapability) {
                     entry.updateAdhocConfCapability(isEnableAdhocConf);
                 } else if (isEnableAdhocConf && !hasAdhocConfCapability) {
                     entry.updateAdhocConfCapability(entry.mPhone.isImsRegistered());
+// QTI_END: 2025-01-30: Telephony: Revert "IMS-DSDA: Update Adhoc conference capability per phone account"
                 }
             }
         }
@@ -1806,7 +1910,9 @@ public class TelecomAccountRegistry {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED);
+// QTI_BEGIN: 2022-12-16: Telephony: IMS: Broadcast essential records loaded
         filter.addAction(CarrierConfigManager.ACTION_ESSENTIAL_RECORDS_LOADED);
+// QTI_END: 2022-12-16: Telephony: IMS: Broadcast essential records loaded
         mContext.registerReceiver(mReceiver, filter);
 
         //We also need to listen for locale changes
@@ -1816,14 +1922,23 @@ public class TelecomAccountRegistry {
         mContext.registerReceiver(mLocaleChangeReceiver, localeChangeFilter);
 
         registerContentObservers();
+// QTI_BEGIN: 2022-05-10: Telephony: Fix incoming call issue after SS to DSDS transition
 
         mSimCount = mTelephonyManager.getActiveModemCount();
         mPstnIncomingCallNotifiers =
                 new PstnIncomingCallNotifier[mSimCount];
+// QTI_END: 2022-05-10: Telephony: Fix incoming call issue after SS to DSDS transition
+// QTI_BEGIN: 2021-10-30: Telephony: Fix phone account isn't associated
         // register for Pstn incoming call notifiers
+// QTI_END: 2021-10-30: Telephony: Fix phone account isn't associated
+// QTI_BEGIN: 2022-05-10: Telephony: Fix incoming call issue after SS to DSDS transition
         for (int i = 0; i < mSimCount; i++) {
+// QTI_END: 2022-05-10: Telephony: Fix incoming call issue after SS to DSDS transition
+// QTI_BEGIN: 2021-10-30: Telephony: Fix phone account isn't associated
             mPstnIncomingCallNotifiers[i] = new PstnIncomingCallNotifier(PhoneFactory.getPhone(i));
         }
+// QTI_END: 2021-10-30: Telephony: Fix phone account isn't associated
+// QTI_BEGIN: 2022-05-10: Telephony: Fix incoming call issue after SS to DSDS transition
         PhoneConfigurationManager.registerForMultiSimConfigChange(mHandler,
                 EVENT_MSIM_CONFIGURATION_CHANGED, null);
 
@@ -1849,6 +1964,7 @@ public class TelecomAccountRegistry {
             }
         }
         mSimCount = newSimCount;
+// QTI_END: 2022-05-10: Telephony: Fix incoming call issue after SS to DSDS transition
     }
 
     private void registerContentObservers() {
@@ -1864,6 +1980,7 @@ public class TelecomAccountRegistry {
             }
         };
 
+// QTI_BEGIN: 2020-01-20: Telephony: IMS: Support for MSIM RTT
         // register for all settings
         for (int i = 0; i < mTelephonyManager.getPhoneCount(); i++) {
             Uri rttSettingUri = Settings.Secure.getUriFor(
@@ -1871,6 +1988,7 @@ public class TelecomAccountRegistry {
             mContext.getContentResolver().registerContentObserver(
                     rttSettingUri, false, rttUiSettingObserver);
         }
+// QTI_END: 2020-01-20: Telephony: IMS: Support for MSIM RTT
 
         // Listen to the changes to the user's Contacts Discovery Setting.
         ContentObserver contactDiscoveryObserver = new ContentObserver(mHandler) {
@@ -1887,10 +2005,12 @@ public class TelecomAccountRegistry {
                 Telephony.SimInfo.COLUMN_IMS_RCS_UCE_ENABLED);
         mContext.getContentResolver().registerContentObserver(
                 contactDiscUri, true /*notifyForDescendants*/, contactDiscoveryObserver);
+// QTI_BEGIN: 2020-01-20: Telephony: IMS: Support for MSIM RTT
     }
 
     private static String convertRttPhoneId(int phoneId) {
         return phoneId != 0 ? Integer.toString(phoneId) : "";
+// QTI_END: 2020-01-20: Telephony: IMS: Support for MSIM RTT
     }
 
     /**
@@ -1954,8 +2074,10 @@ public class TelecomAccountRegistry {
 
         final boolean phoneAccountsEnabled = mContext.getResources().getBoolean(
                 R.bool.config_pstn_phone_accounts_enabled);
+// QTI_BEGIN: 2018-02-22: Telephony: Fixes related to manul provisioning
         int activeCount = 0;
         int activeSubscriptionId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
+// QTI_END: 2018-02-22: Telephony: Fixes related to manul provisioning
 
         synchronized (mAccountsLock) {
             try {
@@ -1967,23 +2089,35 @@ public class TelecomAccountRegistry {
                         boolean isAccountAdded = false;
 
                         Log.i(this, "setupAccounts: Phone with subscription id: " + subscriptionId +
+// QTI_BEGIN: 2021-05-04: Telephony: Remove provision check
                                 " slotId: " + slotId);
+// QTI_END: 2021-05-04: Telephony: Remove provision check
                         // setupAccounts can be called multiple times during service changes.
                         // Don't add an account if subscription is not ready.
                         if (!SubscriptionManager.isValidSubscriptionId(subscriptionId)) {
                             Log.d(this, "setupAccounts: skipping invalid subid %d", subscriptionId);
+// QTI_BEGIN: 2020-06-10: Telephony: MSIM: Emergency account handle support.
                             // If device configured in dsds mode, a SIM removed and if corresponding
+// QTI_END: 2020-06-10: Telephony: MSIM: Emergency account handle support.
+// QTI_BEGIN: 2022-01-27: Telephony: Add emergency account in SCBM
                             // phone is in ECM or SCBM then add emergency account to that sub so
                             // that incoming emergency call can be processed.
                             Phone emergencyPhone =
                                     PhoneGlobals.getInstance().getPhoneInEmergencyMode();
+// QTI_END: 2022-01-27: Telephony: Add emergency account in SCBM
+// QTI_BEGIN: 2020-06-10: Telephony: MSIM: Emergency account handle support.
                             if ((mTelephonyManager.getPhoneCount() > 1)
+// QTI_END: 2020-06-10: Telephony: MSIM: Emergency account handle support.
+// QTI_BEGIN: 2022-01-27: Telephony: Add emergency account in SCBM
                                     && (emergencyPhone != null)
                                     && emergencyPhone.getPhoneId() == phone.getPhoneId()) {
                                 mAccounts.add(new AccountEntry(emergencyPhone, true /* emergency */,
+// QTI_END: 2022-01-27: Telephony: Add emergency account in SCBM
                                         false /* isTest */));
+// QTI_BEGIN: 2020-06-10: Telephony: MSIM: Emergency account handle support.
                                 isAccountAdded = true;
                             }
+// QTI_END: 2020-06-10: Telephony: MSIM: Emergency account handle support.
                             continue;
                         }
                         // Don't add account if it's opportunistic subscription, which is considered
@@ -2011,12 +2145,16 @@ public class TelecomAccountRegistry {
                             continue;
                         }
 
+// QTI_BEGIN: 2021-05-04: Telephony: Remove provision check
                         if (mSubscriptionManager.isActiveSubId(subscriptionId)) {
+// QTI_END: 2021-05-04: Telephony: Remove provision check
                             activeCount++;
                             activeSubscriptionId = subscriptionId;
                             mAccounts.add(new AccountEntry(phone, false /* emergency */,
                                     false /* isTest */));
+// QTI_BEGIN: 2018-06-13: Telephony: MSIM: Emergency account handle support
                             isAccountAdded = true;
+// QTI_END: 2018-06-13: Telephony: MSIM: Emergency account handle support
                         }
                         // Speacial case where one sub sim locked other sub reporting emergency service
                         // emergency call placed will initiate on primary sub i.e sub which is reporting
@@ -2030,7 +2168,9 @@ public class TelecomAccountRegistry {
                             Log.i(this, "Adding emergency account to phone id: "+phone.getPhoneId());
                             mAccounts.add(new AccountEntry(phone, true /* emergency */,
                                     false /* isTest */));
+// QTI_BEGIN: 2018-06-13: Telephony: MSIM: Emergency account handle support
                         }
+// QTI_END: 2018-06-13: Telephony: MSIM: Emergency account handle support
                     }
                 }
             } finally {
@@ -2085,6 +2225,7 @@ public class TelecomAccountRegistry {
         // Clean up any PhoneAccounts that are no longer relevant
         cleanupPhoneAccounts();
 
+// QTI_BEGIN: 2021-07-19: Telephony: MSIM: Fix for default voice subscription change
         // Do not call setUserSelectedOutgoingPhoneAccount() from here when IRadio HAL version 1_5
         // and later enabled as  MultiSimSettingController.updateUserPreferences() taking care of
         // settings the default outgoing phone account.
@@ -2095,13 +2236,19 @@ public class TelecomAccountRegistry {
             if ((defaultPhoneAccount == null)
                         && (mTelephonyManager.getActiveModemCount() > Count.ONE.ordinal())
                         && (activeCount == Count.ONE.ordinal())
+// QTI_END: 2021-07-19: Telephony: MSIM: Fix for default voice subscription change
+// QTI_BEGIN: 2025-02-07: Telephony: Remove legacy code changes
                         && (areAllSimAccountsFound()) && (isRadioInValidState(phones))) {
+// QTI_END: 2025-02-07: Telephony: Remove legacy code changes
+// QTI_BEGIN: 2021-07-19: Telephony: MSIM: Fix for default voice subscription change
                 PhoneAccountHandle phoneAccountHandle =
                         subscriptionIdToPhoneAccountHandle(activeSubscriptionId);
                 if (phoneAccountHandle != null) {
                     Log.i(this, "setting default phone account, subId " + activeSubscriptionId);
                     mTelecomManager.setUserSelectedOutgoingPhoneAccount(phoneAccountHandle);
                 }
+// QTI_END: 2021-07-19: Telephony: MSIM: Fix for default voice subscription change
+// QTI_BEGIN: 2020-07-13: Telephony: MSIM:Set available SIM as default outgoing phoneaccount.
             }
         }
     }
@@ -2123,12 +2270,20 @@ public class TelecomAccountRegistry {
     private boolean isRadioInValidState(Phone[] phones) {
         boolean isApmSimNotPwrDown = false;
         try {
+// QTI_END: 2020-07-13: Telephony: MSIM:Set available SIM as default outgoing phoneaccount.
+// QTI_BEGIN: 2021-05-04: Telephony: Remove provision check
             int propVal = PhoneUtils.getExtTelManager().
                     getPropertyValueInt(APM_SIM_NOT_PWDN_PROPERTY, 0);
+// QTI_END: 2021-05-04: Telephony: Remove provision check
+// QTI_BEGIN: 2020-07-13: Telephony: MSIM:Set available SIM as default outgoing phoneaccount.
             isApmSimNotPwrDown = (propVal == 1);
             Log.d(this, "isRadioInValidState, propVal = " + propVal +
                     " isApmSimNotPwrDown = " + isApmSimNotPwrDown);
+// QTI_END: 2020-07-13: Telephony: MSIM:Set available SIM as default outgoing phoneaccount.
+// QTI_BEGIN: 2021-05-04: Telephony: Remove provision check
         } catch (NullPointerException ex) {
+// QTI_END: 2021-05-04: Telephony: Remove provision check
+// QTI_BEGIN: 2020-07-13: Telephony: MSIM:Set available SIM as default outgoing phoneaccount.
             Log.w(this, "Failed to get property: + " + APM_SIM_NOT_PWDN_PROPERTY +
                     " , Exception: " + ex);
         }
@@ -2165,8 +2320,10 @@ public class TelecomAccountRegistry {
             }
         }
         return null;
+// QTI_END: 2020-07-13: Telephony: MSIM:Set available SIM as default outgoing phoneaccount.
     }
 
+// QTI_BEGIN: 2018-06-13: Telephony: MSIM: Emergency account handle support
     private boolean isOtherPhoneInService(Phone currentPhone) {
         TelephonyManager tm = TelephonyManager.getDefault();
         int phoneCount = tm.getPhoneCount();
@@ -2182,6 +2339,7 @@ public class TelecomAccountRegistry {
         return false;
     }
 
+// QTI_END: 2018-06-13: Telephony: MSIM: Emergency account handle support
     private void tearDownAccounts() {
         synchronized (mAccountsLock) {
             for (AccountEntry entry : mAccounts) {
@@ -2194,6 +2352,7 @@ public class TelecomAccountRegistry {
         PropertyInvalidatedCache.invalidateCache(TelephonyManager.CACHE_KEY_PHONE_ACCOUNT_TO_SUBID);
     }
 
+// QTI_BEGIN: 2023-07-20: Telephony: Replace SIM PhoneAccounts when the associated UserHandle changes
     private boolean hasAnyUserHandleChanged() {
         synchronized (mAccountsLock) {
             for (AccountEntry entry : mAccounts) {
@@ -2206,10 +2365,16 @@ public class TelecomAccountRegistry {
         return false;
     }
 
+// QTI_END: 2023-07-20: Telephony: Replace SIM PhoneAccounts when the associated UserHandle changes
+// QTI_BEGIN: 2021-10-30: Telephony: Fix phone account isn't associated
     private boolean isAccountMatched(SubscriptionInfo info) {
         synchronized (mAccountsLock) {
             for (AccountEntry entry : mAccounts) {
+// QTI_END: 2021-10-30: Telephony: Fix phone account isn't associated
+// QTI_BEGIN: 2023-07-20: Telephony: Fix subid matching for PhoneAccounts
                 if (entry.isSameSubId(info)) {
+// QTI_END: 2023-07-20: Telephony: Fix subid matching for PhoneAccounts
+// QTI_BEGIN: 2021-10-30: Telephony: Fix phone account isn't associated
                     return true;
                 }
             }
@@ -2217,6 +2382,7 @@ public class TelecomAccountRegistry {
         return false;
     }
 
+// QTI_END: 2021-10-30: Telephony: Fix phone account isn't associated
     /**
      * Handles changes to the carrier configuration which may impact a phone account.  There are
      * some extras defined in the {@link PhoneAccount} which are based on carrier config options.

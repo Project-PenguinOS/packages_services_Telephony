@@ -29,7 +29,9 @@ import android.preference.EditTextPreference;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.telephony.PhoneNumberUtils;
 import android.text.BidiFormatter;
+// QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer
 import android.text.format.DateFormat;
+// QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer
 import android.text.TextDirectionHeuristics;
 import android.text.TextUtils;
 import android.text.method.ArrowKeyMovementMethod;
@@ -37,26 +39,36 @@ import android.text.method.DialerKeyListener;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
+// QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+// QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer
 import android.widget.EditText;
 import android.widget.ImageButton;
+// QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer
 import android.widget.Spinner;
+// QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer
 import android.widget.TextView;
+// QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer
 import android.widget.Toast;
 import android.util.Log;
 import java.util.Calendar;
 import java.util.Date;
+// QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer
 
+// QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer
 import com.android.internal.telephony.CommandsInterface;
+// QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer
 
+// QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer
 public class EditPhoneNumberPreference extends EditTextPreference
         implements AdapterView.OnItemSelectedListener {
 
     private String TAG = "EditPhoneNumberPreference";
     private static final boolean DBG = (PhoneGlobals.DBG_LEVEL >= 2);
+// QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer
     //allowed modes for this preference.
     /** simple confirmation (OK / CANCEL) */
     private static final int CM_CONFIRM = 0;
@@ -77,6 +89,7 @@ public class EditPhoneNumberPreference extends EditTextPreference
     //UI layout
     private ImageButton mContactPickButton;
 
+// QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer
     //UI for time settings
     private Calendar mStartDate = Calendar.getInstance();
     private Calendar mEndDate = Calendar.getInstance();
@@ -112,6 +125,7 @@ public class EditPhoneNumberPreference extends EditTextPreference
     private boolean mChecked;
     private boolean mTimePeriodAllDayChecked = true;
 
+// QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer
     //Listeners
     /** Called when focus is changed between fields */
     private View.OnFocusChangeListener mDialogFocusChangeListener;
@@ -277,9 +291,11 @@ public class EditPhoneNumberPreference extends EditTextPreference
                 }
             });
         }
+// QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer
         //set timer settings
         initTimeSettingsView(view);
 
+// QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer
     }
 
     /**
@@ -388,6 +404,7 @@ public class EditPhoneNumberPreference extends EditTextPreference
         // A positive result is technically either button1 or button3.
         if ((mButtonClicked == DialogInterface.BUTTON_POSITIVE) ||
                 (mButtonClicked == DialogInterface.BUTTON_NEUTRAL)){
+// QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer
             EditText editText = getEditText();
             String number = "";
             if (editText != null) {
@@ -406,6 +423,7 @@ public class EditPhoneNumberPreference extends EditTextPreference
                 setPhoneNumber(number);
             }
             if (DBG) dumpSpinnerSelectedTimePeriodInfo();
+// QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer
             super.onDialogClosed(positiveResult);
             setText(getStringValue());
         } else {
@@ -437,9 +455,11 @@ public class EditPhoneNumberPreference extends EditTextPreference
         return this;
     }
 
+// QTI_BEGIN: 2024-04-23: Telephony: IMS-UT: Save/restore InstanceState during language changed for CFUT
     public int getPrefId() {
         return mPrefId;
     }
+// QTI_END: 2024-04-23: Telephony: IMS-UT: Save/restore InstanceState during language changed for CFUT
 
     /**
      * Phone number handling code
@@ -450,6 +470,7 @@ public class EditPhoneNumberPreference extends EditTextPreference
         return PhoneNumberUtils.stripSeparators(mPhoneNumber);
     }
 
+// QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer
     public int getStartTimeHour() {
         return mStartTimeHour;
     }
@@ -470,15 +491,18 @@ public class EditPhoneNumberPreference extends EditTextPreference
         return mTimePeriodAllDay.isChecked();
     }
 
+// QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer
     /** The phone number including any formatting characters */
     protected String getRawPhoneNumber() {
         return mPhoneNumber;
     }
 
+// QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer
     protected String getRawPhoneNumberWithTime(){
         return mPhoneNumber + mTimePeriodString;
     }
 
+// QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer
     //set the phone number value.
     // return the current preference to allow for chaining preferences.
     public EditPhoneNumberPreference setPhoneNumber(String number) {
@@ -489,6 +513,7 @@ public class EditPhoneNumberPreference extends EditTextPreference
         return this;
     }
 
+// QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer
     public void setAllDayCheckBox(boolean checked){
         if (DBG) Log.d(TAG, "setAllDayCheckBox,"
                 +"mTimePeriodAllDayChecked" + checked);
@@ -571,6 +596,7 @@ public class EditPhoneNumberPreference extends EditTextPreference
         return this;
     }
 
+// QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer
 
     /*
      * Other code relevant to preference framework
@@ -671,19 +697,23 @@ public class EditPhoneNumberPreference extends EditTextPreference
     protected void setValueFromString(String value) {
         String[] inValues = value.split(":", 2);
         setToggled(inValues[0].equals(VALUE_ON));
+// QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer
         if (inValues.length == 3){
             setPhoneNumberWithTimePeriod(inValues[1], inValues[2]);
         } else {
             setPhoneNumber(inValues[1]);
         }
+// QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer
     }
 
     //retrieve the state of this preference in the form of an encoded string
     protected String getStringValue() {
+// QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer
         if (mPrefId == CommandsInterface.CF_REASON_UNCONDITIONAL){
             return ((isToggled() ? VALUE_ON : VALUE_OFF) + VALUE_SEPARATOR + getPhoneNumber()
                     + mTimePeriodString);
         }
+// QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer
         return ((isToggled() ? VALUE_ON : VALUE_OFF) + VALUE_SEPARATOR + getPhoneNumber());
     }
 
@@ -704,6 +734,7 @@ public class EditPhoneNumberPreference extends EditTextPreference
         return mIsUnknownStatus;
     }
 
+// QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
     }
@@ -866,4 +897,5 @@ public class EditPhoneNumberPreference extends EditTextPreference
             + ", mEndTimeMinute = " + mEndTimeMinute
             + ", mTimePeriodString = " + mTimePeriodString);
     }
+// QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer
 }

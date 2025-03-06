@@ -14,18 +14,24 @@
  * limitations under the License.
  */
 
+// QTI_BEGIN: 2024-11-06: Telephony: Fix the issues related to UT service in airplane mode am: e74f539a23 am: e74f539a23
 /**
 * Changes from Qualcomm Innovation Center, Inc. are provided under the following license:
 * Copyright (c) 2024 Qualcomm Innovation Center, Inc. All rights reserved.
 * SPDX-License-Identifier: BSD-3-Clause-Clear
 */
 
+// QTI_END: 2024-11-06: Telephony: Fix the issues related to UT service in airplane mode am: e74f539a23 am: e74f539a23
 package com.android.phone;
 
+// QTI_BEGIN: 2024-11-06: Telephony: Fix the issues related to UT service in airplane mode am: e74f539a23 am: e74f539a23
 import android.content.BroadcastReceiver;
+// QTI_END: 2024-11-06: Telephony: Fix the issues related to UT service in airplane mode am: e74f539a23 am: e74f539a23
 import android.content.Context;
+// QTI_BEGIN: 2024-11-06: Telephony: Fix the issues related to UT service in airplane mode am: e74f539a23 am: e74f539a23
 import android.content.Intent;
 import android.content.IntentFilter;
+// QTI_END: 2024-11-06: Telephony: Fix the issues related to UT service in airplane mode am: e74f539a23 am: e74f539a23
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.os.UserManager;
@@ -36,12 +42,16 @@ import android.provider.Settings;
 import android.telephony.CarrierConfigManager;
 import android.util.Log;
 import android.view.MenuItem;
+// QTI_BEGIN: 2024-11-06: Telephony: Fix the issues related to UT service in airplane mode am: e74f539a23 am: e74f539a23
 import com.android.internal.telephony.Phone;
+// QTI_END: 2024-11-06: Telephony: Fix the issues related to UT service in airplane mode am: e74f539a23 am: e74f539a23
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.flags.Flags;
 
+// QTI_BEGIN: 2024-11-06: Telephony: Fix the issues related to UT service in airplane mode am: e74f539a23 am: e74f539a23
 import java.util.ArrayList;
 
+// QTI_END: 2024-11-06: Telephony: Fix the issues related to UT service in airplane mode am: e74f539a23 am: e74f539a23
 public class GsmUmtsCallOptions extends PreferenceActivity {
     private static final String LOG_TAG = "GsmUmtsCallOptions";
     private final boolean DBG = (PhoneGlobals.DBG_LEVEL >= 2);
@@ -50,7 +60,10 @@ public class GsmUmtsCallOptions extends PreferenceActivity {
     public static final String CALL_BARRING_KEY = "call_barring_key";
     public static final String ADDITIONAL_GSM_SETTINGS_KEY = "additional_gsm_call_settings_key";
 
+// QTI_BEGIN: 2019-04-28: Telephony: FR54939: Common call setting for specific operator
     private boolean mCommon = false;
+// QTI_END: 2019-04-28: Telephony: FR54939: Common call setting for specific operator
+// QTI_BEGIN: 2024-11-06: Telephony: Fix the issues related to UT service in airplane mode am: e74f539a23 am: e74f539a23
 
     private Phone mPhone;
     private IntentFilter mIntentFilter;
@@ -72,6 +85,7 @@ public class GsmUmtsCallOptions extends PreferenceActivity {
         }
     }
 
+// QTI_END: 2024-11-06: Telephony: Fix the issues related to UT service in airplane mode am: e74f539a23 am: e74f539a23
     @Override
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
@@ -83,6 +97,7 @@ public class GsmUmtsCallOptions extends PreferenceActivity {
         addPreferencesFromResource(R.xml.gsm_umts_call_options);
 
         SubscriptionInfoHelper subInfoHelper = new SubscriptionInfoHelper(this, getIntent());
+// QTI_BEGIN: 2019-04-28: Telephony: FR54939: Common call setting for specific operator
         PersistableBundle pb = null;
         if (subInfoHelper.hasSubId()) {
             pb = PhoneGlobals.getInstance().getCarrierConfigForSubId(subInfoHelper.getSubId());
@@ -90,19 +105,27 @@ public class GsmUmtsCallOptions extends PreferenceActivity {
             pb = PhoneGlobals.getInstance().getCarrierConfig();
         }
         mCommon = pb != null && pb.getBoolean("config_common_callsettings_support_bool");
+// QTI_END: 2019-04-28: Telephony: FR54939: Common call setting for specific operator
         subInfoHelper.setActionBarTitle(
+// QTI_BEGIN: 2019-04-28: Telephony: FR54939: Common call setting for specific operator
                 getActionBar(), getResources(),
                 mCommon ? R.string.labelCommonMore_with_label : R.string.labelGsmMore_with_label);
+// QTI_END: 2019-04-28: Telephony: FR54939: Common call setting for specific operator
 
+// QTI_BEGIN: 2019-04-28: Telephony: FR54939: Common call setting for specific operator
         init(getPreferenceScreen(), subInfoHelper);
+// QTI_END: 2019-04-28: Telephony: FR54939: Common call setting for specific operator
+// QTI_BEGIN: 2024-11-06: Telephony: Fix the issues related to UT service in airplane mode am: e74f539a23 am: e74f539a23
         mPhone = subInfoHelper.getPhone();
         if (mPhone != null) {
             setPreferencesState(PhoneUtils.isSuppServiceAllowedInAirplaneMode(mPhone));
         }
+// QTI_END: 2024-11-06: Telephony: Fix the issues related to UT service in airplane mode am: e74f539a23 am: e74f539a23
         if (subInfoHelper.getPhone().getPhoneType() != PhoneConstants.PHONE_TYPE_GSM) {
             //disable the entire screen
             getPreferenceScreen().setEnabled(false);
         }
+// QTI_BEGIN: 2024-11-06: Telephony: Fix the issues related to UT service in airplane mode am: e74f539a23 am: e74f539a23
         mIntentFilter = new IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         registerReceiver(mBroadcastReceiver, mIntentFilter);
     }
@@ -113,6 +136,7 @@ public class GsmUmtsCallOptions extends PreferenceActivity {
         unregisterReceiver(mBroadcastReceiver);
         mPreferences.clear();
         mIntentFilter = null;
+// QTI_END: 2024-11-06: Telephony: Fix the issues related to UT service in airplane mode am: e74f539a23 am: e74f539a23
     }
 
     @Override
@@ -152,7 +176,9 @@ public class GsmUmtsCallOptions extends PreferenceActivity {
                             !mobileNetworkConfigsRestricted)) {
                 callForwardingPref.setIntent(
                         subInfoHelper.getIntent(CallForwardType.class));
+// QTI_BEGIN: 2024-11-06: Telephony: Fix the issues related to UT service in airplane mode am: e74f539a23 am: e74f539a23
                 mPreferences.add(callForwardingPref);
+// QTI_END: 2024-11-06: Telephony: Fix the issues related to UT service in airplane mode am: e74f539a23 am: e74f539a23
             } else {
                 prefScreen.removePreference(callForwardingPref);
             }
@@ -169,7 +195,9 @@ public class GsmUmtsCallOptions extends PreferenceActivity {
                             !mobileNetworkConfigsRestricted)) {
                 additionalGsmSettingsPref.setIntent(
                         subInfoHelper.getIntent(GsmUmtsAdditionalCallOptions.class));
+// QTI_BEGIN: 2024-11-06: Telephony: Fix the issues related to UT service in airplane mode am: e74f539a23 am: e74f539a23
                 mPreferences.add(additionalGsmSettingsPref);
+// QTI_END: 2024-11-06: Telephony: Fix the issues related to UT service in airplane mode am: e74f539a23 am: e74f539a23
             } else {
                 prefScreen.removePreference(additionalGsmSettingsPref);
             }
@@ -181,7 +209,9 @@ public class GsmUmtsCallOptions extends PreferenceActivity {
                     (!Flags.ensureAccessToCallSettingsIsRestricted() ||
                             !mobileNetworkConfigsRestricted)) {
                 callBarringPref.setIntent(subInfoHelper.getIntent(GsmUmtsCallBarringOptions.class));
+// QTI_BEGIN: 2024-11-06: Telephony: Fix the issues related to UT service in airplane mode am: e74f539a23 am: e74f539a23
                 mPreferences.add(callBarringPref);
+// QTI_END: 2024-11-06: Telephony: Fix the issues related to UT service in airplane mode am: e74f539a23 am: e74f539a23
             } else {
                 prefScreen.removePreference(callBarringPref);
             }

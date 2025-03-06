@@ -20,7 +20,9 @@ import static android.view.Window.PROGRESS_VISIBILITY_OFF;
 import static android.view.Window.PROGRESS_VISIBILITY_ON;
 
 import android.app.Activity;
+// QTI_BEGIN: 2024-05-21: Telephony: Use dialog to instead of toast when showing pin2 error.
 import android.app.AlertDialog;
+// QTI_END: 2024-05-21: Telephony: Use dialog to instead of toast when showing pin2 error.
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.AsyncQueryHandler;
@@ -37,7 +39,9 @@ import android.widget.Toast;
 
 import com.android.internal.telephony.CommandException;
 import com.android.internal.telephony.Phone;
+// QTI_BEGIN: 2024-05-21: Telephony: Use dialog to instead of toast when showing pin2 error.
 import com.android.phone.FrameworksUtils;
+// QTI_END: 2024-05-21: Telephony: Use dialog to instead of toast when showing pin2 error.
 import com.android.phone.PhoneGlobals;
 import com.android.phone.R;
 import com.android.phone.SubscriptionInfoHelper;
@@ -144,6 +148,7 @@ public abstract class BaseFdnContactScreen extends Activity
                         } else {
                             final int attemptsRemaining = msg.arg1;
                             if (attemptsRemaining > 0) {
+// QTI_BEGIN: 2024-05-21: Telephony: Use dialog to instead of toast when showing pin2 error.
                                 String s = getString(R.string.pin2_invalid)
                                     + getString(R.string.pin2_attempts, attemptsRemaining);
                                 AlertDialog dialog = FrameworksUtils.makeAlertDialogBuilder(
@@ -151,6 +156,7 @@ public abstract class BaseFdnContactScreen extends Activity
                                         .setMessage(s)
                                         .create();
                                 dialog.show();
+// QTI_END: 2024-05-21: Telephony: Use dialog to instead of toast when showing pin2 error.
                                 finish();
                             }
                         }

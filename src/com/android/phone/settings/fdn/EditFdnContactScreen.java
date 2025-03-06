@@ -78,7 +78,9 @@ public class EditFdnContactScreen extends BaseFdnContactScreen {
     /** static intent to invoke phone number picker */
     private static final Intent CONTACT_IMPORT_INTENT;
     static {
+// QTI_BEGIN: 2018-02-21: Telephony: Modify the contact picker for import contact in FDN list
         CONTACT_IMPORT_INTENT = new Intent(Intent.ACTION_PICK, CommonDataKinds.Phone.CONTENT_URI);
+// QTI_END: 2018-02-21: Telephony: Modify the contact picker for import contact in FDN list
     }
     /** flag to track saving state */
     private boolean mDataBusy;

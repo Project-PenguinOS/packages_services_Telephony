@@ -59,6 +59,8 @@
         android:persistent="false"
         android:summary="@string/auto_retry_mode_summary"/>
 
+<!-- QTI_BEGIN: 2020-02-11: Telephony: Add vibrating for outgoing call accepted support-->
+<!-- QTI_END: 2020-02-11: Telephony: Add vibrating for outgoing call accepted support-->
     <SwitchPreference
         android:key="button_vibrating_for_outgoing_call_accepted_key"
         android:title="@string/vibrating_for_outgoing_call_accepted_title"
@@ -77,6 +79,8 @@
         android:summary="@string/sum_cdma_call_settings"
         android:persistent="false" />
 
+<!-- QTI_BEGIN: 2019-04-28: Telephony: FR54939: Common call setting for specific operator-->
+<!-- QTI_END: 2019-04-28: Telephony: FR54939: Common call setting for specific operator-->
     <PreferenceScreen
         android:key="button_common_more_expand_key"
         android:title="@string/labelCommonMore"
