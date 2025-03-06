@@ -1,3 +1,4 @@
+// QTI_BEGIN: 2021-12-29: Telephony: Add exit SCBM support
 /*
  * Copyright (c) 2021, The Linux Foundation. All rights reserved.
  *
@@ -56,7 +57,11 @@ public class SmsCallbackModeService extends Service {
     private static final String LOG_TAG = "SmsCallbackModeService";
 
     private NotificationManager mNotificationManager = null;
+// QTI_END: 2021-12-29: Telephony: Add exit SCBM support
+// QTI_BEGIN: 2022-01-26: Telephony: Remove count down timer in SCBM notification
     private long mTime = 0;
+// QTI_END: 2022-01-26: Telephony: Remove count down timer in SCBM notification
+// QTI_BEGIN: 2021-12-29: Telephony: Add exit SCBM support
     private Phone mPhone = null;
 
     /**
@@ -88,7 +93,11 @@ public class SmsCallbackModeService extends Service {
         registerReceiver(mScmReceiver, filter);
 
         mNotificationManager = getSystemService(NotificationManager.class);
+// QTI_END: 2021-12-29: Telephony: Add exit SCBM support
+// QTI_BEGIN: 2022-01-26: Telephony: Remove count down timer in SCBM notification
         showNotification();
+// QTI_END: 2022-01-26: Telephony: Remove count down timer in SCBM notification
+// QTI_BEGIN: 2021-12-29: Telephony: Add exit SCBM support
     }
 
     @Override
@@ -120,7 +129,11 @@ public class SmsCallbackModeService extends Service {
     /**
      * Shows notification for Sms Callback Mode
      */
+// QTI_END: 2021-12-29: Telephony: Add exit SCBM support
+// QTI_BEGIN: 2022-01-26: Telephony: Remove count down timer in SCBM notification
     private void showNotification() {
+// QTI_END: 2022-01-26: Telephony: Remove count down timer in SCBM notification
+// QTI_BEGIN: 2021-12-29: Telephony: Add exit SCBM support
         boolean isInScm = mPhone.isInScbm();
         if (!isInScm) {
             Log.i(LOG_TAG, "Asked to show notification but not in SCM mode");
@@ -144,6 +157,8 @@ public class SmsCallbackModeService extends Service {
 
         // Format notification string
         String text = null;
+// QTI_END: 2021-12-29: Telephony: Add exit SCBM support
+// QTI_BEGIN: 2022-01-26: Telephony: Remove count down timer in SCBM notification
         // Calculate the time in ms when the notification will be finished.
         mTime = System.currentTimeMillis();
         String completeTime = SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT).format(
@@ -151,6 +166,8 @@ public class SmsCallbackModeService extends Service {
         text = getResources().getString(
                R.string.phone_in_scm_notification_complete_time,
                completeTime);
+// QTI_END: 2022-01-26: Telephony: Remove count down timer in SCBM notification
+// QTI_BEGIN: 2021-12-29: Telephony: Add exit SCBM support
         builder.setContentText(text);
         builder.setChannelId(NotificationChannelController.CHANNEL_ID_ALERT);
 
@@ -177,3 +194,4 @@ public class SmsCallbackModeService extends Service {
     }
 
 }
+// QTI_END: 2021-12-29: Telephony: Add exit SCBM support

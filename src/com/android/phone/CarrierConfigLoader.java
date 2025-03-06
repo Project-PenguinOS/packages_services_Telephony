@@ -77,8 +77,10 @@ import com.android.internal.telephony.util.ArrayUtils;
 import com.android.internal.telephony.util.TelephonyUtils;
 import com.android.internal.util.IndentingPrintWriter;
 
+// QTI_BEGIN: 2022-03-04: Telephony: Update CarrierConfigs on essential records loaded
 import com.qti.extphone.ExtTelephonyManager;
 
+// QTI_END: 2022-03-04: Telephony: Update CarrierConfigs on essential records loaded
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -149,8 +151,10 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
     // CarrierService change monitoring
     @NonNull private CarrierServiceChangeCallback[] mCarrierServiceChangeCallbacks;
 
+// QTI_BEGIN: 2022-03-04: Telephony: Update CarrierConfigs on essential records loaded
     // Whether the essential records have been loaded for each phone id.
     private boolean[] mIsEssentialSimRecordsLoaded;
+// QTI_END: 2022-03-04: Telephony: Update CarrierConfigs on essential records loaded
     // Broadcast receiver for system events
     @NonNull
     private final BroadcastReceiver mSystemBroadcastReceiver = new ConfigLoaderBroadcastReceiver();
@@ -849,17 +853,24 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
 
     private void broadcastConfigChangedIntent(int phoneId) {
         if (TelephonyManager.getSimStateForSlotIndex(phoneId)
+// QTI_BEGIN: 2022-03-04: Telephony: Update CarrierConfigs on essential records loaded
                     != TelephonyManager.SIM_STATE_LOADED
                     && mIsEssentialSimRecordsLoaded[phoneId]) {
             // We are in a state where only the essential records have loaded.
             // Let the Phone know about this.
             notifyConfigChangedToPhone(phoneId);
+// QTI_END: 2022-03-04: Telephony: Update CarrierConfigs on essential records loaded
+// QTI_BEGIN: 2022-12-16: Telephony: IMS: Broadcast essential records loaded
             broadcastEssentialRecordsLoadedIntent(phoneId);
+// QTI_END: 2022-12-16: Telephony: IMS: Broadcast essential records loaded
+// QTI_BEGIN: 2022-03-04: Telephony: Update CarrierConfigs on essential records loaded
         } else {
             broadcastConfigChangedIntent(phoneId, true);
         }
+// QTI_END: 2022-03-04: Telephony: Update CarrierConfigs on essential records loaded
     }
 
+// QTI_BEGIN: 2022-12-16: Telephony: IMS: Broadcast essential records loaded
     private void broadcastEssentialRecordsLoadedIntent(int phoneId) {
         Intent intent = new Intent(CarrierConfigManager.ACTION_ESSENTIAL_RECORDS_LOADED);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT |
@@ -884,6 +895,7 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
         }
     }
 
+// QTI_END: 2022-12-16: Telephony: IMS: Broadcast essential records loaded
     private void broadcastConfigChangedIntent(int phoneId, boolean addSubIdExtra) {
         int subId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
         int carrierId = TelephonyManager.UNKNOWN_CARRIER_ID;
@@ -892,8 +904,10 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
         Intent intent = new Intent(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT |
                 Intent.FLAG_RECEIVER_FOREGROUND);
+// QTI_BEGIN: 2019-01-30: Telephony: Include sub id extra even when sim is locked.
         // Include subId extra only if SIM records are loaded
         if (addSubIdExtra) {
+// QTI_END: 2019-01-30: Telephony: Include sub id extra even when sim is locked.
             SubscriptionManager.putPhoneIdAndSubIdExtra(intent, phoneId);
             intent.putExtra(TelephonyManager.EXTRA_SPECIFIC_CARRIER_ID,
                     getSpecificCarrierIdForPhoneId(phoneId));
@@ -937,6 +951,7 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
         mFromSystemUnlocked[phoneId] = false;
     }
 
+// QTI_BEGIN: 2022-03-04: Telephony: Update CarrierConfigs on essential records loaded
     private void notifyConfigChangedToPhone(int phoneId) {
         logd("notifyConfigChangedToPhone for phone " + phoneId);
         Phone phone = PhoneFactory.getPhone(phoneId);
@@ -945,6 +960,7 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
         }
     }
 
+// QTI_END: 2022-03-04: Telephony: Update CarrierConfigs on essential records loaded
     private int getSimApplicationStateForPhone(int phoneId) {
         int subId = SubscriptionManager.getSubscriptionId(phoneId);
         if (!SubscriptionManager.isValidSubscriptionId(subId)) {
@@ -998,7 +1014,9 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
         String imsi = "";
         String gid1 = "";
         String gid2 = "";
+// QTI_BEGIN: 2018-05-21: Telephony: Pass ICCID to Carrier Config Service
         String iccid = "";
+// QTI_END: 2018-05-21: Telephony: Pass ICCID to Carrier Config Service
         String spn = TelephonyManager.from(mContext).getSimOperatorNameForPhone(phoneId);
         String simOperator = TelephonyManager.from(mContext).getSimOperatorNumericForPhone(phoneId);
         int carrierId = TelephonyManager.UNKNOWN_CARRIER_ID;
@@ -1013,7 +1031,9 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
             imsi = phone.getSubscriberId();
             gid1 = phone.getGroupIdLevel1();
             gid2 = phone.getGroupIdLevel2();
+// QTI_BEGIN: 2018-05-21: Telephony: Pass ICCID to Carrier Config Service
             iccid = phone.getIccSerialNumber();
+// QTI_END: 2018-05-21: Telephony: Pass ICCID to Carrier Config Service
             carrierId = phone.getCarrierId();
             specificCarrierId = phone.getSpecificCarrierId();
         }
@@ -1107,9 +1127,11 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
             fileName = getFilenameForNoSimConfig(packageName);
         } else {
             if (TelephonyManager.getSimStateForSlotIndex(phoneId)
+// QTI_BEGIN: 2022-03-04: Telephony: Update CarrierConfigs on essential records loaded
                     != TelephonyManager.SIM_STATE_LOADED
                     && !mIsEssentialSimRecordsLoaded[phoneId]) {
                 loge("Skip save config because SIM records are not loaded for phone " + phoneId);
+// QTI_END: 2022-03-04: Telephony: Update CarrierConfigs on essential records loaded
                 return;
             }
 
@@ -1199,9 +1221,11 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
             fileName = getFilenameForNoSimConfig(packageName);
         } else {
             if (TelephonyManager.getSimStateForSlotIndex(phoneId)
+// QTI_BEGIN: 2022-03-04: Telephony: Update CarrierConfigs on essential records loaded
                     != TelephonyManager.SIM_STATE_LOADED
                     && !mIsEssentialSimRecordsLoaded[phoneId]) {
                 loge("Skip restore config because SIM records are not loaded for phone " + phoneId);
+// QTI_END: 2022-03-04: Telephony: Update CarrierConfigs on essential records loaded
                 return null;
             }
 
@@ -1406,7 +1430,9 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
         mFromSystemUnlocked = Arrays.copyOf(mFromSystemUnlocked, mNumPhones);
         mNeedNotifyCallback = Arrays.copyOf(mNeedNotifyCallback, mNumPhones);
         mCarrierServiceChangeCallbacks = Arrays.copyOf(mCarrierServiceChangeCallbacks, mNumPhones);
+// QTI_BEGIN: 2022-10-07: Telephony: Change EssenialRecords array size w.r.t to MSIM config.
         mIsEssentialSimRecordsLoaded = Arrays.copyOf(mIsEssentialSimRecordsLoaded, mNumPhones);
+// QTI_END: 2022-10-07: Telephony: Change EssenialRecords array size w.r.t to MSIM config.
 
         // Load the config for all the phones and re-register callback AFTER padding the arrays.
         for (int phoneId = 0; phoneId < mNumPhones; phoneId++) {
@@ -1627,21 +1653,31 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
             case IccCardConstants.INTENT_VALUE_ICC_CARD_RESTRICTED:
             case IccCardConstants.INTENT_VALUE_ICC_UNKNOWN:
             case IccCardConstants.INTENT_VALUE_ICC_NOT_READY:
+// QTI_BEGIN: 2022-03-04: Telephony: Update CarrierConfigs on essential records loaded
                 mIsEssentialSimRecordsLoaded[phoneId] = false;
+// QTI_END: 2022-03-04: Telephony: Update CarrierConfigs on essential records loaded
                 mHandler.sendMessage(mHandler.obtainMessage(EVENT_CLEAR_CONFIG, phoneId, -1));
                 break;
             case IccCardConstants.INTENT_VALUE_ICC_LOADED:
+// QTI_BEGIN: 2018-11-01: Telephony: Revert "Fix carrier config issue since null mccmnc for pin locked sub."
             case IccCardConstants.INTENT_VALUE_ICC_LOCKED:
+// QTI_END: 2018-11-01: Telephony: Revert "Fix carrier config issue since null mccmnc for pin locked sub."
                 mNeedNotifyCallback[phoneId] = true;
+// QTI_BEGIN: 2022-03-04: Telephony: Update CarrierConfigs on essential records loaded
                 mIsEssentialSimRecordsLoaded[phoneId] = false;
+// QTI_END: 2022-03-04: Telephony: Update CarrierConfigs on essential records loaded
+// QTI_BEGIN: 2024-06-06: Telephony: Fix race issue as inserting a SIM during bootup
                 if (mHasSentConfigChange[phoneId] && mFromSystemUnlocked[phoneId]) {
                     logd("Reset mFromSystemUnlocked on phone " + phoneId);
                     mFromSystemUnlocked[phoneId] = false;
                 }
+// QTI_END: 2024-06-06: Telephony: Fix race issue as inserting a SIM during bootup
+// QTI_BEGIN: 2022-03-04: Telephony: Update CarrierConfigs on essential records loaded
                 updateConfigForPhoneId(phoneId);
                 break;
             case ExtTelephonyManager.SIM_STATE_ESSENTIAL_RECORDS_LOADED:
                 mIsEssentialSimRecordsLoaded[phoneId] = true;
+// QTI_END: 2022-03-04: Telephony: Update CarrierConfigs on essential records loaded
                 updateConfigForPhoneId(phoneId);
                 break;
         }

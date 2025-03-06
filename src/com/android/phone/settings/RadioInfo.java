@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
+// QTI_BEGIN: 2024-06-18: Telephony: TeleService: Adapt edge-to-edge enforcement
 /* Changes from Qualcomm Innovation Center, Inc. are provided under the following license:
  * Copyright (c) 2023-2024 Qualcomm Innovation Center, Inc. All rights reserved.
+// QTI_END: 2024-06-18: Telephony: TeleService: Adapt edge-to-edge enforcement
+// QTI_BEGIN: 2023-07-12: Telephony: Gray out the "Enable DSDS" button upon switch
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted (subject to the limitations in the
@@ -48,6 +51,7 @@
  * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+// QTI_END: 2023-07-12: Telephony: Gray out the "Enable DSDS" button upon switch
 package com.android.phone.settings;
 
 import static android.net.ConnectivityManager.NetworkCallback;
@@ -64,18 +68,24 @@ import static android.telephony.ims.stub.ImsRegistrationImplBase.REGISTRATION_TE
 import static android.telephony.ims.stub.ImsRegistrationImplBase.REGISTRATION_TECH_LTE;
 import static android.telephony.ims.stub.ImsRegistrationImplBase.REGISTRATION_TECH_NR;
 
+// QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
 import static com.qti.extphone.ExtTelephonyManager.FEATURE_TDSCDMA_SUPPORT;
 
+// QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 import android.annotation.NonNull;
+// QTI_BEGIN: 2023-07-12: Telephony: Gray out the "Enable DSDS" button upon switch
 import android.content.BroadcastReceiver;
+// QTI_END: 2023-07-12: Telephony: Gray out the "Enable DSDS" button upon switch
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+// QTI_BEGIN: 2023-07-12: Telephony: Gray out the "Enable DSDS" button upon switch
 import android.content.IntentFilter;
+// QTI_END: 2023-07-12: Telephony: Gray out the "Enable DSDS" button upon switch
 import android.content.pm.ComponentInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -92,7 +102,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerExecutor;
+// QTI_BEGIN: 2023-07-12: Telephony: Gray out the "Enable DSDS" button upon switch
 import android.os.HandlerThread;
+// QTI_END: 2023-07-12: Telephony: Gray out the "Enable DSDS" button upon switch
 import android.os.Message;
 import android.os.PersistableBundle;
 import android.os.SystemProperties;
@@ -165,7 +177,9 @@ import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.euicc.EuiccConnector;
 import com.android.internal.telephony.satellite.SatelliteServiceUtils;
 import com.android.phone.R;
+// QTI_BEGIN: 2024-06-18: Telephony: TeleService: Adapt edge-to-edge enforcement
 import com.android.phone.utils.Utils;
+// QTI_END: 2024-06-18: Telephony: TeleService: Adapt edge-to-edge enforcement
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -173,7 +187,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+// QTI_BEGIN: 2023-07-12: Telephony: Gray out the "Enable DSDS" button upon switch
 import java.util.HashMap;
+// QTI_END: 2023-07-12: Telephony: Gray out the "Enable DSDS" button upon switch
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -186,9 +202,11 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
+// QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
+// QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
 
 import com.qti.extphone.ExtTelephonyManager;
 import com.qti.extphone.QtiImeiInfo;
@@ -242,8 +260,10 @@ public class RadioInfo extends AppCompatActivity {
             "NR/LTE/TDSCDMA/CDMA/EvDo/GSM/WCDMA",
             "Unknown"
     };
+// QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
     private String[] mUpdatedPrefNwLabels;
     private final HashMap<String, Integer> mPrefNwLabelToIntMap = new HashMap<>();
+// QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
 
     private static final Integer[] SIGNAL_STRENGTH_LEVEL = new Integer[] {
             -1 /*clear mock*/,
@@ -315,10 +335,12 @@ public class RadioInfo extends AppCompatActivity {
         Log.d(TAG, s);
     }
 
+// QTI_BEGIN: 2023-07-12: Telephony: Gray out the "Enable DSDS" button upon switch
     private static void loge(String s) {
         Log.e(TAG, s);
     }
 
+// QTI_END: 2023-07-12: Telephony: Gray out the "Enable DSDS" button upon switch
     private static final int EVENT_QUERY_SMSC_DONE = 1005;
     private static final int EVENT_UPDATE_SMSC_DONE = 1006;
     private static final int EVENT_UPDATE_NR_STATS = 1008;
@@ -460,6 +482,7 @@ public class RadioInfo extends AppCompatActivity {
         }
     };
 
+// QTI_BEGIN: 2023-07-12: Telephony: Gray out the "Enable DSDS" button upon switch
     private static final String ACTION_RADIO_POWER_STATE_CHANGED =
             "org.codeaurora.intent.action.RADIO_POWER_STATE";
     private static final String RADIO_POWER_STATE = "state";
@@ -485,6 +508,7 @@ public class RadioInfo extends AppCompatActivity {
         }
     };
 
+// QTI_END: 2023-07-12: Telephony: Gray out the "Enable DSDS" button upon switch
     private static final int DEFAULT_TIMEOUT_MS = 1000;
 
     // not final because we need to recreate this object to register on a new subId (b/117555407)
@@ -591,13 +615,16 @@ public class RadioInfo extends AppCompatActivity {
     private void updatePreferredNetworkType(int type) {
         if (type >= PREFERRED_NETWORK_LABELS.length || type < 0) {
             log("Network type: unknown type value=" + type);
+// QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
             mPreferredNetworkTypeResult = mUpdatedPrefNwLabels.length - 1; //set to Unknown
         } else {
             mPreferredNetworkTypeResult = getPrefNwTypeIndexFromUpdatedArray(type);
+// QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
         }
         mPreferredNetworkType.setSelection(mPreferredNetworkTypeResult, true);
     }
 
+// QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
     private int getPrefNwTypeIndexFromUpdatedArray(int type) {
         return IntStream.range(0, mUpdatedPrefNwLabels.length)
                 .filter(i -> mUpdatedPrefNwLabels[i].equals(PREFERRED_NETWORK_LABELS[type]))
@@ -605,6 +632,7 @@ public class RadioInfo extends AppCompatActivity {
                 .orElse(-1);
     }
 
+// QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
     private void updatePhoneIndex() {
         // unregister listeners on the old subId
         unregisterPhoneStateListener();
@@ -663,7 +691,9 @@ public class RadioInfo extends AppCompatActivity {
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
+// QTI_BEGIN: 2024-06-18: Telephony: TeleService: Adapt edge-to-edge enforcement
         Utils.setupEdgeToEdge(this);
+// QTI_END: 2024-06-18: Telephony: TeleService: Adapt edge-to-edge enforcement
         mSystemUser = android.os.Process.myUserHandle().isSystem();
         log("onCreate: mSystemUser=" + mSystemUser);
         UserManager userManager = getSystemService(UserManager.class);
@@ -701,11 +731,13 @@ public class RadioInfo extends AppCompatActivity {
             mPhoneId = DEFAULT_PHONE_ID;
         }
 
+// QTI_BEGIN: 2023-07-12: Telephony: Gray out the "Enable DSDS" button upon switch
         mBroadcastReceiverThread.start();
         Handler scheduler = new Handler(mBroadcastReceiverThread.getLooper());
         IntentFilter filter = new IntentFilter(ACTION_RADIO_POWER_STATE_CHANGED);
         mPhone.getContext().registerReceiver(mBroadcastReceiver, filter, null, scheduler);
 
+// QTI_END: 2023-07-12: Telephony: Gray out the "Enable DSDS" button upon switch
         mImsManager = new ImsManager(this);
         try {
             mProvisioningManager = ProvisioningManager.createForSubscriptionId(mSubId);
@@ -751,6 +783,7 @@ public class RadioInfo extends AppCompatActivity {
         mNetworkSlicingConfig = (TextView) findViewById(R.id.network_slicing_config);
         mEuiccInfo = (TextView) findViewById(R.id.euicc_info);
 
+// QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
         mTelephonyManager = getSystemService(TelephonyManager.class)
                 .createForSubscriptionId(mSubId);
         mEuiccManager = getSystemService(EuiccManager.class);
@@ -759,16 +792,21 @@ public class RadioInfo extends AppCompatActivity {
 
         sPhoneIndexLabels = getPhoneIndexLabels(mTelephonyManager);
 
+// QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
         // hide 5G stats on devices that don't support 5G
         if ((mTelephonyManager.getSupportedRadioAccessFamily()
                 & TelephonyManager.NETWORK_TYPE_BITMASK_NR) == 0) {
             setNrStatsVisibility(View.GONE);
         }
 
+// QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
         mUpdatedPrefNwLabels = getUpdatedPrefNwLabels();
+// QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
         mPreferredNetworkType = (Spinner) findViewById(R.id.preferredNetworkType);
         ArrayAdapter<String> mPreferredNetworkTypeAdapter = new ArrayAdapter<String>(this,
+// QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
                 android.R.layout.simple_spinner_item, mUpdatedPrefNwLabels);
+// QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
         mPreferredNetworkTypeAdapter
                 .setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mPreferredNetworkType.setAdapter(mPreferredNetworkTypeAdapter);
@@ -837,7 +875,9 @@ public class RadioInfo extends AppCompatActivity {
                     showDsdsChangeDialog();
                 } else {
                     performDsdsSwitch();
+// QTI_BEGIN: 2023-07-12: Telephony: Gray out the "Enable DSDS" button upon switch
                     mDsdsSwitch.setEnabled(false);
+// QTI_END: 2023-07-12: Telephony: Gray out the "Enable DSDS" button upon switch
                 }
             });
             mDsdsSwitch.setChecked(isDsdsEnabled());
@@ -944,7 +984,9 @@ public class RadioInfo extends AppCompatActivity {
         }
 
         mCellInfoRefreshRateIndex = 0; //disabled
+// QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
         mPreferredNetworkTypeResult = mUpdatedPrefNwLabels.length - 1; //Unknown
+// QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
 
         new Thread(() -> {
             int networkType = (int) mTelephonyManager.getPreferredNetworkTypeBitmask();
@@ -952,8 +994,11 @@ public class RadioInfo extends AppCompatActivity {
                     RadioAccessFamily.getNetworkTypeFromRaf(networkType)));
         }).start();
         restoreFromBundle(icicle);
+// QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
     }
+// QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
 
+// QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
     private String[] getUpdatedPrefNwLabels() {
         final ArrayList<String> updatedPrefdNwLabels = new ArrayList<>();
         final boolean tdscdmaSupported = isTdscdmaSupported();
@@ -978,10 +1023,13 @@ public class RadioInfo extends AppCompatActivity {
     private boolean isTdscdmaSupported() {
         return mExtTelephonyManager.isFeatureSupported(FEATURE_TDSCDMA_SUPPORT);
     }
+// QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
 
+// QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
     private boolean isCdmaSupported() {
         final PackageManager pm = getPackageManager();
         return pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY_CDMA);
+// QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
     }
 
     boolean shouldHideButton(String action) {
@@ -1023,7 +1071,9 @@ public class RadioInfo extends AppCompatActivity {
 
         @Override
         public void onConnected() {
+// QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
           Log.d(TAG, "ExtTelephony service connected");
+// QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
           isExtServiceConnected = true;
           //get imei
           updateImei();
@@ -1031,7 +1081,9 @@ public class RadioInfo extends AppCompatActivity {
 
         @Override
         public void onDisconnected() {
+// QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
             Log.d(TAG, "ExtTelephony service disconnected...");
+// QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
             isExtServiceConnected = false;
         }
     };
@@ -1169,7 +1221,9 @@ public class RadioInfo extends AppCompatActivity {
         mHttpClientTest.setText(mHttpClientTestResult);
 
         mPreferredNetworkTypeResult = b.getInt("mPreferredNetworkTypeResult",
+// QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
                 mUpdatedPrefNwLabels.length - 1);
+// QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
 
         mPhoneId = b.getInt("mSelectedPhoneIndex", 0);
         mSubId = SubscriptionManager.getSubscriptionId(mPhoneId);
@@ -1243,8 +1297,10 @@ public class RadioInfo extends AppCompatActivity {
         if (mExtTelephonyManager != null && mServiceCallback != null) {
             mExtTelephonyManager.disconnectService(mServiceCallback);
         }
+// QTI_BEGIN: 2023-07-12: Telephony: Gray out the "Enable DSDS" button upon switch
         mPhone.getContext().unregisterReceiver(mBroadcastReceiver);
         mBroadcastReceiverThread.quitSafely();
+// QTI_END: 2023-07-12: Telephony: Gray out the "Enable DSDS" button upon switch
     }
 
     private void clearOverride() {
@@ -2811,9 +2867,11 @@ public class RadioInfo extends AppCompatActivity {
 
         public void onItemSelected(AdapterView parent, View v, int pos, long id) {
             if (mPreferredNetworkTypeResult != pos && pos >= 0
+// QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
                     && pos <= mUpdatedPrefNwLabels.length - 2) {
                 final String prefNwLabel = mUpdatedPrefNwLabels[pos];
                 mPreferredNetworkTypeResult = mPrefNwLabelToIntMap.get(prefNwLabel);
+// QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
                 new Thread(() -> {
                     mTelephonyManager.setAllowedNetworkTypesForReason(
                             TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_USER,
@@ -3133,6 +3191,7 @@ public class RadioInfo extends AppCompatActivity {
         return mCarrierConfigManager;
     }
 
+// QTI_BEGIN: 2023-07-12: Telephony: Gray out the "Enable DSDS" button upon switch
     private void handleRadioPowerStateChanged(int slotId, int radioState) {
         mRadioStatusMap.put(slotId, radioState != TelephonyManager.RADIO_POWER_UNAVAILABLE);
         int numRadiosAvailable = 0;
@@ -3151,4 +3210,5 @@ public class RadioInfo extends AppCompatActivity {
             log("handleRadioPowerStateChanged: mDsdsSwitch null");
         }
     }
+// QTI_END: 2023-07-12: Telephony: Gray out the "Enable DSDS" button upon switch
 }

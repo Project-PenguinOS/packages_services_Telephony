@@ -34,7 +34,9 @@ import java.util.List;
 public class TelephonyConference extends TelephonyConferenceBase implements Holdable {
 
     private boolean mIsHoldable;
+// QTI_BEGIN: 2020-07-29: Telephony: IMS: Add logic for Pseudo DSDA support
     private boolean mIsDisconnecting;
+// QTI_END: 2020-07-29: Telephony: IMS: Add logic for Pseudo DSDA support
 
     public TelephonyConference(PhoneAccountHandle phoneAccount) {
         super(phoneAccount);
@@ -68,14 +70,18 @@ public class TelephonyConference extends TelephonyConferenceBase implements Hold
     private boolean disconnectCall(Connection connection) {
         Call call = getMultipartyCallForConnection(connection, "onDisconnect");
         if (call != null) {
+// QTI_BEGIN: 2020-07-29: Telephony: IMS: Add logic for Pseudo DSDA support
             if (mIsDisconnecting) {
                 Log.i(this, "disconnectCall already called once");
                 return false;
             }
+// QTI_END: 2020-07-29: Telephony: IMS: Add logic for Pseudo DSDA support
             Log.d(this, "Found multiparty call to hangup for conference.");
             try {
                 call.hangup();
+// QTI_BEGIN: 2020-07-29: Telephony: IMS: Add logic for Pseudo DSDA support
                 mIsDisconnecting = true;
+// QTI_END: 2020-07-29: Telephony: IMS: Add logic for Pseudo DSDA support
                 return true;
             } catch (CallStateException e) {
                 Log.e(this, e, "Exception thrown trying to hangup conference");

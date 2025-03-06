@@ -140,8 +140,10 @@ public class VvmSimStateTracker extends BroadcastReceiver {
                 int subId = intent.getIntExtra(PhoneConstants.SUBSCRIPTION_KEY,
                         SubscriptionManager.INVALID_SUBSCRIPTION_ID);
 
+// QTI_BEGIN: 2018-03-12: Telephony: Fix VisualVoicemailService SIM remove CTS Verifier
                 SubscriptionManager subscriptionManager = SubscriptionManager.from(context);
                 if (!subscriptionManager.isActiveSubId(subId)) {
+// QTI_END: 2018-03-12: Telephony: Fix VisualVoicemailService SIM remove CTS Verifier
                     VvmLog.i(TAG, "onReceive: Received carrier config for invalid sub id.");
                     checkRemovedSim(context);
                     return;
@@ -248,10 +250,12 @@ public class VvmSimStateTracker extends BroadcastReceiver {
     }
 
     private void listenToAccount(Context context, PhoneAccountHandle phoneAccountHandle) {
+// QTI_BEGIN: 2021-03-24: Telephony: Fix VVM registers phone state listener repeatedly
         if (sListeners.get(phoneAccountHandle) != null) {
             VvmLog.i(TAG, "Listener is registered for " + phoneAccountHandle);
             return;
         }
+// QTI_END: 2021-03-24: Telephony: Fix VVM registers phone state listener repeatedly
         ServiceStateListener listener = new ServiceStateListener(context, phoneAccountHandle);
         listener.listen();
         VvmLog.i(TAG, "listenToAccount: " + phoneAccountHandle);

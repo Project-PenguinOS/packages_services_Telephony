@@ -54,6 +54,7 @@ public class ImsUtil {
      * @return {@code true} if WFC is supported by the platform and has been enabled by the user.
      */
     public static boolean isWfcEnabled(Context context) {
+// QTI_BEGIN: 2018-03-14: Telephony: IMS: No option to merge calls in VoWIFI
         return isWfcEnabled(context, SubscriptionManager.getDefaultVoicePhoneId());
     }
 
@@ -62,6 +63,7 @@ public class ImsUtil {
      */
     public static boolean isWfcEnabled(Context context, int phoneId) {
         final ImsManager imsManager = ImsManager.getInstance(context, phoneId);
+// QTI_END: 2018-03-14: Telephony: IMS: No option to merge calls in VoWIFI
         boolean isEnabledByPlatform = imsManager.isWfcEnabledByPlatform();
         boolean isEnabledByUser = imsManager.isWfcEnabledByUser();
         if (DBG) Log.d(LOG_TAG, "isWfcEnabled :: isEnabledByPlatform=" + isEnabledByPlatform
@@ -76,6 +78,7 @@ public class ImsUtil {
      * enabled, this will return {@code false}.
      */
     public static boolean isWfcModeWifiOnly(Context context) {
+// QTI_BEGIN: 2018-03-14: Telephony: IMS: No option to merge calls in VoWIFI
         return isWfcModeWifiOnly(context, SubscriptionManager.getDefaultVoicePhoneId());
     }
 
@@ -87,9 +90,12 @@ public class ImsUtil {
         final ImsManager imsManager = ImsManager.getInstance(context, phoneId);
         boolean isWifiOnlyMode =
                 imsManager.getWfcMode() == ImsConfig.WfcModeFeatureValueConstants.WIFI_ONLY;
+// QTI_END: 2018-03-14: Telephony: IMS: No option to merge calls in VoWIFI
         if (DBG) Log.d(LOG_TAG, "isWfcModeWifiOnly :: isWifiOnlyMode" + isWifiOnlyMode
                 + " phoneId=" + phoneId);
+// QTI_BEGIN: 2018-03-14: Telephony: IMS: No option to merge calls in VoWIFI
         return isWfcEnabled(context, phoneId) && isWifiOnlyMode;
+// QTI_END: 2018-03-14: Telephony: IMS: No option to merge calls in VoWIFI
     }
 
     /**
@@ -101,6 +107,7 @@ public class ImsUtil {
      * @return {@code true} if use of WFC should be promoted, {@code false} otherwise.
      */
     public static boolean shouldPromoteWfc(Context context) {
+// QTI_BEGIN: 2018-03-14: Telephony: IMS: No option to merge calls in VoWIFI
         return shouldPromoteWfc(context, SubscriptionManager.getDefaultVoicePhoneId());
     }
 
@@ -113,6 +120,7 @@ public class ImsUtil {
      * @return {@code true} if use of WFC should be promoted, {@code false} otherwise.
      */
     public static boolean shouldPromoteWfc(Context context, int phoneId) {
+// QTI_END: 2018-03-14: Telephony: IMS: No option to merge calls in VoWIFI
         CarrierConfigManager cfgManager = (CarrierConfigManager) context
                 .getSystemService(Context.CARRIER_CONFIG_SERVICE);
 
@@ -121,7 +129,9 @@ public class ImsUtil {
             return false;
         }
 
+// QTI_BEGIN: 2018-03-14: Telephony: IMS: No option to merge calls in VoWIFI
         if (!imsManager.isWfcProvisionedOnDevice()) {
+// QTI_END: 2018-03-14: Telephony: IMS: No option to merge calls in VoWIFI
             return false;
         }
 
@@ -142,14 +152,18 @@ public class ImsUtil {
         if (cm != null) {
             NetworkInfo ni = cm.getActiveNetworkInfo();
             if (ni != null && ni.isConnected()) {
+// QTI_BEGIN: 2018-03-14: Telephony: IMS: No option to merge calls in VoWIFI
                 return ni.getType() == ConnectivityManager.TYPE_WIFI && !isWfcEnabled(context,
                         phoneId);
+// QTI_END: 2018-03-14: Telephony: IMS: No option to merge calls in VoWIFI
             }
         }
         return false;
     }
 
+// QTI_BEGIN: 2018-03-14: Telephony: IMS: No option to merge calls in VoWIFI
     private static int getSubId(int phoneId) {
+// QTI_END: 2018-03-14: Telephony: IMS: No option to merge calls in VoWIFI
         return SubscriptionManager.getSubscriptionId(phoneId);
     }
 

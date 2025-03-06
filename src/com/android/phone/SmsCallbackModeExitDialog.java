@@ -1,3 +1,4 @@
+// QTI_BEGIN: 2021-12-29: Telephony: Add exit SCBM support
 /*
  * Copyright (c) 2021, The Linux Foundation. All rights reserved.
  *
@@ -163,6 +164,8 @@ public class SmsCallbackModeExitDialog extends Activity implements OnCancelListe
             Log.w(TAG, "Tried to show dialog, but activity was already finished");
             return;
         }
+// QTI_END: 2021-12-29: Telephony: Add exit SCBM support
+// QTI_BEGIN: 2022-01-26: Telephony: Remove count down timer in SCBM notification
         if (getIntent().getAction().equals(
                 SmsCallbackModeService.ACTION_SHOW_NOTICE_SCM_BLOCK_OTHERS)) {
             mDialogType = EXIT_SCM_BLOCK_OTHERS;
@@ -170,6 +173,8 @@ public class SmsCallbackModeExitDialog extends Activity implements OnCancelListe
         } else if (getIntent().getAction().equals(ACTION_SHOW_SCM_EXIT_DIALOG)) {
             mDialogType = EXIT_SCM_DIALOG;
             showDialog(EXIT_SCM_DIALOG);
+// QTI_END: 2022-01-26: Telephony: Remove count down timer in SCBM notification
+// QTI_BEGIN: 2021-12-29: Telephony: Add exit SCBM support
         }
     }
 
@@ -181,7 +186,11 @@ public class SmsCallbackModeExitDialog extends Activity implements OnCancelListe
         switch (id) {
             case EXIT_SCM_BLOCK_OTHERS:
             case EXIT_SCM_DIALOG:
+// QTI_END: 2021-12-29: Telephony: Add exit SCBM support
+// QTI_BEGIN: 2022-01-26: Telephony: Remove count down timer in SCBM notification
                 CharSequence text = getDialogText();
+// QTI_END: 2022-01-26: Telephony: Remove count down timer in SCBM notification
+// QTI_BEGIN: 2021-12-29: Telephony: Add exit SCBM support
                 mAlertDialog = new AlertDialog.Builder(SmsCallbackModeExitDialog.this,
                         android.R.style.Theme_DeviceDefault_Dialog_Alert)
                         .setIcon(R.drawable.ic_emergency_callback_mode)
@@ -227,14 +236,26 @@ public class SmsCallbackModeExitDialog extends Activity implements OnCancelListe
     /**
      * Returns dialog box text with updated timeout value
      */
+// QTI_END: 2021-12-29: Telephony: Add exit SCBM support
+// QTI_BEGIN: 2022-01-26: Telephony: Remove count down timer in SCBM notification
     private CharSequence getDialogText() {
+// QTI_END: 2022-01-26: Telephony: Remove count down timer in SCBM notification
+// QTI_BEGIN: 2021-12-29: Telephony: Add exit SCBM support
         switch (mDialogType) {
             case EXIT_SCM_BLOCK_OTHERS:
+// QTI_END: 2021-12-29: Telephony: Add exit SCBM support
+// QTI_BEGIN: 2022-01-26: Telephony: Remove count down timer in SCBM notification
                 return getResources().getString(
                         R.string.alert_dialog_not_avaialble_in_scm);
+// QTI_END: 2022-01-26: Telephony: Remove count down timer in SCBM notification
+// QTI_BEGIN: 2021-12-29: Telephony: Add exit SCBM support
             case EXIT_SCM_DIALOG:
+// QTI_END: 2021-12-29: Telephony: Add exit SCBM support
+// QTI_BEGIN: 2022-01-26: Telephony: Remove count down timer in SCBM notification
                 return getResources().getString(
                         R.string.alert_dialog_exit_scm);
+// QTI_END: 2022-01-26: Telephony: Remove count down timer in SCBM notification
+// QTI_BEGIN: 2021-12-29: Telephony: Add exit SCBM support
         }
         return null;
     }
@@ -271,3 +292,4 @@ public class SmsCallbackModeExitDialog extends Activity implements OnCancelListe
     };
 
 }
+// QTI_END: 2021-12-29: Telephony: Add exit SCBM support

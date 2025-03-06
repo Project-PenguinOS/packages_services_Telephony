@@ -259,6 +259,8 @@
         <item name="android:homeAsUpIndicator">@drawable/ic_back_arrow</item>
         <item name="emergencyButtonBackgroundColor">#10ffffff</item>
         <item name="dialpadTheme">@style/Dialpad_DarkTransparent.Emergency</item>
+<!-- QTI_BEGIN: 2024-05-14: Telephony: Fix activity content is covered by system UI issue-->
+<!-- QTI_END: 2024-05-14: Telephony: Fix activity content is covered by system UI issue-->
         <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
     </style>
 
@@ -325,10 +327,20 @@
         <item name="android:listDivider">@null</item>
     </style>
 
+<!-- QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
+<!-- QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
     <style name="cfut_value">
+<!-- QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
+<!-- QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
         <item name="android:layout_width">80dip</item>
+<!-- QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
+<!-- QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
         <item name="android:layout_height">wrap_content</item>
+<!-- QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
+<!-- QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+<!-- QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
+<!-- QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
         <item name="android:singleLine">true</item>
     </style>
 

@@ -8,15 +8,19 @@ import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Icon;
 import android.os.Binder;
 import android.os.Bundle;
+// QTI_BEGIN: 2018-03-13: Telephony: XDivert changes for MSIM
 import android.os.RemoteException;
 import android.os.ServiceManager;
+// QTI_END: 2018-03-13: Telephony: XDivert changes for MSIM
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.SwitchPreference;
+// QTI_BEGIN: 2020-02-11: Telephony: Add vibrating for outgoing call accepted support
 import android.provider.Settings;
+// QTI_END: 2020-02-11: Telephony: Add vibrating for outgoing call accepted support
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
 import android.telecom.TelecomManager;
@@ -33,7 +37,9 @@ import com.android.phone.PhoneUtils;
 import com.android.phone.R;
 import com.android.phone.SubscriptionInfoHelper;
 
+// QTI_BEGIN: 2021-02-10: Telephony: Move IExtTelephony to IExtPhone
 import android.content.pm.PackageManager.NameNotFoundException;
+// QTI_END: 2021-02-10: Telephony: Move IExtTelephony to IExtPhone
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -51,8 +57,10 @@ public class PhoneAccountSettingsFragment extends PreferenceFragment
 
     private static final String ALL_CALLING_ACCOUNTS_KEY = "phone_accounts_all_calling_accounts";
 
+// QTI_BEGIN: 2018-03-13: Telephony: XDivert changes for MSIM
     private static final String BUTTON_SMART_DIVERT_KEY = "button_smart_divert";
 
+// QTI_END: 2018-03-13: Telephony: XDivert changes for MSIM
     private static final String MAKE_AND_RECEIVE_CALLS_CATEGORY_KEY =
             "make_and_receive_calls_settings_category_key";
     private static final String DEFAULT_OUTGOING_ACCOUNT_KEY = "default_outgoing_account";
@@ -62,9 +70,11 @@ public class PhoneAccountSettingsFragment extends PreferenceFragment
     private static final String LEGACY_ACTION_CONFIGURE_PHONE_ACCOUNT =
             "android.telecom.action.CONNECTION_SERVICE_CONFIGURE";
 
+// QTI_BEGIN: 2020-02-11: Telephony: Add vibrating for outgoing call accepted support
     private static final String BUTTON_VIBRATING_KEY =
             "button_vibrating_for_outgoing_call_accepted_key";
 
+// QTI_END: 2020-02-11: Telephony: Add vibrating for outgoing call accepted support
     /**
      * Value to start ordering of phone accounts relative to other preferences. By setting this
      * value on the phone account listings, we ensure that anything that is ordered before
@@ -75,8 +85,10 @@ public class PhoneAccountSettingsFragment extends PreferenceFragment
 
     private static final String LOG_TAG = PhoneAccountSettingsFragment.class.getSimpleName();
 
+// QTI_BEGIN: 2018-03-13: Telephony: XDivert changes for MSIM
     private boolean isXdivertAvailable = false;
 
+// QTI_END: 2018-03-13: Telephony: XDivert changes for MSIM
     private TelecomManager mTelecomManager;
     private TelephonyManager mTelephonyManager;
     private SubscriptionManager mSubscriptionManager;
@@ -85,10 +97,14 @@ public class PhoneAccountSettingsFragment extends PreferenceFragment
 
     private AccountSelectionPreference mDefaultOutgoingAccount;
     private Preference mAllCallingAccounts;
+// QTI_BEGIN: 2019-04-04: Telephony: Fix to show Xdivert option in CallSettings.
     private Preference mSmartDivertPref;
+// QTI_END: 2019-04-04: Telephony: Fix to show Xdivert option in CallSettings.
 
     private PreferenceCategory mMakeAndReceiveCallsCategory;
+// QTI_BEGIN: 2020-02-11: Telephony: Add vibrating for outgoing call accepted support
     private SwitchPreference mButtonVibratingForMoCallAccepted;
+// QTI_END: 2020-02-11: Telephony: Add vibrating for outgoing call accepted support
     private boolean mMakeAndReceiveCallsCategoryPresent;
 
     private final SubscriptionManager.OnSubscriptionsChangedListener
@@ -111,14 +127,22 @@ public class PhoneAccountSettingsFragment extends PreferenceFragment
         mTelephonyManager = TelephonyManager.from(getActivity());
         mSubscriptionManager = SubscriptionManager.from(getActivity());
 
+// QTI_BEGIN: 2021-02-10: Telephony: Move IExtTelephony to IExtPhone
         // check whether the target handler exist in system
         PackageManager pm = getActivity().getPackageManager();
+// QTI_END: 2021-02-10: Telephony: Move IExtTelephony to IExtPhone
+// QTI_BEGIN: 2018-03-13: Telephony: XDivert changes for MSIM
         try {
+// QTI_END: 2018-03-13: Telephony: XDivert changes for MSIM
+// QTI_BEGIN: 2021-02-10: Telephony: Move IExtTelephony to IExtPhone
             pm.getPackageInfo("com.qti.xdivert", 0);
             isXdivertAvailable = true;
         } catch (NameNotFoundException e) {
             Log.w(LOG_TAG, " com.qti.xdivert Vendor apk not available for ");
+// QTI_END: 2021-02-10: Telephony: Move IExtTelephony to IExtPhone
+// QTI_BEGIN: 2018-03-13: Telephony: XDivert changes for MSIM
         }
+// QTI_END: 2018-03-13: Telephony: XDivert changes for MSIM
         if (Flags.workProfileApiSplit()) {
             mSubscriptionManager = mSubscriptionManager.createForAllUserProfiles();
         }
@@ -165,12 +189,16 @@ public class PhoneAccountSettingsFragment extends PreferenceFragment
         mDefaultOutgoingAccount = (AccountSelectionPreference)
                 getPreferenceScreen().findPreference(DEFAULT_OUTGOING_ACCOUNT_KEY);
         mAllCallingAccounts = getPreferenceScreen().findPreference(ALL_CALLING_ACCOUNTS_KEY);
+// QTI_BEGIN: 2019-04-04: Telephony: Fix to show Xdivert option in CallSettings.
         mSmartDivertPref = getPreferenceScreen().findPreference(BUTTON_SMART_DIVERT_KEY);
+// QTI_END: 2019-04-04: Telephony: Fix to show Xdivert option in CallSettings.
 
         mMakeAndReceiveCallsCategory = (PreferenceCategory) getPreferenceScreen().findPreference(
                 MAKE_AND_RECEIVE_CALLS_CATEGORY_KEY);
+// QTI_BEGIN: 2020-02-11: Telephony: Add vibrating for outgoing call accepted support
         mButtonVibratingForMoCallAccepted = (SwitchPreference)
                 mMakeAndReceiveCallsCategory.findPreference(BUTTON_VIBRATING_KEY);
+// QTI_END: 2020-02-11: Telephony: Add vibrating for outgoing call accepted support
         mMakeAndReceiveCallsCategoryPresent = false;
 
         updateAccounts();
@@ -196,12 +224,14 @@ public class PhoneAccountSettingsFragment extends PreferenceFragment
      */
     @Override
     public boolean onPreferenceChange(Preference pref, Object objValue) {
+// QTI_BEGIN: 2021-05-11: Telephony: Fix to toggle vibrating for outgoing call accepted.
         if (pref == mButtonVibratingForMoCallAccepted) {
             Settings.Global.putInt(getActivity().getContentResolver(),
                     android.provider.Settings.Global.VIBRATING_FOR_OUTGOING_CALL_ACCEPTED,
                     mButtonVibratingForMoCallAccepted.isChecked() ? 0 : 1);
             return true;
         }
+// QTI_END: 2021-05-11: Telephony: Fix to toggle vibrating for outgoing call accepted.
         return false;
     }
 
@@ -392,9 +422,14 @@ public class PhoneAccountSettingsFragment extends PreferenceFragment
                 mAccountList.addPreference(mAllCallingAccounts);
             } else {
                 mAccountList.removePreference(mAllCallingAccounts);
+// QTI_BEGIN: 2020-08-18: Telephony: Fix the "make call with" option shows in SS mode
                 mMakeAndReceiveCallsCategory.removePreference(mDefaultOutgoingAccount);
+// QTI_END: 2020-08-18: Telephony: Fix the "make call with" option shows in SS mode
+// QTI_BEGIN: 2022-04-06: Telephony: Fix for duplicate Vibrating button in single sim
                 mMakeAndReceiveCallsCategoryPresent = false;
+// QTI_END: 2022-04-06: Telephony: Fix for duplicate Vibrating button in single sim
             }
+// QTI_BEGIN: 2021-05-11: Telephony: Fix missing XDivert option in PhoneAccountSettings.
 
             if (isXdivertAvailable) {
                 if (mSmartDivertPref != null) {
@@ -402,6 +437,7 @@ public class PhoneAccountSettingsFragment extends PreferenceFragment
                     mAccountList.addPreference(mSmartDivertPref);
                 }
             }
+// QTI_END: 2021-05-11: Telephony: Fix missing XDivert option in PhoneAccountSettings.
         }
     }
 
@@ -508,6 +544,7 @@ public class PhoneAccountSettingsFragment extends PreferenceFragment
                     getPreferenceScreen().findPreference(SMART_FORWARDING_CONFIGURATION_PREF_KEY));
         }
 
+// QTI_BEGIN: 2022-04-06: Telephony: Fix for duplicate Vibrating button in single sim
         if (mButtonVibratingForMoCallAccepted != null) {
             if (mTelephonyManager.isMultiSimEnabled()) {
                 mMakeAndReceiveCallsCategoryPresent = true;
@@ -519,8 +556,11 @@ public class PhoneAccountSettingsFragment extends PreferenceFragment
             } else {
                 mMakeAndReceiveCallsCategory.removePreference(mButtonVibratingForMoCallAccepted);
             }
+// QTI_END: 2022-04-06: Telephony: Fix for duplicate Vibrating button in single sim
+// QTI_BEGIN: 2020-02-11: Telephony: Add vibrating for outgoing call accepted support
         }
 
+// QTI_END: 2020-02-11: Telephony: Add vibrating for outgoing call accepted support
         if (!mMakeAndReceiveCallsCategoryPresent) {
             getPreferenceScreen().removePreference(mMakeAndReceiveCallsCategory);
         }

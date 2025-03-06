@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- QTI_BEGIN: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."-->
+<!-- QTI_END: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."-->
 <!-- Copyright (C) 2006 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,39 +16,81 @@
      limitations under the License.
 -->
 
+<!-- QTI_BEGIN: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."-->
+<!-- QTI_END: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."-->
 <resources>
+<!-- QTI_BEGIN: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."-->
+<!-- QTI_END: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."-->
     <declare-styleable name="EditPhoneNumberPreference">
         <!-- The enable button text. -->
+<!-- QTI_BEGIN: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."-->
+<!-- QTI_END: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."-->
         <attr name="enableButtonText" format="string" />
         <!-- The disable button text. -->
+<!-- QTI_BEGIN: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."-->
+<!-- QTI_END: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."-->
         <attr name="disableButtonText" format="string" />
         <!-- The change / update button text. -->
+<!-- QTI_BEGIN: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."-->
+<!-- QTI_END: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."-->
         <attr name="changeNumButtonText" format="string" />
         <!-- The confirm button mode. -->
+<!-- QTI_BEGIN: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."-->
+<!-- QTI_END: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."-->
         <attr name="confirmMode">
             <!-- Traditional single action "ok" button. -->
+<!-- QTI_BEGIN: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."-->
+<!-- QTI_END: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."-->
             <enum name="confirm" value="0" />
             <!-- Two state "enable/disable" button. -->
+<!-- QTI_BEGIN: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."-->
+<!-- QTI_END: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."-->
             <enum name="activation" value="1" />
+<!-- QTI_BEGIN: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."-->
+<!-- QTI_END: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."-->
         </attr>
+<!-- QTI_BEGIN: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."-->
+<!-- QTI_END: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."-->
     </declare-styleable>
 
+<!-- QTI_BEGIN: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."-->
+<!-- QTI_END: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."-->
     <declare-styleable name="CallForwardEditPreference">
+<!-- QTI_BEGIN: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."-->
+<!-- QTI_END: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."-->
         <attr name="serviceClass">
             <!-- voice -->
+<!-- QTI_BEGIN: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."-->
+<!-- QTI_END: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."-->
             <enum name="voice" value="1" />
             <!-- data -->
+<!-- QTI_BEGIN: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."-->
+<!-- QTI_END: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."-->
             <enum name="data" value="2" />
+<!-- QTI_BEGIN: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."-->
+<!-- QTI_END: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."-->
         </attr>
+<!-- QTI_BEGIN: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."-->
+<!-- QTI_END: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."-->
         <attr name="reason">
             <!-- unconditional  -->
+<!-- QTI_BEGIN: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."-->
+<!-- QTI_END: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."-->
             <enum name="unconditional" value="0" />
             <!-- busy -->
+<!-- QTI_BEGIN: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."-->
+<!-- QTI_END: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."-->
             <enum name="busy" value="1" />
             <!-- no_reply -->
+<!-- QTI_BEGIN: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."-->
+<!-- QTI_END: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."-->
             <enum name="no_reply" value="2" />
             <!-- not_reachable -->
+<!-- QTI_BEGIN: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."-->
+<!-- QTI_END: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."-->
             <enum name="not_reachable" value="3" />
+<!-- QTI_BEGIN: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."-->
+<!-- QTI_END: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."-->
             <!-- not_logged_in -->
             <enum name="not_logged_in" value="6" />
         </attr>

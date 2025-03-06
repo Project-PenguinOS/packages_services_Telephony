@@ -86,11 +86,13 @@ public class CLIRListPreference extends ListPreference {
         }
     }
 
+// QTI_BEGIN: 2024-07-09: Telephony: IMS: Save/restore InstanceStates for CW and CLIR during language changed
     void restoreClirInfo(boolean isClirEnabled, CharSequence clirSummary) {
         setEnabled(isClirEnabled);
         setSummary(clirSummary);
     }
 
+// QTI_END: 2024-07-09: Telephony: IMS: Save/restore InstanceStates for CW and CLIR during language changed
     /* package */ void handleGetCLIRResult(int tmpClirArray[]) {
         clirArray = tmpClirArray;
         final boolean enabled =

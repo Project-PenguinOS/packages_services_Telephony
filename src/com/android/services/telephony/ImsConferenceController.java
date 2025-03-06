@@ -37,7 +37,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+// QTI_BEGIN: 2021-08-10: Telephony: Add conferenceable connection if on the same sub
 import java.util.Objects;
+// QTI_END: 2021-08-10: Telephony: Add conferenceable connection if on the same sub
 import java.util.stream.Collectors;
 
 /**
@@ -68,7 +70,9 @@ public class ImsConferenceController {
             if (conference instanceof ImsConference) {
                 // Ims Conference call ended, so UE may now have the ability to initiate
                 // an Adhoc Conference call. Hence, try enabling adhoc conference capability
+// QTI_BEGIN: 2025-01-30: Telephony: Revert "IMS-DSDA: Update Adhoc conference capability per phone account"
                 mTelecomAccountRegistry.refreshAdhocConference(true);
+// QTI_END: 2025-01-30: Telephony: Revert "IMS-DSDA: Update Adhoc conference capability per phone account"
             }
             mImsConferences.remove(conference);
         }
@@ -251,7 +255,9 @@ public class ImsConferenceController {
      * Calculates the conference-capable state of all GSM connections in this connection service.
      * Connections from different {@link PhoneAccountHandle}s shall not be conferenceable.
      */
+// QTI_BEGIN: 2025-01-30: Telephony: Revert "Ad-hoc conference: Recalculate ad-hoc capabilities"
     private void recalculateConferenceable() {
+// QTI_END: 2025-01-30: Telephony: Revert "Ad-hoc conference: Recalculate ad-hoc capabilities"
         Log.v(this, "recalculateConferenceable : %d", mTelephonyConnections.size());
         HashSet<Conferenceable> conferenceableSet = new HashSet<>(mTelephonyConnections.size() +
                 mImsConferences.size());
@@ -298,8 +304,10 @@ public class ImsConferenceController {
                 Log.d(this, "recalc - %s %s", conference.getState(), conference);
             }
 
+// QTI_BEGIN: 2020-02-07: Telephony: IMS: Do not skip adding conference to conferenceable set
             if (!conference.isConferenceHost() &&
                     (!conference.isMultiAnchorConferenceSupported())) {
+// QTI_END: 2020-02-07: Telephony: IMS: Do not skip adding conference to conferenceable set
                 if (Log.VERBOSE) {
                     Log.v(this, "skipping conference (not hosted on this device): %s", conference);
                 }
@@ -309,8 +317,10 @@ public class ImsConferenceController {
             // Since UE cannot host two conference calls, remove the ability to initiate
             // another conference call as there already exists a conference call, which
             // is hosted on this device.
+// QTI_BEGIN: 2025-01-30: Telephony: Revert "IMS-DSDA: Update Adhoc conference capability per phone account"
             mTelecomAccountRegistry.refreshAdhocConference(false);
 
+// QTI_END: 2025-01-30: Telephony: Revert "IMS-DSDA: Update Adhoc conference capability per phone account"
             switch (conference.getState()) {
                 case Connection.STATE_ACTIVE:
                     //fall through
@@ -363,8 +373,12 @@ public class ImsConferenceController {
                 // to another conference. Removes connections from different PhoneAccountHandles.
                 List<Connection> connections = conferenceableSet
                         .stream()
+// QTI_BEGIN: 2021-08-10: Telephony: Add conferenceable connection if on the same sub
                         .filter(conferenceable -> conferenceable instanceof Connection &&
+// QTI_END: 2021-08-10: Telephony: Add conferenceable connection if on the same sub
+// QTI_BEGIN: 2025-01-30: Telephony: Revert "Do not show merge button for two HELD calls"
                         isSamePhoneAccountHandle(c, conferenceable))
+// QTI_END: 2025-01-30: Telephony: Revert "Do not show merge button for two HELD calls"
                         .map(conferenceable -> (Connection) conferenceable)
                         .collect(Collectors.toList());
                 // Conference equivalent to setConferenceables that only accepts Connections
@@ -445,8 +459,10 @@ public class ImsConferenceController {
         conferenceHostConnection.setVideoPauseSupported(connection.getVideoPauseSupported());
         conferenceHostConnection.setManageImsConferenceCallSupported(
                 connection.isManageImsConferenceCallSupported());
+// QTI_BEGIN: 2022-02-17: Telephony: IMS: Fix the crashes in MT conference call
         conferenceHostConnection.setTelephonyConnectionService(
                 connection.getTelephonyConnectionService());
+// QTI_END: 2022-02-17: Telephony: IMS: Fix the crashes in MT conference call
         // WARNING: do not try to copy the video provider from connection to
         // conferenceHostConnection here.  In connection.cloneConnection, part of the clone
         // process is to set the original connection so it's already set:
@@ -474,9 +490,11 @@ public class ImsConferenceController {
             phoneAccountHandle =
                     PhoneUtils.makePstnPhoneAccountHandle(imsPhone.getDefaultPhone());
             carrierConfig = getCarrierConfig(imsPhone);
+// QTI_BEGIN: 2024-04-03: Telephony: IMS: Remove VT capabilities for conference call when TTY is enabled
 
             conferenceHostConnection.setTtyEnabled(new DeviceState().
                     isTtyModeEnabled(imsPhone.getContext()));
+// QTI_END: 2024-04-03: Telephony: IMS: Remove VT capabilities for conference call when TTY is enabled
         }
 
         ImsConference conference = new ImsConference(mTelecomAccountRegistry, mConnectionService,

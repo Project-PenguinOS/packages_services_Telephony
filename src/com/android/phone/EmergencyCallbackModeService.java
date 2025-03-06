@@ -35,7 +35,9 @@ import android.sysprop.TelephonyProperties;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
+// QTI_BEGIN: 2019-04-08: Telephony: Handle ECBM mode for both the SUBs to place calls in ECBM mode
 import com.android.internal.telephony.EcbmHandler;
+// QTI_END: 2019-04-08: Telephony: Handle ECBM mode for both the SUBs to place calls in ECBM mode
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
@@ -60,7 +62,9 @@ public class EmergencyCallbackModeService extends Service {
     private long mTimeLeft = 0;
     private Phone mPhone = null;
     private boolean mInEmergencyCall = false;
+// QTI_BEGIN: 2019-04-08: Telephony: Handle ECBM mode for both the SUBs to place calls in ECBM mode
     private EcbmHandler mEcbmHandler;
+// QTI_END: 2019-04-08: Telephony: Handle ECBM mode for both the SUBs to place calls in ECBM mode
 
     private static final int ECM_TIMER_RESET = 1;
 
@@ -76,8 +80,10 @@ public class EmergencyCallbackModeService extends Service {
 
     @Override
     public void onCreate() {
+// QTI_BEGIN: 2019-04-08: Telephony: Handle ECBM mode for both the SUBs to place calls in ECBM mode
         Phone phoneInEcm = PhoneGlobals.getInstance().getPhoneInEcm();
         mEcbmHandler = EcbmHandler.getInstance();
+// QTI_END: 2019-04-08: Telephony: Handle ECBM mode for both the SUBs to place calls in ECBM mode
         // Check if it is CDMA phone
         if (phoneInEcm == null || ((phoneInEcm.getPhoneType() != PhoneConstants.PHONE_TYPE_CDMA)
                 && (phoneInEcm.getImsPhone() == null))) {
@@ -96,7 +102,9 @@ public class EmergencyCallbackModeService extends Service {
 
         // Register ECM timer reset notfication
         mPhone = phoneInEcm;
+// QTI_BEGIN: 2019-04-08: Telephony: Handle ECBM mode for both the SUBs to place calls in ECBM mode
         mEcbmHandler.registerForEcmTimerReset(mHandler, ECM_TIMER_RESET, null);
+// QTI_END: 2019-04-08: Telephony: Handle ECBM mode for both the SUBs to place calls in ECBM mode
 
         startTimerNotification();
     }
@@ -107,7 +115,9 @@ public class EmergencyCallbackModeService extends Service {
             // Unregister receiver
             unregisterReceiver(mEcmReceiver);
             // Unregister ECM timer reset notification
+// QTI_BEGIN: 2019-04-08: Telephony: Handle ECBM mode for both the SUBs to place calls in ECBM mode
             mEcbmHandler.unregisterForEcmTimerReset(mHandler);
+// QTI_END: 2019-04-08: Telephony: Handle ECBM mode for both the SUBs to place calls in ECBM mode
 
             // Cancel the notification and timer
             mNotificationManager.cancelAsUser(null, R.string.phone_in_ecm_notification_title,

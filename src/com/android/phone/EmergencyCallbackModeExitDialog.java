@@ -41,7 +41,9 @@ import android.os.Message;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
+// QTI_BEGIN: 2019-04-08: Telephony: Handle ECBM mode for both the SUBs to place calls in ECBM mode
 import com.android.internal.telephony.EcbmHandler;
+// QTI_END: 2019-04-08: Telephony: Handle ECBM mode for both the SUBs to place calls in ECBM mode
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.domainselection.DomainSelectionResolver;
@@ -79,14 +81,18 @@ public class EmergencyCallbackModeExitDialog extends Activity implements OnCance
     private static final int ECM_TIMER_RESET = 1;
     private Phone mPhone = null;
     private boolean mIsResumed = false;
+// QTI_BEGIN: 2019-04-08: Telephony: Handle ECBM mode for both the SUBs to place calls in ECBM mode
     private EcbmHandler mEcbmHandler;
+// QTI_END: 2019-04-08: Telephony: Handle ECBM mode for both the SUBs to place calls in ECBM mode
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().addPrivateFlags(SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
         mPhone = PhoneGlobals.getInstance().getPhoneInEcm();
+// QTI_BEGIN: 2019-04-08: Telephony: Handle ECBM mode for both the SUBs to place calls in ECBM mode
         mEcbmHandler = EcbmHandler.getInstance();
+// QTI_END: 2019-04-08: Telephony: Handle ECBM mode for both the SUBs to place calls in ECBM mode
         // Check if phone is in Emergency Callback Mode. If not, exit.
         if (mPhone == null || !mPhone.isInEcm()) {
             Log.i(TAG, "ECMModeExitDialog launched - isInEcm: false" + " phone:" + mPhone);
@@ -104,7 +110,9 @@ public class EmergencyCallbackModeExitDialog extends Activity implements OnCance
         waitForConnectionCompleteThread.start();
 
         // Register ECM timer reset notfication
+// QTI_BEGIN: 2019-04-08: Telephony: Handle ECBM mode for both the SUBs to place calls in ECBM mode
         mEcbmHandler.registerForEcmTimerReset(mTimerResetHandler, ECM_TIMER_RESET, null);
+// QTI_END: 2019-04-08: Telephony: Handle ECBM mode for both the SUBs to place calls in ECBM mode
 
         // Register receiver for intent closing the dialog
         IntentFilter filter = new IntentFilter();
@@ -133,8 +141,10 @@ public class EmergencyCallbackModeExitDialog extends Activity implements OnCance
             // Receiver was never registered - silently ignore.
         }
         // Unregister ECM timer reset notification
+// QTI_BEGIN: 2019-04-08: Telephony: Handle ECBM mode for both the SUBs to place calls in ECBM mode
         if (mEcbmHandler != null) {
             mEcbmHandler.unregisterForEcmTimerReset(mHandler);
+// QTI_END: 2019-04-08: Telephony: Handle ECBM mode for both the SUBs to place calls in ECBM mode
         }
     }
 
@@ -263,7 +273,9 @@ public class EmergencyCallbackModeExitDialog extends Activity implements OnCance
                                         } catch (Exception e) {
                                             e.printStackTrace();
                                         }
+// QTI_BEGIN: 2019-04-08: Telephony: Handle ECBM mode for both the SUBs to place calls in ECBM mode
                                     }
+// QTI_END: 2019-04-08: Telephony: Handle ECBM mode for both the SUBs to place calls in ECBM mode
 
                                     // Show progress dialog
                                     showDialog(EXIT_ECM_PROGRESS_DIALOG);
