@@ -2460,6 +2460,7 @@ abstract class TelephonyConnection extends Connection implements Holdable,
                     mOriginalConnection.hangup();
                 }
             } catch (CallStateException e) {
+                mHangupDisconnectCause = DisconnectCause.NOT_VALID;
                 Log.e(this, e, "Call to Connection.hangup failed with exception");
             }
         } else {
