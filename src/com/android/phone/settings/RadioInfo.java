@@ -410,6 +410,7 @@ public class RadioInfo extends AppCompatActivity {
     private Button mEsosButton;
     private Button mSatelliteEnableNonEmergencyModeButton;
     private Button mEsosDemoButton;
+    private Button mSatelliteConfigViewerButton;
     private Switch mImsVolteProvisionedSwitch;
     private Switch mImsVtProvisionedSwitch;
     private Switch mImsWfcProvisionedSwitch;
@@ -946,6 +947,7 @@ public class RadioInfo extends AppCompatActivity {
         mEsosDemoButton  = (Button) findViewById(R.id.demo_esos_questionnaire);
         mSatelliteEnableNonEmergencyModeButton = (Button) findViewById(
                 R.id.satellite_enable_non_emergency_mode);
+        mSatelliteConfigViewerButton = (Button) findViewById(R.id.satellite_config_viewer);
 
         if (shouldHideButton(mActionEsos)) {
             mEsosButton.setVisibility(View.GONE);
@@ -974,6 +976,14 @@ public class RadioInfo extends AppCompatActivity {
                 }
             });
         }
+
+        mSatelliteConfigViewerButton.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.putExtra("mSubId", mSubId);
+            intent.setClassName("com.android.phone",
+                    "com.android.phone.settings.SatelliteConfigViewer");
+            startActivityAsUser(intent, UserHandle.CURRENT);
+        });
 
         mOemInfoButton = (Button) findViewById(R.id.oem_info);
         mOemInfoButton.setOnClickListener(mOemInfoButtonHandler);
