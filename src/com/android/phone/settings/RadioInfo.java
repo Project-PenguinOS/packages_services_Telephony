@@ -694,6 +694,7 @@ public class RadioInfo extends AppCompatActivity {
 // QTI_BEGIN: 2024-06-18: Telephony: TeleService: Adapt edge-to-edge enforcement
         Utils.setupEdgeToEdge(this);
 // QTI_END: 2024-06-18: Telephony: TeleService: Adapt edge-to-edge enforcement
+        SettingsConstants.setupEdgeToEdge(this);
         mSystemUser = android.os.Process.myUserHandle().isSystem();
         log("onCreate: mSystemUser=" + mSystemUser);
         UserManager userManager = getSystemService(UserManager.class);
