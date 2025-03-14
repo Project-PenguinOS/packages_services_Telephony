@@ -228,6 +228,8 @@ public class TelephonyConnectionService extends ConnectionService {
     private final CdmaConferenceController mCdmaConferenceController =
             new CdmaConferenceController(this);
 
+    private com.android.server.telecom.flags.FeatureFlags mTelecomFlags =
+            new com.android.server.telecom.flags.FeatureFlagsImpl();
     private FeatureFlags mFeatureFlags = new FeatureFlagsImpl();
 
     private ImsConferenceController mImsConferenceController;
@@ -4806,6 +4808,8 @@ public class TelephonyConnectionService extends ConnectionService {
      */
     public void maybeIndicateAnsweringWillDisconnect(@NonNull TelephonyConnection connection,
             @NonNull PhoneAccountHandle phoneAccountHandle) {
+        // With sequencing, Telecom handles setting the extra.
+        if (mTelecomFlags.enableCallSequencing()) return;
         if (isCallPresentOnOtherSub(phoneAccountHandle)) {
             if (mTelephonyManagerProxy.isConcurrentCallsPossible()
                     && allCallsSupportHold(connection)) {
@@ -5220,8 +5224,10 @@ public class TelephonyConnectionService extends ConnectionService {
 
     /* Only for testing */
     @VisibleForTesting
-    public void setFeatureFlags(FeatureFlags featureFlags) {
+    public void setFeatureFlags(FeatureFlags featureFlags,
+            com.android.server.telecom.flags.FeatureFlags telecomFlags) {
         mFeatureFlags = featureFlags;
+        mTelecomFlags = telecomFlags;
     }
 
     private void loge(String s) {
