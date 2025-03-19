@@ -273,6 +273,9 @@ public class CallFeaturesSetting extends PreferenceActivity
                                         getString(R.string.mobile_network_settings_class));
                                 intent.setComponent(mobileNetworkSettingsComponent);
 // QTI_END: 2020-01-30: Telephony: Remove hooks that lauched vendor network settings
+                                if (mPhone != null) {
+                                    intent.putExtra(Settings.EXTRA_SUB_ID, mPhone.getSubId());
+                                }
                                 startActivityAsUser(intent, UserHandle.CURRENT);
                             }
                         };
