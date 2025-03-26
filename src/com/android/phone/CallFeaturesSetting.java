@@ -477,7 +477,8 @@ public class CallFeaturesSetting extends PreferenceActivity
             prefSet.removePreference(cdmaOptions);
         }
 
-        if (carrierConfig.getBoolean(CarrierConfigManager.KEY_WORLD_PHONE_BOOL)) {
+        if (!Flags.phoneTypeCleanup()
+                && carrierConfig.getBoolean(CarrierConfigManager.KEY_WORLD_PHONE_BOOL)) {
 // QTI_BEGIN: 2019-04-28: Telephony: FR54939: Common call setting for specific operator
             if (carrierConfig.getBoolean("config_common_callsettings_support_bool")) {
                 prefSet.removePreference(cdmaOptions);
@@ -500,7 +501,8 @@ public class CallFeaturesSetting extends PreferenceActivity
 // QTI_END: 2019-04-28: Telephony: FR54939: Common call setting for specific operator
 
             int phoneType = mPhone.getPhoneType();
-            if (carrierConfig.getBoolean(CarrierConfigManager.KEY_HIDE_CARRIER_NETWORK_SETTINGS_BOOL)) {
+            if (carrierConfig.getBoolean(
+                    CarrierConfigManager.KEY_HIDE_CARRIER_NETWORK_SETTINGS_BOOL)) {
                 prefSet.removePreference(fdnButton);
             } else {
                 if (phoneType == PhoneConstants.PHONE_TYPE_CDMA) {
