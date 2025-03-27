@@ -159,6 +159,10 @@ public class TelephonyConnectionService extends ConnectionService {
     // Timeout to wait for the termination of incoming call before continue with the emergency call.
     private static final int DEFAULT_REJECT_INCOMING_CALL_TIMEOUT_MS = 10 * 1000; // 10 seconds.
 
+    // Timeout to wait for ending active call on other domain before continuing with
+    // the emergency call.
+    private static final int DEFAULT_DISCONNECT_CALL_ON_OTHER_DOMAIN_TIMEOUT_MS = 2 * 1000;
+
     // If configured, reject attempts to dial numbers matching this pattern.
     private static final Pattern CDMA_ACTIVATION_CODE_REGEX_PATTERN =
             Pattern.compile("\\*228[0-9]{0,2}");
@@ -1499,11 +1503,13 @@ public class TelephonyConnectionService extends ConnectionService {
                     }
                     return resultConnection;
                 } else {
-                    // If call sequencing is enabled, Telecom will take care of holding calls across
-                    // subscriptions if needed before delegating the connection creation over to
-                    // Telephony.
-                    if (mTelephonyManagerProxy.isConcurrentCallsPossible()
-                            && !mTelecomFlags.enableCallSequencing()) {
+// QTI_BEGIN: 2025-01-30: Telephony: Revert "DSDA: Bypass AOSP DSDA logic for add call"
+// If call sequencing is enabled, Telecom will take care of holding calls across
+// subscriptions if needed before delegating the connection creation over to
+// Telephony.
+if (mTelephonyManagerProxy.isConcurrentCallsPossible()
+            && !mTelecomFlags.enableCallSequencing()) {
+// QTI_END: 2025-01-30: Telephony: Revert "DSDA: Bypass AOSP DSDA logic for add call"
                         Conferenceable c = maybeHoldCallsOnOtherSubs(request.getAccountHandle());
                         if (c != null) {
                             delayDialForOtherSubHold(phone, c, (success) -> {
@@ -3078,9 +3084,140 @@ public class TelephonyConnectionService extends ConnectionService {
                             + "reject incoming, dialing canceled");
                     return;
                 }
-                placeEmergencyConnectionOnSelectedDomain(request, resultConnection, phone);
+                // Hang up the active calls if the domain of currently active call is different
+                // from the domain selected by domain selector.
+                if (Flags.hangupActiveCallBasedOnEmergencyCallDomain()) {
+                    CompletableFuture<Void> disconnectCall = maybeDisconnectCallsOnOtherDomain(
+                            phone, resultConnection, result,
+                            getAllConnections(), getAllConferences(), (ret) -> {
+                                if (!ret) {
+                                    Log.i(this, "createEmergencyConnection: "
+                                            + "disconnecting call on other domain failed");
+                                }
+                            });
+
+                    CompletableFuture<Void> unused = disconnectCall.thenRun(() -> {
+                        if (resultConnection.getState() == Connection.STATE_DISCONNECTED) {
+                            Log.i(this, "createEmergencyConnection: "
+                                    + "disconnect call on other domain, dialing canceled");
+                            return;
+                        }
+                        placeEmergencyConnectionOnSelectedDomain(request, resultConnection, phone);
+                    });
+                } else {
+                    placeEmergencyConnectionOnSelectedDomain(request, resultConnection, phone);
+                }
             });
         }, mDomainSelectionMainExecutor);
+    }
+
+    /**
+     * Disconnect the active calls on the other domain for an emergency call.
+     * For example,
+     *  - Active IMS normal call and CS emergency call
+     *  - Active CS normal call and IMS emergency call
+     *
+     * @param phone The Phone to be used for an emergency call.
+     * @param emergencyConnection The connection created for an emergency call.
+     * @param emergencyDomain The selected domain for an emergency call.
+     * @param connections All individual connections, including conference participants.
+     * @param conferences All conferences.
+     * @param completeConsumer The consumer to call once the call hangup has been completed.
+     *        {@code true} if the operation commpletes successfully, or
+     *        {@code false} if the operation timed out/failed.
+     */
+    @VisibleForTesting
+    public static CompletableFuture<Void> maybeDisconnectCallsOnOtherDomain(Phone phone,
+            Connection emergencyConnection,
+            @NetworkRegistrationInfo.Domain int emergencyDomain,
+            @NonNull Collection<Connection> connections,
+            @NonNull Collection<Conference> conferences,
+            Consumer<Boolean> completeConsumer) {
+        List<Connection> activeConnections = connections.stream()
+                .filter(c -> {
+                    return !c.equals(emergencyConnection)
+                            && isConnectionOnOtherDomain(c, phone, emergencyDomain);
+                }).toList();
+        List<Conference> activeConferences = conferences.stream()
+                .filter(c -> {
+                    Connection pc = c.getPrimaryConnection();
+                    return isConnectionOnOtherDomain(pc, phone, emergencyDomain);
+                }).toList();
+
+        if (activeConnections.isEmpty() && activeConferences.isEmpty()) {
+            // There are no active calls.
+            completeConsumer.accept(true);
+            return CompletableFuture.completedFuture(null);
+        }
+
+        Log.i(LOG_TAG, "maybeDisconnectCallsOnOtherDomain: "
+                + "connections=" + activeConnections.size()
+                + ", conferences=" + activeConferences.size());
+
+        try {
+            CompletableFuture<Boolean> future = null;
+
+            for (Connection c : activeConnections) {
+                TelephonyConnection tc = (TelephonyConnection) c;
+                if (tc.getState() != Connection.STATE_DISCONNECTED) {
+                    if (future == null) {
+                        future = new CompletableFuture<>();
+                        tc.getOriginalConnection().addListener(new OnDisconnectListener(future));
+                    }
+                    tc.hangup(android.telephony.DisconnectCause.OUTGOING_EMERGENCY_CALL_PLACED);
+                }
+            }
+
+            for (Conference c : activeConferences) {
+                if (c.getState() != Connection.STATE_DISCONNECTED) {
+                    c.onDisconnect();
+                }
+            }
+
+            if (future != null) {
+                // A timeout that will complete the future to not block the outgoing call
+                // indefinitely.
+                CompletableFuture<Boolean> timeout = new CompletableFuture<>();
+                phone.getContext().getMainThreadHandler().postDelayed(
+                        () -> timeout.complete(false),
+                        DEFAULT_DISCONNECT_CALL_ON_OTHER_DOMAIN_TIMEOUT_MS);
+                // Ensure that the Consumer is completed on the main thread.
+                return future.acceptEitherAsync(timeout, completeConsumer,
+                        phone.getContext().getMainExecutor()).exceptionally((ex) -> {
+                            Log.w(LOG_TAG, "maybeDisconnectCallsOnOtherDomain: exceptionally="
+                                    + ex);
+                            return null;
+                        });
+            } else {
+                completeConsumer.accept(true);
+                return CompletableFuture.completedFuture(null);
+            }
+        } catch (Exception e) {
+            Log.w(LOG_TAG, "maybeDisconnectCallsOnOtherDomain: exception=" + e.getMessage());
+            completeConsumer.accept(false);
+            return CompletableFuture.completedFuture(null);
+        }
+    }
+
+    private static boolean isConnectionOnOtherDomain(Connection c, Phone phone,
+            @NetworkRegistrationInfo.Domain int domain) {
+        if (c instanceof TelephonyConnection) {
+            TelephonyConnection tc = (TelephonyConnection) c;
+            Phone callPhone = tc.getPhone();
+            int callDomain = NetworkRegistrationInfo.DOMAIN_UNKNOWN;
+
+            if (callPhone != null && callPhone.getSubId() == phone.getSubId()) {
+                if (tc.isGsmCdmaConnection()) {
+                    callDomain = NetworkRegistrationInfo.DOMAIN_CS;
+                } else if (tc.isImsConnection()) {
+                    callDomain = NetworkRegistrationInfo.DOMAIN_PS;
+                }
+            }
+
+            return callDomain != NetworkRegistrationInfo.DOMAIN_UNKNOWN
+                    && callDomain != domain;
+        }
+        return false;
     }
 
     private void dialCsEmergencyCall(final Phone phone,
@@ -5180,47 +5317,49 @@ public class TelephonyConnectionService extends ConnectionService {
         return null;
     }
 
-    /**
-     * For DSDA devices, disconnects all calls (and conferences) on other subs when placing an
-     * emergency call.
-     * @param handle The {@link PhoneAccountHandle} to exclude when disconnecting calls
-     * @return {@link List} compromised of the conferenceables that have been disconnected.
-     */
-    @VisibleForTesting
-    protected List<Conferenceable> disconnectAllConferenceablesOnOtherSubs(
-            @NonNull PhoneAccountHandle handle) {
-        List<Conferenceable> conferenceables = new ArrayList<>();
-        Collection<Conference> conferences = getAllConferences();
-        // Add the conferences
-        conferences.stream()
-                .filter(c ->
-                        (c.getState() == Connection.STATE_ACTIVE
-                                || c.getState() == Connection.STATE_HOLDING)
-                                // Include any calls not on same sub as current connection.
-                                && !Objects.equals(c.getPhoneAccountHandle(), handle))
-                .forEach(c -> {
-                    if (c instanceof TelephonyConference) {
-                        TelephonyConference tc = (TelephonyConference) c;
-                        Log.i(LOG_TAG, "disconnectAllConferenceablesOnOtherSubs: disconnect"
-                                        + " %s due to redial happened on other sub.",
-                                tc.getTelecomCallId());
-                        tc.onDisconnect();
-                        conferenceables.add(c);
-                    }
-                });
-        // Add the connections.
-        conferenceables.addAll(disconnectAllCallsOnOtherSubs(handle));
-        return conferenceables;
-    }
+// QTI_BEGIN: 2022-02-25: Telephony: Fix concurrent calls occurs when E911 redial happens
+/**
+ * For DSDA devices, disconnects all calls (and conferences) on other subs when placing an
+ * emergency call.
+ * @param handle The {@link PhoneAccountHandle} to exclude when disconnecting calls
+ * @return {@link List} compromised of the conferenceables that have been disconnected.
+ */
+@VisibleForTesting
+protected List<Conferenceable> disconnectAllConferenceablesOnOtherSubs(
+        @NonNull PhoneAccountHandle handle) {
+    List<Conferenceable> conferenceables = new ArrayList<>();
+    Collection<Conference> conferences = getAllConferences();
+    // Add the conferences
+    conferences.stream()
+            .filter(c ->
+                    (c.getState() == Connection.STATE_ACTIVE
+                            || c.getState() == Connection.STATE_HOLDING)
+                            // Include any calls not on same sub as current connection.
+                            && !Objects.equals(c.getPhoneAccountHandle(), handle))
+            .forEach(c -> {
+                if (c instanceof TelephonyConference) {
+                    TelephonyConference tc = (TelephonyConference) c;
+                    Log.i(LOG_TAG, "disconnectAllConferenceablesOnOtherSubs: disconnect"
+                                    + " %s due to redial happened on other sub.",
+                            tc.getTelecomCallId());
+                    tc.onDisconnect();
+                    conferenceables.add(c);
+                }
+            });
+    // Add the connections.
+    conferenceables.addAll(disconnectAllCallsOnOtherSubs(handle));
+    return conferenceables;
+}
 
-    /**
-     * For DSDA devices, disconnects all calls on other subs when placing an emergency call.
-     * @param handle The {@link PhoneAccountHandle} to exclude when disconnecting calls
-     * @return {@link List} including compromised of the connections that have been disconnected.
-     */
-    private List<Connection> disconnectAllCallsOnOtherSubs(@NonNull PhoneAccountHandle handle) {
-        Collection<Connection> connections = getAllConnections();
-        List<Connection> disconnectedConnections = new ArrayList<>();
+// QTI_BEGIN: 2022-02-25: Telephony: Fix concurrent calls occurs when E911 redial happens
+/**
+ * For DSDA devices, disconnects all calls on other subs when placing an emergency call.
+ * @param handle The {@link PhoneAccountHandle} to exclude when disconnecting calls
+ * @return {@link List} including compromised of the connections that have been disconnected.
+ */
+private List<Connection> disconnectAllCallsOnOtherSubs(@NonNull PhoneAccountHandle handle) {
+    Collection<Connection> connections = getAllConnections();
+    List<Connection> disconnectedConnections = new ArrayList<>();
         connections.stream()
                 .filter(c ->
                         (c.getState() == Connection.STATE_ACTIVE
@@ -5239,6 +5378,7 @@ public class TelephonyConnectionService extends ConnectionService {
                 });
         return disconnectedConnections;
     }
+// QTI_END: 2022-02-25: Telephony: Fix concurrent calls occurs when E911 redial happens
 
     private @NetworkRegistrationInfo.Domain int getActiveCallDomain(int subId) {
         for (Connection c: getAllConnections()) {
