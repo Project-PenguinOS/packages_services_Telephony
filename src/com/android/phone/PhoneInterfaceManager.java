@@ -24,11 +24,11 @@ import static android.telephony.TelephonyManager.ENABLE_FEATURE_MAPPING;
 import static android.telephony.TelephonyManager.HAL_SERVICE_NETWORK;
 import static android.telephony.TelephonyManager.HAL_SERVICE_RADIO;
 import static android.telephony.satellite.SatelliteManager.KEY_SATELLITE_COMMUNICATION_ALLOWED;
-import static android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_ACCESS_BARRED;
-import static android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_SUCCESS;
 import static android.telephony.satellite.SatelliteManager.SATELLITE_DISALLOWED_REASON_NOT_PROVISIONED;
 import static android.telephony.satellite.SatelliteManager.SATELLITE_DISALLOWED_REASON_NOT_SUPPORTED;
 import static android.telephony.satellite.SatelliteManager.SATELLITE_DISALLOWED_REASON_UNSUPPORTED_DEFAULT_MSG_APP;
+import static android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_ACCESS_BARRED;
+import static android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_SUCCESS;
 
 import static com.android.internal.telephony.PhoneConstants.PHONE_TYPE_CDMA;
 import static com.android.internal.telephony.PhoneConstants.PHONE_TYPE_GSM;
@@ -224,6 +224,7 @@ import com.android.internal.telephony.SmsPermissions;
 import com.android.internal.telephony.TelephonyCountryDetector;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.TelephonyPermissions;
+import com.android.internal.telephony.configupdate.TelephonyConfigUpdateInstallReceiver;
 import com.android.internal.telephony.data.DataUtils;
 import com.android.internal.telephony.domainselection.DomainSelectionResolver;
 import com.android.internal.telephony.emergency.EmergencyNumberTracker;
@@ -10464,8 +10465,12 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
             throw new SecurityException("Requires READ_PHONE_STATE permission.");
         }
 
-        enforceTelephonyFeatureWithException(callingPackage,
-                PackageManager.FEATURE_TELEPHONY_CALLING, "getEmergencyNumberList");
+        enforceTelephonyFeatureWithException(
+                callingPackage,
+                Arrays.asList(
+                        PackageManager.FEATURE_TELEPHONY_CALLING,
+                        PackageManager.FEATURE_TELEPHONY_MESSAGING),
+                "getEmergencyNumberList");
 
         final long identity = Binder.clearCallingIdentity();
         try {
@@ -10495,8 +10500,12 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
 
         if (!mApp.getResources().getBoolean(
                 com.android.internal.R.bool.config_force_phone_globals_creation)) {
-            enforceTelephonyFeatureWithException(getCurrentPackageName(),
-                    PackageManager.FEATURE_TELEPHONY_CALLING, "isEmergencyNumber");
+            enforceTelephonyFeatureWithException(
+                    getCurrentPackageName(),
+                    Arrays.asList(
+                            PackageManager.FEATURE_TELEPHONY_CALLING,
+                            PackageManager.FEATURE_TELEPHONY_MESSAGING),
+                    "isEmergencyNumber");
         }
 
         final long identity = Binder.clearCallingIdentity();
@@ -10591,8 +10600,12 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     public int getEmergencyNumberDbVersion(int subId) {
         enforceReadPrivilegedPermission("getEmergencyNumberDbVersion");
 
-        enforceTelephonyFeatureWithException(getCurrentPackageName(),
-                PackageManager.FEATURE_TELEPHONY_CALLING, "getEmergencyNumberDbVersion");
+        enforceTelephonyFeatureWithException(
+                getCurrentPackageName(),
+                Arrays.asList(
+                        PackageManager.FEATURE_TELEPHONY_CALLING,
+                        PackageManager.FEATURE_TELEPHONY_MESSAGING),
+                "getEmergencyNumberDbVersion");
 
         final long identity = Binder.clearCallingIdentity();
         try {
@@ -10611,8 +10624,12 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     public void notifyOtaEmergencyNumberDbInstalled() {
         enforceModifyPermission();
 
-        enforceTelephonyFeatureWithException(getCurrentPackageName(),
-                PackageManager.FEATURE_TELEPHONY_CALLING, "notifyOtaEmergencyNumberDbInstalled");
+        enforceTelephonyFeatureWithException(
+                getCurrentPackageName(),
+                Arrays.asList(
+                        PackageManager.FEATURE_TELEPHONY_CALLING,
+                        PackageManager.FEATURE_TELEPHONY_MESSAGING),
+                "notifyOtaEmergencyNumberDbInstalled");
 
         final long identity = Binder.clearCallingIdentity();
         try {
@@ -10631,8 +10648,12 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     public void updateOtaEmergencyNumberDbFilePath(ParcelFileDescriptor otaParcelFileDescriptor) {
         enforceActiveEmergencySessionPermission();
 
-        enforceTelephonyFeatureWithException(getCurrentPackageName(),
-                PackageManager.FEATURE_TELEPHONY_CALLING, "updateOtaEmergencyNumberDbFilePath");
+        enforceTelephonyFeatureWithException(
+                getCurrentPackageName(),
+                Arrays.asList(
+                        PackageManager.FEATURE_TELEPHONY_CALLING,
+                        PackageManager.FEATURE_TELEPHONY_MESSAGING),
+                "updateOtaEmergencyNumberDbFilePath");
 
         final long identity = Binder.clearCallingIdentity();
         try {
@@ -10651,8 +10672,12 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     public void resetOtaEmergencyNumberDbFilePath() {
         enforceActiveEmergencySessionPermission();
 
-        enforceTelephonyFeatureWithException(getCurrentPackageName(),
-                PackageManager.FEATURE_TELEPHONY_CALLING, "resetOtaEmergencyNumberDbFilePath");
+        enforceTelephonyFeatureWithException(
+                getCurrentPackageName(),
+                Arrays.asList(
+                        PackageManager.FEATURE_TELEPHONY_CALLING,
+                        PackageManager.FEATURE_TELEPHONY_MESSAGING),
+                "resetOtaEmergencyNumberDbFilePath");
 
         final long identity = Binder.clearCallingIdentity();
         try {
@@ -14350,6 +14375,32 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     }
 
     /**
+     * This API can be used by only CTS to control the feature
+     * {@code config_support_disable_satellite_while_enable_in_progress}.
+     *
+     * @param reset Whether to reset the override.
+     * @param supported Whether to support the feature.
+     * @return {@code true} if the value is set successfully, {@code false} otherwise.
+     */
+    public boolean setSupportDisableSatelliteWhileEnableInProgress(
+        boolean reset, boolean supported) {
+        Log.d(LOG_TAG, "setSupportDisableSatelliteWhileEnableInProgress - reset=" + reset
+                  + ", supported=" + supported);
+        TelephonyPermissions.enforceShellOnly(
+                Binder.getCallingUid(), "setSupportDisableSatelliteWhileEnableInProgress");
+        TelephonyPermissions.enforceCallingOrSelfModifyPermissionOrCarrierPrivilege(mApp,
+                SubscriptionManager.INVALID_SUBSCRIPTION_ID,
+                "setSupportDisableSatelliteWhileEnableInProgress");
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return mSatelliteController.setSupportDisableSatelliteWhileEnableInProgress(
+                reset, supported);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    /**
      * This API can be used by only CTS to override the timeout durations used by the
      * DatagramController module.
      *
@@ -14504,6 +14555,22 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
+    }
+
+    /**
+     * This API is used by CTS to override the version of the config data
+     *
+     * @param reset Whether to restore the original version
+     * @param version The overriding version
+     * @return {@code true} if successful, {@code false} otherwise
+     */
+    public boolean overrideConfigDataVersion(boolean reset, int version) {
+        Log.d(LOG_TAG, "overrideVersion - reset=" + reset + ", version=" + version);
+        TelephonyPermissions.enforceShellOnly(
+                Binder.getCallingUid(), "overrideConfigDataVersion");
+        TelephonyPermissions.enforceCallingOrSelfModifyPermissionOrCarrierPrivilege(mApp,
+                SubscriptionManager.INVALID_SUBSCRIPTION_ID, "overrideVersion");
+        return TelephonyConfigUpdateInstallReceiver.getInstance().overrideVersion(reset, version);
     }
 
     /**
@@ -14837,6 +14904,40 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     }
 
     /**
+     * Make sure the device has at least one of the required telephony feature
+     *
+     * @throws UnsupportedOperationException if the device does not have any of the required
+     *     telephony feature
+     */
+    private void enforceTelephonyFeatureWithException(
+            @Nullable String callingPackage,
+            @NonNull List<String> anyOfTelephonyFeatures,
+            @NonNull String methodName) {
+        if (callingPackage == null || mPackageManager == null) {
+            return;
+        }
+
+        if (!CompatChanges.isChangeEnabled(ENABLE_FEATURE_MAPPING, callingPackage,
+                Binder.getCallingUserHandle())
+                || mVendorApiLevel < Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+            // Skip to check associated telephony feature,
+            // if compatibility change is not enabled for the current process or
+            // the SDK version of vendor partition is less than Android V.
+            return;
+        }
+        for (String feature : anyOfTelephonyFeatures) {
+            if (mPackageManager.hasSystemFeature(feature)) {
+                // At least one feature is present, so the requirement is satisfied.
+                return;
+            }
+        }
+
+        // No features were found.
+        throw new UnsupportedOperationException(
+                methodName + " is unsupported without any of " + anyOfTelephonyFeatures);
+    }
+
+    /**
      * Registers for the satellite communication allowed state changed.
      *
      * @param subId The subId of the subscription to register for the satellite communication
@@ -15107,5 +15208,36 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         }
 
         return appNames;
+    }
+
+    /**
+     * Method to return the current satellite data service policy supported mode for the
+     * subscriptionId based on carrier config.
+     *
+     * @param subId current subscription id.
+     *
+     * @return Supported modes {@link SatelliteManager#SatelliteDataSupportMode}
+     * @throws IllegalArgumentException if the subscription is invalid.
+     *
+     * @hide
+     */
+    @Override
+    @SatelliteManager.SatelliteDataSupportMode
+    public int getSatelliteDataSupportMode(int subId) {
+        enforceSatelliteCommunicationPermission("getSatelliteDataSupportMode");
+        int satelliteMode = SatelliteManager.SATELLITE_DATA_SUPPORT_UNKNOWN;
+
+        if (!SubscriptionManager.isValidSubscriptionId(subId)) {
+            throw new IllegalArgumentException("Invalid Subscription ID: " + subId);
+        }
+
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            satelliteMode = mSatelliteController.getSatelliteDataSupportMode(subId);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+
+        return satelliteMode;
     }
 }
