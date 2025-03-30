@@ -89,6 +89,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -160,6 +161,8 @@ public class NotificationMgr {
 
     // used to track whether the message waiting indicator is visible, per subscription id.
     private ArrayMap<Integer, Boolean> mMwiVisible = new ArrayMap<Integer, Boolean>();
+    // used to track the last broadcast sent to the dialer about the MWI, per sub id.
+    private ArrayMap<Integer, Integer> mLastMwiCountSent = new ArrayMap<Integer, Integer>();
 
     // those flags are used to track whether to show network selection notification or not.
     private SparseArray<Integer> mPreviousServiceState = new SparseArray<>();
@@ -298,11 +301,38 @@ public class NotificationMgr {
 
     /**
      * Updates the message waiting indicator (voicemail) notification.
-     *
-     * @param subId the subId to update.
-     * @param visible true if there are messages waiting
-     * @param isRefresh {@code true} if the notification is a refresh and the user should not be
-     * notified again.
+     * See also {@link CallNotifier#updatePhoneStateListeners(boolean)} for more background.
+     * Okay, lets get started; time for a code adventure.
+     * This method (unfortunately) serves double-duty for updating the message waiting indicator
+     * when either: the "subscription info" changes (could be due to the carrier name loading, the
+     * current phase of the moon, etc) -- this is considered a "refresh"; or due to a direct signal
+     * from the network that indeed the voicemail indicator has changed state.  Note that although
+     * {@link android.telephony.ims.feature.MmTelFeature.Listener#onVoiceMessageCountUpdate(int)}
+     * gives us an actual COUNT of the messages, that information is unfortunately lost in the
+     * current design -- that's a design issue left for another day.  Note; it is ALSO possible to
+     * get updates through SMS via {@code GsmInboundSmsHandler#updateMessageWaitingIndicator(int)},
+     * and that seems to generally not include a count.
+     * <p>
+     * There are two ways the message waiting indicator can be notified to the user; either directly
+     * here by posting a notification, or via the default dialer.
+     * <p>
+     * The {@code isRefresh} == false case is pretty intuitive.  The network told us something
+     * changed, so we should notify the user.
+     * <p>
+     * The {@code isRefresh} == true case is unfortunately not very intuitive.  While the device is
+     * booting up, we'll actually get a callback from the ImsService telling us the state of the
+     * MWI indication, BUT at that point in time it's possible the sim records won't have loaded so
+     * code below will return early -- the voicemail notification is supposed to include the user's
+     * voicemail number, so we have to defer posting the notification or notifying the dialer until
+     * later on.  That's where the refreshes are handy; once the voicemail number is known, we'll
+     * get a refresh and have an opportunity to notify the user at this point.
+     * @param subId the subId to update where {@code isRefresh} is false,
+     *              or {@link SubscriptionManager#INVALID_SUBSCRIPTION_ID} if {@code isRefresh} is
+     *              true.
+     * @param visible {@code true} if there are messages waiting, or {@code false} if there are not.
+     * @param isRefresh {@code true} if this is a refresh triggered by a subscription change,
+     *                              {@code false} if this is an update based on actual network
+     *                              signalling.
      */
     void updateMwi(int subId, boolean visible, boolean isRefresh) {
         if (!PhoneGlobals.sVoiceCapable) {
@@ -313,8 +343,19 @@ public class NotificationMgr {
         }
 
         Phone phone = PhoneGlobals.getPhone(subId);
-        Log.i(LOG_TAG, "updateMwi(): subId " + subId + " update to " + visible);
+        // --
+        // Note: This is all done just so that we can have a better log of what is going on here.
+        // The state changes are unfortunately not so intuitive.
+        boolean wasPrevStateKnown = mMwiVisible.containsKey(subId);
+        boolean wasVisible = wasPrevStateKnown && mMwiVisible.get(subId);
         mMwiVisible.put(subId, visible);
+        boolean mwiStateChanged = !wasPrevStateKnown || wasVisible != visible;
+        // --
+
+        Log.i(LOG_TAG, "updateMwi(): subId:" + subId + " isRefresh:" + isRefresh + " state:"
+                + (wasPrevStateKnown ? (wasVisible ? "Y" : "N") : "unset") + "->"
+                + (visible ? "Y" : "N")
+                + " (changed:" + (mwiStateChanged ? "Y" : "N") + ")");
 
 // QTI_BEGIN: 2021-02-10: Telephony: Move IExtTelephony to IExtPhone
         if (visible) {
@@ -357,12 +398,19 @@ public class NotificationMgr {
             //       register on the network before the SIM has loaded. In this case, the
             //       SubscriptionListener in CallNotifier will update this once the SIM is loaded.
             if ((vmNumber == null) && !phone.getIccRecordsLoaded()) {
-                if (DBG) log("- Null vm number: SIM records not loaded (yet)...");
+                Log.i(LOG_TAG, "updateMwi - Null vm number: SIM records not loaded (yet)...");
                 return;
             }
 
+            // Pay attention here; vmCount is an Integer, not an int.  This is because:
+            // vmCount == null - means there are voicemail messages waiting.
+            // vmCount == 0 - means there are no voicemail messages waiting.
+            // vmCount > 0 - means there are a specific number of voicemail messages waiting.
+            // Awesome.
             Integer vmCount = null;
 
+            // TODO: This should be revisited; in the IMS case, the network tells us a count, so
+            // it is strange to stash it and then retrieve it here instead of just passing it.
             if (TelephonyCapabilities.supportsVoiceMessageCount(phone)) {
                 vmCount = phone.getVoiceMessageCount();
                 String titleFormat = mContext.getString(R.string.notification_voicemail_title_count);
@@ -377,9 +425,6 @@ public class NotificationMgr {
             boolean isSettingsIntent = TextUtils.isEmpty(vmNumber);
 
             if (isSettingsIntent) {
-                notificationText = mContext.getString(
-                        R.string.notification_voicemail_no_vm_number);
-
                 // If the voicemail number if unknown, instead of calling voicemail, take the user
                 // to the voicemail settings.
                 notificationText = mContext.getString(
@@ -430,12 +475,13 @@ public class NotificationMgr {
             final Notification notification = builder.build();
             List<UserHandle> users = getUsersExcludeDying();
             for (UserHandle userHandle : users) {
-                boolean isManagedUser = mUserManager.isManagedProfile(userHandle.getIdentifier());
+                boolean isProfile = mUserManager.isProfile(userHandle.getIdentifier());
                 if (!hasUserRestriction(UserManager.DISALLOW_OUTGOING_CALLS, userHandle)
                         && (userHandle.equals(subAssociatedUserHandle)
-                            || (subAssociatedUserHandle == null && !isManagedUser))
+                            || (subAssociatedUserHandle == null && !isProfile))
                         && !maybeSendVoicemailNotificationUsingDefaultDialer(phone, vmCount,
                         vmNumber, pendingIntent, isSettingsIntent, userHandle, isRefresh, subId)) {
+                    Log.i(LOG_TAG, "updateMwi: notify userHandle=" + userHandle);
                     notifyAsUser(
                             Integer.toString(subId) /* tag */,
                             VOICEMAIL_NOTIFICATION,
@@ -448,12 +494,13 @@ public class NotificationMgr {
                     mSubscriptionManager.getSubscriptionUserHandle(subId);
             List<UserHandle> users = getUsersExcludeDying();
             for (UserHandle userHandle : users) {
-                boolean isManagedUser = mUserManager.isManagedProfile(userHandle.getIdentifier());
+                boolean isProfile = mUserManager.isProfile(userHandle.getIdentifier());
                 if (!hasUserRestriction(UserManager.DISALLOW_OUTGOING_CALLS, userHandle)
                         && (userHandle.equals(subAssociatedUserHandle)
-                            || (subAssociatedUserHandle == null && !isManagedUser))
+                            || (subAssociatedUserHandle == null && !isProfile))
                         && !maybeSendVoicemailNotificationUsingDefaultDialer(phone, 0, null, null,
                         false, userHandle, isRefresh, subId)) {
+                    Log.i(LOG_TAG, "notifyMwi: cancel userHandle=" + userHandle);
                     cancelAsUser(
                             Integer.toString(subId) /* tag */,
                             VOICEMAIL_NOTIFICATION,
@@ -501,18 +548,56 @@ public class NotificationMgr {
     private boolean maybeSendVoicemailNotificationUsingDefaultDialer(Phone phone, Integer count,
             String number, PendingIntent pendingIntent, boolean isSettingsIntent,
 // QTI_BEGIN: 2018-02-21: Telephony: MSIM: Add subId to voicemail intent
-            UserHandle userHandle, boolean isRefresh, int subId) {
+            UserHandle userHandle, boolean isRefresh, int qtiSubId) {
 // QTI_END: 2018-02-21: Telephony: MSIM: Add subId to voicemail intent
 
         if (shouldManageNotificationThroughDefaultDialer(userHandle)) {
+            int subId = phone.getSubId();
+            // We want to determine if the count of voicemails that we notified to the dialer app
+            // has changed or not.  mLastMwiCountSent will initially contain no entry for a subId
+            // meaning no count was ever sent to dialer.  The previous count is an Integer (not int)
+            // because the caller of maybeSendVoicemailNotificationUsingDefaultDialer will either
+            // send an instance of Integer with an actual number or "null" if the count isn't known.
+            // See the docs on updateMwi to get more flavor on this lovely logic.
+            // The end result here is we want to know if the "count" we last sent to the dialer for
+            // a sub has changed or not; this will play into whether we want to actually send the
+            // broadcast or not.
+            boolean wasCountSentYet = mLastMwiCountSent.containsKey(subId);
+            Integer previousCount = wasCountSentYet ? mLastMwiCountSent.get(subId) : null;
+            boolean didCountChange = !wasCountSentYet || !Objects.equals(previousCount, count);
+            mLastMwiCountSent.put(subId, count);
+
+            Log.i(LOG_TAG,
+                    "maybeSendVoicemailNotificationUsingDefaultDialer: count: " + (wasCountSentYet
+                            ? previousCount : "undef") + "->" + count + " (changed="
+                            + didCountChange + ")");
+
             Intent intent = getShowVoicemailIntentForDefaultDialer(userHandle);
+
+            /**
+             * isRefresh == true means that we're rebroadcasting because of an
+             * onSubscriptionsChanged callback -- that happens a LOT at boot up.  isRefresh == false
+             * happens when TelephonyCallback#onMessageWaitingIndicatorChanged is triggered in
+             * CallNotifier.  It's important to note that that count may either be an actual number,
+             * or "we don't know" because the modem doesn't know the actual count.  Hence anytime
+             * TelephonyCallback#onMessageWaitingIndicatorChanged occurs, we have to sent the
+             * broadcast even if the count didn't actually change.
+             */
+            if (!didCountChange && isRefresh) {
+                Log.i(LOG_TAG, "maybeSendVoicemailNotificationUsingDefaultDialer: skip bcast to:"
+                        + intent.getPackage() + ", user:" + userHandle);
+                // It's "technically" being sent through the dialer, but we just skipped that so
+                // still return true so we don't post a notification.
+                return true;
+            }
+
             intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
             intent.setAction(TelephonyManager.ACTION_SHOW_VOICEMAIL_NOTIFICATION);
             intent.putExtra(TelephonyManager.EXTRA_PHONE_ACCOUNT_HANDLE,
                     PhoneUtils.makePstnPhoneAccountHandle(phone));
             intent.putExtra(TelephonyManager.EXTRA_IS_REFRESH, isRefresh);
 // QTI_BEGIN: 2018-02-21: Telephony: MSIM: Add subId to voicemail intent
-            intent.putExtra(EXTRA_SUB_ID, subId);
+            intent.putExtra(EXTRA_SUB_ID, qtiSubId);
 // QTI_END: 2018-02-21: Telephony: MSIM: Add subId to voicemail intent
             if (count != null) {
                 intent.putExtra(TelephonyManager.EXTRA_NOTIFICATION_COUNT, count);
@@ -536,9 +621,15 @@ public class NotificationMgr {
 
             BroadcastOptions bopts = BroadcastOptions.makeBasic();
             bopts.setTemporaryAppWhitelistDuration(VOICEMAIL_ALLOW_LIST_DURATION_MILLIS);
-            mContext.sendBroadcastAsUser(intent, userHandle, READ_PHONE_STATE, bopts.toBundle());
+
+            Log.i(LOG_TAG, "maybeSendVoicemailNotificationUsingDefaultDialer: send via Dialer:"
+                    + intent.getPackage() + ", user:" + userHandle);
+            mContext.sendBroadcastAsUser(intent, userHandle, READ_PHONE_STATE,
+                    bopts.toBundle());
             return true;
         }
+        Log.i(LOG_TAG, "maybeSendVoicemailNotificationUsingDefaultDialer: not using dialer ; user:"
+                + userHandle);
 
         return false;
     }

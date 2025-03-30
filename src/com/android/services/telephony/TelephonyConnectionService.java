@@ -2095,6 +2095,12 @@ if (mTelephonyManagerProxy.isConcurrentCallsPossible()
     public void onCreateIncomingConnectionFailed(PhoneAccountHandle connectionManagerPhoneAccount,
             ConnectionRequest request) {
         Log.i(this, "onCreateIncomingConnectionFailed, request: " + request);
+        // for auto disconnect cases, the request will contain this message, so we can ignore
+        if (request.getExtras().containsKey(TelecomManager.EXTRA_CALL_DISCONNECT_MESSAGE)) {
+            Log.i(this, "onCreateIncomingConnectionFailed: auto-disconnected,"
+                    + "ignoring.");
+            return;
+        }
         // If there is an incoming emergency CDMA Call (while the phone is in ECBM w/ No SIM),
         // make sure the PhoneAccount lookup retrieves the default Emergency Phone.
         PhoneAccountHandle accountHandle = request.getAccountHandle();
@@ -4297,20 +4303,17 @@ if (mTelephonyManagerProxy.isConcurrentCallsPossible()
             completeConsumer.accept(false);
             return CompletableFuture.completedFuture(null);
         }
-        List<CompletableFuture<Void>> disconnectFutures = new ArrayList<>();
+        List<CompletableFuture<Boolean>> disconnectFutures = new ArrayList<>();
         for (Conferenceable conferenceable : conferenceables) {
-            CompletableFuture<Void> disconnectFuture = CompletableFuture.completedFuture(null);
+            CompletableFuture<Boolean> disconnectFuture = CompletableFuture.completedFuture(null);
             try {
                 if (conferenceable == null) {
                     disconnectFuture = CompletableFuture.completedFuture(null);
                 } else {
                     // Listen for each disconnect as part of an individual future.
-                    disconnectFuture = CompletableFuture.runAsync(() ->
-                            listenForDisconnectStateChanged(conferenceable)
-                                    .completeOnTimeout(false,
-                                            DEFAULT_DSDA_CALL_STATE_CHANGE_TIMEOUT_MS,
-                                            TimeUnit.MILLISECONDS),
-                            phone.getContext().getMainExecutor());
+                    disconnectFuture = listenForDisconnectStateChanged(conferenceable)
+                            .completeOnTimeout(false, DEFAULT_DSDA_CALL_STATE_CHANGE_TIMEOUT_MS,
+                                    TimeUnit.MILLISECONDS);
                 }
             } catch (Exception e) {
                 Log.w(this, "delayDialForOtherSubDisconnects - exception= " + e.getMessage());
