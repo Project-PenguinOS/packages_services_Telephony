@@ -18,6 +18,9 @@ package com.android.phone;
 
 import static android.telephony.ServiceState.RIL_RADIO_TECHNOLOGY_UNKNOWN;
 
+import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
+import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.ColorInt;
@@ -69,6 +72,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.AccessibilityDelegate;
 import android.view.ViewGroup;
+import android.view.WindowInsetsController;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.TextView;
@@ -76,6 +80,7 @@ import android.widget.TextView;
 import com.android.phone.common.dialpad.DialpadKeyButton;
 import com.android.phone.common.util.ViewUtil;
 import com.android.phone.common.widget.ResizingTextEditText;
+import com.android.phone.settings.SettingsConstants;
 import com.android.telephony.Rlog;
 
 import java.util.ArrayList;
@@ -262,6 +267,7 @@ public class EmergencyDialer extends Activity implements View.OnClickListener,
     @Override
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
+        SettingsConstants.setupEdgeToEdge(this);
 
         getWindow().addSystemFlags(
                 android.view.WindowManager.LayoutParams
@@ -717,17 +723,18 @@ public class EmergencyDialer extends Activity implements View.OnClickListener,
             return;
         }
 
-        int vis = getWindow().getDecorView().getSystemUiVisibility();
+        int systemBarsMask = APPEARANCE_LIGHT_STATUS_BARS | APPEARANCE_LIGHT_NAVIGATION_BARS;
+        int systemBarsAppearance = 0;
         if (supportsDarkText) {
-            vis |= View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
-            vis |= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+            systemBarsAppearance = systemBarsMask;
             setTheme(R.style.EmergencyDialerThemeDark);
         } else {
-            vis &= View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
-            vis &= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
             setTheme(R.style.EmergencyDialerTheme);
         }
-        getWindow().getDecorView().setSystemUiVisibility(vis);
+        WindowInsetsController insetsController = getWindow().getInsetsController();
+        if (insetsController != null) {
+            insetsController.setSystemBarsAppearance(systemBarsAppearance, systemBarsMask);
+        }
     }
 
     /**
