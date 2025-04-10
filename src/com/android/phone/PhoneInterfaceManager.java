@@ -10947,7 +10947,11 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
             UiccSlotInfo[] slotInfos = getUiccSlotsInfo(mApp.getOpPackageName());
             if (slotInfos != null) {
                 for (int i = 0; i < slotInfos.length; i++) {
-                    for (UiccPortInfo portInfo : slotInfos[i].getPorts()) {
+                    UiccSlotInfo slotInfo = slotInfos[i];
+                    if (slotInfo == null) {
+                        continue;
+                    }
+                    for (UiccPortInfo portInfo : slotInfo.getPorts()) {
                         if (SubscriptionManager.isValidPhoneId(portInfo.getLogicalSlotIndex())) {
                             slotMap.add(new UiccSlotMapping(portInfo.getPortIndex(), i,
                                     portInfo.getLogicalSlotIndex()));
