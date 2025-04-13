@@ -272,6 +272,7 @@ public class EmergencyDialer extends Activity implements View.OnClickListener,
         getWindow().addSystemFlags(
                 android.view.WindowManager.LayoutParams
                         .SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
+        SettingsConstants.setupEdgeToEdge(this);
 
         mEntryType = getIntent().getIntExtra(EXTRA_ENTRY_TYPE, ENTRY_TYPE_UNKNOWN);
         Log.d(LOG_TAG, "Launched from " + entryTypeToString(mEntryType));
