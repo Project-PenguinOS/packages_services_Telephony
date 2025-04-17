@@ -3224,6 +3224,11 @@ if (mTelephonyManagerProxy.isConcurrentCallsPossible()
             Phone callPhone = tc.getPhone();
             int callDomain = NetworkRegistrationInfo.DOMAIN_UNKNOWN;
 
+            // Treat Wi-Fi calling same as PS domain.
+            if (domain == PhoneConstants.DOMAIN_NON_3GPP_PS) {
+                domain = NetworkRegistrationInfo.DOMAIN_PS;
+            }
+
             if (callPhone != null && callPhone.getSubId() == phone.getSubId()) {
                 if (tc.isGsmCdmaConnection()) {
                     callDomain = NetworkRegistrationInfo.DOMAIN_CS;
