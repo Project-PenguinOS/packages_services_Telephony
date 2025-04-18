@@ -1440,12 +1440,6 @@ abstract class TelephonyConnection extends Connection implements Holdable,
 // QTI_BEGIN: 2025-01-30: Telephony: Revert "DSDA: Handle across sub operations"
                         imsPhone.holdActiveCall();
 // QTI_END: 2025-01-30: Telephony: Revert "DSDA: Handle across sub operations"
-                        if (!com.android.server.telecom.flags.Flags.enableCallSequencing()) {
-// QTI_BEGIN: 2023-04-06: Telephony: DSDA: Bypass AOSP DSDA logic for resume call while swap
-                            mTelephonyConnectionService.maybeUnholdCallsOnOtherSubs(
-                                    getPhoneAccountHandle());
-                        }
-// QTI_END: 2023-04-06: Telephony: DSDA: Bypass AOSP DSDA logic for resume call while swap
                         return;
                     }
                     phone.switchHoldingAndActive();
