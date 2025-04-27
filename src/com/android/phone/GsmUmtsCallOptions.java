@@ -163,7 +163,7 @@ public class GsmUmtsCallOptions extends PreferenceActivity {
                 .getSystemService(Context.USER_SERVICE);
         boolean mobileNetworkConfigsRestricted =
                 userManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS);
-        if (Flags.ensureAccessToCallSettingsIsRestricted() && mobileNetworkConfigsRestricted) {
+        if (mobileNetworkConfigsRestricted) {
             Log.i(LOG_TAG, "Mobile network configs are restricted, hiding GSM call "
                     + "forwarding, additional call settings, and call options.");
         }
@@ -172,8 +172,7 @@ public class GsmUmtsCallOptions extends PreferenceActivity {
         if (callForwardingPref != null) {
             if (b != null && b.getBoolean(
                     CarrierConfigManager.KEY_CALL_FORWARDING_VISIBILITY_BOOL) &&
-                    (!Flags.ensureAccessToCallSettingsIsRestricted() ||
-                            !mobileNetworkConfigsRestricted)) {
+                            !mobileNetworkConfigsRestricted) {
                 callForwardingPref.setIntent(
                         subInfoHelper.getIntent(CallForwardType.class));
 // QTI_BEGIN: 2024-11-06: Telephony: Fix the issues related to UT service in airplane mode am: e74f539a23 am: e74f539a23
@@ -191,8 +190,7 @@ public class GsmUmtsCallOptions extends PreferenceActivity {
                     CarrierConfigManager.KEY_ADDITIONAL_SETTINGS_CALL_WAITING_VISIBILITY_BOOL)
                     || b.getBoolean(
                     CarrierConfigManager.KEY_ADDITIONAL_SETTINGS_CALLER_ID_VISIBILITY_BOOL)) &&
-                    (!Flags.ensureAccessToCallSettingsIsRestricted() ||
-                            !mobileNetworkConfigsRestricted)) {
+                            !mobileNetworkConfigsRestricted) {
                 additionalGsmSettingsPref.setIntent(
                         subInfoHelper.getIntent(GsmUmtsAdditionalCallOptions.class));
 // QTI_BEGIN: 2024-11-06: Telephony: Fix the issues related to UT service in airplane mode am: e74f539a23 am: e74f539a23
@@ -206,8 +204,7 @@ public class GsmUmtsCallOptions extends PreferenceActivity {
         Preference callBarringPref = prefScreen.findPreference(CALL_BARRING_KEY);
         if (callBarringPref != null) {
             if (b != null && b.getBoolean(CarrierConfigManager.KEY_CALL_BARRING_VISIBILITY_BOOL) &&
-                    (!Flags.ensureAccessToCallSettingsIsRestricted() ||
-                            !mobileNetworkConfigsRestricted)) {
+                    !mobileNetworkConfigsRestricted) {
                 callBarringPref.setIntent(subInfoHelper.getIntent(GsmUmtsCallBarringOptions.class));
 // QTI_BEGIN: 2024-11-06: Telephony: Fix the issues related to UT service in airplane mode am: e74f539a23 am: e74f539a23
                 mPreferences.add(callBarringPref);
