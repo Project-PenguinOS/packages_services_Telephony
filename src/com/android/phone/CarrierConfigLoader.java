@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+/*
+ * Changes from Qualcomm Technologies, Inc. are provided under the following license:
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+ * SPDX-License-Identifier: BSD-3-Clause-Clear
+ */
+
 package com.android.phone;
 
 import static android.content.pm.PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION;
@@ -794,6 +800,11 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
             if (phone.isShuttingDown()) {
                 return;
             }
+        }
+
+        if (SubscriptionManager.isValidPhoneId(phoneId)) {
+            mPersistentOverrideConfigs[phoneId] = null;
+            mOverrideConfigs[phoneId] = null;
         }
 
         if (mConfigFromDefaultApp.length <= phoneId) {
