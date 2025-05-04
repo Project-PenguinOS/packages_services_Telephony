@@ -10948,14 +10948,17 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
             if (slotInfos != null) {
                 for (int i = 0; i < slotInfos.length; i++) {
                     UiccSlotInfo slotInfo = slotInfos[i];
-                    if (slotInfo == null) {
-                        continue;
-                    }
-                    for (UiccPortInfo portInfo : slotInfo.getPorts()) {
-                        if (SubscriptionManager.isValidPhoneId(portInfo.getLogicalSlotIndex())) {
-                            slotMap.add(new UiccSlotMapping(portInfo.getPortIndex(), i,
-                                    portInfo.getLogicalSlotIndex()));
+                    if (slotInfo != null) {
+                        for (UiccPortInfo portInfo : slotInfo.getPorts()) {
+                            if (SubscriptionManager.isValidPhoneId(
+                                    portInfo.getLogicalSlotIndex())) {
+                                slotMap.add(new UiccSlotMapping(portInfo.getPortIndex(), i,
+                                        portInfo.getLogicalSlotIndex()));
+                            }
                         }
+                    } else {
+                        loge("getSlotsMapping, SlotInfo[ " + i
+                                + " ] is null, which is not expected");
                     }
                 }
             }
