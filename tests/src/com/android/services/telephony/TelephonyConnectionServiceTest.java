@@ -116,6 +116,7 @@ import com.android.internal.telephony.satellite.SatelliteController;
 import com.android.internal.telephony.satellite.SatelliteSOSMessageRecommender;
 import com.android.internal.telephony.subscription.SubscriptionInfoInternal;
 import com.android.internal.telephony.subscription.SubscriptionManagerService;
+import com.android.services.telephony.domainselection.DynamicRoutingController;
 
 import org.junit.After;
 import org.junit.Before;
@@ -271,6 +272,7 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
     @Mock SubscriptionManagerService mSubscriptionManagerService;
     @Mock private SatelliteSOSMessageRecommender mSatelliteSOSMessageRecommender;
     @Mock private EmergencyStateTracker mEmergencyStateTracker;
+    @Mock private DynamicRoutingController mDynamicRoutingController;
     @Mock private Resources mMockResources;
     @Mock private FeatureFlags mFeatureFlags;
     @Mock private com.android.server.telecom.flags.FeatureFlags mTelecomFlags;
@@ -348,6 +350,8 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
         doReturn(mMockResources).when(mContext).getResources();
         replaceInstance(SubscriptionManagerService.class, "sInstance", null,
                 mSubscriptionManagerService);
+        replaceInstance(DynamicRoutingController.class, "sInstance", null,
+                mDynamicRoutingController);
 
         mTestConnectionService.onCreate();
         mTestConnectionService.setTelephonyManagerProxy(mTelephonyManagerProxy);
@@ -355,6 +359,7 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
         mBinderStub = (IConnectionService.Stub) mTestConnectionService.onBind(null);
         mSetFlagsRule.disableFlags(Flags.FLAG_HANGUP_ACTIVE_CALL_BASED_ON_EMERGENCY_CALL_DOMAIN);
         mSetFlagsRule.disableFlags(Flags.FLAG_IGNORE_STATE_DETAILS_UPDATE_FOR_DOMAIN_RESELECTION);
+        mSetFlagsRule.disableFlags(Flags.FLAG_USE_EMERGENCY_ROUTING_CAUSE);
     }
 
     @After
@@ -3018,6 +3023,117 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
         assertEquals(eccCategory, dialArgs.eccCategory);
         assertTrue(dialArgs.intentExtras.getBoolean(
                 PhoneConstants.EXTRA_USE_EMERGENCY_ROUTING, false));
+    }
+
+    @Test
+    public void testDomainSelectionUpdateEmergencyCallRoutingWithSourceModification()
+            throws Exception {
+        mSetFlagsRule.enableFlags(Flags.FLAG_USE_EMERGENCY_ROUTING_CAUSE);
+        setupForCallTest();
+
+        int preciseDisconnectCause = com.android.internal.telephony.CallFailCause.ERROR_UNSPECIFIED;
+        int disconnectCause = android.telephony.DisconnectCause.ERROR_UNSPECIFIED;
+        int eccCategory = EMERGENCY_SERVICE_CATEGORY_POLICE;
+        int selectedDomain = DOMAIN_PS;
+
+        setupForDialForDomainSelection(mPhone0, selectedDomain, true);
+        doReturn(mPhone0).when(mImsPhone).getDefaultPhone();
+        doReturn(mInternalConnection).when(mPhone0).dial(anyString(), any(), any());
+
+        TestTelephonyConnection c = setupForReDialForDomainSelection(
+                mImsPhone, selectedDomain, preciseDisconnectCause, disconnectCause, false);
+        c.setEmergencyServiceCategory(eccCategory);
+        c.setAddress(TEST_ADDRESS, TelecomManager.PRESENTATION_ALLOWED);
+
+        ImsReasonInfo reasonInfo = new ImsReasonInfo(CODE_SIP_ALTERNATE_EMERGENCY_CALL, 0, null);
+        assertTrue(mTestConnectionService.maybeReselectDomain(c, reasonInfo, true,
+                android.telephony.DisconnectCause.NOT_VALID));
+
+        ArgumentCaptor<android.telecom.Connection> connectionCaptor =
+                ArgumentCaptor.forClass(android.telecom.Connection.class);
+
+        verify(mDomainSelectionResolver)
+                .getDomainSelectionConnection(eq(mPhone0), eq(SELECTOR_TYPE_CALLING), eq(true));
+        verify(mEmergencyStateTracker)
+                .startEmergencyCall(eq(mPhone0), connectionCaptor.capture(), eq(false));
+        verify(mSatelliteSOSMessageRecommender).onEmergencyCallStarted(any(), anyBoolean());
+        verify(mEmergencyCallDomainSelectionConnection).createEmergencyConnection(any(), any());
+
+        android.telecom.Connection tc = connectionCaptor.getValue();
+
+        assertNotNull(tc);
+        assertEquals(TELECOM_CALL_ID1, tc.getTelecomCallId());
+        assertEquals(mTestConnectionService.getEmergencyConnection(), tc);
+
+        ArgumentCaptor<DialArgs> argsCaptor = ArgumentCaptor.forClass(DialArgs.class);
+
+        verify(mPhone0).dial(anyString(), argsCaptor.capture(), any());
+        DialArgs dialArgs = argsCaptor.getValue();
+        assertNotNull("DialArgs param is null", dialArgs);
+        assertNotNull("intentExtras is null", dialArgs.intentExtras);
+        assertTrue(dialArgs.intentExtras.containsKey(PhoneConstants.EXTRA_DIAL_DOMAIN));
+        assertEquals(selectedDomain,
+                dialArgs.intentExtras.getInt(PhoneConstants.EXTRA_DIAL_DOMAIN, -1));
+        assertTrue(dialArgs.isEmergency);
+        assertEquals(eccCategory, dialArgs.eccCategory);
+        assertEquals(dialArgs.intentExtras.getInt(
+                PhoneConstants.EXTRA_EMERGENCY_ROUTING_UPDATE_CAUSE,
+                PhoneConstants.EMERGENCY_ROUTING_UPDATE_CAUSE_UNSPECIFIED),
+                        PhoneConstants.EMERGENCY_ROUTING_UPDATE_CAUSE_ALTERNATE_SERVICE);
+    }
+
+    @Test
+    public void testDomainSelectionUpdateEmergencyCallRoutingButSourceKept() throws Exception {
+        mSetFlagsRule.enableFlags(Flags.FLAG_USE_EMERGENCY_ROUTING_CAUSE);
+        setupForCallTest();
+        int selectedDomain = DOMAIN_PS;
+
+        EmergencyNumber emergencyNumber = new EmergencyNumber(TEST_EMERGENCY_NUMBER, "us", "",
+                EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED,
+                Collections.emptyList(),
+                EmergencyNumber.EMERGENCY_NUMBER_SOURCE_DATABASE,
+                EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN);
+
+        setupForDialForDomainSelection(mPhone0, selectedDomain, true);
+        doReturn(emergencyNumber).when(mEmergencyNumberTracker).getEmergencyNumber(anyString());
+        doReturn(Arrays.asList(emergencyNumber)).when(mEmergencyNumberTracker).getEmergencyNumbers(
+                anyString());
+
+        doReturn(true).when(mDynamicRoutingController).isDynamicRoutingEnabled();
+        doReturn(EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY)
+                .when(mDynamicRoutingController).getEmergencyCallRouting(
+                        eq(mPhone0), eq(TEST_EMERGENCY_NUMBER),
+                        anyBoolean(), anyBoolean(), anyBoolean());
+
+        mTestConnectionService.onCreateOutgoingConnection(PHONE_ACCOUNT_HANDLE_1,
+                createConnectionRequest(PHONE_ACCOUNT_HANDLE_1,
+                        TEST_EMERGENCY_NUMBER, TELECOM_CALL_ID1));
+
+        ArgumentCaptor<android.telecom.Connection> connectionCaptor =
+                ArgumentCaptor.forClass(android.telecom.Connection.class);
+
+        verify(mDomainSelectionResolver)
+                .getDomainSelectionConnection(eq(mPhone0), eq(SELECTOR_TYPE_CALLING), eq(true));
+        verify(mEmergencyStateTracker)
+                .startEmergencyCall(eq(mPhone0), connectionCaptor.capture(), eq(false));
+        verify(mEmergencyCallDomainSelectionConnection).createEmergencyConnection(any(), any());
+
+        android.telecom.Connection tc = connectionCaptor.getValue();
+
+        assertNotNull(tc);
+        assertEquals(TELECOM_CALL_ID1, tc.getTelecomCallId());
+        assertEquals(mTestConnectionService.getEmergencyConnection(), tc);
+
+        ArgumentCaptor<DialArgs> argsCaptor = ArgumentCaptor.forClass(DialArgs.class);
+
+        verify(mPhone0).dial(anyString(), argsCaptor.capture(), any());
+        DialArgs dialArgs = argsCaptor.getValue();
+        assertNotNull("DialArgs param is null", dialArgs);
+        assertNotNull("intentExtras is null", dialArgs.intentExtras);
+        assertEquals(dialArgs.intentExtras.getInt(
+                PhoneConstants.EXTRA_EMERGENCY_ROUTING_UPDATE_CAUSE,
+                PhoneConstants.EMERGENCY_ROUTING_UPDATE_CAUSE_UNSPECIFIED),
+                        PhoneConstants.EMERGENCY_ROUTING_UPDATE_CAUSE_DYNAMIC_ROUTING);
     }
 
     @Test
