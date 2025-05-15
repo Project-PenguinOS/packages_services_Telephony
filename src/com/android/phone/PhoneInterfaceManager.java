@@ -5841,8 +5841,12 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
             }
         }
 
-        enforceTelephonyFeatureWithException(callingPackage,
-                PackageManager.FEATURE_TELEPHONY_RADIO_ACCESS, "getDataNetworkTypeForSubscriber");
+        if (!mApp.getResources().getBoolean(
+                com.android.internal.R.bool.config_force_phone_globals_creation)) {
+            enforceTelephonyFeatureWithException(callingPackage,
+                    PackageManager.FEATURE_TELEPHONY_RADIO_ACCESS,
+                    "getDataNetworkTypeForSubscriber");
+        }
 
         final long identity = Binder.clearCallingIdentity();
         try {
@@ -15317,6 +15321,22 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
                 "setCtsMode");
         mIsInCtsMode = ctsMode;
         return true;
+    }
+
+    /**
+     * This API can be used by only CTS to ignore plmn list from storage.
+     *
+     * @param enabled Whether to enable boolean config.
+     * @return {@code true} if the value is set successfully, {@code false} otherwise.
+     */
+    public boolean setSatelliteIgnorePlmnListFromStorage(boolean enabled) {
+        Log.d(LOG_TAG, "setSatelliteIgnorePlmnListFromStorage - " + enabled);
+        TelephonyPermissions.enforceShellOnly(
+                Binder.getCallingUid(), "setSatelliteIgnorePlmnListFromStorage");
+        TelephonyPermissions.enforceCallingOrSelfModifyPermissionOrCarrierPrivilege(mApp,
+                SubscriptionManager.INVALID_SUBSCRIPTION_ID,
+                "setSatelliteIgnorePlmnListFromStorage");
+        return mSatelliteController.setSatelliteIgnorePlmnListFromStorage(enabled);
     }
 
     private boolean shouldIgnoreSatelliteRequestInCtsMode(

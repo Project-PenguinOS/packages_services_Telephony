@@ -34,8 +34,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.CallFailCause;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneFactory;
-import com.android.internal.telephony.flags.FeatureFlags;
-import com.android.internal.telephony.flags.FeatureFlagsImpl;
 import com.android.internal.telephony.satellite.SatelliteController;
 import com.android.phone.ImsUtil;
 import com.android.phone.PhoneGlobals;
@@ -906,7 +904,6 @@ public class DisconnectCauseUtil {
 
             case android.telephony.DisconnectCause.OUT_OF_SERVICE:
                 // No network connection.
-                FeatureFlags mFeatureFlags = new FeatureFlagsImpl();
 // QTI_BEGIN: 2018-03-14: Telephony: IMS: No option to merge calls in VoWIFI
                 if (ImsUtil.shouldPromoteWfc(context, phoneId)) {
 // QTI_END: 2018-03-14: Telephony: IMS: No option to merge calls in VoWIFI
@@ -918,20 +915,12 @@ public class DisconnectCauseUtil {
 // QTI_BEGIN: 2018-03-14: Telephony: IMS: No option to merge calls in VoWIFI
                 } else if (ImsUtil.isWfcEnabled(context, phoneId)) {
 // QTI_END: 2018-03-14: Telephony: IMS: No option to merge calls in VoWIFI
-                    if (!mFeatureFlags.showCallFailNotificationFor2gToggle()) {
-                        resourceId = R.string.incall_error_out_of_service_wfc;
-                        break;
-                    }
                     if (is2gDisabled(phoneId) && !shouldTreatAsEmergency) {
                         resourceId = R.string.incall_error_out_of_service_wfc_2g_user;
                     } else {
                         resourceId = R.string.incall_error_out_of_service_wfc;
                     }
                 } else {
-                    if (!mFeatureFlags.showCallFailNotificationFor2gToggle()) {
-                        resourceId = R.string.incall_error_out_of_service;
-                        break;
-                    }
                     if (is2gDisabled(phoneId) && !shouldTreatAsEmergency) {
                         resourceId = R.string.incall_error_out_of_service_2g;
                     } else {
