@@ -3392,6 +3392,7 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
     private int handleSetSatelliteAccessAllowedForSubscriptions() {
         PrintWriter errPw = getErrPrintWriter();
         String subIdListStr = null;
+        boolean reset = false;
 
         String opt;
         while ((opt = getNextOption()) != null) {
@@ -3400,13 +3401,18 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
                     subIdListStr = getNextArgRequired();
                     break;
                 }
+                case "-r": {
+                    reset = true;
+                    break;
+                }
             }
         }
         Log.d(LOG_TAG, "handleSetSatelliteAccessAllowedForSubscriptions: subIdListStr="
-            + subIdListStr);
+            + subIdListStr + ", reset=" + reset);
 
         try {
-            boolean result = mInterface.setSatelliteAccessAllowedForSubscriptions(subIdListStr);
+            boolean result = mInterface.setSatelliteAccessAllowedForSubscriptions(
+                reset, subIdListStr);
             if (VDBG) {
                 Log.v(LOG_TAG, "SetSatelliteAccessAllowedForSubscriptions " + subIdListStr
                     + ", result = " + result);
