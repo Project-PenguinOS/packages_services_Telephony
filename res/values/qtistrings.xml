@@ -491,7 +491,7 @@ ul.</string>
     <string name="cf_setting_mobile_data_off_alert">Please turn on mobile data</string>
 <!-- QTI_BEGIN: 2024-03-18: Telephony: Allow to query CF from UI when Wi-Fi is on-->
 <!-- QTI_END: 2024-03-18: Telephony: Allow to query CF from UI when Wi-Fi is on-->
-    <string name="cf_setting_wifi_on_alert">Please turn off Wi-Fi</string>
+    <string name="cf_setting_wifi_on_alert">This operation may incur some data charges. Please understand this situation and try again after turning off Wi-Fi</string>
 <!-- QTI_BEGIN: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding-->
 <!-- QTI_END: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding-->
     <string name="cf_setting_mobile_data_roaming_alert">Please turn on data roaming</string>
