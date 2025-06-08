@@ -2499,7 +2499,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         mApp = app;
         mFeatureFlags = featureFlags;
         mTelecomFeatureFlags = new com.android.server.telecom.flags.FeatureFlagsImpl();
-        mCM = PhoneGlobals.getInstance().mCM;
+        mCM = PhoneGlobals.getInstance().getCallManager();
         mImsResolver = ImsResolver.getInstance();
         mSatelliteController = SatelliteController.getInstance();
         mUserManager = (UserManager) app.getSystemService(Context.USER_SERVICE);
@@ -3366,8 +3366,12 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         final long identity = Binder.clearCallingIdentity();
         try {
             Phone phone = getPhone(subId);
-            return phone == null ? TelephonyManager.CALL_STATE_IDLE :
-                    PhoneConstantConversions.convertCallState(phone.getState());
+            if (phone == null) {
+                return TelephonyManager.CALL_STATE_IDLE;
+            }
+            PhoneConstants.State state = phone.getState();
+            return state == null ? TelephonyManager.CALL_STATE_IDLE :
+                    PhoneConstantConversions.convertCallState(state);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
