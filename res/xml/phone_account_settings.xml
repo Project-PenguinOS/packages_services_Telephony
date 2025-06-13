@@ -77,7 +77,6 @@
             android:title="@string/vibrating_for_outgoing_call_accepted_title"
             android:persistent="false"
             android:summary="@string/vibrating_for_outgoing_call_accepted_summary"/>
-
     </PreferenceCategory>
 
 </PreferenceScreen>

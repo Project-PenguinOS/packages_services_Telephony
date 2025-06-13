@@ -140,6 +140,7 @@ public class CallFeaturesSetting extends PreferenceActivity
     private SwitchPreference mEnableVideoCalling;
     private Preference mButtonWifiCalling;
     private boolean mDisallowedConfig = false;
+    private int mCallConnectedIndicator = TelecomManager.CALL_CONNECTED_INDICATOR_NONE;
 
 // QTI_BEGIN: 2020-02-11: Telephony: Add vibrating for outgoing call accepted support
     private SwitchPreference mButtonVibratingForMoCallAccepted;
@@ -203,9 +204,11 @@ public class CallFeaturesSetting extends PreferenceActivity
             return true;
 // QTI_BEGIN: 2020-02-11: Telephony: Add vibrating for outgoing call accepted support
         } else if (preference == mButtonVibratingForMoCallAccepted) {
-            Settings.Global.putInt(mPhone.getContext().getContentResolver(),
-                    android.provider.Settings.Global.VIBRATING_FOR_OUTGOING_CALL_ACCEPTED,
-                    mButtonVibratingForMoCallAccepted.isChecked() ? 1 : 0);
+            final int prefs = mButtonVibratingForMoCallAccepted.isChecked()?
+                    mCallConnectedIndicator | TelecomManager.CALL_CONNECTED_INDICATOR_VIBRATION
+                    : mCallConnectedIndicator & ~TelecomManager.CALL_CONNECTED_INDICATOR_VIBRATION;
+            mTelecomManager.setCallConnectedIndicatorPreference(prefs);
+
             return true;
 // QTI_END: 2020-02-11: Telephony: Add vibrating for outgoing call accepted support
         } else if (preference == preferenceScreen.findPreference(
@@ -418,6 +421,12 @@ public class CallFeaturesSetting extends PreferenceActivity
 // QTI_BEGIN: 2020-02-11: Telephony: Add vibrating for outgoing call accepted support
         mButtonVibratingForMoCallAccepted = (SwitchPreference) findPreference(BUTTON_VIBRATING_KEY);
 // QTI_END: 2020-02-11: Telephony: Add vibrating for outgoing call accepted support
+        if (!getResources().getBoolean(
+                R.bool.show_call_connected_indicator_preference)) {
+            Preference phoneAccountSettingsPreference = findPreference(PHONE_ACCOUNT_SETTINGS_KEY);
+            getPreferenceScreen().removePreference(mButtonVibratingForMoCallAccepted);
+        }
+        mCallConnectedIndicator = mTelecomManager.getCallConnectedIndicatorPreference();
         // Note: The PhoneAccountSettingsActivity accessible via the
         // android.telecom.action.CHANGE_PHONE_ACCOUNTS intent is accessible directly from
         // the AOSP Dialer settings page on multi-sim devices.
@@ -427,14 +436,12 @@ public class CallFeaturesSetting extends PreferenceActivity
         if (telephonyManager.isMultiSimEnabled()) {
             Preference phoneAccountSettingsPreference = findPreference(PHONE_ACCOUNT_SETTINGS_KEY);
             getPreferenceScreen().removePreference(phoneAccountSettingsPreference);
-// QTI_BEGIN: 2020-02-11: Telephony: Add vibrating for outgoing call accepted support
             getPreferenceScreen().removePreference(mButtonVibratingForMoCallAccepted);
         } else {
             final int vibrating = Settings.Global.getInt(getContentResolver(),
                     Settings.Global.VIBRATING_FOR_OUTGOING_CALL_ACCEPTED, 1);
             mButtonVibratingForMoCallAccepted.setChecked(vibrating != 0);
             mButtonVibratingForMoCallAccepted.setOnPreferenceChangeListener(this);
-// QTI_END: 2020-02-11: Telephony: Add vibrating for outgoing call accepted support
         }
 
         PreferenceScreen prefSet = getPreferenceScreen();
