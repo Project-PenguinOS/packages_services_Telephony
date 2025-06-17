@@ -66,7 +66,6 @@
         android:title="@string/vibrating_for_outgoing_call_accepted_title"
         android:persistent="false"
         android:summary="@string/vibrating_for_outgoing_call_accepted_summary"/>
-
     <PreferenceScreen
         android:key="button_gsm_more_expand_key"
         android:title="@string/labelGSMMore"

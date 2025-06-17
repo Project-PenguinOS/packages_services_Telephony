@@ -492,6 +492,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     private static final int LINE1_NUMBER_MAX_LEN = 50;
 
     private static final String CTS_PACKAGE = "android.telephony.cts";
+    private static final String PHONE_PACKAGE = "com.android.phone";
     private boolean mIsInCtsMode = false;
 
     /**
@@ -10755,10 +10756,14 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         Phone phone = PhoneFactory.getPhone(slotIndex);
         if (phone == null) return false;
 
-        if (!TelephonyPermissions.checkCallingOrSelfReadPhoneState(
-                mApp, phone.getSubId(), callingPackage, callingFeatureId,
-                "isModemEnabledForSlot")) {
-            throw new SecurityException("Requires READ_PHONE_STATE permission.");
+        if (!mFeatureFlags.macroBasedOpportunisticNetworks()
+                || !TelephonyPermissions.checkCallingOrSelfReadNonDangerousPhoneStateNoThrow(
+                mApp, "isModemEnabledForSlot")) {
+            if (!TelephonyPermissions.checkCallingOrSelfReadPhoneState(
+                    mApp, phone.getSubId(), callingPackage, callingFeatureId,
+                    "isModemEnabledForSlot")) {
+                throw new SecurityException("Caller has no permission.");
+            }
         }
 
         enforceTelephonyFeatureWithException(callingPackage,
@@ -10796,10 +10801,20 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     @Override
     @TelephonyManager.IsMultiSimSupportedResult
     public int isMultiSimSupported(String callingPackage, String callingFeatureId) {
-        if (!TelephonyPermissions.checkCallingOrSelfReadPhoneState(mApp,
-                getDefaultPhone().getSubId(), callingPackage, callingFeatureId,
-                "isMultiSimSupported")) {
-            return TelephonyManager.MULTISIM_NOT_SUPPORTED_BY_HARDWARE;
+        if (mFeatureFlags.macroBasedOpportunisticNetworks()) {
+            if (!TelephonyPermissions.checkCallingOrSelfReadNonDangerousPhoneStateNoThrow(mApp,
+                    "isMultiSimSupported")
+                    && !TelephonyPermissions.checkCallingOrSelfReadPhoneState(mApp,
+                    getDefaultPhone().getSubId(), callingPackage, callingFeatureId,
+                    "isMultiSimSupported")) {
+                throw new SecurityException("Caller does not have permission.");
+            }
+        } else {
+            if (!TelephonyPermissions.checkCallingOrSelfReadPhoneState(mApp,
+                    getDefaultPhone().getSubId(), callingPackage, callingFeatureId,
+                    "isMultiSimSupported")) {
+                return TelephonyManager.MULTISIM_NOT_SUPPORTED_BY_HARDWARE;
+            }
         }
 
         enforceTelephonyFeatureWithException(callingPackage,
@@ -15433,10 +15448,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     private boolean shouldIgnoreSatelliteRequestInCtsMode(
         @NonNull String methodName, @Nullable Object resultCallback) {
         if (mIsInCtsMode) {
-            String callingPackage = getCurrentPackageName();
-            if (!TextUtils.equals(callingPackage, CTS_PACKAGE)) {
-                Log.d(LOG_TAG, methodName + " requested by " + callingPackage
-                    + " is ignored in CTS mode");
+            if (!isCallingPackageAllowedInCtsMode(methodName)) {
                 if (resultCallback == null) return true;
 
                 if (resultCallback instanceof ResultReceiver) {
@@ -15450,6 +15462,25 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
                 return true;
             }
         }
+        return false;
+    }
+
+    private boolean isCallingPackageAllowedInCtsMode(String methodName) {
+        PackageManager pm = mApp.getBaseContext().createContextAsUser(
+                Binder.getCallingUserHandle(), 0).getPackageManager();
+        if (pm == null) return false;
+        String[] callingPackages = pm.getPackagesForUid(Binder.getCallingUid());
+        if (callingPackages == null) return false;
+
+        for (String callingPackage : callingPackages) {
+            if (TextUtils.equals(callingPackage, CTS_PACKAGE)
+                    || TextUtils.equals(callingPackage, PHONE_PACKAGE)) {
+                return true;
+            }
+        }
+        Log.d(LOG_TAG, "isCallingPackageAllowedInCtsMode: calling packages="
+                + String.join(",", callingPackages) + " is not allowed in CTS mode"
+                + " for method: " + methodName);
         return false;
     }
 }
