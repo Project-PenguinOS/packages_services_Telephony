@@ -122,11 +122,6 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
     // Package name for platform carrier config app, bundled with system image.
     @NonNull private final String mPlatformCarrierConfigPackage;
 
-    @NonNull private final SubscriptionManagerService mSubscriptionManagerService;
-
-    /** Telephony manager instance. */
-    @NonNull private final TelephonyManager mTelephonyManager;
-
     /** The singleton instance. */
     @Nullable private static CarrierConfigLoader sInstance;
     // The context for phone app, passed from PhoneGlobals.
@@ -172,6 +167,7 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
     @NonNull private final LocalLog mCarrierConfigLoadingLog = new LocalLog(256);
     // Number of phone instances (active modem count)
     private int mNumPhones;
+
 
     // Message codes; see mHandler below.
     // Request from UiccController when SIM becomes absent or error.
@@ -731,22 +727,19 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
      * receiver for relevant events.
      */
     @VisibleForTesting
-    /* package */ CarrierConfigLoader(@NonNull Context context,
-            @NonNull SubscriptionManagerService subscriptionManagerService, @NonNull Looper looper,
+    /* package */ CarrierConfigLoader(@NonNull Context context, @NonNull Looper looper,
             @NonNull FeatureFlags featureFlags) {
         super(PermissionEnforcer.fromContext(context));
         mContext = context;
         mPlatformCarrierConfigPackage =
                 mContext.getString(R.string.platform_carrier_config_package);
         mHandler = new ConfigHandler(looper);
-        mTelephonyManager = mContext.getSystemService(TelephonyManager.class);
-        mSubscriptionManagerService = subscriptionManagerService;
 
         IntentFilter systemEventsFilter = new IntentFilter();
         systemEventsFilter.addAction(Intent.ACTION_BOOT_COMPLETED);
         context.registerReceiver(mSystemBroadcastReceiver, systemEventsFilter);
 
-        mNumPhones = mTelephonyManager.getActiveModemCount();
+        mNumPhones = TelephonyManager.from(context).getActiveModemCount();
         mConfigFromDefaultApp = new PersistableBundle[mNumPhones];
         mConfigFromCarrierApp = new PersistableBundle[mNumPhones];
         mPersistentOverrideConfigs = new PersistableBundle[mNumPhones];
@@ -763,7 +756,7 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
         mCarrierServiceChangeCallbacks = new CarrierServiceChangeCallback[mNumPhones];
         for (int phoneId = 0; phoneId < mNumPhones; phoneId++) {
             mCarrierServiceChangeCallbacks[phoneId] = new CarrierServiceChangeCallback(phoneId);
-            mTelephonyManager.registerCarrierPrivilegesCallback(phoneId,
+            TelephonyManager.from(context).registerCarrierPrivilegesCallback(phoneId,
                     new HandlerExecutor(mHandler), mCarrierServiceChangeCallbacks[phoneId]);
         }
         mFeatureFlags = featureFlags;
@@ -785,12 +778,10 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
      */
     @NonNull
     /* package */ static CarrierConfigLoader init(@NonNull Context context,
-            @NonNull SubscriptionManagerService subscriptionManagerService,
             @NonNull FeatureFlags featureFlags) {
         synchronized (CarrierConfigLoader.class) {
             if (sInstance == null) {
-                sInstance = new CarrierConfigLoader(context, subscriptionManagerService,
-                        Looper.myLooper(), featureFlags);
+                sInstance = new CarrierConfigLoader(context, Looper.myLooper(), featureFlags);
                 // Make this service available through ServiceManager.
                 TelephonyFrameworkInitializer.getTelephonyServiceManager()
                         .getCarrierConfigServiceRegisterer().register(sInstance);
@@ -860,7 +851,12 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
             configToSend.putAll(config);
         }
 
-        mSubscriptionManagerService.updateSubscriptionByCarrierConfig(
+        SubscriptionManagerService sm = SubscriptionManagerService.getInstance();
+        if (sm == null) {
+            loge("SubscriptionManagerService missing");
+            return;
+        }
+        sm.updateSubscriptionByCarrierConfig(
                 phoneId, configPackageName, configToSend,
                 () -> mHandler.obtainMessage(EVENT_SUBSCRIPTION_INFO_UPDATED, phoneId, -1)
                         .sendToTarget());
@@ -980,7 +976,12 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
         if (!SubscriptionManager.isValidSubscriptionId(subId)) {
             return TelephonyManager.SIM_STATE_UNKNOWN;
         }
-        return mTelephonyManager.getSimApplicationState();
+        TelephonyManager telMgr = TelephonyManager.from(mContext)
+                .createForSubscriptionId(subId);
+        if (telMgr == null) {
+            return TelephonyManager.SIM_STATE_UNKNOWN;
+        }
+        return telMgr.getSimApplicationState();
     }
 
     /** Binds to the default or carrier config app. */
@@ -1026,8 +1027,8 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
 // QTI_BEGIN: 2018-05-21: Telephony: Pass ICCID to Carrier Config Service
         String iccid = "";
 // QTI_END: 2018-05-21: Telephony: Pass ICCID to Carrier Config Service
-        String spn = mTelephonyManager.getSimOperatorNameForPhone(phoneId);
-        String simOperator = mTelephonyManager.getSimOperatorNumericForPhone(phoneId);
+        String spn = TelephonyManager.from(mContext).getSimOperatorNameForPhone(phoneId);
+        String simOperator = TelephonyManager.from(mContext).getSimOperatorNumericForPhone(phoneId);
         int carrierId = TelephonyManager.UNKNOWN_CARRIER_ID;
         int specificCarrierId = TelephonyManager.UNKNOWN_CARRIER_ID;
         // A valid simOperator should be 5 or 6 digits, depending on the length of the MNC.
@@ -1054,7 +1055,8 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
     private String getCarrierPackageForPhoneId(int phoneId) {
         final long token = Binder.clearCallingIdentity();
         try {
-            return mTelephonyManager.getCarrierServicePackageNameForLogicalSlot(phoneId);
+            return TelephonyManager.from(mContext)
+                    .getCarrierServicePackageNameForLogicalSlot(phoneId);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -1399,7 +1401,7 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
 
     private void onMultiSimConfigChanged() {
         int oldNumPhones = mNumPhones;
-        mNumPhones = mTelephonyManager.getActiveModemCount();
+        mNumPhones = TelephonyManager.from(mContext).getActiveModemCount();
         if (mNumPhones == oldNumPhones) {
             return;
         }
@@ -1419,7 +1421,7 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
         // The phone to slot mapping may change, unregister here and re-register callbacks later
         for (int phoneId = 0; phoneId < oldNumPhones; phoneId++) {
             if (mCarrierServiceChangeCallbacks[phoneId] != null) {
-                mTelephonyManager.unregisterCarrierPrivilegesCallback(
+                TelephonyManager.from(mContext).unregisterCarrierPrivilegesCallback(
                         mCarrierServiceChangeCallbacks[phoneId]);
             }
         }
@@ -1447,7 +1449,7 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
             mNeedNotifyCallback[phoneId] = true;
             updateConfigForPhoneId(phoneId);
             mCarrierServiceChangeCallbacks[phoneId] = new CarrierServiceChangeCallback(phoneId);
-            mTelephonyManager.registerCarrierPrivilegesCallback(phoneId,
+            TelephonyManager.from(mContext).registerCarrierPrivilegesCallback(phoneId,
                     new HandlerExecutor(mHandler), mCarrierServiceChangeCallbacks[phoneId]);
         }
     }
@@ -2020,7 +2022,7 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
         if (!SubscriptionManager.isValidSubscriptionId(subId)) {
             return false;
         }
-        return mTelephonyManager.createForSubscriptionId(subId)
+        return TelephonyManager.from(mContext).createForSubscriptionId(subId)
                 .checkCarrierPrivilegesForPackage(pkgName)
                 == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS;
     }
