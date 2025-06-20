@@ -2500,7 +2500,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         mApp = app;
         mFeatureFlags = featureFlags;
         mTelecomFeatureFlags = new com.android.server.telecom.flags.FeatureFlagsImpl();
-        mCM = PhoneGlobals.getInstance().getCallManager();
+        mCM = PhoneGlobals.getInstance().mCM;
         mImsResolver = ImsResolver.getInstance();
         mSatelliteController = SatelliteController.getInstance();
         mUserManager = (UserManager) app.getSystemService(Context.USER_SERVICE);
@@ -9980,6 +9980,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
 
         boolean hasReadPermission = false;
         boolean isIccIdAccessRestricted = false;
+        boolean hasOnlyReadBasicPermission = false;
         try {
             enforceReadPrivilegedPermission("getUiccCardsInfo");
             hasReadPermission = true;
@@ -9988,7 +9989,14 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
             // has carrier privileges on an active UICC
             if (checkCarrierPrivilegesForPackageAnyPhoneWithPermission(callingPackage)
                     != TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
-                throw new SecurityException("Caller does not have permission.");
+                if (!mFeatureFlags.macroBasedOpportunisticNetworks()
+                        ||
+                        !TelephonyPermissions.checkCallingOrSelfReadNonDangerousPhoneStateNoThrow(
+                        mApp, "getUiccCardsInfo")) {
+                    throw new SecurityException("Caller does not have permission.");
+                } else {
+                    hasOnlyReadBasicPermission = true;
+                }
             }
         }
 
@@ -10013,17 +10021,25 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
             for (UiccCardInfo cardInfo : cardInfos) {
                 //setting the value after compatibility check
                 cardInfo.setIccIdAccessRestricted(isIccIdAccessRestricted);
+                // If caller has only READ_BASIC_PHONE_STATE, return minimum info
+                if (mFeatureFlags.macroBasedOpportunisticNetworks() && hasOnlyReadBasicPermission) {
+                    filteredInfos.add(cardInfo.createSensitiveInfoSanitizedCopy(
+                            false /* hasCarrierPrivileges */));
+                    continue;
+                }
                 // For an inactive eUICC, the UiccCard will be null even though the UiccCardInfo
                 // is available
                 UiccCard card = uiccController.getUiccCardForSlot(cardInfo.getPhysicalSlotIndex());
                 if (card == null) {
                     // assume no access if the card is unavailable
-                    filteredInfos.add(getUiccCardInfoUnPrivileged(cardInfo));
+                    filteredInfos.add(cardInfo.createSensitiveInfoSanitizedCopy(
+                            true /* hasCarrierPrivileges */));
                     continue;
                 }
                 Collection<UiccPortInfo> portInfos = cardInfo.getPorts();
                 if (portInfos.isEmpty()) {
-                    filteredInfos.add(getUiccCardInfoUnPrivileged(cardInfo));
+                    filteredInfos.add(cardInfo.createSensitiveInfoSanitizedCopy(
+                            true /* hasCarrierPrivileges */));
                     continue;
                 }
                 List<UiccPortInfo> uiccPortInfos = new  ArrayList<>();
@@ -10032,13 +10048,13 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
                             cardInfo.getPhysicalSlotIndex(), portInfo.getPortIndex());
                     if (port == null) {
                         // assume no access if port is null
-                        uiccPortInfos.add(getUiccPortInfoUnPrivileged(portInfo));
+                        uiccPortInfos.add(portInfo.createSensitiveInfoSanitizedCopy());
                         continue;
                     }
                     if (haveCarrierPrivilegeAccess(port, callingPackage)) {
                         uiccPortInfos.add(portInfo);
                     } else {
-                        uiccPortInfos.add(getUiccPortInfoUnPrivileged(portInfo));
+                        uiccPortInfos.add(portInfo.createSensitiveInfoSanitizedCopy());
                     }
                 }
                 filteredInfos.add(new UiccCardInfo(
@@ -10056,43 +10072,6 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         }
     }
 
-    /**
-     * Returns a copy of the UiccCardinfo with the EID and ICCID set to null. These values are
-     * generally private and require carrier privileges to view.
-     *
-     * @hide
-     */
-    @NonNull
-    public UiccCardInfo getUiccCardInfoUnPrivileged(UiccCardInfo cardInfo) {
-        List<UiccPortInfo> portinfo = new  ArrayList<>();
-        for (UiccPortInfo portinfos : cardInfo.getPorts()) {
-            portinfo.add(getUiccPortInfoUnPrivileged(portinfos));
-        }
-        return new UiccCardInfo(
-                cardInfo.isEuicc(),
-                cardInfo.getCardId(),
-                null,
-                cardInfo.getPhysicalSlotIndex(),
-                cardInfo.isRemovable(),
-                cardInfo.isMultipleEnabledProfilesSupported(),
-                portinfo
-        );
-    }
-
-    /**
-     * @hide
-     * @return a copy of the UiccPortInfo with ICCID set to {@link UiccPortInfo#ICCID_REDACTED}.
-     * These values are generally private and require carrier privileges to view.
-     */
-    @NonNull
-    public UiccPortInfo getUiccPortInfoUnPrivileged(UiccPortInfo portInfo) {
-        return new UiccPortInfo(
-                UiccPortInfo.ICCID_REDACTED,
-                portInfo.getPortIndex(),
-                portInfo.getLogicalSlotIndex(),
-                portInfo.isActive()
-        );
-    }
     @Override
     public UiccSlotInfo[] getUiccSlotsInfo(String callingPackage) {
         // Verify that the callingPackage belongs to the calling UID
@@ -10105,8 +10084,13 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         // we are reading iccId which is PII data.
         enforceReadPrivilegedPermission("getUiccSlotsInfo");
 
-        enforceTelephonyFeatureWithException(callingPackage,
-                PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION, "getUiccSlotsInfo");
+        if (!mApp.getResources().getBoolean(
+                com.android.internal.R.bool.config_force_phone_globals_creation)) {
+            enforceTelephonyFeatureWithException(
+                    callingPackage,
+                    PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION,
+                    "getUiccSlotsInfo");
+        }
 
         // checking compatibility, if calling app's target SDK is T and beyond.
         if (CompatChanges.isChangeEnabled(GET_API_SIGNATURES_FROM_UICC_PORT_INFO,
