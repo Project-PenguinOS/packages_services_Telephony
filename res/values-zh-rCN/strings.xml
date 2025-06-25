@@ -985,7 +985,7 @@
     <string name="call_forward_option">"呼叫转移选项"</string>
 
     <string name="cf_setting_mobile_data_off_alert">请开启手机数据连接</string>
-    <string name="cf_setting_wifi_on_alert">请关闭Wi-Fi</string>
+    <string name="cf_setting_wifi_on_alert">此操作可能会产生一些数据费用。请知晓这种情况，并在关闭 Wi-Fi 后再试一次</string>
     <string name="cf_setting_network_alert">请开启网络连接</string>
     <string name="no_mobile_data">移动数据连接不可用</string>
     <string name="wifi_on">Wi-Fi已开启</string>
