@@ -1497,7 +1497,6 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
     @SmallTest
     public void testCreateOutgoingEmergencyConnection_exitingSatellite_EmergencySatellite()
             throws Exception {
-        doReturn(true).when(mFeatureFlags).carrierRoamingNbIotNtn();
         doReturn(true).when(mSatelliteController).isSatelliteEnabledOrBeingEnabled();
 
         // Set config_turn_off_non_emergency_nb_iot_ntn_satellite_for_emergency_call as true
@@ -1517,7 +1516,6 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
     @Test
     @SmallTest
     public void testCreateOutgoingEmergencyConnection_exitingSatellite_OEM() throws Exception {
-        doReturn(true).when(mFeatureFlags).carrierRoamingNbIotNtn();
         doReturn(true).when(mSatelliteController).isSatelliteEnabledOrBeingEnabled();
 
         // Set config_turn_off_oem_enabled_satellite_during_emergency_call as false
@@ -1552,7 +1550,6 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
     @Test
     @SmallTest
     public void testCreateOutgoingEmergencyConnection_exitingSatellite_Carrier() throws Exception {
-        doReturn(true).when(mFeatureFlags).carrierRoamingNbIotNtn();
         doReturn(true).when(mSatelliteController).isSatelliteEnabledOrBeingEnabled();
 
         // Set config_turn_off_oem_enabled_satellite_during_emergency_call as false
@@ -1588,7 +1585,6 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
     @Test
     @SmallTest
     public void testCreateOutgoingEmergencyConnection_NonEmergencySatelliteSession() {
-        doReturn(true).when(mFeatureFlags).carrierRoamingNbIotNtn();
         doReturn(true).when(mSatelliteController).isSatelliteEnabledOrBeingEnabled();
 
         // Set config_turn_off_non_emergency_nb_iot_ntn_satellite_for_emergency_call as false
@@ -4049,8 +4045,6 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
 
     @Test
     public void testNormalCallWhenEligibilityIsTrue() throws Exception {
-        mSetFlagsRule.enableFlags(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN);
-
         setupForCallTest();
 
         // Carrier roaming ntn eligibility is true and call is not supported
