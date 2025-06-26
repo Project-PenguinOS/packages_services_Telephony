@@ -1873,7 +1873,6 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
     @Test
     @SmallTest
     public void testSecondCallSameSubWontDisconnect() throws Exception {
-        doReturn(false).when(mTelecomFlags).enableCallSequencing();
         // Previous test gets us into a good enough state
         testIncomingDoesntRequestDisconnect();
 
