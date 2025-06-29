@@ -561,7 +561,6 @@ public class PhoneInterfaceManagerTest extends TelephonyTestBase {
 
     @Test
     public void testGetSatelliteDataOptimizedApps() throws Exception {
-        doReturn(true).when(mFeatureFlags).carrierRoamingNbIotNtn();
         mPhoneInterfaceManager.setFeatureFlags(mFeatureFlags);
         loge("FeatureFlagApi is set to return true");
 

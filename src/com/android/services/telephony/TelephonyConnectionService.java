@@ -2391,30 +2391,25 @@ public class TelephonyConnectionService extends ConnectionService {
             if (mSatelliteController.isDemoModeEnabled()) {
                 // If user makes emergency call in demo mode, end the satellite session
                 return true;
-            } else if (mFeatureFlags.carrierRoamingNbIotNtn()
-                    && !mSatelliteController.getRequestIsEmergency()) {
+            } else if (!mSatelliteController.getRequestIsEmergency()) {
                 // If satellite is not for emergency, end the satellite session
                 return true;
             } else { // satellite is for emergency
-                if (mFeatureFlags.carrierRoamingNbIotNtn()) {
-                    int subId = mSatelliteController.getSelectedSatelliteSubId();
-                    SubscriptionInfoInternal info = SubscriptionManagerService.getInstance()
-                            .getSubscriptionInfoInternal(subId);
-                    if (info == null) {
-                        loge("satellite is/being enabled, but satellite sub "
-                                + subId + " is null");
-                        return false;
-                    }
+                int subId = mSatelliteController.getSelectedSatelliteSubId();
+                SubscriptionInfoInternal info = SubscriptionManagerService.getInstance()
+                        .getSubscriptionInfoInternal(subId);
+                if (info == null) {
+                    loge("satellite is/being enabled, but satellite sub "
+                            + subId + " is null");
+                    return false;
+                }
 
-                    if (info.getOnlyNonTerrestrialNetwork() == 1) {
-                        // OEM
-                        return getTurnOffOemEnabledSatelliteDuringEmergencyCall();
-                    } else {
-                        // Carrier
-                        return mSatelliteController.shouldTurnOffCarrierSatelliteForEmergencyCall();
-                    }
-                } else {
+                if (info.getOnlyNonTerrestrialNetwork() == 1) {
+                    // OEM
                     return getTurnOffOemEnabledSatelliteDuringEmergencyCall();
+                } else {
+                    // Carrier
+                    return mSatelliteController.shouldTurnOffCarrierSatelliteForEmergencyCall();
                 }
             }
         }

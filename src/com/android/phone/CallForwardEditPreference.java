@@ -81,7 +81,6 @@ import com.android.internal.telephony.gsm.GsmMmiCode;
 import com.android.internal.telephony.gsm.SsData;
 // QTI_END: 2023-03-16: Telephony: Enable telephony FDN check for side car SS requests.
 import com.android.internal.telephony.Phone;
-import com.android.internal.telephony.flags.Flags;
 
 // QTI_BEGIN: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
 import com.qti.extphone.Client;
@@ -532,14 +531,10 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
                         .getCarrierConfigForSubId(mPhone.getSubId());
                 if (carrierConfig.getBoolean(
                         CarrierConfigManager.KEY_SUPPORT_NO_REPLY_TIMER_FOR_CFNRY_BOOL, true)) {
-                    if (Flags.setNoReplyTimerForCfnry()) {
-                        // Get timer value from carrier config
-                        time = carrierConfig.getInt(
-                                CarrierConfigManager.KEY_NO_REPLY_TIMER_FOR_CFNRY_SEC_INT,
-                                DEFAULT_NO_REPLY_TIMER_FOR_CFNRY);
-                    } else {
-                        time = DEFAULT_NO_REPLY_TIMER_FOR_CFNRY;
-                    }
+                    // Get timer value from carrier config
+                    time = carrierConfig.getInt(
+                            CarrierConfigManager.KEY_NO_REPLY_TIMER_FOR_CFNRY_SEC_INT,
+                            DEFAULT_NO_REPLY_TIMER_FOR_CFNRY);
                 }
             }
             final String number = getPhoneNumber();
