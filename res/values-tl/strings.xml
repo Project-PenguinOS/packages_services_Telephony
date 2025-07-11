@@ -461,6 +461,10 @@
     <string name="auto_retry_mode_summary" msgid="2863919925349511402">"Paganahin ang mode ng Awtomatikong muling pagsubok"</string>
     <string name="vibrating_for_outgoing_call_accepted_title" msgid="647945514737734657">"Pag-vibrate para sa pagtanggap ng outgoing na tawag"</string>
     <string name="vibrating_for_outgoing_call_accepted_summary" msgid="906112327196063688">"I-enable ang vibrating mode para sa pagtanggap ng outgoing na tawag"</string>
+    <!-- no translation found for playing_tone_for_outgoing_call_accepted_title (856074537423753072) -->
+    <skip />
+    <!-- no translation found for playing_tone_for_outgoing_call_accepted_summary (2442128058517260047) -->
+    <skip />
     <string name="tty_mode_not_allowed_video_call" msgid="6551976083652752815">"Hindi pinapayagan ang pagbago sa TTY Mode habang nagvi-video call"</string>
     <string name="menu_add" msgid="5616487894975773141">"Magdagdag ng contact"</string>
     <string name="menu_edit" msgid="3593856941552460706">"I-edit ang contact"</string>

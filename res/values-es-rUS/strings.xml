@@ -461,6 +461,10 @@
     <string name="auto_retry_mode_summary" msgid="2863919925349511402">"Activar el modo de reintento automático"</string>
     <string name="vibrating_for_outgoing_call_accepted_title" msgid="647945514737734657">"Se aceptó la vibración para la llamada saliente"</string>
     <string name="vibrating_for_outgoing_call_accepted_summary" msgid="906112327196063688">"Se aceptó la habilitación del modo de vibración para la llamada saliente"</string>
+    <!-- no translation found for playing_tone_for_outgoing_call_accepted_title (856074537423753072) -->
+    <skip />
+    <!-- no translation found for playing_tone_for_outgoing_call_accepted_summary (2442128058517260047) -->
+    <skip />
     <string name="tty_mode_not_allowed_video_call" msgid="6551976083652752815">"No se permite cambiar el modo TTY durante una videollamada."</string>
     <string name="menu_add" msgid="5616487894975773141">"Agregar contacto"</string>
     <string name="menu_edit" msgid="3593856941552460706">"Editar contacto"</string>
