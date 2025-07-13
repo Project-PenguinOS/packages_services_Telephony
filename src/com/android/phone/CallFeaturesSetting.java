@@ -128,6 +128,8 @@ public class CallFeaturesSetting extends PreferenceActivity
     private static final String BUTTON_VIBRATING_KEY =
             "button_vibrating_for_outgoing_call_accepted_key";
 // QTI_END: 2020-02-11: Telephony: Add vibrating for outgoing call accepted support
+    private static final String BUTTON_PLAYING_TONE_KEY =
+            "button_playing_tone_for_outgoing_call_accepted_key";
 
     private Phone mPhone;
     private ImsManager mImsMgr;
@@ -140,6 +142,7 @@ public class CallFeaturesSetting extends PreferenceActivity
     private SwitchPreference mEnableVideoCalling;
     private Preference mButtonWifiCalling;
     private boolean mDisallowedConfig = false;
+    private SwitchPreference mButtonPlayingToneForMoCallAccepted;
     private int mCallConnectedIndicator = TelecomManager.CALL_CONNECTED_INDICATOR_NONE;
 
 // QTI_BEGIN: 2020-02-11: Telephony: Add vibrating for outgoing call accepted support
@@ -204,13 +207,19 @@ public class CallFeaturesSetting extends PreferenceActivity
             return true;
 // QTI_BEGIN: 2020-02-11: Telephony: Add vibrating for outgoing call accepted support
         } else if (preference == mButtonVibratingForMoCallAccepted) {
-            final int prefs = mButtonVibratingForMoCallAccepted.isChecked()?
-                    mCallConnectedIndicator | TelecomManager.CALL_CONNECTED_INDICATOR_VIBRATION
+            final int prefs = mButtonVibratingForMoCallAccepted.isChecked()
+                    ? mCallConnectedIndicator | TelecomManager.CALL_CONNECTED_INDICATOR_VIBRATION
                     : mCallConnectedIndicator & ~TelecomManager.CALL_CONNECTED_INDICATOR_VIBRATION;
             mTelecomManager.setCallConnectedIndicatorPreference(prefs);
 
             return true;
 // QTI_END: 2020-02-11: Telephony: Add vibrating for outgoing call accepted support
+        } else if (preference == mButtonPlayingToneForMoCallAccepted) {
+            final int prefs = mButtonPlayingToneForMoCallAccepted.isChecked()
+                    ? mCallConnectedIndicator | TelecomManager.CALL_CONNECTED_INDICATOR_TONE
+                    : mCallConnectedIndicator & ~TelecomManager.CALL_CONNECTED_INDICATOR_TONE;
+            mTelecomManager.setCallConnectedIndicatorPreference(prefs);
+            return true;
         } else if (preference == preferenceScreen.findPreference(
                 GsmUmtsCallOptions.CALL_FORWARDING_KEY)) {
             return doSsOverUtPrecautions(preference);
@@ -421,10 +430,13 @@ public class CallFeaturesSetting extends PreferenceActivity
 // QTI_BEGIN: 2020-02-11: Telephony: Add vibrating for outgoing call accepted support
         mButtonVibratingForMoCallAccepted = (SwitchPreference) findPreference(BUTTON_VIBRATING_KEY);
 // QTI_END: 2020-02-11: Telephony: Add vibrating for outgoing call accepted support
+        mButtonPlayingToneForMoCallAccepted = (SwitchPreference) findPreference(
+                BUTTON_PLAYING_TONE_KEY);
         if (!getResources().getBoolean(
                 R.bool.show_call_connected_indicator_preference)) {
             Preference phoneAccountSettingsPreference = findPreference(PHONE_ACCOUNT_SETTINGS_KEY);
             getPreferenceScreen().removePreference(mButtonVibratingForMoCallAccepted);
+            getPreferenceScreen().removePreference(mButtonPlayingToneForMoCallAccepted);
         }
         mCallConnectedIndicator = mTelecomManager.getCallConnectedIndicatorPreference();
         // Note: The PhoneAccountSettingsActivity accessible via the
@@ -437,11 +449,15 @@ public class CallFeaturesSetting extends PreferenceActivity
             Preference phoneAccountSettingsPreference = findPreference(PHONE_ACCOUNT_SETTINGS_KEY);
             getPreferenceScreen().removePreference(phoneAccountSettingsPreference);
             getPreferenceScreen().removePreference(mButtonVibratingForMoCallAccepted);
+            getPreferenceScreen().removePreference(mButtonPlayingToneForMoCallAccepted);
         } else {
             final int vibrating = Settings.Global.getInt(getContentResolver(),
                     Settings.Global.VIBRATING_FOR_OUTGOING_CALL_ACCEPTED, 1);
             mButtonVibratingForMoCallAccepted.setChecked(vibrating != 0);
             mButtonVibratingForMoCallAccepted.setOnPreferenceChangeListener(this);
+            mButtonPlayingToneForMoCallAccepted.setChecked((mCallConnectedIndicator
+                    & TelecomManager.CALL_CONNECTED_INDICATOR_TONE) > 0);
+            mButtonPlayingToneForMoCallAccepted.setOnPreferenceChangeListener(this);
         }
 
         PreferenceScreen prefSet = getPreferenceScreen();
