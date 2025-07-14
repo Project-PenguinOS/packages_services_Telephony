@@ -7679,8 +7679,12 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
 
     @Override
     public int getCarrierPrivilegeStatus(int subId) {
-        enforceTelephonyFeatureWithException(getCurrentPackageName(),
-                PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION, "getCarrierPrivilegeStatus");
+        if (!mApp.getResources().getBoolean(
+                    com.android.internal.R.bool.config_force_phone_globals_creation)) {
+            enforceTelephonyFeatureWithException(getCurrentPackageName(),
+                    PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION,
+                    "getCarrierPrivilegeStatus");
+        }
 
         // No permission needed; this only lets the caller inspect their own status.
         return getCarrierPrivilegeStatusForUidWithPermission(subId, Binder.getCallingUid());
