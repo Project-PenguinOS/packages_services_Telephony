@@ -461,10 +461,8 @@
     <string name="auto_retry_mode_summary" msgid="2863919925349511402">"Vumela imodi Yokuzama Futhi Okuzenzakalelayo"</string>
     <string name="vibrating_for_outgoing_call_accepted_title" msgid="647945514737734657">"Ukudlidliza kocingo oluphumayo kwamukelwe"</string>
     <string name="vibrating_for_outgoing_call_accepted_summary" msgid="906112327196063688">"Ukusebenzisa imodi yokudlidliza ocingweni oluphumayo kwamukelwe"</string>
-    <!-- no translation found for playing_tone_for_outgoing_call_accepted_title (856074537423753072) -->
-    <skip />
-    <!-- no translation found for playing_tone_for_outgoing_call_accepted_summary (2442128058517260047) -->
-    <skip />
+    <string name="playing_tone_for_outgoing_call_accepted_title" msgid="856074537423753072">"Amathoni axhunywe kukholi"</string>
+    <string name="playing_tone_for_outgoing_call_accepted_summary" msgid="2442128058517260047">"Ithoni yokudlala yocingo oluphumayo yamukelwe"</string>
     <string name="tty_mode_not_allowed_video_call" msgid="6551976083652752815">"Ukuguqulwa kwemodi ye-TTY akuvunyelwe ngesikhathi sekholi yevidiyo"</string>
     <string name="menu_add" msgid="5616487894975773141">"Engeza othintana naye"</string>
     <string name="menu_edit" msgid="3593856941552460706">"Hlela othintana naye"</string>

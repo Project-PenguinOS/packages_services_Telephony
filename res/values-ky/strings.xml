@@ -461,10 +461,8 @@
     <string name="auto_retry_mode_summary" msgid="2863919925349511402">"Авто-чалуу тартибин иштетүү"</string>
     <string name="vibrating_for_outgoing_call_accepted_title" msgid="647945514737734657">"Чыгуучу чалуу кабыл алынганда дирилдөө"</string>
     <string name="vibrating_for_outgoing_call_accepted_summary" msgid="906112327196063688">"Чыгуучу чалуу кабыл алынганда дирилдөө режимин иштетүү"</string>
-    <!-- no translation found for playing_tone_for_outgoing_call_accepted_title (856074537423753072) -->
-    <skip />
-    <!-- no translation found for playing_tone_for_outgoing_call_accepted_summary (2442128058517260047) -->
-    <skip />
+    <string name="playing_tone_for_outgoing_call_accepted_title" msgid="856074537423753072">"Чалууга туташканда ойнотула турган сигналдар"</string>
+    <string name="playing_tone_for_outgoing_call_accepted_summary" msgid="2442128058517260047">"Чыгуучу чалуу кабыл алынганда ойнотула турган сигнал"</string>
     <string name="tty_mode_not_allowed_video_call" msgid="6551976083652752815">"Видео чалуу учурунда Телетайп түзмөк режимин өзгөртүүгө уруксат жок"</string>
     <string name="menu_add" msgid="5616487894975773141">"Байланыш кошуу"</string>
     <string name="menu_edit" msgid="3593856941552460706">"Байланышты түзөтүү"</string>

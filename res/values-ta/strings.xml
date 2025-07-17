@@ -461,10 +461,8 @@
     <string name="auto_retry_mode_summary" msgid="2863919925349511402">"தானாக மீண்டும் அழைக்க முயற்சிக்கும் பயன்முறையை இயக்கு"</string>
     <string name="vibrating_for_outgoing_call_accepted_title" msgid="647945514737734657">"வெளிச்செல்லும் அழைப்புகளுக்கு அதிர்வுப் பயன்முறை ஏற்றுக்கொள்ளப்பட்டது"</string>
     <string name="vibrating_for_outgoing_call_accepted_summary" msgid="906112327196063688">"வெளிச்செல்லும் அழைப்புகளுக்கு அதிர்வுப் பயன்முறையை ஆன் செய்வது ஏற்றுக்கொள்ளப்பட்டது"</string>
-    <!-- no translation found for playing_tone_for_outgoing_call_accepted_title (856074537423753072) -->
-    <skip />
-    <!-- no translation found for playing_tone_for_outgoing_call_accepted_summary (2442128058517260047) -->
-    <skip />
+    <string name="playing_tone_for_outgoing_call_accepted_title" msgid="856074537423753072">"அழைப்பு இணைக்கப்பட்டதற்கான டோன்கள்"</string>
+    <string name="playing_tone_for_outgoing_call_accepted_summary" msgid="2442128058517260047">"வெளிச்செல்லும் அழைப்பு ஏற்கப்பட்டதற்கான டோன் பிளே செய்யப்படுகிறது"</string>
     <string name="tty_mode_not_allowed_video_call" msgid="6551976083652752815">"வீடியோ அழைப்பின்போது TTY பயன்முறை மாற்றம் அனுமதிக்கப்படாது"</string>
     <string name="menu_add" msgid="5616487894975773141">"தொடர்பைச் சேர்"</string>
     <string name="menu_edit" msgid="3593856941552460706">"தொடர்பை மாற்று"</string>

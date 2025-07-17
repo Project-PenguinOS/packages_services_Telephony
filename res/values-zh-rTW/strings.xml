@@ -461,10 +461,8 @@
     <string name="auto_retry_mode_summary" msgid="2863919925349511402">"啟用自動重試模式"</string>
     <string name="vibrating_for_outgoing_call_accepted_title" msgid="647945514737734657">"在通話對象接起電話時震動"</string>
     <string name="vibrating_for_outgoing_call_accepted_summary" msgid="906112327196063688">"針對通話對象接起電話的情況啟用震動模式"</string>
-    <!-- no translation found for playing_tone_for_outgoing_call_accepted_title (856074537423753072) -->
-    <skip />
-    <!-- no translation found for playing_tone_for_outgoing_call_accepted_summary (2442128058517260047) -->
-    <skip />
+    <string name="playing_tone_for_outgoing_call_accepted_title" msgid="856074537423753072">"電話接通音效"</string>
+    <string name="playing_tone_for_outgoing_call_accepted_summary" msgid="2442128058517260047">"在通話對象接起電話時播放音效"</string>
     <string name="tty_mode_not_allowed_video_call" msgid="6551976083652752815">"無法在視訊通話過程中變更 TTY 模式"</string>
     <string name="menu_add" msgid="5616487894975773141">"新增聯絡人"</string>
     <string name="menu_edit" msgid="3593856941552460706">"編輯聯絡人"</string>
