@@ -461,10 +461,8 @@
     <string name="auto_retry_mode_summary" msgid="2863919925349511402">"เปิดใช้งานโหมดลองซ้ำอัตโนมัติ"</string>
     <string name="vibrating_for_outgoing_call_accepted_title" msgid="647945514737734657">"การสั่นสำหรับสายโทรออกที่ปลายทางรับสาย"</string>
     <string name="vibrating_for_outgoing_call_accepted_summary" msgid="906112327196063688">"เปิดใช้โหมดสั่นสำหรับสายโทรออกที่ปลายทางรับสาย"</string>
-    <!-- no translation found for playing_tone_for_outgoing_call_accepted_title (856074537423753072) -->
-    <skip />
-    <!-- no translation found for playing_tone_for_outgoing_call_accepted_summary (2442128058517260047) -->
-    <skip />
+    <string name="playing_tone_for_outgoing_call_accepted_title" msgid="856074537423753072">"เสียงเมื่อเชื่อมต่อสาย"</string>
+    <string name="playing_tone_for_outgoing_call_accepted_summary" msgid="2442128058517260047">"เล่นเสียงเมื่อปลายทางรับสายโทรออก"</string>
     <string name="tty_mode_not_allowed_video_call" msgid="6551976083652752815">"ไม่อนุญาตการเปลี่ยนโหมด TTY ในระหว่าง Hangouts วิดีโอ"</string>
     <string name="menu_add" msgid="5616487894975773141">"เพิ่มรายชื่อติดต่อ"</string>
     <string name="menu_edit" msgid="3593856941552460706">"แก้ไขรายชื่อติดต่อ"</string>

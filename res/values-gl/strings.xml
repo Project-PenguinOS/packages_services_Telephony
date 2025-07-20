@@ -461,10 +461,8 @@
     <string name="auto_retry_mode_summary" msgid="2863919925349511402">"Activar o modo de reintento automático"</string>
     <string name="vibrating_for_outgoing_call_accepted_title" msgid="647945514737734657">"Aceptouse a vibración para as chamadas saíntes"</string>
     <string name="vibrating_for_outgoing_call_accepted_summary" msgid="906112327196063688">"Aceptouse a activación do modo de vibración para as chamadas saíntes"</string>
-    <!-- no translation found for playing_tone_for_outgoing_call_accepted_title (856074537423753072) -->
-    <skip />
-    <!-- no translation found for playing_tone_for_outgoing_call_accepted_summary (2442128058517260047) -->
-    <skip />
+    <string name="playing_tone_for_outgoing_call_accepted_title" msgid="856074537423753072">"Tons de chamada conectada"</string>
+    <string name="playing_tone_for_outgoing_call_accepted_summary" msgid="2442128058517260047">"Ton que soará cando se acepten as chamadas saíntes"</string>
     <string name="tty_mode_not_allowed_video_call" msgid="6551976083652752815">"Non se permite cambiar o modo TTY durante as videochamadas"</string>
     <string name="menu_add" msgid="5616487894975773141">"Engadir contacto"</string>
     <string name="menu_edit" msgid="3593856941552460706">"Editar contacto"</string>

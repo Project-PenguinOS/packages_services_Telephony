@@ -461,10 +461,8 @@
     <string name="auto_retry_mode_summary" msgid="2863919925349511402">"Овозможи режим на автоматски повторен обид"</string>
     <string name="vibrating_for_outgoing_call_accepted_title" msgid="647945514737734657">"Вибрации за прифатен појдовен повик"</string>
     <string name="vibrating_for_outgoing_call_accepted_summary" msgid="906112327196063688">"Овозможете режим со вибрации за прифатен појдовен повик"</string>
-    <!-- no translation found for playing_tone_for_outgoing_call_accepted_title (856074537423753072) -->
-    <skip />
-    <!-- no translation found for playing_tone_for_outgoing_call_accepted_summary (2442128058517260047) -->
-    <skip />
+    <string name="playing_tone_for_outgoing_call_accepted_title" msgid="856074537423753072">"Звуци за поврзан повик"</string>
+    <string name="playing_tone_for_outgoing_call_accepted_summary" msgid="2442128058517260047">"Се пушта звук за прифатен појдовен повик"</string>
     <string name="tty_mode_not_allowed_video_call" msgid="6551976083652752815">"Промена на режим TTY не е дозволена за време на видеоповик"</string>
     <string name="menu_add" msgid="5616487894975773141">"Додајте контакт"</string>
     <string name="menu_edit" msgid="3593856941552460706">"Измени контакт"</string>

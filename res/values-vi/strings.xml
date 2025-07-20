@@ -461,10 +461,8 @@
     <string name="auto_retry_mode_summary" msgid="2863919925349511402">"Bật chế độ Tự động thử lại"</string>
     <string name="vibrating_for_outgoing_call_accepted_title" msgid="647945514737734657">"Rung khi cuộc gọi đi được chấp nhận"</string>
     <string name="vibrating_for_outgoing_call_accepted_summary" msgid="906112327196063688">"Bật chế độ rung khi cuộc gọi đi được chấp nhận"</string>
-    <!-- no translation found for playing_tone_for_outgoing_call_accepted_title (856074537423753072) -->
-    <skip />
-    <!-- no translation found for playing_tone_for_outgoing_call_accepted_summary (2442128058517260047) -->
-    <skip />
+    <string name="playing_tone_for_outgoing_call_accepted_title" msgid="856074537423753072">"Âm báo cuộc gọi được kết nối"</string>
+    <string name="playing_tone_for_outgoing_call_accepted_summary" msgid="2442128058517260047">"Phát âm báo khi cuộc gọi đi được chấp nhận"</string>
     <string name="tty_mode_not_allowed_video_call" msgid="6551976083652752815">"Không được phép thay đổi Chế độ Máy điện báo đánh chữ (TTY) trong cuộc gọi video"</string>
     <string name="menu_add" msgid="5616487894975773141">"Thêm người liên hệ"</string>
     <string name="menu_edit" msgid="3593856941552460706">"Chỉnh sửa liên hệ"</string>

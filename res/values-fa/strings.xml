@@ -461,10 +461,8 @@
     <string name="auto_retry_mode_summary" msgid="2863919925349511402">"فعال کردن حالت سعی مجدد خودکار"</string>
     <string name="vibrating_for_outgoing_call_accepted_title" msgid="647945514737734657">"لرزیدن برای پذیرفته شدن تماس خروجی"</string>
     <string name="vibrating_for_outgoing_call_accepted_summary" msgid="906112327196063688">"فعال کردن حالت لرزش برای پذیرفته شدن تماس خروجی"</string>
-    <!-- no translation found for playing_tone_for_outgoing_call_accepted_title (856074537423753072) -->
-    <skip />
-    <!-- no translation found for playing_tone_for_outgoing_call_accepted_summary (2442128058517260047) -->
-    <skip />
+    <string name="playing_tone_for_outgoing_call_accepted_title" msgid="856074537423753072">"آهنگ‌های متصل شدن تماس"</string>
+    <string name="playing_tone_for_outgoing_call_accepted_summary" msgid="2442128058517260047">"پخش کردن آهنگ برای پذیرفته شدن تماس خروجی"</string>
     <string name="tty_mode_not_allowed_video_call" msgid="6551976083652752815">"‏تغییر حالت TTY در طول تماس تصویری مجاز نیست"</string>
     <string name="menu_add" msgid="5616487894975773141">"افزودن مخاطب"</string>
     <string name="menu_edit" msgid="3593856941552460706">"ویرایش مخاطب"</string>
