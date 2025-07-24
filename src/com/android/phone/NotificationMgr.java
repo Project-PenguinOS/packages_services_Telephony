@@ -552,7 +552,12 @@ public class NotificationMgr {
 // QTI_END: 2018-02-21: Telephony: MSIM: Add subId to voicemail intent
 
         if (shouldManageNotificationThroughDefaultDialer(userHandle)) {
-            int subId = phone.getSubId();
+            // It is possible that the phone is null here when we are dismissing the
+            // notification.  In that case we can't get the subId, so we will default to
+            // unknown.  That is reasonable as it will just mean we will send the broadcast
+            // always in the logic below.
+            int subId = phone == null ?
+                SubscriptionManager.INVALID_SUBSCRIPTION_ID : phone.getSubId();
             // We want to determine if the count of voicemails that we notified to the dialer app
             // has changed or not.  mLastMwiCountSent will initially contain no entry for a subId
             // meaning no count was ever sent to dialer.  The previous count is an Integer (not int)
