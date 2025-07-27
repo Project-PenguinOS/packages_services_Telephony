@@ -647,12 +647,6 @@ public class PhoneGlobals extends ContextWrapper {
             // {@link android.telephony.satellite.SatelliteManager}.
             SatelliteController.make(this, mFeatureFlags);
 
-            if (!mFeatureFlags.phoneTypeCleanup()) {
-                // Create an instance of CdmaPhoneCallState and initialize it to IDLE
-                cdmaPhoneCallState = new CdmaPhoneCallState();
-                cdmaPhoneCallState.CdmaPhoneCallStateInit();
-            }
-
             // before registering for phone state changes
             mPowerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
             mWakeLock = mPowerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, LOG_TAG);

@@ -141,8 +141,18 @@ public class PhoneInformationV2FragmentIms extends Fragment {
         phoneButton1 = view.findViewById(R.id.phone_button_1);
         phoneTitle1 = view.findViewById(R.id.phone_button_1_title);
 
-        phoneTitle0.setText(sPhoneIndexLabels[0]);
-        phoneTitle1.setText(sPhoneIndexLabels[1]);
+        // Configure phone selection buttons based on the number of active modems.
+        if (sPhoneIndexLabels.length > 1) {
+            phoneTitle0.setText(sPhoneIndexLabels[0]);
+            phoneTitle1.setText(sPhoneIndexLabels[1]);
+            phoneButton1.setVisibility(View.VISIBLE);
+        } else if (sPhoneIndexLabels.length == 1) {
+            phoneTitle0.setText(sPhoneIndexLabels[0]);
+            phoneButton1.setVisibility(View.GONE);
+        } else {
+            phoneButton0.setVisibility(View.GONE);
+            phoneButton1.setVisibility(View.GONE);
+        }
 
         mImsManager = new ImsManager(mContext);
 

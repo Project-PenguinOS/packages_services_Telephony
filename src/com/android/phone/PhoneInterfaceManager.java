@@ -309,14 +309,6 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     private static final int EVENT_OPEN_CHANNEL_DONE = 10;
     private static final int CMD_CLOSE_CHANNEL = 11;
     private static final int EVENT_CLOSE_CHANNEL_DONE = 12;
-    private static final int CMD_NV_READ_ITEM = 13;
-    private static final int EVENT_NV_READ_ITEM_DONE = 14;
-    private static final int CMD_NV_WRITE_ITEM = 15;
-    private static final int EVENT_NV_WRITE_ITEM_DONE = 16;
-    private static final int CMD_NV_WRITE_CDMA_PRL = 17;
-    private static final int EVENT_NV_WRITE_CDMA_PRL_DONE = 18;
-    private static final int CMD_RESET_MODEM_CONFIG = 19;
-    private static final int EVENT_RESET_MODEM_CONFIG_DONE = 20;
     private static final int CMD_GET_ALLOWED_NETWORK_TYPES_BITMASK = 21;
     private static final int EVENT_GET_ALLOWED_NETWORK_TYPES_BITMASK_DONE = 22;
     private static final int CMD_SEND_ENVELOPE = 25;
@@ -346,12 +338,6 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     private static final int EVENT_SWITCH_SLOTS_DONE = 51;
     private static final int CMD_GET_NETWORK_SELECTION_MODE = 52;
     private static final int EVENT_GET_NETWORK_SELECTION_MODE_DONE = 53;
-    private static final int CMD_GET_CDMA_ROAMING_MODE = 54;
-    private static final int EVENT_GET_CDMA_ROAMING_MODE_DONE = 55;
-    private static final int CMD_SET_CDMA_ROAMING_MODE = 56;
-    private static final int EVENT_SET_CDMA_ROAMING_MODE_DONE = 57;
-    private static final int CMD_SET_CDMA_SUBSCRIPTION_MODE = 58;
-    private static final int EVENT_SET_CDMA_SUBSCRIPTION_MODE_DONE = 59;
     private static final int CMD_GET_ALL_CELL_INFO = 60;
     private static final int EVENT_GET_ALL_CELL_INFO_DONE = 61;
     private static final int CMD_GET_CELL_LOCATION = 62;
@@ -366,8 +352,6 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     private static final int EVENT_GET_MODEM_STATUS_DONE = 71;
     private static final int CMD_SET_FORBIDDEN_PLMNS = 72;
     private static final int EVENT_SET_FORBIDDEN_PLMNS_DONE = 73;
-    private static final int CMD_ERASE_MODEM_CONFIG = 74;
-    private static final int EVENT_ERASE_MODEM_CONFIG_DONE = 75;
     private static final int CMD_CHANGE_ICC_LOCK_PASSWORD = 76;
     private static final int EVENT_CHANGE_ICC_LOCK_PASSWORD_DONE = 77;
     private static final int CMD_SET_ICC_LOCK_ENABLED = 78;
@@ -387,8 +371,6 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     private static final int EVENT_ENABLE_NR_DUAL_CONNECTIVITY_DONE = 92;
     private static final int CMD_IS_NR_DUAL_CONNECTIVITY_ENABLED = 93;
     private static final int EVENT_IS_NR_DUAL_CONNECTIVITY_ENABLED_DONE = 94;
-    private static final int CMD_GET_CDMA_SUBSCRIPTION_MODE = 95;
-    private static final int EVENT_GET_CDMA_SUBSCRIPTION_MODE_DONE = 96;
     private static final int CMD_GET_SYSTEM_SELECTION_CHANNELS = 97;
     private static final int EVENT_GET_SYSTEM_SELECTION_CHANNELS_DONE = 98;
     private static final int CMD_SET_DATA_THROTTLING = 99;
@@ -470,7 +452,6 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     private NetworkScanRequestTracker mNetworkScanRequestTracker;
 
     private static final int TYPE_ALLOCATION_CODE_LENGTH = 8;
-    private static final int MANUFACTURER_CODE_LENGTH = 8;
 
     private static final int SET_DATA_THROTTLING_MODEM_THREW_INVALID_PARAMS = -1;
     private static final int MODEM_DOES_NOT_SUPPORT_DATA_THROTTLING_ERROR_CODE = -2;
@@ -921,54 +902,6 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
                                         "exception from modem to close iccLogical Channel");
                     }
                     notifyRequester(request);
-                    break;
-
-                case CMD_NV_READ_ITEM:
-                    request = (MainThreadRequest) msg.obj;
-                    onCompleted = obtainMessage(EVENT_NV_READ_ITEM_DONE, request);
-                    defaultPhone.nvReadItem((Integer) request.argument, onCompleted,
-                            request.workSource);
-                    break;
-
-                case EVENT_NV_READ_ITEM_DONE:
-                    ar = (AsyncResult) msg.obj;
-                    request = (MainThreadRequest) ar.userObj;
-                    if (ar.exception == null && ar.result != null) {
-                        request.result = ar.result;     // String
-                    } else {
-                        request.result = "";
-                        if (ar.result == null) {
-                            loge("nvReadItem: Empty response");
-                        } else if (ar.exception instanceof CommandException) {
-                            loge("nvReadItem: CommandException: " +
-                                    ar.exception);
-                        } else {
-                            loge("nvReadItem: Unknown exception");
-                        }
-                    }
-                    notifyRequester(request);
-                    break;
-
-                case CMD_NV_WRITE_ITEM:
-                    request = (MainThreadRequest) msg.obj;
-                    onCompleted = obtainMessage(EVENT_NV_WRITE_ITEM_DONE, request);
-                    Pair<Integer, String> idValue = (Pair<Integer, String>) request.argument;
-                    defaultPhone.nvWriteItem(idValue.first, idValue.second, onCompleted,
-                            request.workSource);
-                    break;
-
-                case EVENT_NV_WRITE_ITEM_DONE:
-                    handleNullReturnEvent(msg, "nvWriteItem");
-                    break;
-
-                case CMD_RESET_MODEM_CONFIG:
-                    request = (MainThreadRequest) msg.obj;
-                    onCompleted = obtainMessage(EVENT_RESET_MODEM_CONFIG_DONE, request);
-                    defaultPhone.resetModemConfig(onCompleted);
-                    break;
-
-                case EVENT_RESET_MODEM_CONFIG_DONE:
-                    handleNullReturnEvent(msg, "resetModemConfig");
                     break;
 
                 case CMD_IS_NR_DUAL_CONNECTIVITY_ENABLED: {
@@ -1925,14 +1858,6 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
                         ((SIMRecords) uiccApp.getIccRecords())
                                 .setForbiddenPlmns(onCompleted, fplmns);
                     }
-                    break;
-                case CMD_ERASE_MODEM_CONFIG:
-                    request = (MainThreadRequest) msg.obj;
-                    onCompleted = obtainMessage(EVENT_ERASE_MODEM_CONFIG_DONE, request);
-                    defaultPhone.eraseModemConfig(onCompleted);
-                    break;
-                case EVENT_ERASE_MODEM_CONFIG_DONE:
-                    handleNullReturnEvent(msg, "eraseModemConfig");
                     break;
 
                 case CMD_ERASE_DATA_SHARED_PREFERENCES:
@@ -3899,32 +3824,6 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     }
 
     @Override
-    public int getActivePhoneType() {
-        return getActivePhoneTypeForSlot(getSlotForDefaultSubscription());
-    }
-
-    @Override
-    public int getActivePhoneTypeForSlot(int slotIndex) {
-        if (!mApp.getResources().getBoolean(
-                com.android.internal.R.bool.config_force_phone_globals_creation)) {
-            enforceTelephonyFeatureWithException(getCurrentPackageName(),
-                    PackageManager.FEATURE_TELEPHONY, "getActivePhoneTypeForSlot");
-        }
-
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            final Phone phone = PhoneFactory.getPhone(slotIndex);
-            if (phone == null) {
-                return PhoneConstants.PHONE_TYPE_NONE;
-            } else {
-                return phone.getPhoneType();
-            }
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-    }
-
-    @Override
     public void requestNumberVerification(PhoneNumberRange range, long timeoutMillis,
             INumberVerificationCallback callback, String callingPackage) {
         if (mApp.checkCallingOrSelfPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
@@ -3951,21 +3850,6 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
                 TelephonyManager.getMaxNumberVerificationTimeoutMillis());
 
         NumberVerificationManager.getInstance().requestVerification(range, callback, timeoutMillis);
-    }
-
-    /**
-     * Returns true if CDMA provisioning needs to run.
-     */
-    public boolean needsOtaServiceProvisioning() {
-        enforceTelephonyFeatureWithException(getCurrentPackageName(),
-                PackageManager.FEATURE_TELEPHONY_RADIO_ACCESS, "needsOtaServiceProvisioning");
-
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            return getDefaultPhone().needsOtaServiceProvisioning();
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
     }
 
     /**
@@ -5634,47 +5518,6 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
                 return phone.getIccCard().hasIccCard();
             } else {
                 return false;
-            }
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-    }
-
-    /**
-     * Return if the current radio is LTE on CDMA. This
-     * is a tri-state return value as for a period of time
-     * the mode may be unknown.
-     *
-     * @param callingPackage the name of the package making the call.
-     * @return {@link Phone#LTE_ON_CDMA_UNKNOWN}, {@link Phone#LTE_ON_CDMA_FALSE}
-     * or {@link Phone#LTE_ON_CDMA_TRUE}
-     */
-    @Override
-    public int getLteOnCdmaMode(String callingPackage, String callingFeatureId) {
-        return getLteOnCdmaModeForSubscriber(getDefaultSubscription(), callingPackage,
-                callingFeatureId);
-    }
-
-    @Override
-    public int getLteOnCdmaModeForSubscriber(int subId, String callingPackage,
-            String callingFeatureId) {
-        try {
-            enforceReadPrivilegedPermission("getLteOnCdmaModeForSubscriber");
-        } catch (SecurityException e) {
-            return PhoneConstants.LTE_ON_CDMA_UNKNOWN;
-        }
-
-        enforceTelephonyFeatureWithException(callingPackage,
-                PackageManager.FEATURE_TELEPHONY_RADIO_ACCESS, "getLteOnCdmaModeForSubscriber");
-
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            final Phone phone = getPhone(subId);
-            if (phone == null) {
-                return PhoneConstants.LTE_ON_CDMA_UNKNOWN;
-            } else {
-                return TelephonyProperties.lte_on_cdma_device()
-                        .orElse(PhoneConstants.LTE_ON_CDMA_FALSE);
             }
         } finally {
             Binder.restoreCallingIdentity(identity);
@@ -8861,34 +8704,6 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
                 Log.e(LOG_TAG, "Not getting aid", e);
             }
             return aid;
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-    }
-
-    /**
-     * Return the Electronic Serial Number.
-     *
-     * @param subId the subscription ID that this request applies to.
-     * @return ESN or null if error.
-     */
-    @Override
-    public String getEsn(int subId) {
-        enforceReadPrivilegedPermission("getEsn");
-        Phone phone = getPhone(subId);
-
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            if (phone == null) {
-                return null;
-            }
-            String esn = null;
-            try {
-                esn = phone.getEsn();
-            } catch (Exception e) {
-                Log.e(LOG_TAG, "Not getting ESN", e);
-            }
-            return esn;
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

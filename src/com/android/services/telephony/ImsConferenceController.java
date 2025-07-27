@@ -369,23 +369,37 @@ public class ImsConferenceController {
 
                 // If the conference is full, don't allow anything to be conferenced with it.
                 if (imsConference.isFullConference()) {
-                    imsConference.setConferenceableConnections(Collections.<Connection>emptyList());
+                    if (com.android.server.telecom.flags.Flags.multiPartyAnchorConf()) {
+                        imsConference.setConferenceables(Collections.<Conferenceable>emptyList());
+                    } else {
+                        imsConference
+                                .setConferenceableConnections(Collections.<Connection>emptyList());
+                    }
                 }
 
-                // Remove all conferences from the set, since we can not conference a conference
-                // to another conference. Removes connections from different PhoneAccountHandles.
-                List<Connection> connections = conferenceableSet
-                        .stream()
-// QTI_BEGIN: 2021-08-10: Telephony: Add conferenceable connection if on the same sub
-                        .filter(conferenceable -> conferenceable instanceof Connection &&
-// QTI_END: 2021-08-10: Telephony: Add conferenceable connection if on the same sub
-// QTI_BEGIN: 2025-01-30: Telephony: Revert "Do not show merge button for two HELD calls"
-                        isSamePhoneAccountHandle(c, conferenceable))
-// QTI_END: 2025-01-30: Telephony: Revert "Do not show merge button for two HELD calls"
-                        .map(conferenceable -> (Connection) conferenceable)
-                        .collect(Collectors.toList());
-                // Conference equivalent to setConferenceables that only accepts Connections
-                imsConference.setConferenceableConnections(connections);
+                if (com.android.server.telecom.flags.Flags.multiPartyAnchorConf() &&
+                        imsConference.getCarrierConfig() != null &&
+                        imsConference.getCarrierConfig().isMultiPartyAnchorConfSupported()) {
+                    // Remove conferenceables from different PhoneAccountHandles.
+                    List<Conferenceable> conferenceables = conferenceableSet
+                            .stream()
+                            .filter(conferenceable -> isSamePhoneAccountHandle(c, conferenceable))
+                            .collect(Collectors.toList());
+                    imsConference.setConferenceables(conferenceables);
+                } else {
+                    // Remove all conferences from the set, since we can not conference a
+                    // conference to another conference. Removes connections from different
+                    // PhoneAccountHandles.
+                    List<Connection> connections = conferenceableSet
+                            .stream()
+                            .filter(conferenceable -> conferenceable instanceof Connection
+                                    && isSamePhoneAccountHandle(c, conferenceable))
+                            .map(conferenceable -> (Connection) conferenceable)
+                            .collect(Collectors.toList());
+                    // Conference equivalent to setConferenceables that only accepts Connections
+                    imsConference.setConferenceableConnections(connections);
+                }
+
             }
         }
     }
@@ -568,16 +582,21 @@ public class ImsConferenceController {
                     CarrierConfigManager.KEY_ALLOW_HOLD_IN_IMS_CALL_BOOL);
             boolean shouldLocalDisconnectOnEmptyConference = bundle.getBoolean(
                     CarrierConfigManager.KEY_LOCAL_DISCONNECT_EMPTY_IMS_CONFERENCE_BOOL);
+            boolean isMultiPartyAnchorConfSupported = false;
+            if (com.android.server.telecom.flags.Flags.multiPartyAnchorConf()){
+                isMultiPartyAnchorConfSupported = bundle.getBoolean(
+                        CarrierConfigManager.KEY_SUPPORT_MULTI_PARTY_ANCHOR_CONFERENCE_BOOL);
+            }
             boolean isMultiAnchorConferenceSupported = bundle.getBoolean(
                     CarrierConfigManager.KEY_CARRIER_SUPPORTS_MULTIANCHOR_CONFERENCE);
             boolean filterOutConferenceHost = !cfgManager.getConfigForSubId(phone.getSubId())
                     .getBoolean("disable_filter_out_conference_host");
-
             config.setIsMaximumConferenceSizeEnforced(isMaximumConferenceSizeEnforced)
                     .setMaximumConferenceSize(maximumConferenceSize)
                     .setIsHoldAllowed(isHoldAllowed)
                     .setShouldLocalDisconnectEmptyConference(
                             shouldLocalDisconnectOnEmptyConference)
+                    .setIsMultiPartyAnchorConfSupported(isMultiPartyAnchorConfSupported)
                     .setIsMultiAnchorConferenceSupported(isMultiAnchorConferenceSupported)
                     .setFilterOutConferenceHost(filterOutConferenceHost);
         }

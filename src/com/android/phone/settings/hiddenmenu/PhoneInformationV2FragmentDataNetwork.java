@@ -418,8 +418,19 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
         mPhoneButton1 = view.findViewById(R.id.phone_button_1);
         mPhoneTitle1 = view.findViewById(R.id.phone_button_1_title);
 
-        mPhoneTitle0.setText(sPhoneIndexLabels[0]);
-        mPhoneTitle1.setText(sPhoneIndexLabels[1]);
+        // Configure phone selection buttons based on the number of active modems.
+        if (sPhoneIndexLabels.length > 1) {
+            mPhoneTitle0.setText(sPhoneIndexLabels[0]);
+            mPhoneTitle1.setText(sPhoneIndexLabels[1]);
+            mPhoneButton1.setVisibility(View.VISIBLE);
+        } else if (sPhoneIndexLabels.length == 1) {
+            mPhoneTitle0.setText(sPhoneIndexLabels[0]);
+            mPhoneButton1.setVisibility(View.GONE);
+        } else {
+            mPhoneButton0.setVisibility(View.GONE);
+            mPhoneButton1.setVisibility(View.GONE);
+        }
+
 
         View.OnClickListener selectionListener =
                 clickedView -> {

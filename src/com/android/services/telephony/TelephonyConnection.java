@@ -1333,6 +1333,10 @@ abstract class TelephonyConnection extends Connection implements Holdable,
             isAllowedToDisplayPicture = callFilteringCompletionInfo.isInContacts();
         }
 
+        if (!isAllowedToDisplayPicture) {
+            isAllowedToDisplayPicture = isBusinessCall();
+        }
+
         if (isImsConnection()) {
             ImsPhone imsPhone = (getPhone() instanceof ImsPhone) ? (ImsPhone) getPhone() : null;
             if (imsPhone != null
@@ -1366,6 +1370,14 @@ abstract class TelephonyConnection extends Connection implements Holdable,
                 }
             }
         }
+    }
+
+    private boolean isBusinessCall() {
+        Bundle extras = getExtras();
+        if (extras == null) {
+            return false;
+        }
+        return extras.getBoolean(ImsCallProfile.EXTRA_IS_BUSINESS_CALL, false);
     }
 
     @Override
