@@ -363,6 +363,18 @@ public class TelephonyConnectionTest extends TelephonyTestBase {
                 serviceCategory.intValue());
     }
 
+    // If the original connection was a network identified emergency call (NIE),
+    // then the new connection in a redial should also be a NIE call.
+    @Test
+    public void testNetworkIdentifiedEmergencyRedial() {
+        TestTelephonyConnection c = new TestTelephonyConnection();
+        doReturn(true).when(mImsPhoneConnection)
+                .isNetworkIdentifiedEmergencyCall();
+        c.setOriginalConnection(mImsPhoneConnection);
+        assertTrue(c.shouldTreatAsEmergencyCall());
+        assertTrue(c.isNetworkIdentifiedEmergencyCall());
+    }
+
     private EmergencyNumber getEmergencyNumber(int eccCategory) {
         return new EmergencyNumber("", "", "", eccCategory,
             new ArrayList<String>(),
