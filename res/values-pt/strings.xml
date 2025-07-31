@@ -530,7 +530,7 @@
     <string name="card_title_dialing" msgid="8742182654254431781">"Chamando..."</string>
     <string name="card_title_redialing" msgid="18130232613559964">"Rediscando"</string>
     <string name="card_title_conf_call" msgid="901197309274457427">"Teleconferência"</string>
-    <string name="card_title_incoming_call" msgid="881424648458792430">"Recebendo chamada"</string>
+    <string name="card_title_incoming_call" msgid="881424648458792430">"Recebendo ligação"</string>
     <string name="card_title_call_ended" msgid="650223980095026340">"Chamada encerrada"</string>
     <string name="card_title_on_hold" msgid="9028319436626975207">"Em espera"</string>
     <string name="card_title_hanging_up" msgid="814874106866647871">"Desligando"</string>

@@ -1733,8 +1733,6 @@ abstract class TelephonyConnection extends Connection implements Holdable,
 // QTI_BEGIN: 2018-08-30: Telephony: Fix plus sign of country code prefixes can't show on CDMA MO call
         }
 
-// QTI_END: 2018-08-30: Telephony: Fix plus sign of country code prefixes can't show on CDMA MO call
-// QTI_BEGIN: 2023-12-12: Telephony: Preserve isNetworkIdentifiedEmergencyCall for Connection during handover.
         // When a call is redialed as an emergency call, a handover may occur.
         // In that case, mIsNetworkIdentifiedEmergencyCall is overwritten
         // along with the Connection Property. The associated Call object
@@ -1749,7 +1747,6 @@ abstract class TelephonyConnection extends Connection implements Holdable,
             isEmergency = mOriginalConnection.isNetworkIdentifiedEmergencyCall();
         }
 
-// QTI_END: 2023-12-12: Telephony: Preserve isNetworkIdentifiedEmergencyCall for Connection during handover.
         clearOriginalConnection();
         mOriginalConnectionExtras.clear();
         mOriginalConnection = originalConnection;
@@ -1768,10 +1765,8 @@ abstract class TelephonyConnection extends Connection implements Holdable,
         // Set video state and capabilities
         setTelephonyVideoState(mOriginalConnection.getVideoState());
         setOriginalConnectionCapabilities(mOriginalConnection.getConnectionCapabilities());
-// QTI_BEGIN: 2023-12-12: Telephony: Preserve isNetworkIdentifiedEmergencyCall for Connection during handover.
         setIsNetworkIdentifiedEmergencyCall(isEmergency ||
                 mOriginalConnection.isNetworkIdentifiedEmergencyCall());
-// QTI_END: 2023-12-12: Telephony: Preserve isNetworkIdentifiedEmergencyCall for Connection during handover.
         setIsAdhocConferenceCall(mOriginalConnection.isAdhocConference());
         setAudioModeIsVoip(mOriginalConnection.getAudioModeIsVoip());
         setTelephonyVideoProvider(mOriginalConnection.getVideoProvider());
@@ -1789,9 +1784,7 @@ abstract class TelephonyConnection extends Connection implements Holdable,
 
         TelephonyManager tm = (TelephonyManager) getPhone().getContext()
                 .getSystemService(Context.TELEPHONY_SERVICE);
-// QTI_BEGIN: 2024-06-04: Telephony: Set mTreatIsEmergencyCall to true when the call is an emergency call.
         if (isEmergency || tm.isEmergencyNumber(mOriginalConnection.getAddress())) {
-// QTI_END: 2024-06-04: Telephony: Set mTreatIsEmergencyCall to true when the call is an emergency call.
             mTreatAsEmergencyCall = true;
         }
         // Propagate VERSTAT for IMS calls.
@@ -2736,20 +2729,14 @@ abstract class TelephonyConnection extends Connection implements Holdable,
         if (mOriginalConnection == null) {
             return;
         }
-// QTI_BEGIN: 2021-03-17: RIL: Update mTreatAsEmergencyCall before using it
 
         TelephonyManager tm = (TelephonyManager) getPhone().getContext()
                 .getSystemService(Context.TELEPHONY_SERVICE);
-// QTI_END: 2021-03-17: RIL: Update mTreatAsEmergencyCall before using it
-// QTI_BEGIN: 2024-06-04: Telephony: Set mTreatIsEmergencyCall to true when the call is an emergency call.
         if (isNetworkIdentifiedEmergencyCall() ||
                 tm.isEmergencyNumber(mOriginalConnection.getAddress())) {
-// QTI_END: 2024-06-04: Telephony: Set mTreatIsEmergencyCall to true when the call is an emergency call.
-// QTI_BEGIN: 2021-03-17: RIL: Update mTreatAsEmergencyCall before using it
             mTreatAsEmergencyCall = true;
         }
 
-// QTI_END: 2021-03-17: RIL: Update mTreatAsEmergencyCall before using it
         Call.State newState;
         // If the state is overridden and the state of the original connection hasn't changed since,
         // then we continue in the overridden state, else we go to the original connection's state.
