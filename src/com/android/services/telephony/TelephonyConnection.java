@@ -90,7 +90,6 @@ import com.android.internal.telephony.d2d.RtpAdapter;
 import com.android.internal.telephony.d2d.RtpTransport;
 import com.android.internal.telephony.d2d.Timeouts;
 import com.android.internal.telephony.d2d.TransportProtocol;
-import com.android.internal.telephony.flags.Flags;
 import com.android.internal.telephony.gsm.SuppServiceNotification;
 import com.android.internal.telephony.imsphone.ImsPhone;
 import com.android.internal.telephony.imsphone.ImsPhoneCall;
@@ -1552,7 +1551,7 @@ abstract class TelephonyConnection extends Connection implements Holdable,
 
         boolean allowHold = false;
         if (!shouldTreatAsEmergencyCall() && isImsConnection()) {
-            if (Flags.enableRttHoldCarrierConfig() && isRtt()) {
+            if (isRtt()) {
                 Log.d(this,
                     "buildConnectionCapabilities: Call is RTT, evaluating hold capabilities.");
                 allowHold = canHoldImsCalls() && canHoldRttCalls();
@@ -3725,6 +3724,17 @@ abstract class TelephonyConnection extends Connection implements Holdable,
      */
     public void setTelephonyConnectionDisconnected(@NonNull
             android.telecom.DisconnectCause disconnectCause) {
+        if (disconnectCause.getCode() == android.telecom.DisconnectCause.ANSWERED_ELSEWHERE) {
+            PersistableBundle carrierConfig = getCarrierConfig();
+            if (carrierConfig != null && !carrierConfig.getBoolean(
+                    CarrierConfigManager.KEY_LOG_CALLS_ANSWERED_ELSEWHERE_BOOL, true)) {
+                Log.i(this, "setTelephonyConnectionDisconnected: skip logging call answered "
+                        + "elsewhere based on carrier requirements.");
+                Bundle extras = new Bundle();
+                extras.putBoolean(TelecomManager.EXTRA_DO_NOT_LOG_CALL, true);
+                putTelephonyExtras(extras);
+            }
+        }
         setDisconnected(disconnectCause);
         notifyDisconnected(disconnectCause);
         notifyStateChanged(getState());
