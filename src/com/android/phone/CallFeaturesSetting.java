@@ -68,6 +68,7 @@ import com.android.ims.ImsException;
 import com.android.ims.ImsManager;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneConstants;
+import com.android.internal.telephony.flags.Flags;
 import com.android.phone.settings.PhoneAccountSettingsFragment;
 import com.android.phone.settings.SuppServicesUiUtil;
 import com.android.phone.settings.VoicemailSettingsActivity;
@@ -308,6 +309,7 @@ public class CallFeaturesSetting extends PreferenceActivity
     @Override
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
+        if (Flags.deleteCdma()) return;
         if (DBG) log("onCreate: Intent is " + getIntent());
 
         getWindow().addSystemFlags(
@@ -509,6 +511,7 @@ public class CallFeaturesSetting extends PreferenceActivity
                 CarrierConfigManager.KEY_HIDE_CARRIER_NETWORK_SETTINGS_BOOL)) {
             prefSet.removePreference(fdnButton);
         } else {
+            if (Flags.deleteCdma()) phoneType = PhoneConstants.PHONE_TYPE_GSM;
             if (phoneType == PhoneConstants.PHONE_TYPE_CDMA) {
                 // For now, just keep CdmaCallOptions as one entity. Eventually CDMA should
                 // follow the same pattern as GSM below, where VP and Call forwarding are
