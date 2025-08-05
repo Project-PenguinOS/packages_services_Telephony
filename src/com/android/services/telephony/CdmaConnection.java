@@ -27,6 +27,8 @@ import com.android.internal.telephony.Call;
 import com.android.internal.telephony.CallStateException;
 import com.android.internal.telephony.Connection;
 import com.android.internal.telephony.Phone;
+import com.android.internal.telephony.flags.Flags;
+
 // QTI_BEGIN: 2018-03-07: Telephony: Emergency Number Implementation for SS & DS
 import com.android.phone.PhoneUtils;
 // QTI_END: 2018-03-07: Telephony: Emergency Number Implementation for SS & DS
@@ -78,7 +80,7 @@ final class CdmaConnection extends TelephonyConnection {
     private boolean mAllowMute;
     // Queue of pending short-DTMF characters.
     private final Queue<Character> mDtmfQueue = new LinkedList<>();
-    private final EmergencyTonePlayer mEmergencyTonePlayer;
+    private EmergencyTonePlayer mEmergencyTonePlayer;
 
     // Indicates that the DTMF confirmation from telephony is pending.
     private boolean mDtmfBurstConfirmationPending = false;
@@ -94,6 +96,7 @@ final class CdmaConnection extends TelephonyConnection {
             int callDirection,
             String telecomCallId) {
         super(connection, telecomCallId, callDirection);
+        if (Flags.deleteCdma()) return;
         mEmergencyTonePlayer = emergencyTonePlayer;
         mAllowMute = allowMute;
         mIsCallWaiting = connection != null && connection.getState() == Call.State.WAITING;

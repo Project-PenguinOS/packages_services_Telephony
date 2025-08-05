@@ -186,9 +186,6 @@ public class PhoneGlobals extends ContextWrapper {
 
     static boolean sVoiceCapable = true;
 
-    // TODO: Remove, no longer used.
-    CdmaPhoneCallState cdmaPhoneCallState;
-
     // The currently-active PUK entry activity and progress dialog.
     // Normally, these are the Emergency Dialer and the subsequent
     // progress dialog.  null if there is are no such objects in
