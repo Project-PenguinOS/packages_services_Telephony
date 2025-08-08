@@ -2107,6 +2107,19 @@
     <string name="enforce_satellite_channel_string">Force Camp Satellite LTE Channel (Debug Build only)</string>
     <string name="enforce_satellite_channel_label">Force Camp Satellite LTE Channel</string>
 
+    <!-- Titles for selection of satellite bands and channels. -->
+    <string name="starlink_satellite_band_string">Starlink_US</string>
+    <string name="ast_satellite_band_string">AST_US</string>
+    <string name="manual_override_satellite_band_string">Manual Override</string>
+    <string name="satellite_manual_band_label">Select Band:</string>
+    <string name="satellite_channel_label_text">Enter Channel:</string>
+    <string name="satellite_channel_hint_text">Enter Satellite Channel here</string>
+    <string name="force_camp_satellite_button_string">Connect</string>
+    <string name="force_camp_satellite_button_connected_string">Connected</string>
+
+
+
+
     <!-- Title for simulating SIM capable of satellite. -->
     <string name="mock_carrier_roaming_satellite_string">Mock Carrier Satellite Mode (Debug Build only)</string>
     <string name="mock_carrier_roaming_satellite_label">Mock</string>
