@@ -852,6 +852,22 @@
     <string name="simulate_out_of_service_label" msgid="3563376136603403714">"سروس سے باہر کی حالت کو سیمولیٹ کریں"</string>
     <string name="enforce_satellite_channel_string" msgid="295306734591329892">"‏فورس کیمپ سیٹلائٹ LTE چینل (صرف ڈیبگ بلڈ)"</string>
     <string name="enforce_satellite_channel_label" msgid="8212349350110213468">"‏فورس کیمپ سیٹلائٹ LTE چینل"</string>
+    <!-- no translation found for starlink_satellite_band_string (2287502104005508384) -->
+    <skip />
+    <!-- no translation found for ast_satellite_band_string (3238737906080758289) -->
+    <skip />
+    <!-- no translation found for manual_override_satellite_band_string (801049975307124461) -->
+    <skip />
+    <!-- no translation found for satellite_manual_band_label (4135706517193927388) -->
+    <skip />
+    <!-- no translation found for satellite_channel_label_text (1999162483250790313) -->
+    <skip />
+    <!-- no translation found for satellite_channel_hint_text (4342575738602358270) -->
+    <skip />
+    <!-- no translation found for force_camp_satellite_button_string (3719311367839668322) -->
+    <skip />
+    <!-- no translation found for force_camp_satellite_button_connected_string (2457912207054938894) -->
+    <skip />
     <string name="mock_carrier_roaming_satellite_string" msgid="4796300252858292593">"موک کیریئر سیٹلائٹ موڈ (صرف ڈیبگ بلڈ)"</string>
     <string name="mock_carrier_roaming_satellite_label" msgid="2052656038544917979">"موک"</string>
     <string name="choose_satellite_data_mode_label" msgid="7403013160079828226">"موک سیٹلائٹ ڈیٹا موڈ"</string>
