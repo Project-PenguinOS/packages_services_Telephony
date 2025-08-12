@@ -852,22 +852,14 @@
     <string name="simulate_out_of_service_label" msgid="3563376136603403714">"‘ဆက်သွယ်မှုဧရိယာပြင်ပ’ အသွင်တူလုပ်ခြင်း"</string>
     <string name="enforce_satellite_channel_string" msgid="295306734591329892">"Force Camp Satellite LTE ချန်နယ် (အမှားရှာပြင်ခြင်းအတွက်သာ)"</string>
     <string name="enforce_satellite_channel_label" msgid="8212349350110213468">"Force Camp Satellite LTE ချန်နယ်"</string>
-    <!-- no translation found for starlink_satellite_band_string (2287502104005508384) -->
-    <skip />
-    <!-- no translation found for ast_satellite_band_string (3238737906080758289) -->
-    <skip />
-    <!-- no translation found for manual_override_satellite_band_string (801049975307124461) -->
-    <skip />
-    <!-- no translation found for satellite_manual_band_label (4135706517193927388) -->
-    <skip />
-    <!-- no translation found for satellite_channel_label_text (1999162483250790313) -->
-    <skip />
-    <!-- no translation found for satellite_channel_hint_text (4342575738602358270) -->
-    <skip />
-    <!-- no translation found for force_camp_satellite_button_string (3719311367839668322) -->
-    <skip />
-    <!-- no translation found for force_camp_satellite_button_connected_string (2457912207054938894) -->
-    <skip />
+    <string name="starlink_satellite_band_string" msgid="2287502104005508384">"Starlink_US"</string>
+    <string name="ast_satellite_band_string" msgid="3238737906080758289">"AST_US"</string>
+    <string name="manual_override_satellite_band_string" msgid="801049975307124461">"ကိုယ်တိုင် အစားထိုးခြင်း"</string>
+    <string name="satellite_manual_band_label" msgid="4135706517193927388">"ရေဒီယိုလှိုင်းခွင် ရွေးရန်-"</string>
+    <string name="satellite_channel_label_text" msgid="1999162483250790313">"ချန်နယ်ထည့်ရန်-"</string>
+    <string name="satellite_channel_hint_text" msgid="4342575738602358270">"ဂြိုဟ်တုချန်နယ်ကို ဤနေရာတွင် ထည့်ပါ"</string>
+    <string name="force_camp_satellite_button_string" msgid="3719311367839668322">"ချိတ်ဆက်ရန်"</string>
+    <string name="force_camp_satellite_button_connected_string" msgid="2457912207054938894">"ချိတ်ဆက်ထားသည်"</string>
     <string name="mock_carrier_roaming_satellite_string" msgid="4796300252858292593">"Mock Carrier Satellite Mode (အမှားရှာပြင်ခြင်း အတွက်သာ)"</string>
     <string name="mock_carrier_roaming_satellite_label" msgid="2052656038544917979">"အသွင်တူ"</string>
     <string name="choose_satellite_data_mode_label" msgid="7403013160079828226">"အသွင်တူ ဂြိုဟ်တုဒေတာမုဒ်"</string>
