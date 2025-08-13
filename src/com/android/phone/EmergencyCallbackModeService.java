@@ -41,6 +41,7 @@ import com.android.internal.telephony.EcbmHandler;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
+import com.android.internal.telephony.flags.Flags;
 import com.android.internal.telephony.util.NotificationChannelController;
 
 import java.text.SimpleDateFormat;
@@ -85,7 +86,8 @@ public class EmergencyCallbackModeService extends Service {
         mEcbmHandler = EcbmHandler.getInstance();
 // QTI_END: 2019-04-08: Telephony: Handle ECBM mode for both the SUBs to place calls in ECBM mode
         // Check if it is CDMA phone
-        if (phoneInEcm == null || ((phoneInEcm.getPhoneType() != PhoneConstants.PHONE_TYPE_CDMA)
+        if (phoneInEcm == null || ((Flags.deleteCdma()
+                || phoneInEcm.getPhoneType() != PhoneConstants.PHONE_TYPE_CDMA)
                 && (phoneInEcm.getImsPhone() == null))) {
             Log.e(LOG_TAG, "Error! Emergency Callback Mode not supported for " + phoneInEcm);
             stopSelf();

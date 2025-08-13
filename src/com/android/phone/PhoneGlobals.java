@@ -35,7 +35,6 @@ import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PersistableBundle;
-import android.os.PowerManager;
 import android.os.SystemProperties;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
@@ -152,18 +151,6 @@ public class PhoneGlobals extends ContextWrapper {
     public static final int AIRPLANE_ON = 1;
     public static final int AIRPLANE_OFF = 0;
 
-    /**
-     * Allowable values for the wake lock code.
-     *   SLEEP means the device can be put to sleep.
-     *   PARTIAL means wake the processor, but we display can be kept off.
-     *   FULL means wake both the processor and the display.
-     */
-    public enum WakeState {
-        SLEEP,
-        PARTIAL,
-        FULL
-    }
-
 // QTI_BEGIN: 2023-02-07: Telephony: Use data registration state to show network selection notification
     private static final String NETWORK_ACCESS_MODE = "access_mode";
 // QTI_END: 2023-02-07: Telephony: Use data registration state to show network selection notification
@@ -240,19 +227,6 @@ public class PhoneGlobals extends ContextWrapper {
      */
     private ArraySet<String> mShownNotificationReasons = new ArraySet<>();
 
-    // For reorganize_roaming_notification feature disabled.
-    @RoamingNotification
-    private int mPrevRoamingNotification = ROAMING_NOTIFICATION_NO_NOTIFICATION;
-
-    // For reorganize_roaming_notification feature disabled.
-    /** Operator numerics for which we've shown is-roaming notifications. **/
-    private ArraySet<String> mPrevRoamingOperatorNumerics = new ArraySet<>();
-
-    private WakeState mWakeState = WakeState.SLEEP;
-
-    private PowerManager mPowerManager;
-    private PowerManager.WakeLock mWakeLock;
-    private PowerManager.WakeLock mPartialWakeLock;
     private KeyguardManager mKeyguardManager;
 
     private int mDefaultDataSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
@@ -373,7 +347,6 @@ public class PhoneGlobals extends ContextWrapper {
     Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            PhoneConstants.State phoneState;
             if (VDBG) Log.v(LOG_TAG, "event=" + msg.what);
             switch (msg.what) {
                 // TODO: This event should be handled by the lock screen, just
@@ -643,13 +616,6 @@ public class PhoneGlobals extends ContextWrapper {
             // Create the SatelliteController singleton, which acts as a backend service for
             // {@link android.telephony.satellite.SatelliteManager}.
             SatelliteController.make(this, mFeatureFlags);
-
-            // before registering for phone state changes
-            mPowerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
-            mWakeLock = mPowerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, LOG_TAG);
-            // lock used to keep the processor awake, when we don't care for the display.
-            mPartialWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK
-                    | PowerManager.ON_AFTER_RELEASE, LOG_TAG);
 
             mKeyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
 
@@ -1296,15 +1262,6 @@ public class PhoneGlobals extends ContextWrapper {
 
     private @RoamingNotification int getCurrentRoamingNotification() {
         return mCurrentRoamingNotification;
-    }
-
-    /**
-     *
-     * @param subId to check roaming on
-     * @return whether we have transitioned to dataRoaming
-     */
-    private boolean dataIsNowRoaming(int subId) {
-        return getPhone(subId).getServiceState().getDataRoaming();
     }
 
     private boolean shouldShowRoamingNotification(String roamingNumeric) {

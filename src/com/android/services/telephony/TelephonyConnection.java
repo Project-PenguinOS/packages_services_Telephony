@@ -90,6 +90,7 @@ import com.android.internal.telephony.d2d.RtpAdapter;
 import com.android.internal.telephony.d2d.RtpTransport;
 import com.android.internal.telephony.d2d.Timeouts;
 import com.android.internal.telephony.d2d.TransportProtocol;
+import com.android.internal.telephony.flags.Flags;
 import com.android.internal.telephony.gsm.SuppServiceNotification;
 import com.android.internal.telephony.imsphone.ImsPhone;
 import com.android.internal.telephony.imsphone.ImsPhoneCall;
@@ -1711,8 +1712,10 @@ abstract class TelephonyConnection extends Connection implements Holdable,
         phone.registerForRingbackTone(mHandler, MSG_RINGBACK_TONE, null);
         phone.registerForSuppServiceNotification(mHandler, MSG_SUPP_SERVICE_NOTIFY, null);
         phone.registerForOnHoldTone(mHandler, MSG_ON_HOLD_TONE, null);
-        phone.registerForInCallVoicePrivacyOn(mHandler, MSG_CDMA_VOICE_PRIVACY_ON, null);
-        phone.registerForInCallVoicePrivacyOff(mHandler, MSG_CDMA_VOICE_PRIVACY_OFF, null);
+        if (!Flags.deleteCdma()) {
+            phone.registerForInCallVoicePrivacyOn(mHandler, MSG_CDMA_VOICE_PRIVACY_ON, null);
+            phone.registerForInCallVoicePrivacyOff(mHandler, MSG_CDMA_VOICE_PRIVACY_OFF, null);
+        }
         mPhoneForEvents = phone;
     }
 
@@ -3339,10 +3342,6 @@ abstract class TelephonyConnection extends Connection implements Holdable,
         return mWasImsConnection;
     }
 
-    boolean getIsUsingAssistedDialing() {
-        return mIsUsingAssistedDialing;
-    }
-
     void setIsUsingAssistedDialing(Boolean isUsingAssistedDialing) {
         mIsUsingAssistedDialing = isUsingAssistedDialing;
         updateConnectionProperties();
@@ -3590,7 +3589,8 @@ abstract class TelephonyConnection extends Connection implements Holdable,
     private boolean isShowingOriginalDialString() {
         boolean showOrigDialString = false;
         Phone phone = getPhone();
-        if (phone != null && (phone.getPhoneType() == TelephonyManager.PHONE_TYPE_CDMA)
+        if (phone != null && (!Flags.deleteCdma()
+                && phone.getPhoneType() == TelephonyManager.PHONE_TYPE_CDMA)
                 && !mOriginalConnection.isIncoming()) {
 // QTI_END: 2018-08-30: Telephony: Fix plus sign of country code prefixes can't show on CDMA MO call
             showOrigDialString = getCarrierConfig().getBoolean(CarrierConfigManager

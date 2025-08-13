@@ -72,7 +72,6 @@ import android.util.Pair;
 import android.view.WindowManager;
 import android.widget.Toast;
 
-import com.android.ims.ImsManager;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.Call;
 import com.android.internal.telephony.CallFailCause;
@@ -244,9 +243,6 @@ public class TelephonyConnectionService extends ConnectionService {
             new TelephonyConferenceController(mTelephonyConnectionServiceProxy);
     private final CdmaConferenceController mCdmaConferenceController =
             new CdmaConferenceController(this);
-
-    private com.android.server.telecom.flags.FeatureFlags mTelecomFlags =
-            new com.android.server.telecom.flags.FeatureFlagsImpl();
     private FeatureFlags mFeatureFlags = new FeatureFlagsImpl();
 
     private ImsConferenceController mImsConferenceController;
@@ -280,7 +276,6 @@ public class TelephonyConnectionService extends ConnectionService {
     private TelephonyConnection mAlternateEmergencyConnection;
     private TelephonyConnection mNormalRoutingEmergencyConnection;
     private Executor mDomainSelectionMainExecutor;
-    private ImsManager mImsManager = null;
     private DomainSelectionConnection mDomainSelectionConnection;
     private TelephonyConnection mNormalCallConnection;
     private SatelliteController mSatelliteController;
@@ -2241,11 +2236,6 @@ public class TelephonyConnectionService extends ConnectionService {
             return Connection.createCanceledConnection();
         }
 
-        // We should rely on the originalConnection to get the video state.  The request coming
-        // from Telecom does not know the video state of the unknown call.
-        int videoState = unknownConnection != null ? unknownConnection.getVideoState() :
-                VideoProfile.STATE_AUDIO_ONLY;
-
         TelephonyConnection connection =
                 createConnectionFor(phone, unknownConnection,
                         !unknownConnection.isIncoming() /* isOutgoing */,
@@ -2713,7 +2703,7 @@ public class TelephonyConnectionService extends ConnectionService {
 
     private int handleMmiCode(Phone phone, int telephonyDisconnectCause) {
         int disconnectCause = telephonyDisconnectCause;
-        if (phone.getPhoneType() == PhoneConstants.PHONE_TYPE_GSM
+        if ((mFeatureFlags.deleteCdma() || phone.getPhoneType() == PhoneConstants.PHONE_TYPE_GSM)
                 || phone.isUtEnabled()) {
             Log.d(this, "dialed MMI code");
             int subId = phone.getSubId();
@@ -3851,12 +3841,6 @@ public class TelephonyConnectionService extends ConnectionService {
 
     @VisibleForTesting
     public TelephonyConnection.TelephonyConnectionListener
-            getNormalRoutingEmergencyConnectionListener() {
-        return mNormalRoutingEmergencyConnectionListener;
-    }
-
-    @VisibleForTesting
-    public TelephonyConnection.TelephonyConnectionListener
             getEmergencyConnectionSatelliteListener() {
         return mEmergencyConnectionSatelliteListener;
     }
@@ -3947,7 +3931,7 @@ public class TelephonyConnectionService extends ConnectionService {
         int phoneType = phone.getPhoneType();
         int callDirection = isOutgoing ? android.telecom.Call.Details.DIRECTION_OUTGOING
                 : android.telecom.Call.Details.DIRECTION_INCOMING;
-        if (phoneType == TelephonyManager.PHONE_TYPE_GSM) {
+        if (mFeatureFlags.deleteCdma() || phoneType == TelephonyManager.PHONE_TYPE_GSM) {
             returnConnection = new GsmConnection(originalConnection, telecomCallId, callDirection);
         } else if (phoneType == TelephonyManager.PHONE_TYPE_CDMA) {
             boolean allowsMute = allowsMute(phone);
@@ -4213,41 +4197,6 @@ public class TelephonyConnectionService extends ConnectionService {
         } else {
             throw new IllegalArgumentException(
                     "addTelephonyConnectionListener(): Unexpected conferenceable! " + c);
-        }
-    }
-
-    private CompletableFuture<Boolean> listenForHoldStateChanged(
-            @NonNull Conferenceable conferenceable) {
-        CompletableFuture<Boolean> future = new CompletableFuture<>();
-        final StateHoldingListener stateHoldingListener = new StateHoldingListener(future);
-        addTelephonyConnectionListener(conferenceable, stateHoldingListener);
-        return future;
-    }
-
-    // Returns a future that waits for the STATE_HOLDING confirmation on the input
-    // {@link Conferenceable}, or times out.
-    private CompletableFuture<Void> delayDialForOtherSubHold(Phone phone, Conferenceable c,
-            Consumer<Boolean> completeConsumer) {
-        if (c == null || phone == null) {
-            // Unexpected inputs
-            completeConsumer.accept(false);
-            return CompletableFuture.completedFuture(null);
-        }
-
-        try {
-            CompletableFuture<Boolean> stateHoldingFuture = listenForHoldStateChanged(c);
-            // a timeout that will complete the future to not block the outgoing call indefinitely.
-            CompletableFuture<Boolean> timeout = new CompletableFuture<>();
-            phone.getContext().getMainThreadHandler().postDelayed(
-                    () -> timeout.complete(false), DEFAULT_DSDA_CALL_STATE_CHANGE_TIMEOUT_MS);
-            // Ensure that the Consumer is completed on the main thread.
-            return stateHoldingFuture.acceptEitherAsync(timeout, completeConsumer,
-                    phone.getContext().getMainExecutor());
-        } catch (Exception e) {
-            Log.w(this, "delayDialForOtherSubHold - exception= "
-                    + e.getMessage());
-            completeConsumer.accept(false);
-            return CompletableFuture.completedFuture(null);
         }
     }
 
@@ -4658,6 +4607,7 @@ public class TelephonyConnectionService extends ConnectionService {
     private boolean allowsMute(Phone phone) {
         // For CDMA phones, check if we are in Emergency Callback Mode (ECM).  Mute is disallowed
         // in ECM mode.
+        if (mFeatureFlags.deleteCdma()) return true;
         if (phone.getPhoneType() == TelephonyManager.PHONE_TYPE_CDMA) {
             if (phone.isInEcm()) {
                 return false;
@@ -4711,7 +4661,7 @@ public class TelephonyConnectionService extends ConnectionService {
             }
         } else {
             int phoneType = connection.getCall().getPhone().getPhoneType();
-            if (phoneType == TelephonyManager.PHONE_TYPE_GSM) {
+            if (mFeatureFlags.deleteCdma() || phoneType == TelephonyManager.PHONE_TYPE_GSM) {
                 Log.d(this, "Adding GSM connection to conference controller: " + connection);
                 mTelephonyConferenceController.add(connection);
                 if (!mFeatureFlags.deleteCdma()) {
@@ -4759,6 +4709,7 @@ public class TelephonyConnectionService extends ConnectionService {
      * the right circumstances to support adding a call.
      */
     private Connection checkAdditionalOutgoingCallLimits(Phone phone) {
+        if (mFeatureFlags.deleteCdma()) return null;
         if (phone.getPhoneType() == TelephonyManager.PHONE_TYPE_CDMA) {
             // Check to see if any CDMA conference calls exist, and if they do, check them for
             // limitations.
@@ -5252,7 +5203,6 @@ private List<Connection> disconnectAllCallsOnOtherSubs(@NonNull PhoneAccountHand
     public void setFeatureFlags(FeatureFlags featureFlags,
             com.android.server.telecom.flags.FeatureFlags telecomFlags) {
         mFeatureFlags = featureFlags;
-        mTelecomFlags = telecomFlags;
     }
 
     private void loge(String s) {

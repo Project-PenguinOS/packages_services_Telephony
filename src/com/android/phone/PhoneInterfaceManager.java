@@ -172,7 +172,9 @@ import android.telephony.satellite.SatelliteCapabilities;
 import android.telephony.satellite.SatelliteDatagram;
 import android.telephony.satellite.SatelliteDatagramCallback;
 import android.telephony.satellite.SatelliteManager;
+import android.telephony.satellite.SatelliteModemStateCallback;
 import android.telephony.satellite.SatelliteProvisionStateCallback;
+import android.telephony.satellite.SatelliteSessionStats;
 import android.telephony.satellite.SatelliteSubscriberInfo;
 import android.text.TextUtils;
 import android.util.ArraySet;
@@ -213,6 +215,7 @@ import com.android.internal.telephony.PhoneConfigurationManager;
 import com.android.internal.telephony.PhoneConstantConversions;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.PhoneFactory;
+import com.android.internal.telephony.PhoneInternalInterface;
 import com.android.internal.telephony.ProxyController;
 import com.android.internal.telephony.RIL;
 import com.android.internal.telephony.RILConstants;
@@ -288,6 +291,7 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -441,7 +445,6 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     private static final String PREF_CARRIERS_ALPHATAG_PREFIX = "carrier_alphtag_";
     private static final String PREF_CARRIERS_NUMBER_PREFIX = "carrier_number_";
     private static final String PREF_CARRIERS_SUBSCRIBER_PREFIX = "carrier_subscriber_";
-    private static final String PREF_PROVISION_IMS_MMTEL_PREFIX = "provision_ims_mmtel_";
 
     // String to store multi SIM allowed
     private static final String PREF_MULTI_SIM_RESTRICTED = "multisim_restricted";
@@ -555,10 +558,6 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
 
         public WorkSource workSource;
 
-        public MainThreadRequest(Object argument) {
-            this.argument = argument;
-        }
-
         MainThreadRequest(Object argument, Phone phone, WorkSource workSource) {
             this.argument = argument;
             if (phone != null) {
@@ -573,19 +572,6 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
                 this.subId = subId;
             }
             this.workSource = workSource;
-        }
-    }
-
-    private static final class IncomingThirdPartyCallArgs {
-        public final ComponentName component;
-        public final String callId;
-        public final String callerDisplayName;
-
-        public IncomingThirdPartyCallArgs(ComponentName component, String callId,
-                String callerDisplayName) {
-            this.component = component;
-            this.callId = callId;
-            this.callerDisplayName = callerDisplayName;
         }
     }
 
@@ -1700,7 +1686,8 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
                         request.result = ar.result;
                     } else {
                         Phone phone = getPhoneFromRequest(request);
-                        request.result = (phone.getPhoneType() == PhoneConstants.PHONE_TYPE_CDMA)
+                        request.result = (!mFeatureFlags.deleteCdma()
+                                && phone.getPhoneType() == PhoneConstants.PHONE_TYPE_CDMA)
                                 ? new CellIdentityCdma() : new CellIdentityGsm();
                     }
 
@@ -2300,20 +2287,6 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         return request.result;
     }
 
-    /**
-     * Asynchronous ("fire and forget") version of sendRequest():
-     * Posts the specified command to be executed on the main thread, and
-     * returns immediately.
-     * @see #sendRequest
-     */
-    private void sendRequestAsync(int command) {
-        mMainThreadHandler.sendEmptyMessage(command);
-    }
-
-    /**
-     * Same as {@link #sendRequestAsync(int)} except it takes an argument.
-     * @see {@link #sendRequest(int)}
-     */
     private void sendRequestAsync(int command, Object argument) {
         sendRequestAsync(command, argument, null, null);
     }
@@ -2444,13 +2417,13 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         return PhoneFactory.getPhone(SubscriptionManager.getPhoneId(subId));
     }
 
-    private void sendEraseModemConfig(@NonNull Phone phone) {
+    private void sendEraseModemConfig() {
         int cmd = CMD_MODEM_REBOOT;
         Boolean success = (Boolean) sendRequest(cmd, null);
         if (DBG) log("eraseModemConfig:" + ' ' + (success ? "ok" : "fail"));
     }
 
-    private void sendEraseDataInSharedPreferences(@NonNull Phone phone) {
+    private void sendEraseDataInSharedPreferences() {
         Boolean success = (Boolean) sendRequest(CMD_ERASE_DATA_SHARED_PREFERENCES, null);
         if (DBG) log("eraseDataInSharedPreferences:" + ' ' + (success ? "ok" : "fail"));
     }
@@ -2941,27 +2914,6 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         }
     }
 
-    public boolean setRadioPowerForSubscriber(int subId, boolean turnOn) {
-        enforceModifyPermission();
-
-        if (!turnOn) {
-            log("setRadioPowerForSubscriber off: subId=" + subId
-                    + ",callingPackage=" + getCurrentPackageName());
-        }
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            final Phone phone = getPhone(subId);
-            if (phone != null) {
-                phone.setRadioPower(turnOn);
-                return true;
-            } else {
-                return false;
-            }
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-    }
-
     /**
      * Vote on powering off the radio for a reason. The radio will be turned on only when there is
      * no reason to power it off. When any of the voters want to power it off, it will be turned
@@ -2969,10 +2921,10 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
      * powering it off, and these radio off votes will be cleared.
      * Multiple apps can vote for the same reason and the last vote will take effect. Each app is
      * responsible for its vote. A powering-off vote of a reason will be maintained until it is
-     * cleared by calling {@link clearRadioPowerOffForReason} for that reason, or an emergency call
-     * is made, or the device is rebooted. When an app comes backup from a crash, it needs to make
-     * sure if its vote is as expected. An app can use the API {@link getRadioPowerOffReasons} to
-     * check its vote.
+     * cleared by calling {@link #clearRadioPowerOffForReason(int, int)} for that reason, or an
+     * emergency call is made, or the device is rebooted. When an app comes backup from a crash, it
+     * needs to make sure if its vote is as expected. An app can use the API
+     * {@link #getRadioPowerOffReasons(int, String, String)} to check its vote.
      *
      * @param subId The subscription ID.
      * @param reason The reason for powering off radio.
@@ -3005,7 +2957,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
 
     /**
      * Remove the vote on powering off the radio for a reason, as requested by
-     * {@link requestRadioPowerOffForReason}.
+     * {@link #requestRadioPowerOffForReason(int, int)}.
      *
      * @param subId The subscription ID.
      * @param reason The reason for powering off radio.
@@ -3035,7 +2987,8 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     }
 
     /**
-     * Get reasons for powering off radio, as requested by {@link requestRadioPowerOffForReason}.
+     * Get reasons for powering off radio, as requested by
+     * {@link #requestRadioPowerOffForReason(int, int)}.
      *
      * @param subId The subscription ID.
      * @param callingPackage The package making the call.
@@ -3294,7 +3247,8 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
             case DENIED_HARD:
                 throw new SecurityException("Not allowed to access cell location");
             case DENIED_SOFT:
-                return (getDefaultPhone().getPhoneType() == PhoneConstants.PHONE_TYPE_CDMA)
+                return (!mFeatureFlags.deleteCdma()
+                        && getDefaultPhone().getPhoneType() == PhoneConstants.PHONE_TYPE_CDMA)
                         ? new CellIdentityCdma() : new CellIdentityGsm();
         }
 
@@ -3328,7 +3282,6 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
                 // Get default phone in this case.
                 phoneId = SubscriptionManager.DEFAULT_PHONE_INDEX;
             }
-            final int subId = SubscriptionManager.getSubscriptionId(phoneId);
             Phone phone = PhoneFactory.getPhone(phoneId);
             if (phone == null) return "";
             ServiceStateTracker sst = phone.getServiceStateTracker();
@@ -3441,13 +3394,22 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
                 return new ArrayList<>();
         }
 
+        enforceTelephonyFeatureWithException(callingPackage,
+            PackageManager.FEATURE_TELEPHONY_RADIO_ACCESS, "getAllCellInfo");
+
+        mAppOps = Objects.requireNonNull(
+            getDefaultPhone().getContext().getSystemService(AppOpsManager.class));
+        mAppOps.noteOpNoThrow(
+            mAppOps.OP_READ_CELL_INFO,
+            Binder.getCallingUid(),
+            getDefaultPhone().getContext().getPackageName(),
+            getDefaultPhone().getContext().getAttributionTag(),
+            "getAllCellInfo reporting cell info");
+
         final int targetSdk = TelephonyPermissions.getTargetSdk(mApp, callingPackage);
         if (targetSdk >= android.os.Build.VERSION_CODES.Q) {
             return getCachedCellInfo();
         }
-
-        enforceTelephonyFeatureWithException(callingPackage,
-                PackageManager.FEATURE_TELEPHONY_RADIO_ACCESS, "getAllCellInfo");
 
         if (DBG_LOC) log("getAllCellInfo: is active user");
         WorkSource workSource = getWorkSource(Binder.getCallingUid());
@@ -3519,6 +3481,15 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
 
         enforceTelephonyFeatureWithException(callingPackage,
                 PackageManager.FEATURE_TELEPHONY_RADIO_ACCESS, "requestCellInfoUpdateInternal");
+
+        mAppOps = Objects.requireNonNull(
+            getDefaultPhone().getContext().getSystemService(AppOpsManager.class));
+        mAppOps.noteOpNoThrow(
+            mAppOps.OP_READ_CELL_INFO,
+            Binder.getCallingUid(),
+            getDefaultPhone().getContext().getPackageName(),
+            getDefaultPhone().getContext().getAttributionTag(),
+            "requestCellInfoUpdate reporting cell info");
 
         final Phone phone = getPhoneFromSubId(subId);
         if (phone == null) throw new IllegalArgumentException("Invalid Subscription Id: " + subId);
@@ -5532,10 +5503,6 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         return SubscriptionManager.getDefaultSubscriptionId();
     }
 
-    private int getSlotForDefaultSubscription() {
-        return SubscriptionManager.getPhoneId(getDefaultSubscription());
-    }
-
     private int getPreferredVoiceSubscription() {
         return SubscriptionManager.getDefaultVoiceSubscriptionId();
     }
@@ -6182,7 +6149,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
 
     /**
      * Clears any carrier ImsService overrides for the slot index specified that were previously
-     * set with {@link #setBoundImsServiceOverride(int, boolean, int[], String)}.
+     * set with {@link #setBoundImsServiceOverride(int, int, boolean, int[], String)}.
      *
      * This should only be used for testing.
      *
@@ -7508,7 +7475,6 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         try {
             final Context context = mApp;
             final TelephonyManager tele = TelephonyManager.from(context);
-            final SubscriptionManager sub = SubscriptionManager.from(context);
 
             // Figure out what subscribers are currently active
             final ArraySet<String> activeSubscriberIds = new ArraySet<>();
@@ -8152,10 +8118,10 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
             String configValue = DeviceConfig.getProperty(DeviceConfig.NAMESPACE_TELEPHONY,
                     RESET_NETWORK_ERASE_MODEM_CONFIG_ENABLED);
             if (configValue != null && Boolean.parseBoolean(configValue)) {
-                sendEraseModemConfig(defaultPhone);
+                sendEraseModemConfig();
             }
 
-            sendEraseDataInSharedPreferences(defaultPhone);
+            sendEraseDataInSharedPreferences();
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -8297,8 +8263,6 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         int activityDurationMs =
                 (int) (info.getTimestampMillis() - mLastModemActivityInfo.getTimestampMillis());
         activityDurationMs += MODEM_ACTIVITY_TIME_OFFSET_CORRECTION_MS;
-
-        int totalTxTimeMs = Arrays.stream(info.getTransmitTimeMillis()).sum();
 
         return (info.isValid()
                 && (info.getSleepTimeMillis() <= activityDurationMs)
@@ -9685,19 +9649,6 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         return TelephonyProperties.mobile_data().orElse(true);
     }
 
-    /**
-     * Returns the default network type for the given {@code subId}, if the default network type is
-     * not set, return {@link Phone#PREFERRED_NT_MODE}.
-     */
-    private int getDefaultNetworkType(int subId) {
-        List<Integer> list = TelephonyProperties.default_network();
-        int phoneId = SubscriptionManager.getPhoneId(subId);
-        if (phoneId >= 0 && phoneId < list.size() && list.get(phoneId) != null) {
-            return list.get(phoneId);
-        }
-        return Phone.PREFERRED_NT_MODE;
-    }
-
     @Override
     public void setCarrierTestOverride(int subId, String mccmnc, String imsi, String iccid, String
             gid1, String gid2, String plmn, String spn, String carrierPrivilegeRules, String apn) {
@@ -9866,8 +9817,9 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         try {
             for (Phone phone : PhoneFactory.getPhones()) {
                 Rlog.d(LOG_TAG, "startEmergencyCallbackMode phone type: " + phone.getPhoneType());
-                if (phone != null && ((phone.getPhoneType() == PHONE_TYPE_GSM)
-                        || (phone.getPhoneType() == PHONE_TYPE_CDMA))) {
+                if (phone != null && (mFeatureFlags.deleteCdma()
+                        || (phone.getPhoneType() == PHONE_TYPE_GSM
+                        || phone.getPhoneType() == PHONE_TYPE_CDMA))) {
                     GsmCdmaPhone gsmCdmaPhone = (GsmCdmaPhone) phone;
                     gsmCdmaPhone.obtainMessage(
                             GsmCdmaPhone.EVENT_EMERGENCY_CALLBACK_MODE_ENTER).sendToTarget();
@@ -10906,7 +10858,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
      * Attempts to set the radio power state for all phones for thermal reason.
      * This does not guarantee that the
      * requested radio power state will actually be set. See {@link
-     * PhoneInternalInterface#setRadioPowerForReason} for more details.
+     * PhoneInternalInterface#setRadioPowerForReason(boolean, int)} for more details.
      *
      * @param enable {@code true} if trying to turn radio on.
      * @return {@code true} if phone setRadioPowerForReason was called. Otherwise, returns {@code
@@ -11039,7 +10991,6 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
                     + "calling package: " + callingPackage);
         }
 
-        WorkSource workSource = getWorkSource(Binder.getCallingUid());
         final long identity = Binder.clearCallingIdentity();
 
         int thermalMitigationResult = TelephonyManager.THERMAL_MITIGATION_RESULT_UNKNOWN_ERROR;
@@ -12115,7 +12066,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
 
         final long token = Binder.clearCallingIdentity();
         try {
-            int slotId = getSlotIndexOrException(subId);
+            getSlotIndexOrException(subId);
             controller.registerImsStateCallback(subId, feature, cb, callingPackage);
         } catch (ImsException e) {
             throw new ServiceSpecificException(e.getCode());
@@ -13012,7 +12963,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
      * If callback was not registered before, the request will be ignored.
      *
      * @param callback The callback that was passed to
-     * {@link #registerForModemStateChanged(int, ISatelliteModemStateCallback)}.
+     * {@link SatelliteManager#registerForModemStateChanged(Executor, SatelliteModemStateCallback)}
      *
      * @throws SecurityException if the caller doesn't have the required permission.
      */
@@ -14684,7 +14635,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
      * Get list of applications that are optimized for low bandwidth satellite data.
      *
      * @return List of Application Name with data optimized network property.
-     * {@link #PROPERTY_SATELLITE_DATA_OPTIMIZED}
+     * {@link SatelliteManager#PROPERTY_SATELLITE_DATA_OPTIMIZED}
      */
     @Override
     public List<String> getSatelliteDataOptimizedApps() {

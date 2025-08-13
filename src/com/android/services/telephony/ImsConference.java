@@ -1572,7 +1572,8 @@ public class ImsConference extends TelephonyConferenceBase implements Holdable {
                 }
             }
 
-            if (mConferenceHost.getPhone().getPhoneType() == PhoneConstants.PHONE_TYPE_GSM) {
+            if (Flags.deleteCdma() || mConferenceHost.getPhone().getPhoneType()
+                    == PhoneConstants.PHONE_TYPE_GSM) {
                 GsmConnection c = new GsmConnection(originalConnection, getTelecomCallId(),
                         mConferenceHost.getCallDirection());
                 Log.i(this, "handleOriginalConnectionChange : SRVCC to GSM."

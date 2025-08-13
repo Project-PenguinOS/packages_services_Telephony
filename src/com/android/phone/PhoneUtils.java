@@ -620,7 +620,7 @@ public class PhoneUtils {
      *         if the current pending MMI wasn't cancelable
      *         or if there was no current pending MMI at all.
      *
-     * @see displayMMIInitiate
+     * @see #displayMMIInitiate(Context, MmiCode, Message, Dialog)
      */
     static boolean cancelMmiCode(Phone phone) {
         List<? extends MmiCode> pendingMmis = phone.getPendingMmiCodes();
