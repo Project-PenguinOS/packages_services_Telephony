@@ -150,6 +150,8 @@ public class NotificationMgr {
     private ArrayMap<Integer, Boolean> mMwiVisible = new ArrayMap<Integer, Boolean>();
     // used to track the last broadcast sent to the dialer about the MWI, per sub id.
     private ArrayMap<Integer, Integer> mLastMwiCountSent = new ArrayMap<Integer, Integer>();
+    // used to track whether the voicemail number for waiting indicator is empty, per sub id.
+    private ArrayMap<Integer, String> mLastMwiVoicemailNumber = new ArrayMap<Integer, String>();
 
     // those flags are used to track whether to show network selection notification or not.
     private SparseArray<Integer> mPreviousServiceState = new SparseArray<>();
@@ -527,11 +529,15 @@ public class NotificationMgr {
             Integer previousCount = wasCountSentYet ? mLastMwiCountSent.get(subId) : null;
             boolean didCountChange = !wasCountSentYet || !Objects.equals(previousCount, count);
             mLastMwiCountSent.put(subId, count);
+            String previousNumber = mLastMwiVoicemailNumber.get(subId);
+            boolean voicemailNumberChanged = !Objects.equals(number, previousNumber);
+            mLastMwiVoicemailNumber.put(subId, number);
 
             Log.i(LOG_TAG,
                     "maybeSendVoicemailNotificationUsingDefaultDialer: count: " + (wasCountSentYet
                             ? previousCount : "undef") + "->" + count + " (changed="
-                            + didCountChange + ")");
+                            + didCountChange + ")" + ", voicemailNumberChanged="
+                            + voicemailNumberChanged);
 
             Intent intent = getShowVoicemailIntentForDefaultDialer(userHandle);
 
@@ -544,7 +550,7 @@ public class NotificationMgr {
              * TelephonyCallback#onMessageWaitingIndicatorChanged occurs, we have to sent the
              * broadcast even if the count didn't actually change.
              */
-            if (!didCountChange && isRefresh) {
+            if (!didCountChange && isRefresh && !voicemailNumberChanged) {
                 Log.i(LOG_TAG, "maybeSendVoicemailNotificationUsingDefaultDialer: skip bcast to:"
                         + intent.getPackage() + ", user:" + userHandle);
                 // It's "technically" being sent through the dialer, but we just skipped that so

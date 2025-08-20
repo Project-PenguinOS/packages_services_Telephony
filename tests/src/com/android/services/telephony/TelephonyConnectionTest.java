@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 
 import android.os.Bundle;
 import android.os.PersistableBundle;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.telecom.Connection;
 import android.telephony.CarrierConfigManager;
 import android.telephony.DisconnectCause;
@@ -37,10 +38,12 @@ import com.android.internal.telephony.Call;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.d2d.DtmfTransport;
 import com.android.internal.telephony.d2d.RtpTransport;
+import com.android.internal.telephony.flags.Flags;
 import com.android.internal.telephony.imsphone.ImsPhoneConnection;
 import com.android.phone.R;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -49,6 +52,7 @@ import java.util.ArrayList;
 
 @RunWith(AndroidJUnit4.class)
 public class TelephonyConnectionTest extends TelephonyTestBase {
+    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
     @Mock
     private ImsPhoneConnection mImsPhoneConnection;
     @Mock
@@ -60,6 +64,7 @@ public class TelephonyConnectionTest extends TelephonyTestBase {
 
         when(mImsPhoneConnection.getState()).thenReturn(Call.State.ACTIVE);
         when(mImsPhoneConnection.getPhoneType()).thenReturn(PhoneConstants.PHONE_TYPE_IMS);
+        mSetFlagsRule.disableFlags(Flags.FLAG_IGNORE_STATE_DETAILS_UPDATE_FOR_DOMAIN_RESELECTION);
     }
 
     /**
@@ -314,6 +319,51 @@ public class TelephonyConnectionTest extends TelephonyTestBase {
 
         assertNotEquals(STATE_DISCONNECTED, c.getState());
         assertTrue(c.isOriginalConnectionCleared());
+    }
+
+    @Test
+    public void testDomainSelectionDisconnected_Redial_disableIgnoreStateDetailsUpdate() {
+        doReturn(true).when(mImsPhoneConnection).isRttEnabledForCall();
+        TestTelephonyConnection c = new TestTelephonyConnection();
+        c.requestToClearOriginalConnection(true);
+        c.setOriginalConnection(mImsPhoneConnection);
+
+        doReturn(Call.State.DISCONNECTED).when(mImsPhoneConnection)
+                .getState();
+        c.setTelephonyConnectionService(mTelephonyConnectionService);
+        doReturn(true).when(mTelephonyConnectionService)
+                .maybeReselectDomain(any(), any(), anyBoolean(), anyInt());
+        c.resetOriginalConnectionCleared();
+        c.updateState();
+
+        assertNotEquals(STATE_DISCONNECTED, c.getState());
+        assertTrue(c.isOriginalConnectionCleared());
+        // The connection properties are updated in the DISCONNECTED state.
+        assertEquals(0, c.getConnectionProperties() & Connection.PROPERTY_IS_RTT);
+    }
+
+    @Test
+    public void testDomainSelectionDisconnected_Redial_enableIgnoreStateDetailsUpdate() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_IGNORE_STATE_DETAILS_UPDATE_FOR_DOMAIN_RESELECTION);
+        doReturn(true).when(mImsPhoneConnection).isRttEnabledForCall();
+        TestTelephonyConnection c = new TestTelephonyConnection();
+        c.requestToClearOriginalConnection(true);
+        c.setOriginalConnection(mImsPhoneConnection);
+
+        doReturn(Call.State.DISCONNECTED).when(mImsPhoneConnection)
+                .getState();
+        c.setTelephonyConnectionService(mTelephonyConnectionService);
+        doReturn(true).when(mTelephonyConnectionService)
+                .maybeReselectDomain(any(), any(), anyBoolean(), anyInt());
+        c.resetOriginalConnectionCleared();
+        c.updateState();
+
+        assertNotEquals(STATE_DISCONNECTED, c.getState());
+        assertTrue(c.isOriginalConnectionCleared());
+        // The connection properties are not updated in the DISCONNECTED state.
+        // But, they are updated when redialing or domain selection is terminated.
+        assertEquals(Connection.PROPERTY_IS_RTT,
+                c.getConnectionProperties() & Connection.PROPERTY_IS_RTT);
     }
 
     @Test
