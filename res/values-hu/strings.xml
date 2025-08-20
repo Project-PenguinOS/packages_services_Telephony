@@ -883,12 +883,12 @@
     <string name="radio_info_ims_feature_status_available" msgid="6493200914756969292">"Rendelkezésre áll"</string>
     <string name="radio_info_ims_feature_status_unavailable" msgid="8930391136839759778">"Nem áll rendelkezésre"</string>
     <string name="radio_info_ims_reg_status" msgid="25582845222446390">"IMS-regisztráció: <xliff:g id="STATUS">%1$s</xliff:g>\nHanghívás LTE-adatkapcsolaton keresztül: <xliff:g id="AVAILABILITY_0">%2$s</xliff:g>\nHanghívás Wi-Fi-kapcsolaton keresztül: <xliff:g id="AVAILABILITY_1">%3$s</xliff:g>\nVideohívás: <xliff:g id="AVAILABILITY_2">%4$s</xliff:g>\nUT-felület: <xliff:g id="AVAILABILITY_3">%5$s</xliff:g>"</string>
-    <string name="radioInfo_service_in" msgid="45753418231446400">"Szolgáltatás"</string>
+    <string name="radioInfo_service_in" msgid="45753418231446400">"Működik"</string>
     <string name="radioInfo_service_out" msgid="287972405416142312">"Nem működik"</string>
     <string name="radioInfo_service_emergency" msgid="4763879891415016848">"Csak segélyhívások"</string>
     <string name="radioInfo_service_off" msgid="3456583511226783064">"Rádió kikapcsolva"</string>
     <string name="radioInfo_roaming_in" msgid="3156335577793145965">"Roaming"</string>
-    <string name="radioInfo_roaming_not" msgid="1904547918725478110">"Nem barangol"</string>
+    <string name="radioInfo_roaming_not" msgid="1904547918725478110">"Nincs roaming"</string>
     <string name="radioInfo_phone_idle" msgid="2191653783170757819">"Tétlen"</string>
     <string name="radioInfo_phone_ringing" msgid="8100354169567413370">"Csörgés"</string>
     <string name="radioInfo_phone_offhook" msgid="7564601639749936170">"Hívás folyamatban"</string>

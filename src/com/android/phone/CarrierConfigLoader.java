@@ -1826,11 +1826,13 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
         }
 
         indentPW.println("CarrierConfigLoader: " + this);
+
+        // display default values in CarrierConfigManager
+        printConfig(CarrierConfigManager.getDefaultConfig(), indentPW,
+                "Default Values from CarrierConfigManager");
+
         for (int i = 0; i < mNumPhones; i++) {
             indentPW.println("Phone Id = " + i);
-            // display default values in CarrierConfigManager
-            printConfig(CarrierConfigManager.getDefaultConfig(), indentPW,
-                    "Default Values from CarrierConfigManager");
             // display ConfigFromDefaultApp
             printConfig(mConfigFromDefaultApp[i], indentPW, "mConfigFromDefaultApp");
             // display ConfigFromCarrierApp

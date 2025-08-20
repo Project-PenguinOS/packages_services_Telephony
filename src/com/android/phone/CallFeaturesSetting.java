@@ -309,7 +309,6 @@ public class CallFeaturesSetting extends PreferenceActivity
     @Override
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
-        if (Flags.deleteCdma()) return;
         if (DBG) log("onCreate: Intent is " + getIntent());
 
         getWindow().addSystemFlags(
