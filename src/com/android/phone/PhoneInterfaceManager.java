@@ -237,7 +237,6 @@ import com.android.internal.telephony.ims.ImsResolver;
 import com.android.internal.telephony.imsphone.ImsPhone;
 import com.android.internal.telephony.imsphone.ImsPhoneCallTracker;
 import com.android.internal.telephony.metrics.RcsStats;
-import com.android.internal.telephony.metrics.TelephonyMetrics;
 import com.android.internal.telephony.satellite.SatelliteController;
 import com.android.internal.telephony.subscription.SubscriptionInfoInternal;
 import com.android.internal.telephony.subscription.SubscriptionManagerService;
@@ -1721,7 +1720,6 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
                     //update the cache as modem status has changed
                     if ((boolean) request.result) {
                         mPhoneConfigurationManager.addToPhoneStatusCache(phoneId, msg.arg1 == 1);
-                        updateModemStateMetrics();
                     } else {
                         Log.e(LOG_TAG, msg.what + " failure. Not updating modem status."
                                 + ar.exception);
@@ -10212,12 +10210,6 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
-    }
-
-    private void updateModemStateMetrics() {
-        TelephonyMetrics metrics = TelephonyMetrics.getInstance();
-        // TODO: check the state for each modem if the api is ready.
-        metrics.updateEnabledModemBitmap((1 << TelephonyManager.from(mApp).getPhoneCount()) - 1);
     }
 
     @Override
