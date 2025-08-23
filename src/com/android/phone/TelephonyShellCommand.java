@@ -3274,7 +3274,8 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
         try {
             if (mInterface != null) {
                 result = mInterface.setAllowedNetworkTypesForReason(subId,
-                        TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_USER, allowedNetworkTypes);
+                        TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_USER, allowedNetworkTypes,
+                        mContext.getOpPackageName());
             } else {
                 throw new IllegalStateException("telephony service is null.");
             }
