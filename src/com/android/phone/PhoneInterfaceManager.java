@@ -6836,14 +6836,17 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
      * @param subId the id of the subscription.
      * @param reason the reason the allowed network type change is taking place
      * @param allowedNetworkTypes the allowed network types.
+     * @param callingPackage the package that changed set the allowed network types.
      * @return true on success; false on any failure.
      */
     @Override
     public boolean setAllowedNetworkTypesForReason(int subId,
             @TelephonyManager.AllowedNetworkTypesReason int reason,
-            @TelephonyManager.NetworkTypeBitMask long allowedNetworkTypes) {
+            @TelephonyManager.NetworkTypeBitMask long allowedNetworkTypes,
+            @NonNull String callingPackage) {
         TelephonyPermissions.enforceCallingOrSelfModifyPermissionOrCarrierPrivilege(
                 mApp, subId, "setAllowedNetworkTypesForReason");
+        String reasonStr = Phone.convertAllowedNetworkTypeMapIndexToDbName(reason);
         // If the caller only has carrier privileges, then they should not be able to override
         // any network types which were set for security reasons.
         if (mApp.checkCallingOrSelfPermission(Manifest.permission.MODIFY_PHONE_STATE)
@@ -6851,14 +6854,15 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
                 && reason == TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G) {
             throw new SecurityException(
                     "setAllowedNetworkTypesForReason cannot be called with carrier privileges for"
-                            + " reason " + reason);
+                            + " reason " + reasonStr);
         }
 
         enforceTelephonyFeatureWithException(getCurrentPackageName(),
                 PackageManager.FEATURE_TELEPHONY_RADIO_ACCESS, "setAllowedNetworkTypesForReason");
 
         if (!TelephonyManager.isValidAllowedNetworkTypesReason(reason)) {
-            loge("setAllowedNetworkTypesForReason: Invalid allowed network type reason: " + reason);
+            loge("setAllowedNetworkTypesForReason: Invalid allowed network type reason: "
+                    + reason);
             return false;
         }
         if (!SubscriptionManager.isUsableSubscriptionId(subId)) {
@@ -6866,8 +6870,10 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
             return false;
         }
 
-        log("setAllowedNetworkTypesForReason: subId=" + subId + ", reason=" + reason + " value: "
-                + TelephonyManager.convertNetworkTypeBitmaskToString(allowedNetworkTypes));
+        log("setAllowedNetworkTypesForReason: subId=" + subId
+                + ", reason=" + reasonStr + ", value="
+                + TelephonyManager.convertNetworkTypeBitmaskToString(allowedNetworkTypes)
+                + ", callingPackage=" + callingPackage);
 
         Phone phone = getPhone(subId);
         if (phone == null) {
@@ -6875,7 +6881,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         }
 
         if (allowedNetworkTypes == phone.getAllowedNetworkTypes(reason)) {
-            log("setAllowedNetworkTypesForReason: " + reason + "does not change value");
+            log("setAllowedNetworkTypesForReason: " + reasonStr + ". Already has this value.");
             return true;
         }
 
