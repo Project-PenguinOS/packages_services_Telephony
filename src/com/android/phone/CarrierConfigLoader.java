@@ -997,11 +997,8 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
             mServiceConnection[phoneId] = serviceConnection;
         }
         try {
-            if (mFeatureFlags.supportCarrierServicesForHsum()
-                    ? mContext.bindServiceAsUser(carrierService, serviceConnection,
-                    Context.BIND_AUTO_CREATE, UserHandle.of(ActivityManager.getCurrentUser()))
-                    : mContext.bindService(carrierService, serviceConnection,
-                            Context.BIND_AUTO_CREATE)) {
+            if (mContext.bindServiceAsUser(carrierService, serviceConnection,
+                    Context.BIND_AUTO_CREATE, UserHandle.of(ActivityManager.getCurrentUser()))) {
                 if (eventId == EVENT_CONNECTED_TO_DEFAULT_FOR_NO_SIM_CONFIG) {
                     mServiceBoundForNoSimConfig[phoneId] = true;
                 } else {
@@ -1378,10 +1375,8 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
     @Nullable
     private String getPackageVersion(@NonNull String packageName) {
         try {
-            PackageInfo info = mFeatureFlags.supportCarrierServicesForHsum()
-                    ? mContext.getPackageManager().getPackageInfoAsUser(packageName, 0,
-                    ActivityManager.getCurrentUser())
-                    : mContext.getPackageManager().getPackageInfo(packageName, 0);
+            PackageInfo info = mContext.getPackageManager().getPackageInfoAsUser(packageName, 0,
+                    ActivityManager.getCurrentUser());
             return Long.toString(info.getLongVersionCode());
         } catch (PackageManager.NameNotFoundException e) {
             return null;
