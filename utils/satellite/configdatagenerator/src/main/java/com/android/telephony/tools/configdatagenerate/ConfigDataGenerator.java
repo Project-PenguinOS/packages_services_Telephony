@@ -29,6 +29,7 @@ import org.xml.sax.SAXException;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -47,6 +48,7 @@ public class ConfigDataGenerator {
 
     public static final String TAG_CARRIER_ROAMING_CONFIG = "carrier_roaming_config";
     public static final String TAG_MAX_ALLOWED_DATA_MODE = "max_allowed_data_mode";
+    public static final String TAG_DEVICE_SATELLITE_PLMN = "device_satellite_plmn";
 
     public static final String TAG_SATELLITE_REGION =  "satelliteregion";
     public static final String TAG_S2_CELL_FILE = "s2_cell_file";
@@ -72,7 +74,7 @@ public class ConfigDataGenerator {
 
         System.out.println("-----------------------------------------------------------------");
         setSatelliteConfigVersion(doc);
-        createStarlinkConfigProto(doc);
+        createCarrierRoamingConfigProto(doc);
         createSkyloConfigProto(doc);
 
         SatelliteConfigProtoGenerator.generateProto();
@@ -143,7 +145,7 @@ public class ConfigDataGenerator {
      * &lt;/carriersupportedservices&gt;
      * </pre>
      */
-    public static void createStarlinkConfigProto(Document doc) {
+    public static void createCarrierRoamingConfigProto(Document doc) {
         Node carrierRoamingConfig = doc.getElementsByTagName(TAG_CARRIER_ROAMING_CONFIG).item(0);
         if (carrierRoamingConfig != null) {
             Element carrierRoamingConfigElement = (Element) carrierRoamingConfig;
@@ -151,19 +153,38 @@ public class ConfigDataGenerator {
 
             Node nodeMaxAllowedDataMode = carrierRoamingConfigElement.getElementsByTagName(
                     TAG_MAX_ALLOWED_DATA_MODE).item(0);
+            Integer maxAllowedDataMode = null;
             if (nodeMaxAllowedDataMode != null) {
-                int maxAllowedDataMode = Integer.parseInt(nodeMaxAllowedDataMode.getTextContent());
+                maxAllowedDataMode = Integer.parseInt(nodeMaxAllowedDataMode.getTextContent());
                 if (!Util.isValidMaxAllowedDataMode(maxAllowedDataMode)) {
                     throw new ParameterException("Invalid maxAllowedDataModel: "
                             + maxAllowedDataMode);
                 }
-                SatelliteConfigProtoGenerator.sCarrierRoamingConfig =
-                        new RoamingConfigProto(maxAllowedDataMode);
                 System.out.println("└ MaxAllowedDataMode: " + maxAllowedDataMode);
             } else {
-                throw new ParameterException("** Max allowed data mode is empty, "
-                        + "please set it explicitly");
+                System.out.println("└ MaxAllowedDataMode: empty");
             }
+
+            NodeList nodeDeviceSatellitePlmnList =
+                    carrierRoamingConfigElement.getElementsByTagName(TAG_DEVICE_SATELLITE_PLMN);
+            List<String> satellitePlmnList = new ArrayList<>();
+            if (nodeDeviceSatellitePlmnList != null) {
+                System.out.print("└ Satellite Plmn List: ");
+                for (int k = 0; k < nodeDeviceSatellitePlmnList.getLength(); k++) {
+                    String plmn = nodeDeviceSatellitePlmnList.item(k).getTextContent();
+                    System.out.print(plmn + " ");
+                    if (!Util.isValidPlmn(plmn)) {
+                        throw new ParameterException("Invalid PLMN: " + plmn);
+                    }
+                    satellitePlmnList.add(plmn);
+                }
+            } else {
+                System.out.println("└ SatellitePLMNList: empty");
+            }
+
+            System.out.println();
+            SatelliteConfigProtoGenerator.sCarrierRoamingConfig =
+                    new RoamingConfigProto(maxAllowedDataMode, satellitePlmnList);
         } else {
             System.out.println("\nCarrier Roaming Config is empty");
             SatelliteConfigProtoGenerator.sCarrierRoamingConfig = null;
@@ -173,7 +194,7 @@ public class ConfigDataGenerator {
         SatelliteConfigProtoGenerator.sServiceProtoList = new ArrayList<>();
 
         if (carrierServicesList.getLength() == 0) {
-            System.out.println("\ncarrierServicesList.getLength() == 0");
+            System.out.println("\nCarrier Supported Satellite Services is empty");
         } else {
             System.out.println("\nCarrier Supported Satellite Services ");
             for (int i = 0; i < carrierServicesList.getLength(); i++) {
