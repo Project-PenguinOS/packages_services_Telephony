@@ -223,9 +223,7 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
 
                 mHandler.sendMessage(mHandler.obtainMessage(mHandler.MESSAGE_GET_CFUT));
 
-                if (mPhone.getCallForwardingIndicator()) {
-                    updateCallForwardingPreferenceForCfut(reason,false, number);
-                }
+                updateCallForwardingPreferenceForCfut(mStatus == 1, number);
             }
 
             @Override
@@ -962,12 +960,12 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
         }
     }
 
-    private void updateCallForwardingPreferenceForCfut(int reason, boolean enable, String number) {
-        if (!mIsCfutEnabled || reason != CommandsInterface.CF_REASON_UNCONDITIONAL) {
-            return;
-        }
-
-        mPhone.setVoiceCallForwardingFlag(1, enable, number);
+    private void updateCallForwardingPreferenceForCfut(boolean enable, String number) {
+        // The expected behavior by design is
+        // 1. if CFUT is enabled (isTimerValid == true), shall not show CF icon.
+        // 2. if CFUT is not enabled ((isTimerValid == false)), CF icon showing depends on
+        // the actual CF status queried from network.
+        mPhone.setVoiceCallForwardingFlag(1, isTimerValid() ? false : enable, number);
     }
 
 // QTI_END: 2022-01-17: Telephony: Update call forward preference
