@@ -56,7 +56,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * This class query the entitlement server to receive values for satellite services and passes the
@@ -428,7 +427,8 @@ public class SatelliteEntitlementController extends Handler {
                 reportSuccessForEntitlement(subId, entitlementResult);
             } catch (ServiceEntitlementException e) {
                 loge(e.toString());
-                mEntitlementMetricsStats.reportError(subId, e.getErrorCode(), false);
+                mEntitlementMetricsStats.reportError(subId, e.getErrorCode(), false,
+                        e.getHttpStatus());
                 if (!isInternetConnected()) {
                     logd("StartQuery: disconnected. " + e);
                     mIsEntitlementInProgressPerSub.remove(subId);
@@ -493,7 +493,7 @@ public class SatelliteEntitlementController extends Handler {
             reportSuccessForEntitlement(subId, entitlementResult);
         } catch (ServiceEntitlementException e) {
             loge(e.toString());
-            mEntitlementMetricsStats.reportError(subId, e.getErrorCode(), true);
+            mEntitlementMetricsStats.reportError(subId, e.getErrorCode(), true, e.getHttpStatus());
             if (!isRetryAvailable(subId)) {
                 logd("retryQuery: unavailable.");
                 queryCompleted(subId);

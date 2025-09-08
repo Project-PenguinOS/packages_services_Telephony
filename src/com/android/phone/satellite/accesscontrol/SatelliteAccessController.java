@@ -472,6 +472,8 @@ public class SatelliteAccessController extends Handler {
             mUpdateSystemSelectionChannelsResultReceivers = new HashSet<>();
     @NonNull
     private final ResultReceiver mInternalSatelliteSupportedResultReceiver;
+    private static final String ACTION_DEFAULT_SMS_PACKAGE_CHANGED_INTERNAL =
+            "android.provider.action.DEFAULT_SMS_PACKAGE_CHANGED_INTERNAL";
 
     /**
      * Create a SatelliteAccessController instance.
@@ -1789,6 +1791,9 @@ public class SatelliteAccessController extends Handler {
         intentFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         intentFilter.addDataScheme("package");
         context.registerReceiver(mDefaultSmsAppChangedBroadcastReceiver, intentFilter);
+        IntentFilter smsFilter = new IntentFilter();
+        smsFilter.addAction(ACTION_DEFAULT_SMS_PACKAGE_CHANGED_INTERNAL);
+        context.registerReceiver(mDefaultSmsAppChangedBroadcastReceiver, smsFilter);
     }
 
     private void registerLocationModeChangedBroadcastReceiver(Context context) {
@@ -2259,8 +2264,12 @@ public class SatelliteAccessController extends Handler {
             new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
-                    if (intent.getAction()
-                            .equals(Intent.ACTION_PACKAGE_CHANGED)) {
+                    if (intent == null || intent.getAction() == null) {
+                        return;
+                    }
+                    String action = intent.getAction();
+                    if (ACTION_DEFAULT_SMS_PACKAGE_CHANGED_INTERNAL.equals(action)
+                            || Intent.ACTION_PACKAGE_CHANGED.equals(action)) {
                         if (mFeatureFlags.satelliteImproveMultiThreadDesign()) {
                             sendRequestAsync(EVENT_ACTION_PACKAGE_CHANGED, context);
                             return;

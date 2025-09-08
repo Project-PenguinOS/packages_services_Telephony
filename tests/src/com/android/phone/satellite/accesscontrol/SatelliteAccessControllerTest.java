@@ -123,6 +123,7 @@ import com.android.TelephonyTestBase;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneFactory;
 import com.android.internal.telephony.TelephonyCountryDetector;
+import com.android.internal.telephony.data.DataNetworkController;
 import com.android.internal.telephony.flags.FeatureFlags;
 import com.android.internal.telephony.satellite.SatelliteConfig;
 import com.android.internal.telephony.satellite.SatelliteConfigParser;
@@ -175,6 +176,8 @@ public class SatelliteAccessControllerTest extends TelephonyTestBase {
     private static final String TEST_SATELLITE_COUNTRY_CODE_JP = "JP";
 
     private static final String TEST_SATELLITE_S2_FILE = "sat_s2_file.dat";
+    private static final String ACTION_DEFAULT_SMS_PACKAGE_CHANGED_INTERNAL =
+            "android.provider.action.DEFAULT_SMS_PACKAGE_CHANGED_INTERNAL";
     private static final boolean TEST_SATELLITE_ALLOW = true;
     private static final boolean TEST_SATELLITE_NOT_ALLOW = false;
     private static final int TEST_LOCATION_FRESH_DURATION_SECONDS = 10;
@@ -252,6 +255,8 @@ public class SatelliteAccessControllerTest extends TelephonyTestBase {
             mMockSatelliteCommunicationAccessStateChangedListeners;
     @Mock
     private CarrierRoamingSatelliteControllerStats mCarrierRoamingSatelliteControllerStats;
+    @Mock
+    private DataNetworkController mMockDataNetworkController;
 
     private SatelliteInfo mSatelliteInfo;
 
@@ -354,6 +359,8 @@ public class SatelliteAccessControllerTest extends TelephonyTestBase {
                 mMockTelecomManager);
         when(mMockContext.getSystemService(DropBoxManager.class)).thenReturn(
                 mMockDropBoxManager);
+        when(mMockPhone.getDataNetworkController()).thenReturn(mMockDataNetworkController);
+        when(mMockDataNetworkController.getInternetDataDisallowedReasons()).thenReturn(listOf());
         doAnswer(inv -> {
             var args = inv.getArguments();
             return InstrumentationRegistry.getTargetContext()
@@ -2143,7 +2150,7 @@ public class SatelliteAccessControllerTest extends TelephonyTestBase {
 
         logd("testLocationModeChanged: captor: verify mockReceiver & mockContext registered");
         mSatelliteAccessControllerUT.elapsedRealtimeNanos = TEST_LOCATION_FRESH_DURATION_NANOS + 1;
-        verify(mMockContext, times(2)).registerReceiver(
+        verify(mMockContext, times(3)).registerReceiver(
                 mLocationBroadcastReceiverCaptor.capture(), mIntentFilterCaptor.capture());
 
         logd("testLocationModeChanged: no isLocationEnabled() when action != MODE_CHANGED_ACTION");
@@ -2873,7 +2880,7 @@ public class SatelliteAccessControllerTest extends TelephonyTestBase {
 
         logd("testLocationProvidersChanged: "
                 + "captor and verify if the mockReceiver and mockContext is registered well");
-        verify(mMockContext, times(2)).registerReceiver(
+        verify(mMockContext, times(3)).registerReceiver(
                 mLocationBroadcastReceiverCaptor.capture(), mIntentFilterCaptor.capture());
 
         // (1) Both mIsLocationManagerEnabled and mIsLocationProviderEnabled are false.
@@ -2955,7 +2962,7 @@ public class SatelliteAccessControllerTest extends TelephonyTestBase {
 
         // Send ACTION_PACKAGE_CHANGED, default SMS app does not support satellite communication
         assertTrue(mSatelliteAccessControllerUT.getSatelliteDisallowedReasons().isEmpty());
-        intent.setAction(Intent.ACTION_PACKAGE_CHANGED);
+        intent.setAction(ACTION_DEFAULT_SMS_PACKAGE_CHANGED_INTERNAL);
         mSatelliteAccessControllerUT.getDefaultSmsAppChangedBroadcastReceiver().onReceive(
                 mMockContext, intent);
         mTestableLooper.processAllMessages();
