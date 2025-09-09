@@ -18,7 +18,6 @@ package com.android.phone;
 
 import android.annotation.NonNull;
 import android.annotation.WorkerThread;
-import android.content.res.Resources;
 import android.app.ActivityManager;
 import android.os.DropBoxManager;
 import android.os.SystemClock;
@@ -28,7 +27,6 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.android.internal.telephony.flags.Flags;
-import com.android.phone.R;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -36,15 +34,13 @@ import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.stream.Collectors;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * A class to help collect dumpsys/logcat and persist it to the
@@ -65,6 +61,9 @@ public class DiagnosticDataCollector {
     private static final String LOGCAT_BUFFERS = "system,radio";
     private static final long LOG_TIME_OFFSET_MILLIS = 75L;
     private static final String DUMPSYS_BINARY = "/system/bin/dumpsys";
+    // Instantiate a max dropbox buffer size to avoid hitting the 1MB kernel limit for
+    // binder transactions.
+    private static final int MAX_DROPBOX_BUFFER_SIZE = 128 * 1024; // 128KB
     static final String DROPBOX_TAG = "ecall_diagnostic_data";
     static final String DROPBOX_TAG_FOR_OEM = "ecall_diagnostic_data_oem";
     private final Runtime mJavaRuntime;
@@ -280,7 +279,15 @@ public class DiagnosticDataCollector {
                 output.append(ERROR_MSG + System.lineSeparator());
             }
             try {
-                mDropBoxManager.addText(dropboxTag, output.toString());
+                String dropboxData;
+                // Truncate the data if needed to avoid the TransactionTooLargeException.
+                if (output.length() > MAX_DROPBOX_BUFFER_SIZE) {
+                    dropboxData = output.substring(0, MAX_DROPBOX_BUFFER_SIZE)
+                            + "\n\n[TRUNCATED]\n";
+                } else {
+                    dropboxData = output.toString();
+                }
+                mDropBoxManager.addText(dropboxTag, dropboxData);
             } catch (Exception e) {
                 if (e instanceof TransactionTooLargeException) {
                     AnomalyReporter.reportAnomaly(
