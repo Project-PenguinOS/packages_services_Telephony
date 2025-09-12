@@ -728,15 +728,17 @@ public class PhoneInformationV2FragmentSatellite extends Fragment {
                 mViewModel.setSatelliteDataModeEnabled(isChecked, mPhoneId);
                 if (isChecked) {
                     if (isValidOperator(mSubId)) {
+                        log("satData: Uncapping maxAllowedDataMode");
                         uncapMaxAllowedDataMode();
                         updateSatelliteDataButton();
                     } else {
                         log("satData: Not a valid Operator");
-                        restoreMaxAllowedDataMode();
                         mMockSatelliteDataSwitch.setChecked(false);
                         return;
                     }
                 } else {
+                    log("satData: restoring maxAllowedDataMode");
+                    restoreMaxAllowedDataMode();
                     reloadCarrierConfigDefaults();
                 }
                 setDataModeChangeVisibility(isChecked);

@@ -34,7 +34,6 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PersistableBundle;
-import android.os.SystemProperties;
 import android.telephony.CarrierConfigManager;
 import android.telephony.Rlog;
 import android.telephony.SubscriptionManager;
@@ -74,9 +73,7 @@ public class SatelliteEntitlementController extends Handler {
     private static final int CMD_SIM_REFRESH = 3;
     private static final int AIRPLANE_MODE_CHANGED = 4;
 
-    private static final String ALLOW_MOCK_MODEM_PROPERTY = "persist.radio.allow_mock_modem";
-    private static final String BOOT_ALLOW_MOCK_MODEM_PROPERTY = "ro.boot.radio.allow_mock_modem";
-    private static final boolean DEBUG = !"user".equals(Build.TYPE);
+    private static final boolean IS_DEBUG_BUILD = !"user".equals(Build.TYPE);
 
     /** Retry on next trigger event. */
     private static final int HTTP_RESPONSE_500 = 500;
@@ -236,8 +233,9 @@ public class SatelliteEntitlementController extends Handler {
      */
     public boolean overrideEntilementStatusResponseForCtsTest(
             String overriddenEntilementStatusResponse, boolean throwException) {
-        if (!isMockModemAllowed()) {
-            logd("overrideEntilementStatusResponseForCtsTest: " + "mock modem not allowed.");
+        if (!isDebugBuild()) {
+            logd("overrideEntilementStatusResponseForCtsTest: "
+                    + "not allowed for non-debug build.");
             return false;
         }
 
@@ -258,8 +256,8 @@ public class SatelliteEntitlementController extends Handler {
      */
     public boolean overrideEntilementQueryConditions(
             boolean ignoreInternetConnection, boolean ignoreRefreshCondition) {
-        if (!isMockModemAllowed()) {
-            logd("overrideEntilementQueryConditions: " + "mock modem not allowed.");
+        if (!isDebugBuild()) {
+            logd("overrideEntilementQueryConditions: " + "not allowed for non-debug build.");
             return false;
         }
 
@@ -890,9 +888,7 @@ public class SatelliteEntitlementController extends Handler {
         Rlog.e(TAG, log);
     }
 
-    private static boolean isMockModemAllowed() {
-        return (DEBUG
-                || SystemProperties.getBoolean(ALLOW_MOCK_MODEM_PROPERTY, false)
-                || SystemProperties.getBoolean(BOOT_ALLOW_MOCK_MODEM_PROPERTY, false));
+    private static boolean isDebugBuild() {
+        return IS_DEBUG_BUILD;
     }
 }

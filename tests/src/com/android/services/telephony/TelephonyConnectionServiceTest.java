@@ -4540,6 +4540,38 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
                 mTestConnectionService.getPhoneInEmergencyCallbackMode());
     }
 
+    @Test
+    public void testDomainSelectionEmergencyCallFailed_nonEmergencyNumber() throws Exception {
+        setupForCallTest();
+
+        int selectedDomain = DOMAIN_PS;
+
+        setupForDialForDomainSelection(mPhone0, selectedDomain, true);
+
+        CompletableFuture<Integer> future = new CompletableFuture<>();
+        doReturn(future).when(mEmergencyCallDomainSelectionConnection)
+                .createEmergencyConnection(any(), any());
+
+        mTestConnectionService.onCreateOutgoingConnection(PHONE_ACCOUNT_HANDLE_1,
+                createConnectionRequest(PHONE_ACCOUNT_HANDLE_1,
+                        TEST_EMERGENCY_NUMBER, TELECOM_CALL_ID1));
+
+        verify(mEmergencyCallDomainSelectionConnection).createEmergencyConnection(any(), any());
+
+        // Dialed emergency number is recognized as a non-emergency number.
+        doReturn(false).when(mTelephonyManagerProxy).isCurrentEmergencyNumber(anyString());
+
+        TelephonyConnection c = mTestConnectionService.getEmergencyConnection();
+        // domain selection has completed
+        future.complete(selectedDomain);
+
+        // verify that dialing is discarded
+        verify(mPhone0, never()).dial(anyString(), any(), any());
+        verify(mEmergencyCallDomainSelectionConnection).cancelSelection();
+        verify(mEmergencyStateTracker).endCall(any());
+        assertEquals(c.getDisconnectCause().getCode(), DisconnectCause.ERROR);
+    }
+
     private void setupMockEmergencyNumbers(Phone mockPhone, List<EmergencyNumber> numbers) {
         EmergencyNumberTracker emergencyNumberTracker = Mockito.mock(EmergencyNumberTracker.class);
         // Yuck.  There should really be a fake emergency number class which makes it easy to inject
