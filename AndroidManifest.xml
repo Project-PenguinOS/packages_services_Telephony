@@ -33,6 +33,8 @@
         android:sharedUserId="android.uid.phone"
         android:sharedUserLabel="@string/phoneAppLabel">
 
+    <attribution android:tag="telephony" android:label="@string/telephony_attribution_tag"/>
+
     <!-- Allows broadcasting for SlicePurchaseController events. -->
 <!-- QTI_BEGIN: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
 <!-- QTI_END: 2024-08-06: Telephony: Fix for missing an OEMHOOK permission declaration-->
