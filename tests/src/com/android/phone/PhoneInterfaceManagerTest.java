@@ -16,6 +16,8 @@
 
 package com.android.phone;
 
+import static com.android.internal.telephony.util.TelephonyUtils.TELEPHONY_FEATURE_ENFORCEMENT_VENDOR_API_LEVEL;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -42,7 +44,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.os.Build;
 import android.os.UserHandle;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
@@ -542,10 +543,9 @@ public class PhoneInterfaceManagerTest extends TelephonyTestBase {
     @Test
     @EnableCompatChanges({TelephonyManager.ENABLE_FEATURE_MAPPING})
     public void testWithoutTelephonyFeatureAndCompatChanges() throws Exception {
-        // Replace field to set SDK version of vendor partition to Android V
-        int vendorApiLevel = Build.VERSION_CODES.VANILLA_ICE_CREAM;
+        // Replace field to set vendor API level to the one where the exceptions are enabled.
         replaceInstance(PhoneInterfaceManager.class, "mVendorApiLevel", mPhoneInterfaceManager,
-                vendorApiLevel);
+                TELEPHONY_FEATURE_ENFORCEMENT_VENDOR_API_LEVEL);
 
         // telephony features is not defined, expect UnsupportedOperationException.
         doReturn(false).when(mPackageManager).hasSystemFeature(
