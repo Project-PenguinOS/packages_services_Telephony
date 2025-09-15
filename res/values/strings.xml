@@ -17,6 +17,8 @@
 <!-- QTI_END: 2025-03-06: Telephony: This file has QTI Telephony additions-->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- DO NOT TRANSLATE. Internal key for a telephony attribution tag. -->
+    <string name="telephony_attribution_tag">Telephony</string>
 
     <!-- Official label of the phone app, as seen in "Manage Applications"
          and other settings UIs.  This is the version of the label for
