@@ -1449,6 +1449,8 @@ public class RadioInfo extends AppCompatActivity {
                         + subMgr.getPhoneNumber(subId, SubscriptionManager.PHONE_NUMBER_SOURCE_UICC)
                         + ", IMS:"
                         + subMgr.getPhoneNumber(subId, SubscriptionManager.PHONE_NUMBER_SOURCE_IMS)
+                        + ", TS43:"
+                        + subMgr.getPhoneNumber(subId, SubscriptionManager.PHONE_NUMBER_SOURCE_TS43)
                         + " }";
         mLine1Number.setText(s);
     }
