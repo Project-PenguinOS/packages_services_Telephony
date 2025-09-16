@@ -5486,7 +5486,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     }
 
     /**
-     * {@hide}
+     * @hide
      * Returns Default subId, 0 in the case of single standby.
      */
     private int getDefaultSubscription() {
@@ -7943,7 +7943,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     }
 
     /**
-     * {@hide}
+     * @hide
      * Returns the IMS Registration Status on a particular subid
      *
      * @param subId
@@ -8670,7 +8670,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     }
 
     /**
-     * {@hide}
+     * @hide
      * Set the allowed carrier list and the excluded carrier list, indicating the priority between
      * the two lists.
      * Require system privileges. In the future we may add this to carrier APIs.
@@ -8701,7 +8701,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     }
 
     /**
-     * {@hide}
+     * @hide
      * Get the allowed carrier list and the excluded carrier list, including the priority between
      * the two lists.
      * Require system privileges. In the future we may add this to carrier APIs.
@@ -8787,7 +8787,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
      * Action set from carrier signalling broadcast receivers to enable/disable radio
      * @param subId the subscription ID that this action applies to.
      * @param enabled control enable or disable radio.
-     * {@hide}
+     * @hide
      */
     @Override
     public void carrierActionSetRadioEnabled(int subId, boolean enabled) {
@@ -8872,7 +8872,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
      *
      * @param subId the subscription ID that this action applies to.
      * @param report control start/stop reporting the default network status.
-     * {@hide}
+     * @hide
      */
     @Override
     public void carrierActionReportDefaultNetworkStatus(int subId, boolean report) {
@@ -8901,7 +8901,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     /**
      * Action set from carrier signalling broadcast receivers to reset all carrier actions
      * @param subId the subscription ID that this action applies to.
-     * {@hide}
+     * @hide
      */
     @Override
     public void carrierActionResetAll(int subId) {
