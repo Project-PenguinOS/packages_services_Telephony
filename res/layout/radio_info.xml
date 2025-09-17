@@ -423,6 +423,19 @@
                 android:layout_height="wrap_content"
                 android:text="@string/vt_provisioned_switch_string"/>
 
+       <Switch android:id="@+id/enable_vonr_switch"
+                android:textSize="14sp"
+                android:layout_marginTop="8dip"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/enable_vonr" />
+        <Switch android:id="@+id/enable_volte_switch"
+                android:textSize="14sp"
+                android:layout_marginTop="8dip"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/enable_volte" />
+
         <!-- Wifi Calling provisioned -->
         <Switch android:id="@+id/wfc_provisioned_switch"
                 android:textSize="14sp"

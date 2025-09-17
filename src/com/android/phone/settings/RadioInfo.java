@@ -368,6 +368,8 @@ public class RadioInfo extends AppCompatActivity {
     private Switch mCbrsDataSwitch;
     private Switch mDsdsSwitch;
     private Switch mRemovableEsimSwitch;
+    private Switch mEnableVoLteSwitch;
+    private Switch mEnableVoNrSwitch;
     private Spinner mPreferredNetworkType;
     private Spinner mMockSignalStrength;
     private Spinner mMockDataNetworkType;
@@ -829,12 +831,16 @@ public class RadioInfo extends AppCompatActivity {
         mImsVtProvisionedSwitch = (Switch) findViewById(R.id.vt_provisioned_switch);
         mImsWfcProvisionedSwitch = (Switch) findViewById(R.id.wfc_provisioned_switch);
         mEabProvisionedSwitch = (Switch) findViewById(R.id.eab_provisioned_switch);
+        mEnableVoLteSwitch = (Switch) findViewById(R.id.enable_volte_switch);
+        mEnableVoNrSwitch = (Switch) findViewById(R.id.enable_vonr_switch);
 
         if (!isImsSupportedOnDevice()) {
             mImsVolteProvisionedSwitch.setVisibility(View.GONE);
             mImsVtProvisionedSwitch.setVisibility(View.GONE);
             mImsWfcProvisionedSwitch.setVisibility(View.GONE);
             mEabProvisionedSwitch.setVisibility(View.GONE);
+            mEnableVoLteSwitch.setVisibility(View.GONE);
+            mEnableVoNrSwitch.setVisibility(View.GONE);
         }
 
         mCbrsDataSwitch = (Switch) findViewById(R.id.cbrs_data_switch);
@@ -1145,6 +1151,9 @@ public class RadioInfo extends AppCompatActivity {
 
         updateCellInfo(mCellInfoResult);
         updateSubscriptionIds();
+
+        updateVoLteState();
+        updateVoNrState();
 
         mPingHostnameV4.setText(mPingHostnameResultV4);
         mPingHostnameV6.setText(mPingHostnameResultV6);
@@ -1948,6 +1957,29 @@ public class RadioInfo extends AppCompatActivity {
         return mTelephonyManager.getRadioPowerState() == TelephonyManager.RADIO_POWER_ON;
     }
 
+    private void updateVoLteState() {
+        ImsMmTelManager imsMmTelManager = mImsManager.getImsMmTelManager(mSubId);
+        mEnableVoLteSwitch.setChecked(PhoneInformationUtil.isVolteEnabled(imsMmTelManager));
+        mEnableVoLteSwitch.setOnCheckedChangeListener(mVoLteOnChangeListener);
+    }
+
+    private void updateVoNrState() {
+        mQueuedWork.execute(new Runnable() {
+            public void run() {
+                ImsMmTelManager imsMmTelManager = mImsManager.getImsMmTelManager(mSubId);
+                boolean voNrEnabled = PhoneInformationUtil.isVoNrEnabled(mTelephonyManager);
+                boolean voLteEnabled = PhoneInformationUtil.isVolteEnabled(imsMmTelManager);
+                mHandler.post(() -> {
+                    mEnableVoNrSwitch.setChecked(voNrEnabled);
+
+                    // Disable VoNr option if VoLte is disabled
+                    if (!voLteEnabled) mEnableVoNrSwitch.setEnabled(false);
+                });
+            }
+        });
+        mEnableVoNrSwitch.setOnCheckedChangeListener(mVoNrOnChangeListener);
+    }
+
     private void updateRadioPowerState() {
         // delightful hack to prevent on-checked-changed calls from
         // actually forcing the radio preference to its transient/current value.
@@ -2089,6 +2121,80 @@ public class RadioInfo extends AppCompatActivity {
                 }
                 mPhone.getTelephonyTester().setServiceStateTestIntent(intent);
             };
+
+    OnCheckedChangeListener mVoLteOnChangeListener = new OnCheckedChangeListener() {
+        @Override
+        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            Log.d(TAG, "VoLte button onCheckedChanged " + isChecked + " on subId=" + mSubId);
+            setVoLteEnabled(isChecked);
+        }
+    };
+
+    OnCheckedChangeListener mVoNrOnChangeListener = new OnCheckedChangeListener() {
+        @Override
+        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            Log.d(TAG, "VoNr button onCheckedChanged " + isChecked + " on subId=" + mSubId);
+            setVoNrEnabled(isChecked);
+        }
+    };
+
+    private void setVoLteEnabled(boolean isChecked) {
+        if (!SubscriptionManager.isValidSubscriptionId(mSubId) || (mTelephonyManager == null)) {
+            return;
+        }
+
+        mQueuedWork.execute(new Runnable() {
+            public void run() {
+                ImsMmTelManager imsMmTelManager = mImsManager.getImsMmTelManager(mSubId);
+                try {
+                    if (isChecked != PhoneInformationUtil.isVolteEnabled(imsMmTelManager)) {
+                        if (isChecked) {
+                            mTelephonyManager.enableIms(mPhoneId);
+                        } else {
+                            mTelephonyManager.disableIms(mPhoneId);
+                        }
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "fail to set VoLTE=" + isChecked + ". subId=" + mSubId, e);
+                }
+
+                mHandler.post(() -> {
+                     /**
+                      * 1. VoNr option is disabled if VoLte option is disabled
+                      * 2. VoNr option is enabled if VoLte option is enabled
+                      */
+                    if (!isChecked) {
+                        mEnableVoNrSwitch.setChecked(false);
+                        mEnableVoNrSwitch.setEnabled(false);
+                    } else {
+                        mEnableVoNrSwitch.setEnabled(true);
+                    }
+                });
+            }
+        });
+    }
+
+    public void setVoNrEnabled(boolean isChecked) {
+        if (!SubscriptionManager.isValidSubscriptionId(mSubId)
+                || (mTelephonyManager == null)) {
+            return;
+        }
+
+        mQueuedWork.execute(new Runnable() {
+            public void run() {
+                try {
+                    boolean isVoNrEnabled =
+                            PhoneInformationUtil.isVoNrEnabled(mTelephonyManager);
+                    if (isVoNrEnabled != isChecked) {
+                        mTelephonyManager.setVoNrEnabled(isChecked);
+                        Log.d(TAG, "set VoNR state to " + isChecked + " on subId=" + mSubId);
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "fail to set VoNr=" + isChecked + ". subId=" + mSubId, e);
+                }
+            }
+        });
+    }
 
     // satellite radio group function
     private final RadioGroup.OnCheckedChangeListener

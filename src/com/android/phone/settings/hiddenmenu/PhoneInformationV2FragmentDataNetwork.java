@@ -114,6 +114,8 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
     private Switch mImsVolteProvisionedSwitch;
     private Switch mImsVtProvisionedSwitch;
     private Switch mImsWfcProvisionedSwitch;
+    private Switch mEnableVoLteSwitch;
+    private Switch mEnableVoNrSwitch;
     private Switch mEabProvisionedSwitch;
     private TelephonyManager mTelephonyManager;
     private ImsManager mImsManager = null;
@@ -301,12 +303,16 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
         mImsVtProvisionedSwitch = (Switch) view.findViewById(R.id.vt_provisioned_switch);
         mImsWfcProvisionedSwitch = (Switch) view.findViewById(R.id.wfc_provisioned_switch);
         mEabProvisionedSwitch = (Switch) view.findViewById(R.id.eab_provisioned_switch);
+        mEnableVoLteSwitch = (Switch) view.findViewById(R.id.enable_volte_switch);
+        mEnableVoNrSwitch = (Switch) view.findViewById(R.id.enable_vonr_switch);
 
         if (!isImsSupportedOnDevice()) {
             mImsVolteProvisionedSwitch.setVisibility(View.GONE);
             mImsVtProvisionedSwitch.setVisibility(View.GONE);
             mImsWfcProvisionedSwitch.setVisibility(View.GONE);
             mEabProvisionedSwitch.setVisibility(View.GONE);
+            mEnableVoLteSwitch.setVisibility(View.GONE);
+            mEnableVoNrSwitch.setVisibility(View.GONE);
         }
 
         // hide 5G stats on devices that don't support 5G
@@ -705,6 +711,29 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
                 !IS_USER_BUILD && isEnabledByPlatform && isEabProvisioningRequired());
     }
 
+    private void updateVoLteState() {
+        ImsMmTelManager imsMmTelManager = mImsManager.getImsMmTelManager(mSubId);
+        mEnableVoLteSwitch.setChecked(PhoneInformationUtil.isVolteEnabled(imsMmTelManager));
+        mEnableVoLteSwitch.setOnCheckedChangeListener(mVoLteOnChangeListener);
+    }
+
+    private void updateVoNrState() {
+        mQueuedWork.execute(new Runnable() {
+            public void run() {
+                ImsMmTelManager imsMmTelManager = mImsManager.getImsMmTelManager(mSubId);
+                boolean voNrEnabled = PhoneInformationUtil.isVoNrEnabled(mTelephonyManager);
+                boolean voLteEnabled = PhoneInformationUtil.isVolteEnabled(imsMmTelManager);
+                mHandler.post(() -> {
+                    mEnableVoNrSwitch.setChecked(voNrEnabled);
+
+                    // Disable VoNr option if VoLte is disabled
+                    if (!voLteEnabled) mEnableVoNrSwitch.setEnabled(false);
+                });
+            }
+        });
+        mEnableVoNrSwitch.setOnCheckedChangeListener(mVoNrOnChangeListener);
+    }
+
     private void updateImsProvisionedState() {
         if (!isImsSupportedOnDevice()) {
             return;
@@ -749,6 +778,9 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
         updateImsProvisionedState();
         updateNetworkType();
         updateNrStats();
+
+        updateVoLteState();
+        updateVoNrState();
 
         updateCellInfo(mCellInfoResult);
         mCellInfoRefreshRateSpinner.setOnItemSelectedListener(mCellInfoRefreshRateHandler);
@@ -1176,6 +1208,80 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
                 }
                 mPhone.getTelephonyTester().setServiceStateTestIntent(intent);
             };
+
+    OnCheckedChangeListener mVoLteOnChangeListener = new OnCheckedChangeListener() {
+        @Override
+        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            Log.d(TAG, "VoLte button onCheckedChanged " + isChecked + " on subId=" + mSubId);
+            setVoLteEnabled(isChecked);
+        }
+    };
+
+    OnCheckedChangeListener mVoNrOnChangeListener = new OnCheckedChangeListener() {
+        @Override
+        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            Log.d(TAG, "VoNr button onCheckedChanged " + isChecked + " on subId=" + mSubId);
+            setVoNrEnabled(isChecked);
+        }
+    };
+
+    private void setVoLteEnabled(boolean isChecked) {
+        if (!SubscriptionManager.isValidSubscriptionId(mSubId) || (mTelephonyManager == null)) {
+            return;
+        }
+
+        mQueuedWork.execute(new Runnable() {
+            public void run() {
+                ImsMmTelManager imsMmTelManager = mImsManager.getImsMmTelManager(mSubId);
+                try {
+                    if (isChecked != PhoneInformationUtil.isVolteEnabled(imsMmTelManager)) {
+                        if (isChecked) {
+                            mTelephonyManager.enableIms(mPhoneId);
+                        } else {
+                            mTelephonyManager.disableIms(mPhoneId);
+                        }
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "fail to set VoLTE=" + isChecked + ". subId=" + mSubId, e);
+                }
+
+                mHandler.post(() -> {
+                     /**
+                      * 1. VoNr option is disabled if VoLte option is disabled
+                      * 2. VoNr option is enabled if VoLte option is enabled
+                      */
+                    if (!isChecked) {
+                        mEnableVoNrSwitch.setChecked(false);
+                        mEnableVoNrSwitch.setEnabled(false);
+                    } else {
+                        mEnableVoNrSwitch.setEnabled(true);
+                    }
+                });
+            }
+        });
+    }
+
+    public void setVoNrEnabled(boolean isChecked) {
+        if (!SubscriptionManager.isValidSubscriptionId(mSubId)
+                || (mTelephonyManager == null)) {
+            return;
+        }
+
+        mQueuedWork.execute(new Runnable() {
+            public void run() {
+                try {
+                    boolean isVoNrEnabled =
+                            PhoneInformationUtil.isVoNrEnabled(mTelephonyManager);
+                    if (isVoNrEnabled != isChecked) {
+                        mTelephonyManager.setVoNrEnabled(isChecked);
+                        Log.d(TAG, "set VoNR state to " + isChecked + " on subId=" + mSubId);
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "fail to set VoNr=" + isChecked + ". subId=" + mSubId, e);
+                }
+            }
+        });
+    }
 
     private void updateSelectionVisuals() {
         LinearLayout selectedButton, unSelectedButton;
