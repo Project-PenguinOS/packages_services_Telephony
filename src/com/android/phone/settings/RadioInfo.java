@@ -1937,13 +1937,17 @@ public class RadioInfo extends AppCompatActivity {
         mForceCampSatelliteSelectionRadioGroup.check(checkId);
     }
 
+    // Starlink configs
     private static final int SATELLITE_CHANNEL_STARLINK_US = 8665;
-    private static final int[] STARLINK_CHANNELS = {SATELLITE_CHANNEL_STARLINK_US};
-    private static final int[] AST_CHANNELS = {};
-    private static final int[] STARLINK_BAND = {AccessNetworkConstants.EutranBand.BAND_25};
-    private static final int[] AST_BAND = {
-        AccessNetworkConstants.EutranBand.BAND_5, AccessNetworkConstants.EutranBand.BAND_14
-    };
+    private static final int[] STARLINK_CHANNELS = { SATELLITE_CHANNEL_STARLINK_US };
+    private static final int[] STARLINK_BAND = { AccessNetworkConstants.EutranBand.BAND_25 };
+
+    // AST configs
+    private static final int SATELLITE_CHANNEL_AST_US_1 = 2625;
+    private static final int SATELLITE_CHANNEL_AST_US_2 = 2630;
+    private static final int[] AST_CHANNELS = { SATELLITE_CHANNEL_AST_US_1,
+            SATELLITE_CHANNEL_AST_US_2 };
+    private static final int[] AST_BAND = { AccessNetworkConstants.EutranBand.BAND_5 };
 
     private void forceSatelliteChannel(
             int[] satelliteBands, int satelliteBandRadioButton, int[] satelliteChannels) {
