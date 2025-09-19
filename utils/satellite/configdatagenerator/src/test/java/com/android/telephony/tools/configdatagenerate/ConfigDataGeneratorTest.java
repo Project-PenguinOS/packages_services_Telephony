@@ -55,6 +55,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -71,6 +72,8 @@ public class ConfigDataGeneratorTest {
 
     private static final String PLMN_VALID_310062 = "310062";
     private static final String PLMN_VALID_45005 = "45005";
+    private static final List<String> DEVICE_SATELLITE_PLMNS = List.of("310210");
+
     private static final String PLMN_INVALID_310062222 = "310062222";
     private static final String COUNTRY_CODE_US = "US";
     private static final String COUNTRY_CODE_INVALID = "USSSS";
@@ -234,6 +237,14 @@ public class ConfigDataGeneratorTest {
         return SATELLITE_DATA_SUPPORT_BANDWIDTH_CONSTRAINED;
     }
 
+    private List<String> getDeviceSatellitePlmns(boolean empty) {
+        if (!empty) {
+            System.out.println("Set device satellite plmn nodes as empty");
+            return null;
+        }
+        return DEVICE_SATELLITE_PLMNS;
+    }
+
     private String getCountryCode(boolean empty) {
         if (!empty) {
             System.out.println("Set country code node as empty");
@@ -253,6 +264,7 @@ public class ConfigDataGeneratorTest {
                 PLMN_INVALID_310062222,
                 SERVICE_TYPE_SMS,
                 SATELLITE_DATA_SUPPORT_BANDWIDTH_CONSTRAINED,
+                DEVICE_SATELLITE_PLMNS,
                 COUNTRY_CODE_US,
                 true,
                 getS2CellFile(true),
@@ -281,6 +293,7 @@ public class ConfigDataGeneratorTest {
                 PLMN_VALID_310062,
                 SERVICE_TYPE_INVALID,
                 SATELLITE_DATA_SUPPORT_BANDWIDTH_CONSTRAINED,
+                DEVICE_SATELLITE_PLMNS,
                 COUNTRY_CODE_US,
                 true,
                 getS2CellFile(true),
@@ -308,6 +321,7 @@ public class ConfigDataGeneratorTest {
                 PLMN_VALID_310062,
                 SERVICE_TYPE_INVALID,
                 SATELLITE_DATA_SUPPORT_BANDWIDTH_CONSTRAINED,
+                DEVICE_SATELLITE_PLMNS,
                 COUNTRY_CODE_INVALID,
                 true,
                 getS2CellFile(true),
@@ -337,6 +351,7 @@ public class ConfigDataGeneratorTest {
                 PLMN_VALID_310062,
                 SERVICE_TYPE_INVALID,
                 SATELLITE_DATA_SUPPORT_ALL + 1,
+                DEVICE_SATELLITE_PLMNS,
                 COUNTRY_CODE_INVALID,
                 true,
                 getS2CellFile(true),
@@ -358,6 +373,7 @@ public class ConfigDataGeneratorTest {
                 PLMN_VALID_310062,
                 SERVICE_TYPE_INVALID,
                 SATELLITE_DATA_SUPPORT_ONLY_RESTRICTED - 1,
+                DEVICE_SATELLITE_PLMNS,
                 COUNTRY_CODE_US,
                 true,
                 getS2CellFile(true),
@@ -387,6 +403,7 @@ public class ConfigDataGeneratorTest {
                 getPlmn(true),
                 getServiceType(true),
                 getMaxAllowedDataMode(true),
+                getDeviceSatellitePlmns(true),
                 getCountryCode(true),
                 getIsAllowed(true),
                 getS2CellFile(true),
@@ -425,6 +442,8 @@ public class ConfigDataGeneratorTest {
                 satelliteConfigProto.getCarrierRoamingConfig();
         int maxAllowedDataMode = carrierRoamingConfigProto.getMaxAllowedDataMode();
         assertEquals(SATELLITE_DATA_SUPPORT_BANDWIDTH_CONSTRAINED, maxAllowedDataMode);
+        assertEquals(DEVICE_SATELLITE_PLMNS,
+                carrierRoamingConfigProto.getDeviceSatellitePlmnList());
 
         SatelliteRegionProto regionProto = satelliteConfigProto.getDeviceSatelliteRegion();
         String countryCode = regionProto.getCountryCodes(0);
@@ -455,6 +474,7 @@ public class ConfigDataGeneratorTest {
                 getPlmn(true),
                 Objects.requireNonNull(getServiceType(true)),
                 Objects.requireNonNull(getMaxAllowedDataMode(true)),
+                Objects.requireNonNull(getDeviceSatellitePlmns(true)),
                 getCountryCode(true),
                 getIsAllowed(true),
                 getS2CellFile(true),
@@ -579,6 +599,16 @@ public class ConfigDataGeneratorTest {
                             satelliteConfigProto.getCarrierRoamingConfig()
                                     .getMaxAllowedDataMode());
                 }
+
+                if (roamingConfigProto.mDeviceSatellitePlmns == null) {
+                    System.out.println("mDeviceSatellitePlmns is null");
+                    assertTrue(satelliteConfigProto.getCarrierRoamingConfig()
+                            .getDeviceSatellitePlmnList().isEmpty());
+                } else {
+                    assertArrayEquals(roamingConfigProto.mDeviceSatellitePlmns.toArray(),
+                            satelliteConfigProto.getCarrierRoamingConfig()
+                                    .getDeviceSatellitePlmnList().toArray());
+                }
             }
 
             if (regionProto == null) {
@@ -625,9 +655,12 @@ public class ConfigDataGeneratorTest {
 
         HashMap<RoamingConfigProto, Boolean> roamingConfigProtoMap = new HashMap<>();
         roamingConfigProtoMap.put(null, true);
-        roamingConfigProtoMap.put(new RoamingConfigProto(null), false);
+        roamingConfigProtoMap.put(new RoamingConfigProto(null, null), true);
         roamingConfigProtoMap.put(new RoamingConfigProto(
-                SATELLITE_DATA_SUPPORT_BANDWIDTH_CONSTRAINED), true);
+                SATELLITE_DATA_SUPPORT_BANDWIDTH_CONSTRAINED, null), true);
+        roamingConfigProtoMap.put(new RoamingConfigProto(null, DEVICE_SATELLITE_PLMNS), true);
+        roamingConfigProtoMap.put(new RoamingConfigProto(
+                SATELLITE_DATA_SUPPORT_BANDWIDTH_CONSTRAINED, DEVICE_SATELLITE_PLMNS), true);
 
         ServiceProto serviceProtoValid = new ServiceProto(CARRIER_ID_VALID,
                 new ProviderCapabilityProto[]{new ProviderCapabilityProto(PLMN_VALID_45005,
@@ -676,7 +709,8 @@ public class ConfigDataGeneratorTest {
                 new ProviderCapabilityProto(PLMN_VALID_45005, new int[]{SERVICE_TYPE_MMS})}), true);
 
         RoamingConfigProto roamingConfigProtoValid =
-                new RoamingConfigProto(SATELLITE_DATA_SUPPORT_BANDWIDTH_CONSTRAINED);
+                new RoamingConfigProto(SATELLITE_DATA_SUPPORT_BANDWIDTH_CONSTRAINED,
+                        DEVICE_SATELLITE_PLMNS);
         RegionProto regionProtoValid = new RegionProto(getS2CellFile(true),
                 new String[]{COUNTRY_CODE_US},
                 true, getSACJsonFile(true));
@@ -729,7 +763,8 @@ public class ConfigDataGeneratorTest {
                 getIsAllowed(true),
                 getSACJsonFile(true)), true);
 
-        RoamingConfigProto roamingConfigProtoValid = new RoamingConfigProto(1);
+        RoamingConfigProto roamingConfigProtoValid =
+                new RoamingConfigProto(1, DEVICE_SATELLITE_PLMNS);
         ServiceProto serviceProtoValid = new ServiceProto(
                 CARRIER_ID_VALID,
                 new ProviderCapabilityProto[]{new ProviderCapabilityProto(PLMN_VALID_45005,
@@ -793,7 +828,8 @@ public class ConfigDataGeneratorTest {
             if (roamingConfigProto != null) {
                 // Add <carrierRoamingConfig>
                 rootElement.appendChild(
-                        createCarrierRoamingConfig(doc, roamingConfigProto.mMaxAllowedDataMode));
+                        createCarrierRoamingConfig(doc, roamingConfigProto.mMaxAllowedDataMode,
+                                roamingConfigProto.mDeviceSatellitePlmns));
             }
 
             if (regionProto != null) {
@@ -843,6 +879,7 @@ public class ConfigDataGeneratorTest {
             String plmn,
             int allowedService,
             int maxAllowedDataMode,
+            List<String> satellitePlmnList,
             String countryCode,
             boolean isAllowed,
             String inputS2CellFileName,
@@ -867,7 +904,7 @@ public class ConfigDataGeneratorTest {
 
             // Add <carrierroamingconfig>
             rootElement.appendChild(
-                    createCarrierRoamingConfig(doc, maxAllowedDataMode));
+                    createCarrierRoamingConfig(doc, maxAllowedDataMode, satellitePlmnList));
 
             // Add <satelliteregion>
             Element satelliteRegion = doc.createElement(ConfigDataGenerator.TAG_SATELLITE_REGION);
@@ -932,7 +969,8 @@ public class ConfigDataGeneratorTest {
     }
 
 
-    private static Element createCarrierRoamingConfig(Document doc, Integer maxAllowedDataMode) {
+    private static Element createCarrierRoamingConfig(Document doc, Integer maxAllowedDataMode,
+            List<String> satellitePlmns) {
         Element carrierRoamingConfig = doc.createElement(
                 ConfigDataGenerator.TAG_CARRIER_ROAMING_CONFIG);
         // Add CarrierId
@@ -940,6 +978,13 @@ public class ConfigDataGeneratorTest {
             carrierRoamingConfig.appendChild(createElementWithText(doc,
                     ConfigDataGenerator.TAG_MAX_ALLOWED_DATA_MODE,
                     String.valueOf(maxAllowedDataMode)));
+        }
+
+        if (satellitePlmns != null) {
+            for (String plmn : satellitePlmns) {
+                carrierRoamingConfig.appendChild(createElementWithText(doc,
+                        ConfigDataGenerator.TAG_DEVICE_SATELLITE_PLMN, String.valueOf(plmn)));
+            }
         }
         return carrierRoamingConfig;
     }

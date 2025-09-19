@@ -82,7 +82,7 @@ public class SatelliteConfigProtoGenerator {
                 carrierSupportedSatelliteServiceBuilder.clear();
             }
         } else {
-            System.out.print("ServiceProtoList does not exist");
+            System.out.println("ServiceProtoList does not exist");
         }
 
         if (sCarrierRoamingConfig != null) {
@@ -93,6 +93,12 @@ public class SatelliteConfigProtoGenerator {
                 carrierRoamingConfigBuilder.setMaxAllowedDataMode(
                         sCarrierRoamingConfig.mMaxAllowedDataMode);
             }
+
+            if (sCarrierRoamingConfig.mDeviceSatellitePlmns != null) {
+                carrierRoamingConfigBuilder.addAllDeviceSatellitePlmn(
+                        sCarrierRoamingConfig.mDeviceSatellitePlmns);
+            }
+
             satelliteConfigBuilder.setCarrierRoamingConfig(carrierRoamingConfigBuilder);
         }
 
@@ -148,9 +154,10 @@ public class SatelliteConfigProtoGenerator {
 
             satelliteConfigBuilder.setDeviceSatelliteRegion(satelliteRegionBuilder);
         } else {
-            System.out.print("\nRegionProto does not exist");
+            System.out.println("\nRegionProto does not exist");
         }
 
+        System.out.println();
         telephonyConfigBuilder.setSatellite(satelliteConfigBuilder);
         writeToResultFile(telephonyConfigBuilder);
     }

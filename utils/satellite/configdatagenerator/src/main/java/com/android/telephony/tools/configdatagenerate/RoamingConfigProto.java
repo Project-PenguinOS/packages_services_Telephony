@@ -16,11 +16,15 @@
 
 package com.android.telephony.tools.configdatagenerate;
 
+import java.util.List;
+
 public class RoamingConfigProto {
 
     public Integer mMaxAllowedDataMode;
+    public List<String> mDeviceSatellitePlmns;
 
-    public RoamingConfigProto(Integer maxAllowedDataMode) {
+    public RoamingConfigProto(Integer maxAllowedDataMode, List<String> deviceSatellitePlmns) {
         this.mMaxAllowedDataMode = maxAllowedDataMode;
+        this.mDeviceSatellitePlmns = deviceSatellitePlmns;
     }
 }
