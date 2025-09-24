@@ -172,11 +172,9 @@ public class TelecomAccountRegistry {
             mIsEmergency = isEmergency;
             mIsTestAccount = isTest;
             mIsAdhocConfCapable = mPhone.isImsRegistered();
-            if (Flags.simultaneousCallingIndications()) {
-                mSCT = SimultaneousCallingTracker.getInstance();
-                mSimultaneousCallSupportedSubIds =
-                        mSCT.getSubIdsSupportingSimultaneousCalling(mPhone.getSubId());
-            }
+            mSCT = SimultaneousCallingTracker.getInstance();
+            mSimultaneousCallSupportedSubIds =
+                    mSCT.getSubIdsSupportingSimultaneousCalling(mPhone.getSubId());
             mAccount = registerPstnPhoneAccount(isEmergency, isTest);
             Log.i(this, "Registered phoneAccount: %s with handle: %s",
                     mAccount, mAccount.getAccountHandle());
@@ -230,20 +228,18 @@ public class TelecomAccountRegistry {
             };
             registerImsRegistrationCallback();
 
-            if (Flags.simultaneousCallingIndications()) {
-                //Register SimultaneousCallingTracker listener:
-                mSimultaneousCallingTrackerListener = new SimultaneousCallingTracker.Listener() {
-                    @Override
-                    public void onSimultaneousCallingSupportChanged(Map<Integer,
-                            Set<Integer>> simultaneousCallSubSupportMap) {
-                        updateSimultaneousCallSubSupportMap(simultaneousCallSubSupportMap);
-                    }
-                };
-                SimultaneousCallingTracker.getInstance()
-                        .addListener(mSimultaneousCallingTrackerListener);
-                Log.d(LOG_TAG, "Finished registering mSimultaneousCallingTrackerListener for "
-                        + "phoneId = " + mPhone.getPhoneId() + "; subId = " + mPhone.getSubId());
-            }
+            //Register SimultaneousCallingTracker listener:
+            mSimultaneousCallingTrackerListener = new SimultaneousCallingTracker.Listener() {
+                @Override
+                public void onSimultaneousCallingSupportChanged(Map<Integer,
+                        Set<Integer>> simultaneousCallSubSupportMap) {
+                    updateSimultaneousCallSubSupportMap(simultaneousCallSubSupportMap);
+                }
+            };
+            SimultaneousCallingTracker.getInstance()
+                    .addListener(mSimultaneousCallingTrackerListener);
+            Log.d(LOG_TAG, "Finished registering mSimultaneousCallingTrackerListener for "
+                    + "phoneId = " + mPhone.getPhoneId() + "; subId = " + mPhone.getSubId());
         }
 
         void teardown() {
@@ -258,10 +254,8 @@ public class TelecomAccountRegistry {
                     mMmTelManager.unregisterImsRegistrationCallback(mImsRegistrationCallback);
                 }
             }
-            if (Flags.simultaneousCallingIndications()) {
-                SimultaneousCallingTracker.getInstance()
-                        .removeListener(mSimultaneousCallingTrackerListener);
-            }
+            SimultaneousCallingTracker.getInstance()
+                    .removeListener(mSimultaneousCallingTrackerListener);
         }
 
         private void registerMmTelCapabilityCallback() {
@@ -591,14 +585,12 @@ public class TelecomAccountRegistry {
                     .setExtras(extras)
                     .setGroupId(groupId);
 
-            if (Flags.simultaneousCallingIndications()) {
-                Set <PhoneAccountHandle> simultaneousCallingHandles =
-                        mSimultaneousCallSupportedSubIds.stream()
-                                .map(subscriptionId -> PhoneUtils.makePstnPhoneAccountHandleWithId(
-                                        String.valueOf(subscriptionId), userToRegister))
-                                .collect(Collectors.toSet());
-                accountBuilder.setSimultaneousCallingRestriction(simultaneousCallingHandles);
-            }
+            Set <PhoneAccountHandle> simultaneousCallingHandles =
+                    mSimultaneousCallSupportedSubIds.stream()
+                            .map(subscriptionId -> PhoneUtils.makePstnPhoneAccountHandleWithId(
+                                    String.valueOf(subscriptionId), userToRegister))
+                            .collect(Collectors.toSet());
+            accountBuilder.setSimultaneousCallingRestriction(simultaneousCallingHandles);
 
 
             return accountBuilder.build();
@@ -961,7 +953,6 @@ public class TelecomAccountRegistry {
 
         public void updateSimultaneousCallSubSupportMap(Map<Integer,
                 Set<Integer>> simultaneousCallSubSupportMap) {
-            if (!Flags.simultaneousCallingIndications()) { return; }
             //Check if the simultaneous call support subIds for this account have changed:
             Set<Integer> updatedSimultaneousCallSupportSubIds = new HashSet<>(3);
             updatedSimultaneousCallSupportSubIds.addAll(
