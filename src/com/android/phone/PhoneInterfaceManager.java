@@ -3369,6 +3369,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
 
     @Override
     public List<CellInfo> getAllCellInfo(String callingPackage, String callingFeatureId) {
+        log("getAllCellInfo: package=" + callingPackage + ", uid=" + Binder.getCallingUid());
         mApp.getSystemService(AppOpsManager.class)
                 .checkPackage(Binder.getCallingUid(), callingPackage);
 
@@ -3395,12 +3396,9 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
 
         mAppOps = Objects.requireNonNull(
             getDefaultPhone().getContext().getSystemService(AppOpsManager.class));
-        mAppOps.noteOpNoThrow(
-            mAppOps.OP_READ_CELL_INFO,
-            Binder.getCallingUid(),
-            getDefaultPhone().getContext().getPackageName(),
-            getDefaultPhone().getContext().getAttributionTag(),
-            "getAllCellInfo reporting cell info");
+        mAppOps.noteOpNoThrow(mAppOps.OP_READ_CELL_INFO,
+                Binder.getCallingUid(), callingPackage, callingFeatureId,
+                "getAllCellInfo reporting cell info");
 
         final int targetSdk = TelephonyPermissions.getTargetSdk(mApp, callingPackage);
         if (targetSdk >= android.os.Build.VERSION_CODES.Q) {
@@ -3480,12 +3478,8 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
 
         mAppOps = Objects.requireNonNull(
             getDefaultPhone().getContext().getSystemService(AppOpsManager.class));
-        mAppOps.noteOpNoThrow(
-            mAppOps.OP_READ_CELL_INFO,
-            Binder.getCallingUid(),
-            getDefaultPhone().getContext().getPackageName(),
-            getDefaultPhone().getContext().getAttributionTag(),
-            "requestCellInfoUpdate reporting cell info");
+        mAppOps.noteOpNoThrow(mAppOps.OP_READ_CELL_INFO, Binder.getCallingUid(),
+                callingPackage, callingFeatureId, "requestCellInfoUpdate reporting cell info");
 
         final Phone phone = getPhoneFromSubId(subId);
         if (phone == null) throw new IllegalArgumentException("Invalid Subscription Id: " + subId);
