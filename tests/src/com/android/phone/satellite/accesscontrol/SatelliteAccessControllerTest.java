@@ -101,6 +101,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ResultReceiver;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.telecom.TelecomManager;
 import android.telephony.SubscriptionManager;
@@ -1823,6 +1824,7 @@ public class SatelliteAccessControllerTest extends TelephonyTestBase {
                         satelliteAccessConfigResId, targetSatelliteAccessConfigFileName);
         when(mMockResources.getString(com.android.internal.R.string.satellite_access_config_file))
                 .thenReturn(satelliteAccessConfigFilePath);
+        logd("setupOnDeviceGeofenceData: " + satelliteAccessConfigFilePath);
         mSatelliteAccessControllerUT.loadOverlayConfigs(mMockContext);
     }
 
@@ -2854,8 +2856,24 @@ public class SatelliteAccessControllerTest extends TelephonyTestBase {
         mSatelliteAccessControllerUT = new TestSatelliteAccessController(mMockContext,
                 mMockFeatureFlags, mTestableLooper.getLooper(), mMockLocationManager,
                 mMockTelecomManager, mMockSatelliteOnDeviceAccessController, mMockSatS2File);
+        mTestableLooper.processAllMessages();
 
         verify(mMockSharedPreferencesEditor, times(4)).remove(anyString());
+    }
+
+    @Test
+    public void testCheckAnrOnSatelliteAccessControllerConstructor() {
+        final long anrTimeOut = 5000L;
+        long startTime = SystemClock.elapsedRealtime();
+
+        mSatelliteAccessControllerUT = new TestSatelliteAccessController(mMockContext,
+                mMockFeatureFlags, mTestableLooper.getLooper(), mMockLocationManager,
+                mMockTelecomManager, mMockSatelliteOnDeviceAccessController, mMockSatS2File);
+
+        long endTime = SystemClock.elapsedRealtime();
+        long duration = endTime - startTime;
+        logd("Duration time for the SatelliteAccessController is " + duration);
+        assertTrue("Duration is longer than ANR time(5 sec)", anrTimeOut >= duration);
     }
 
     @Test
