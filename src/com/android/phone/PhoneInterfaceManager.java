@@ -14072,6 +14072,29 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     }
 
     /**
+     * This API can be used for testing purposes to uncap the max allowed data mode.
+     *
+     * @return {@code true} if the max allowed data mode is uncapped successfully,
+     * {@code false} otherwise.
+     */
+    public boolean uncapMaxAllowedSatelliteDataMode() {
+        Log.d(LOG_TAG, "uncapMaxAllowedSatelliteDataMode");
+        TelephonyPermissions.enforceDebugBuildsOnly("uncapMaxAllowedSatelliteDataMode");
+        TelephonyPermissions.enforceShellOnly(
+                Binder.getCallingUid(),
+                "uncapMaxAllowedSatelliteDataMode");
+        TelephonyPermissions.enforceCallingOrSelfModifyPermissionOrCarrierPrivilege(mApp,
+                SubscriptionManager.INVALID_SUBSCRIPTION_ID,
+                "uncapMaxAllowedSatelliteDataMode");
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return mSatelliteController.uncapMaxAllowedDataMode();
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    /**
      * Sets the service defined in ComponentName to be bound.
      *
      * This should only be used for testing.
