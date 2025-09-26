@@ -974,8 +974,7 @@
     <string name="satellite_config_version_label" msgid="1153447193166314791">"versão:"</string>
     <string name="satellite_config_version_for_skylo_label" msgid="7068241597009832840">"versão do Skylo:"</string>
     <string name="satellite_max_allowed_data_mode_label" msgid="1808484802651916339">"modo de dados máximo permitido:"</string>
-    <!-- no translation found for satellite_provider_plmn_list_label (7289533883006851963) -->
-    <skip />
+    <string name="satellite_provider_plmn_list_label" msgid="7289533883006851963">"plmns de todos os fornecedores de satélite:"</string>
     <string name="satellite_config_version_for_starlink_label" msgid="7984209491963621773">"versão do Starlink:"</string>
     <string name="satellite_config_service_type_label" msgid="21749170241956082">"subId/plmn/servicetype:"</string>
     <string name="satellite_config_allow_access_label" msgid="3806779900418131140">"permitir acesso:"</string>
