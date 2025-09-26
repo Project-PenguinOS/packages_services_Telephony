@@ -2742,6 +2742,25 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         }
     }
 
+    @Override
+    public @TelephonyManager.TtyMode int getCurrentTtyMode() {
+        enforceReadPrivilegedPermission("Needs READ_PRIVILEGED_PHONE_STATE for "
+                + "getCurrentTtyMode");
+        enforceTelephonyFeatureWithException(getCurrentPackageName(),
+                PackageManager.FEATURE_TELEPHONY_CALLING, "getCurrentTtyMode");
+        final Phone defaultPhone = getDefaultPhone();
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return Settings.Secure.getIntForUser(defaultPhone.getContext().getContentResolver(),
+                    Settings.Secure.PREFERRED_TTY_MODE, defaultPhone.getContext().getUserId());
+        } catch (Settings.SettingNotFoundException e) {
+            Log.w(LOG_TAG, "Secure setting not found: ", e);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+        return TelephonyManager.TTY_MODE_OFF;
+    }
+
     @Deprecated
     @Override
     public boolean isRadioOn(String callingPackage) {
