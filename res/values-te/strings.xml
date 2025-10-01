@@ -640,7 +640,7 @@
     <string name="ota_unsuccessful" msgid="8531037653803955754">"మీ ఫోన్ సక్రియం చేయబడలేదు. \nమీరు మెరుగైన కవరేజీ గల ప్రాంతాన్ని (కిటికీ దగ్గర లేదా వెలుపల) కనుగొనాల్సి ఉంటుంది. \n\nమళ్లీ ట్రై చేయండి లేదా మరిన్ని ఎంపికల కోసం కస్టమర్ సేవకు కాల్ చేయండి."</string>
     <string name="ota_spc_failure" msgid="904092035241370080">"అత్యధిక SPC వైఫల్యాలు"</string>
     <string name="ota_call_end" msgid="8657746378290737034">"వెనుకకు"</string>
-    <string name="ota_try_again" msgid="6914781945599998550">"మళ్లీ ప్రయత్నించు"</string>
+    <string name="ota_try_again" msgid="6914781945599998550">"మళ్లీ ట్రై చేయండి"</string>
     <string name="ota_next" msgid="2041016619313475914">"తదుపరి"</string>
     <string name="ecm_exit_dialog" msgid="4200691880721429078">"EcmExitDialog"</string>
     <string name="phone_entered_ecm_text" msgid="8431238297843035842">"అత్యవసర కాల్‌బ్యాక్ మోడ్‌లోకి ప్రవేశించింది"</string>
