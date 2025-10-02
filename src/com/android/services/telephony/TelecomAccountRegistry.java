@@ -599,6 +599,10 @@ public class TelecomAccountRegistry {
                 extras.putAll(getPhoneAccountExtras());
             }
 
+            if (Flags.supportLowBatteryAlert()) {
+                extras.putAll(getExtrasForLowBatteryAlert());
+            }
+
             if (mIsAdhocConfCapable && isCarrierAdhocConferenceCallSupported()) {
                 capabilities |= PhoneAccount.CAPABILITY_ADHOC_CONFERENCE_CALLING;
             } else {
@@ -996,6 +1000,28 @@ public class TelecomAccountRegistry {
                     instantLetteringMaxLength);
             phoneAccountExtras.putString(PhoneAccount.EXTRA_CALL_SUBJECT_CHARACTER_ENCODING,
                     instantLetteringEncoding);
+            return phoneAccountExtras;
+        }
+
+        /**
+         * When low battery alert feature is enabled,then set the necessary PhoneAccount
+         * extras for those features.
+         *
+         * @return The {@link PhoneAccount} extras associated with the current subscription.
+         */
+        private Bundle getExtrasForLowBatteryAlert() {
+            PersistableBundle b =
+                    PhoneGlobals.getInstance().getCarrierConfigForSubId(mPhone.getSubId());
+            if (b == null) return new Bundle();
+            int batteryAlertInterval = b.getInt(
+                    CarrierConfigManager.KEY_LOW_BATTERY_ALERT_INTERVAL_INT);
+            int batteryLevelThreshold = b.getInt(
+                    CarrierConfigManager.KEY_LOW_BATTERY_ALERT_THRESHOLD_INT);
+            Bundle phoneAccountExtras = new Bundle();
+            phoneAccountExtras.putInt(PhoneAccount.EXTRA_LOW_BATTERY_ALERT_INTERVAL_SECONDS,
+                    batteryAlertInterval);
+            phoneAccountExtras.putInt(PhoneAccount.EXTRA_LOW_BATTERY_ALERT_LEVEL_THRESHOLD,
+                    batteryLevelThreshold);
             return phoneAccountExtras;
         }
 

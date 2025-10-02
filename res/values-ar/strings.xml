@@ -681,7 +681,7 @@
     <string name="sim_label_emergency_calls" msgid="9078241989421522310">"مكالمات الطوارئ"</string>
     <string name="sim_description_emergency_calls" msgid="5146872803938897296">"مكالمات الطوارئ فقط"</string>
     <string name="sim_description_default" msgid="7474671114363724971">"‏شريحة SIM، المنفذ: <xliff:g id="SLOT_ID">%s</xliff:g>"</string>
-    <string name="accessibility_settings_activity_title" msgid="7883415189273700298">"إعدادات تمكين الوصول"</string>
+    <string name="accessibility_settings_activity_title" msgid="7883415189273700298">"تسهيل الاستخدام"</string>
     <string name="status_hint_label_incoming_wifi_call" msgid="2606052595898044071">"‏مكالمة Wi-Fi من"</string>
     <string name="status_hint_label_wifi_call" msgid="942993035689809853">"‏مكالمة عبر Wi-Fi"</string>
     <string name="message_decode_error" msgid="1061856591500290887">"حدث خطأ أثناء فك ترميز الرسالة."</string>
@@ -974,8 +974,7 @@
     <string name="satellite_config_version_label" msgid="1153447193166314791">"الإصدار:"</string>
     <string name="satellite_config_version_for_skylo_label" msgid="7068241597009832840">"‏إصدار skylo:"</string>
     <string name="satellite_max_allowed_data_mode_label" msgid="1808484802651916339">"تحديد الحد الأقصى المسموح به للبيانات:"</string>
-    <!-- no translation found for satellite_provider_plmn_list_label (7289533883006851963) -->
-    <skip />
+    <string name="satellite_provider_plmn_list_label" msgid="7289533883006851963">"‏كل أرقام plmns لمقدّمي خدمات الأقمار الصناعية:"</string>
     <string name="satellite_config_version_for_starlink_label" msgid="7984209491963621773">"‏إصدار starlink:"</string>
     <string name="satellite_config_service_type_label" msgid="21749170241956082">"subId/plmn/servicetype:‎"</string>
     <string name="satellite_config_allow_access_label" msgid="3806779900418131140">"allow_access:"</string>
