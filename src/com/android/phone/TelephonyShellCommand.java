@@ -223,6 +223,8 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
             "override-satellite-entitlement-status-response-for-cts-test";
     private static final String SET_MAX_ALLOWED_SATELLITE_DATA_MODE_FOR_CTS_TEST =
             "set-max-allowed-satellite-data-mode-for-cts-test";
+    private static final String UNCAP_MAX_ALLOWED_SATELLITE_DATA_MODE =
+            "uncap-max-allowed-satellite-data-mode";
 
     private static final String  ADD_ATTACH_RESTRICTION_FOR_CARRIER =
             "add-attach-restriction-for-carrier";
@@ -460,6 +462,8 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
                 return handleOverrideSatelliteEntitlementStatusResponseForCtsTest();
             case SET_MAX_ALLOWED_SATELLITE_DATA_MODE_FOR_CTS_TEST:
                 return handleSetMaxAllowedSatelliteDataModeForCtsTest();
+            case UNCAP_MAX_ALLOWED_SATELLITE_DATA_MODE:
+                return handleUncapMaxAllowedSatelliteDataMode();
             case OVERRIDE_CONFIG_DATA_VERSION:
                 return handleOverrideConfigDataVersion();
             case SET_COUNTRY_CODES:
@@ -4023,6 +4027,26 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
         } catch (RemoteException e) {
             Log.w(LOG_TAG, "handleSetMaxAllowedSatelliteDataModeForCtsTest("
                     + maxAllowedDataMode + "), error = " + e.getMessage());
+            errPw.println("Exception: " + e.getMessage());
+            return -1;
+        }
+        return 0;
+    }
+
+    private int handleUncapMaxAllowedSatelliteDataMode() {
+        PrintWriter errPw = getErrPrintWriter();
+        Log.d(LOG_TAG, "handleUncapMaxAllowedSatelliteDataMode");
+        if (!UserHandle.isSameApp(Binder.getCallingUid(), Process.ROOT_UID)
+                || TelephonyUtils.IS_USER) {
+            getErrPrintWriter().println("Permission denied.");
+            return -1;
+        }
+        try {
+            boolean result = mInterface.uncapMaxAllowedSatelliteDataMode();
+            Log.v(LOG_TAG, "handleUncapMaxAllowedSatelliteDataMode returns: " + result);
+            getOutPrintWriter().println("Result: " + result);
+        } catch (RemoteException e) {
+            Log.w(LOG_TAG, "handleUncapMaxAllowedSatelliteDataMode, error = " + e.getMessage());
             errPw.println("Exception: " + e.getMessage());
             return -1;
         }
