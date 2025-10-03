@@ -905,9 +905,16 @@ public class TelecomAccountRegistry {
                     PhoneGlobals.getInstance().getCarrierConfigForSubId(mPhone.getSubId());
             if (b == null) return new Bundle();
             int batteryAlertInterval = b.getInt(
-                    CarrierConfigManager.KEY_LOW_BATTERY_ALERT_INTERVAL_INT);
+                    CarrierConfigManager.KEY_LOW_BATTERY_ALERT_INTERVAL_INT,
+                    PhoneAccount.LOW_BATTERY_ALERT_DISABLED);
             int batteryLevelThreshold = b.getInt(
-                    CarrierConfigManager.KEY_LOW_BATTERY_ALERT_THRESHOLD_INT);
+                    CarrierConfigManager.KEY_LOW_BATTERY_ALERT_THRESHOLD_INT,
+                    PhoneAccount.LOW_BATTERY_ALERT_DISABLED);
+            if (batteryAlertInterval == PhoneAccount.LOW_BATTERY_ALERT_DISABLED
+                    || batteryLevelThreshold == PhoneAccount.LOW_BATTERY_ALERT_DISABLED) {
+                return new Bundle();
+            }
+
             Bundle phoneAccountExtras = new Bundle();
             phoneAccountExtras.putInt(PhoneAccount.EXTRA_LOW_BATTERY_ALERT_INTERVAL_SECONDS,
                     batteryAlertInterval);
