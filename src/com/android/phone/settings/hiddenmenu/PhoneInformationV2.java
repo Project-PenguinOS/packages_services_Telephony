@@ -20,6 +20,10 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
+import android.telephony.CarrierConfigManager;
+import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -31,6 +35,8 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.android.internal.telephony.Phone;
+import com.android.internal.telephony.PhoneFactory;
 import com.android.phone.R;
 
 import java.util.ArrayList;
@@ -83,10 +89,33 @@ public class PhoneInformationV2 extends AppCompatActivity
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
         if (mViewModel != null) {
+            CarrierConfigManager carrierConfigManager =
+                    getSystemService(CarrierConfigManager.class);
+            TelephonyManager telephonyManager =
+                    getSystemService(TelephonyManager.class);
+
+            for (int i = 0; i < telephonyManager.getActiveModemCount(); i++) {
+                Phone phone = PhoneFactory.getPhone(i);
+                if (phone == null) {
+                    continue;
+                }
+
+                int subId = SubscriptionManager.getSubscriptionId(i);
+
+                Log.d(TAG, "onDestroy: subId for phone (" + i + "): " + subId);
+                // Revert satellite carrier config overrides by restoring the original bundle
+                if (Boolean.TRUE.equals(mViewModel.getSatelliteEnabled(i).getValue())) {
+                    carrierConfigManager.overrideConfig(subId, null, false);
+                }
+
+                if (Boolean.TRUE.equals(mViewModel.getSatelliteDataEnabled(i).getValue())) {
+                    PhoneInformationUtil.restoreMaxAllowedDataMode();
+                }
+            }
             mViewModel.resetToDefaults();
         }
+        super.onDestroy();
     }
 
     private void selectNavItem(int selectedItemId, boolean savePreference) {
