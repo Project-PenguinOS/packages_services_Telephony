@@ -90,6 +90,7 @@ import com.android.internal.telephony.d2d.RtpAdapter;
 import com.android.internal.telephony.d2d.RtpTransport;
 import com.android.internal.telephony.d2d.Timeouts;
 import com.android.internal.telephony.d2d.TransportProtocol;
+import com.android.internal.telephony.flags.Flags;
 import com.android.internal.telephony.gsm.SuppServiceNotification;
 import com.android.internal.telephony.imsphone.ImsPhone;
 import com.android.internal.telephony.imsphone.ImsPhoneCall;
@@ -393,6 +394,7 @@ abstract class TelephonyConnection extends Connection implements Holdable,
                         updateConnectionProperties();
                         refreshConferenceSupported();
                     }
+                    updateConnectionCapabilities();
                     sendRttInitiationSuccess();
                     break;
                 case MSG_HOLD:
@@ -873,6 +875,7 @@ abstract class TelephonyConnection extends Connection implements Holdable,
 
         @Override
         public void onRttTerminated() {
+            updateConnectionCapabilities();
             updateConnectionProperties();
 // QTI_BEGIN: 2019-06-18: Telephony: Recalculate conference on RTT mode change
             refreshConferenceSupported();
@@ -1049,6 +1052,12 @@ abstract class TelephonyConnection extends Connection implements Holdable,
 
     private Integer mEmergencyServiceCategory = null;
     private List<String> mEmergencyUrns = null;
+
+    /**
+     * Indicates a flag to not perform the state details update during the domain reselection
+     * after a call failure.
+     */
+    private boolean mIsDomainReselectionInProgress;
 
     protected TelephonyConnection(com.android.internal.telephony.Connection originalConnection,
             String callId, int callDirection) {
@@ -1330,6 +1339,10 @@ abstract class TelephonyConnection extends Connection implements Holdable,
             isAllowedToDisplayPicture = callFilteringCompletionInfo.isInContacts();
         }
 
+        if (!isAllowedToDisplayPicture) {
+            isAllowedToDisplayPicture = isBusinessCall();
+        }
+
         if (isImsConnection()) {
             ImsPhone imsPhone = (getPhone() instanceof ImsPhone) ? (ImsPhone) getPhone() : null;
             if (imsPhone != null
@@ -1363,6 +1376,14 @@ abstract class TelephonyConnection extends Connection implements Holdable,
                 }
             }
         }
+    }
+
+    private boolean isBusinessCall() {
+        Bundle extras = getExtras();
+        if (extras == null) {
+            return false;
+        }
+        return extras.getBoolean(ImsCallProfile.EXTRA_IS_BUSINESS_CALL, false);
     }
 
     @Override
@@ -1534,7 +1555,20 @@ abstract class TelephonyConnection extends Connection implements Holdable,
         if (mOriginalConnection != null && mOriginalConnection.isIncoming()) {
             callCapabilities |= CAPABILITY_SPEED_UP_MT_AUDIO;
         }
-        if (!shouldTreatAsEmergencyCall() && isImsConnection() && canHoldImsCalls()) {
+
+        boolean allowHold = false;
+        if (!shouldTreatAsEmergencyCall() && isImsConnection()) {
+            if (isRtt()) {
+                Log.d(this,
+                    "buildConnectionCapabilities: Call is RTT, evaluating hold capabilities.");
+                allowHold = canHoldImsCalls() && canHoldRttCalls();
+                Log.d(this, "buildConnectionCapabilities: RTT hold allowed = " + allowHold);
+            } else {
+                allowHold = canHoldImsCalls();
+            }
+        }
+
+        if (allowHold) {
             callCapabilities |= CAPABILITY_SUPPORT_HOLD;
             if (mIsHoldable && (getState() == STATE_ACTIVE || getState() == STATE_HOLDING)) {
                 callCapabilities |= CAPABILITY_HOLD;
@@ -1684,8 +1718,10 @@ abstract class TelephonyConnection extends Connection implements Holdable,
         phone.registerForRingbackTone(mHandler, MSG_RINGBACK_TONE, null);
         phone.registerForSuppServiceNotification(mHandler, MSG_SUPP_SERVICE_NOTIFY, null);
         phone.registerForOnHoldTone(mHandler, MSG_ON_HOLD_TONE, null);
-        phone.registerForInCallVoicePrivacyOn(mHandler, MSG_CDMA_VOICE_PRIVACY_ON, null);
-        phone.registerForInCallVoicePrivacyOff(mHandler, MSG_CDMA_VOICE_PRIVACY_OFF, null);
+        if (!Flags.deleteCdma()) {
+            phone.registerForInCallVoicePrivacyOn(mHandler, MSG_CDMA_VOICE_PRIVACY_ON, null);
+            phone.registerForInCallVoicePrivacyOff(mHandler, MSG_CDMA_VOICE_PRIVACY_OFF, null);
+        }
         mPhoneForEvents = phone;
     }
 
@@ -1705,8 +1741,6 @@ abstract class TelephonyConnection extends Connection implements Holdable,
 // QTI_BEGIN: 2018-08-30: Telephony: Fix plus sign of country code prefixes can't show on CDMA MO call
         }
 
-// QTI_END: 2018-08-30: Telephony: Fix plus sign of country code prefixes can't show on CDMA MO call
-// QTI_BEGIN: 2023-12-12: Telephony: Preserve isNetworkIdentifiedEmergencyCall for Connection during handover.
         // When a call is redialed as an emergency call, a handover may occur.
         // In that case, mIsNetworkIdentifiedEmergencyCall is overwritten
         // along with the Connection Property. The associated Call object
@@ -1721,7 +1755,6 @@ abstract class TelephonyConnection extends Connection implements Holdable,
             isEmergency = mOriginalConnection.isNetworkIdentifiedEmergencyCall();
         }
 
-// QTI_END: 2023-12-12: Telephony: Preserve isNetworkIdentifiedEmergencyCall for Connection during handover.
         clearOriginalConnection();
         mOriginalConnectionExtras.clear();
         mOriginalConnection = originalConnection;
@@ -1740,10 +1773,8 @@ abstract class TelephonyConnection extends Connection implements Holdable,
         // Set video state and capabilities
         setTelephonyVideoState(mOriginalConnection.getVideoState());
         setOriginalConnectionCapabilities(mOriginalConnection.getConnectionCapabilities());
-// QTI_BEGIN: 2023-12-12: Telephony: Preserve isNetworkIdentifiedEmergencyCall for Connection during handover.
         setIsNetworkIdentifiedEmergencyCall(isEmergency ||
                 mOriginalConnection.isNetworkIdentifiedEmergencyCall());
-// QTI_END: 2023-12-12: Telephony: Preserve isNetworkIdentifiedEmergencyCall for Connection during handover.
         setIsAdhocConferenceCall(mOriginalConnection.isAdhocConference());
         setAudioModeIsVoip(mOriginalConnection.getAudioModeIsVoip());
         setTelephonyVideoProvider(mOriginalConnection.getVideoProvider());
@@ -1761,9 +1792,7 @@ abstract class TelephonyConnection extends Connection implements Holdable,
 
         TelephonyManager tm = (TelephonyManager) getPhone().getContext()
                 .getSystemService(Context.TELEPHONY_SERVICE);
-// QTI_BEGIN: 2024-06-04: Telephony: Set mTreatIsEmergencyCall to true when the call is an emergency call.
         if (isEmergency || tm.isEmergencyNumber(mOriginalConnection.getAddress())) {
-// QTI_END: 2024-06-04: Telephony: Set mTreatIsEmergencyCall to true when the call is an emergency call.
             mTreatAsEmergencyCall = true;
         }
         // Propagate VERSTAT for IMS calls.
@@ -2196,6 +2225,24 @@ abstract class TelephonyConnection extends Connection implements Holdable,
                 ((mOriginalConnection != null && mOriginalConnection.shouldAllowHoldingVideoCall())
                 || !VideoProfile.isVideo(getVideoState()));
 // QTI_END: 2018-03-23: Telephony: IMS-VT: Add support that controls holding a video call
+    }
+
+    /**
+     * Determines if holding an RTT call is permitted based on carrier configuration.
+     *
+     * @return {@code true} if RTT calls can be held.
+     */
+    private boolean canHoldRttCalls() {
+        PersistableBundle carrierConfig = getCarrierConfig();
+        if (carrierConfig == null) {
+            Log.w(this, "canHoldRttCalls: CarrierConfig is unavailable. Defaulting to true.");
+            return true;
+        }
+
+        boolean isHoldRttCallAllowed =
+                carrierConfig.getBoolean(CarrierConfigManager.KEY_ALLOW_HOLD_IN_RTT_CALL_BOOL);
+        Log.d(this, "canHoldRttCalls: KEY_ALLOW_HOLD_IN_RTT_CALL_BOOL=" + isHoldRttCallAllowed);
+        return isHoldRttCallAllowed;
     }
 
     private boolean isConferenceHosted() {
@@ -2690,20 +2737,14 @@ abstract class TelephonyConnection extends Connection implements Holdable,
         if (mOriginalConnection == null) {
             return;
         }
-// QTI_BEGIN: 2021-03-17: RIL: Update mTreatAsEmergencyCall before using it
 
         TelephonyManager tm = (TelephonyManager) getPhone().getContext()
                 .getSystemService(Context.TELEPHONY_SERVICE);
-// QTI_END: 2021-03-17: RIL: Update mTreatAsEmergencyCall before using it
-// QTI_BEGIN: 2024-06-04: Telephony: Set mTreatIsEmergencyCall to true when the call is an emergency call.
         if (isNetworkIdentifiedEmergencyCall() ||
                 tm.isEmergencyNumber(mOriginalConnection.getAddress())) {
-// QTI_END: 2024-06-04: Telephony: Set mTreatIsEmergencyCall to true when the call is an emergency call.
-// QTI_BEGIN: 2021-03-17: RIL: Update mTreatAsEmergencyCall before using it
             mTreatAsEmergencyCall = true;
         }
 
-// QTI_END: 2021-03-17: RIL: Update mTreatAsEmergencyCall before using it
         Call.State newState;
         // If the state is overridden and the state of the original connection hasn't changed since,
         // then we continue in the overridden state, else we go to the original connection's state.
@@ -2717,6 +2758,10 @@ abstract class TelephonyConnection extends Connection implements Holdable,
                 getTelecomCallId());
 
         if (mConnectionState != newState) {
+            // This flag should be reset if the call redial proceeds normally
+            // after domain reselection is successfully performed.
+            mIsDomainReselectionInProgress = false;
+
             mConnectionState = newState;
             switch (newState) {
                 case IDLE:
@@ -2776,6 +2821,7 @@ abstract class TelephonyConnection extends Connection implements Holdable,
                         if (mTelephonyConnectionService.maybeReselectDomain(this, reasonInfo,
                                 mShowPreciseFailedCause, mHangupDisconnectCause)) {
                             clearOriginalConnection();
+                            mIsDomainReselectionInProgress = true;
                             break;
                         }
                     }
@@ -2881,6 +2927,16 @@ abstract class TelephonyConnection extends Connection implements Holdable,
         }
 
         updateStateInternal();
+
+        if (Flags.ignoreStateDetailsUpdateForDomainReselection()
+                && mIsDomainReselectionInProgress) {
+            Log.d(this, "updateState: ignore state details update for domain reselection");
+        } else {
+            updateStateDetails();
+        }
+    }
+
+    void updateStateDetails() {
         updateStatusHints();
         updateConnectionCapabilities();
         updateConnectionProperties();
@@ -2963,6 +3019,7 @@ abstract class TelephonyConnection extends Connection implements Holdable,
 
     public void close() {
         Log.v(this, "close");
+        mIsDomainReselectionInProgress = false;
         clearOriginalConnection();
         destroy();
         if (mTelephonyConnectionService != null) {
@@ -3307,10 +3364,6 @@ abstract class TelephonyConnection extends Connection implements Holdable,
         return mWasImsConnection;
     }
 
-    boolean getIsUsingAssistedDialing() {
-        return mIsUsingAssistedDialing;
-    }
-
     void setIsUsingAssistedDialing(Boolean isUsingAssistedDialing) {
         mIsUsingAssistedDialing = isUsingAssistedDialing;
         updateConnectionProperties();
@@ -3558,7 +3611,8 @@ abstract class TelephonyConnection extends Connection implements Holdable,
     private boolean isShowingOriginalDialString() {
         boolean showOrigDialString = false;
         Phone phone = getPhone();
-        if (phone != null && (phone.getPhoneType() == TelephonyManager.PHONE_TYPE_CDMA)
+        if (phone != null && (!Flags.deleteCdma()
+                && phone.getPhoneType() == TelephonyManager.PHONE_TYPE_CDMA)
                 && !mOriginalConnection.isIncoming()) {
 // QTI_END: 2018-08-30: Telephony: Fix plus sign of country code prefixes can't show on CDMA MO call
             showOrigDialString = getCarrierConfig().getBoolean(CarrierConfigManager
@@ -3692,6 +3746,17 @@ abstract class TelephonyConnection extends Connection implements Holdable,
      */
     public void setTelephonyConnectionDisconnected(@NonNull
             android.telecom.DisconnectCause disconnectCause) {
+        if (disconnectCause.getCode() == android.telecom.DisconnectCause.ANSWERED_ELSEWHERE) {
+            PersistableBundle carrierConfig = getCarrierConfig();
+            if (carrierConfig != null && !carrierConfig.getBoolean(
+                    CarrierConfigManager.KEY_LOG_CALLS_ANSWERED_ELSEWHERE_BOOL, true)) {
+                Log.i(this, "setTelephonyConnectionDisconnected: skip logging call answered "
+                        + "elsewhere based on carrier requirements.");
+                Bundle extras = new Bundle();
+                extras.putBoolean(TelecomManager.EXTRA_DO_NOT_LOG_CALL, true);
+                putTelephonyExtras(extras);
+            }
+        }
         setDisconnected(disconnectCause);
         notifyDisconnected(disconnectCause);
         notifyStateChanged(getState());

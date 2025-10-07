@@ -121,7 +121,8 @@ public class GsmUmtsCallOptions extends PreferenceActivity {
             setPreferencesState(PhoneUtils.isSuppServiceAllowedInAirplaneMode(mPhone));
         }
 // QTI_END: 2024-11-06: Telephony: Fix the issues related to UT service in airplane mode am: e74f539a23 am: e74f539a23
-        if (subInfoHelper.getPhone().getPhoneType() != PhoneConstants.PHONE_TYPE_GSM) {
+        if (!Flags.deleteCdma()
+                && subInfoHelper.getPhone().getPhoneType() != PhoneConstants.PHONE_TYPE_GSM) {
             //disable the entire screen
             getPreferenceScreen().setEnabled(false);
         }

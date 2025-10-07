@@ -1416,7 +1416,8 @@ public class SatelliteAccessController extends Handler {
 
         try {
             if (SatelliteAccessConfigurationParser.parse(
-                    configUpdaterSatelliteAccessConfigJsonFile.getAbsolutePath()) == null) {
+                    configUpdaterSatelliteAccessConfigJsonFile.getAbsolutePath(),
+                    mFeatureFlags) == null) {
                 ploge("updateSatelliteAccessDataWithConfigUpdaterData: "
                         + "the satellite_access_config.json is not valid");
                 mConfigUpdaterMetricsStats.reportOemConfigError(SatelliteConstants
@@ -1578,7 +1579,8 @@ public class SatelliteAccessController extends Handler {
         logd("loadSatelliteAccessConfigurationFileToMap: " + fileName);
         if (!TextUtils.isEmpty(fileName)) {
             try {
-                setSatelliteAccessConfigMap(SatelliteAccessConfigurationParser.parse(fileName));
+                setSatelliteAccessConfigMap(SatelliteAccessConfigurationParser.parse(
+                                                fileName, mFeatureFlags));
             } catch (Exception e) {
                 loge("loadSatelliteAccessConfigurationFileToMap: failed load json file: " + e);
             }

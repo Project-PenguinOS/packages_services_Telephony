@@ -461,6 +461,8 @@
     <string name="auto_retry_mode_summary" msgid="2863919925349511402">"Ativar modo Repetir automaticamente"</string>
     <string name="vibrating_for_outgoing_call_accepted_title" msgid="647945514737734657">"Vibração para ligações efetuadas"</string>
     <string name="vibrating_for_outgoing_call_accepted_summary" msgid="906112327196063688">"Ativar o modo de vibração ao fazer ligações"</string>
+    <string name="playing_tone_for_outgoing_call_accepted_title" msgid="856074537423753072">"Sons de chamada conectada"</string>
+    <string name="playing_tone_for_outgoing_call_accepted_summary" msgid="2442128058517260047">"Tocando o som para ligações efetuadas aceitas"</string>
     <string name="tty_mode_not_allowed_video_call" msgid="6551976083652752815">"Não é permitida a alteração do modo TTD durante uma videochamada"</string>
     <string name="menu_add" msgid="5616487894975773141">"Adicionar contato"</string>
     <string name="menu_edit" msgid="3593856941552460706">"Editar contato"</string>
@@ -528,7 +530,7 @@
     <string name="card_title_dialing" msgid="8742182654254431781">"Chamando..."</string>
     <string name="card_title_redialing" msgid="18130232613559964">"Rediscando"</string>
     <string name="card_title_conf_call" msgid="901197309274457427">"Teleconferência"</string>
-    <string name="card_title_incoming_call" msgid="881424648458792430">"Recebendo chamada"</string>
+    <string name="card_title_incoming_call" msgid="881424648458792430">"Recebendo ligação"</string>
     <string name="card_title_call_ended" msgid="650223980095026340">"Chamada encerrada"</string>
     <string name="card_title_on_hold" msgid="9028319436626975207">"Em espera"</string>
     <string name="card_title_hanging_up" msgid="814874106866647871">"Desligando"</string>
@@ -850,6 +852,14 @@
     <string name="simulate_out_of_service_label" msgid="3563376136603403714">"Simular o modo fora de serviço"</string>
     <string name="enforce_satellite_channel_string" msgid="295306734591329892">"Forçar o canal LTE de satélite do grupo (somente build de depuração)"</string>
     <string name="enforce_satellite_channel_label" msgid="8212349350110213468">"Forçar o canal LTE de satélite do grupo"</string>
+    <string name="starlink_satellite_band_string" msgid="2287502104005508384">"Starlink_US"</string>
+    <string name="ast_satellite_band_string" msgid="3238737906080758289">"AST_US"</string>
+    <string name="manual_override_satellite_band_string" msgid="801049975307124461">"Substituição manual"</string>
+    <string name="satellite_manual_band_label" msgid="4135706517193927388">"Selecionar banda:"</string>
+    <string name="satellite_channel_label_text" msgid="1999162483250790313">"Inserir canal:"</string>
+    <string name="satellite_channel_hint_text" msgid="4342575738602358270">"Insira o canal de satélite aqui"</string>
+    <string name="force_camp_satellite_button_string" msgid="3719311367839668322">"Conectar"</string>
+    <string name="force_camp_satellite_button_connected_string" msgid="2457912207054938894">"Conectado"</string>
     <string name="mock_carrier_roaming_satellite_string" msgid="4796300252858292593">"Simulação de modo satélite da operadora (somente build de depuração)"</string>
     <string name="mock_carrier_roaming_satellite_label" msgid="2052656038544917979">"Simulação"</string>
     <string name="choose_satellite_data_mode_label" msgid="7403013160079828226">"Simulação do modo de dados de satélite"</string>

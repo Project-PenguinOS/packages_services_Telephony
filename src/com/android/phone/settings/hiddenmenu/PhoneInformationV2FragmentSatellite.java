@@ -21,6 +21,8 @@ import static android.telephony.CarrierConfigManager.KEY_SATELLITE_ATTACH_SUPPOR
 import static android.telephony.CarrierConfigManager.KEY_SATELLITE_DATA_SUPPORT_MODE_INT;
 import static android.telephony.CarrierConfigManager.KEY_SATELLITE_ENTITLEMENT_SUPPORTED_BOOL;
 
+import static com.android.internal.telephony.configupdate.ConfigProviderAdaptor.DOMAIN_SATELLITE;
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -62,6 +64,9 @@ import androidx.lifecycle.ViewModelProvider;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneFactory;
 import com.android.internal.telephony.RILConstants;
+import com.android.internal.telephony.configupdate.TelephonyConfigUpdateInstallReceiver;
+import com.android.internal.telephony.satellite.SatelliteConfig;
+import com.android.internal.telephony.satellite.SatelliteConfigParser;
 import com.android.phone.R;
 
 import java.util.Arrays;
@@ -86,6 +91,8 @@ public class PhoneInformationV2FragmentSatellite extends Fragment {
     private String mActionEsos;
     private String mActionEsosDemo;
     private Intent mNonEsosIntent;
+    private SatelliteConfigParser mBackedUpSatelliteConfigParser;
+    private SatelliteConfig mBackedUpSatelliteConfig;
     private int mSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
     private int mPhoneId = SubscriptionManager.INVALID_PHONE_INDEX;
     private final PersistableBundle[] mCarrierSatelliteOriginalBundle = new PersistableBundle[2];
@@ -167,8 +174,18 @@ public class PhoneInformationV2FragmentSatellite extends Fragment {
         mPhoneButton1 = view.findViewById(R.id.phone_button_1);
         mPhoneTitle1 = view.findViewById(R.id.phone_button_1_title);
 
-        mPhoneTitle0.setText(sPhoneIndexLabels[0]);
-        mPhoneTitle1.setText(sPhoneIndexLabels[1]);
+        // Configure phone selection buttons based on the number of active modems.
+        if (sPhoneIndexLabels.length > 1) {
+            mPhoneTitle0.setText(sPhoneIndexLabels[0]);
+            mPhoneTitle1.setText(sPhoneIndexLabels[1]);
+            mPhoneButton1.setVisibility(View.VISIBLE);
+        } else if (sPhoneIndexLabels.length == 1) {
+            mPhoneTitle0.setText(sPhoneIndexLabels[0]);
+            mPhoneButton1.setVisibility(View.GONE);
+        } else {
+            mPhoneButton0.setVisibility(View.GONE);
+            mPhoneButton1.setVisibility(View.GONE);
+        }
 
         mMockSatellite = (Switch) view.findViewById(R.id.mock_carrier_roaming_satellite);
         mMockSatelliteDataSwitch =
@@ -711,9 +728,11 @@ public class PhoneInformationV2FragmentSatellite extends Fragment {
                 mViewModel.setSatelliteDataModeEnabled(isChecked, mPhoneId);
                 if (isChecked) {
                     if (isValidOperator(mSubId)) {
+                        uncapMaxAllowedDataMode();
                         updateSatelliteDataButton();
                     } else {
                         log("satData: Not a valid Operator");
+                        restoreMaxAllowedDataMode();
                         mMockSatelliteDataSwitch.setChecked(false);
                         return;
                     }
@@ -839,6 +858,70 @@ public class PhoneInformationV2FragmentSatellite extends Fragment {
         }
 
         updateAllFields();
+    }
+
+    private void uncapMaxAllowedDataMode() {
+        log("uncapMaxAllowedDataMode: uncap max allowed data mode by overriding satellite config");
+        SatelliteConfigParser satelliteConfigParser =
+                (SatelliteConfigParser)
+                        TelephonyConfigUpdateInstallReceiver.getInstance()
+                                .getConfigParser(DOMAIN_SATELLITE);
+        SatelliteConfig satelliteConfig =
+                satelliteConfigParser != null ? satelliteConfigParser.getConfig() : null;
+
+        log(
+                "uncapMaxAllowedDataMode: backing up satellite config parser: "
+                        + satelliteConfigParser);
+        mBackedUpSatelliteConfigParser = satelliteConfigParser;
+
+        log("uncapMaxAllowedDataMode: backing up satellite config: " + satelliteConfig);
+        mBackedUpSatelliteConfig = satelliteConfig;
+
+        SatelliteConfig uncappedSatelliteConfig;
+        if (satelliteConfig == null) {
+            log(
+                    "uncapMaxAllowedDataMode: satelliteConfig is null, creating new SatelliteConfig"
+                            + " just to uncap max allowed data mode");
+            uncappedSatelliteConfig = new SatelliteConfig();
+        } else {
+            log(
+                    "uncapMaxAllowedDataMode: satelliteConfig is not null, make a deepcopy just to"
+                            + " uncap max allowed data mode");
+            uncappedSatelliteConfig = new SatelliteConfig(satelliteConfig);
+        }
+        uncappedSatelliteConfig.overrideSatelliteMaxAllowedDataMode(
+                CarrierConfigManager.SATELLITE_DATA_SUPPORT_ALL);
+
+        log(
+                "uncapMaxAllowedDataMode: creating uncappedSatelliteConfigParser to uncap max"
+                        + " allowed data mode");
+        SatelliteConfigParser uncappedSatelliteConfigParser =
+                new SatelliteConfigParser(new byte[] {});
+
+        uncappedSatelliteConfigParser.overrideConfig(uncappedSatelliteConfig);
+        TelephonyConfigUpdateInstallReceiver.getInstance()
+                .overrideConfigParser(uncappedSatelliteConfigParser);
+    }
+
+    private void restoreMaxAllowedDataMode() {
+        log(
+                "restoreMaxAllowedDataMode: restoring max allowed data mode by restoring the backed"
+                        + " up satellite config parser: "
+                        + mBackedUpSatelliteConfigParser
+                        + " and config: "
+                        + mBackedUpSatelliteConfig);
+        TelephonyConfigUpdateInstallReceiver.getInstance()
+                .overrideConfigParser(mBackedUpSatelliteConfigParser);
+        if (mBackedUpSatelliteConfigParser == null) {
+            log(
+                    "restoreMaxAllowedDataMode: mBackedUpSatelliteConfigParser is null, therefore"
+                            + " don't have to override mBackedUpSatelliteConfig, as it would null"
+                            + " as well");
+            return;
+        }
+        TelephonyConfigUpdateInstallReceiver.getInstance()
+                .getConfigParser(DOMAIN_SATELLITE)
+                .overrideConfig(mBackedUpSatelliteConfig);
     }
 
     private final Handler mHandler =

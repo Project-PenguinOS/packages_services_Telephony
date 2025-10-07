@@ -36,7 +36,6 @@ import android.app.BroadcastOptions;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.StatusBarManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -53,7 +52,6 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.preference.PreferenceManager;
-import android.provider.ContactsContract.PhoneLookup;
 import android.provider.Settings;
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
@@ -69,7 +67,6 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseArray;
-import android.widget.Toast;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.Phone;
@@ -105,19 +102,12 @@ public class NotificationMgr {
     private static final String LOG_TAG = NotificationMgr.class.getSimpleName();
     private static final boolean DBG =
             (PhoneGlobals.DBG_LEVEL >= 1) && (SystemProperties.getInt("ro.debuggable", 0) == 1);
-    // Do not check in with VDBG = true, since that may write PII to the system log.
-    private static final boolean VDBG = false;
-
-    private static final String MWI_SHOULD_CHECK_VVM_CONFIGURATION_KEY_PREFIX =
-            "mwi_should_check_vvm_configuration_state_";
 
 // QTI_BEGIN: 2018-02-21: Telephony: MSIM: Add subId to voicemail intent
     private static final String EXTRA_SUB_ID = "sub_id";
 
 // QTI_END: 2018-02-21: Telephony: MSIM: Add subId to voicemail intent
     // notification types
-    static final int MMI_NOTIFICATION = 1;
-    static final int NETWORK_SELECTION_NOTIFICATION = 2;
     static final int VOICEMAIL_NOTIFICATION = 3;
     static final int CALL_FORWARD_NOTIFICATION = 4;
     static final int DATA_ROAMING_NOTIFICATION = 5;
@@ -146,11 +136,8 @@ public class NotificationMgr {
     private PhoneGlobals mApp;
 
     private Context mContext;
-    private StatusBarManager mStatusBarManager;
     private UserManager mUserManager;
-    private Toast mToast;
     private SubscriptionManager mSubscriptionManager;
-    private TelecomManager mTelecomManager;
     private TelephonyManager mTelephonyManager;
 
     // used to track the notification of selected network unavailable, per subscription id.
@@ -163,6 +150,8 @@ public class NotificationMgr {
     private ArrayMap<Integer, Boolean> mMwiVisible = new ArrayMap<Integer, Boolean>();
     // used to track the last broadcast sent to the dialer about the MWI, per sub id.
     private ArrayMap<Integer, Integer> mLastMwiCountSent = new ArrayMap<Integer, Integer>();
+    // used to track whether the voicemail number for waiting indicator is empty, per sub id.
+    private ArrayMap<Integer, String> mLastMwiVoicemailNumber = new ArrayMap<Integer, String>();
 
     // those flags are used to track whether to show network selection notification or not.
     private SparseArray<Integer> mPreviousServiceState = new SparseArray<>();
@@ -203,11 +192,8 @@ public class NotificationMgr {
     /* package */ NotificationMgr(PhoneGlobals app) {
         mApp = app;
         mContext = app;
-        mStatusBarManager =
-                (StatusBarManager) app.getSystemService(Context.STATUS_BAR_SERVICE);
         mUserManager = (UserManager) app.getSystemService(Context.USER_SERVICE);
         mSubscriptionManager = SubscriptionManager.from(mContext);
-        mTelecomManager = app.getSystemService(TelecomManager.class);
         mTelephonyManager = (TelephonyManager) app.getSystemService(Context.TELEPHONY_SERVICE);
 // QTI_BEGIN: 2024-11-20: Telephony: Deprecate TDSCDMA
         sExtTelephonyManager = ExtTelephonyManager.getInstance(mContext);
@@ -233,13 +219,6 @@ public class NotificationMgr {
             return sInstance;
         }
     }
-
-    /** The projection to use when querying the phones table */
-    static final String[] PHONES_PROJECTION = new String[] {
-        PhoneLookup.NUMBER,
-        PhoneLookup.DISPLAY_NAME,
-        PhoneLookup._ID
-    };
 
     /**
      * Re-creates the message waiting indicator (voicemail) notification if it is showing.  Used to
@@ -269,27 +248,6 @@ public class NotificationMgr {
         }
     }
 
-    public void setShouldCheckVisualVoicemailConfigurationForMwi(int subId, boolean enabled) {
-        if (!SubscriptionManager.isValidSubscriptionId(subId)) {
-            Log.e(LOG_TAG, "setShouldCheckVisualVoicemailConfigurationForMwi: invalid subId"
-                    + subId);
-            return;
-        }
-
-        PreferenceManager.getDefaultSharedPreferences(mContext).edit()
-                .putBoolean(MWI_SHOULD_CHECK_VVM_CONFIGURATION_KEY_PREFIX + subId, enabled)
-                .apply();
-    }
-
-    private boolean shouldCheckVisualVoicemailConfigurationForMwi(int subId) {
-        if (!SubscriptionManager.isValidSubscriptionId(subId)) {
-            Log.e(LOG_TAG, "shouldCheckVisualVoicemailConfigurationForMwi: invalid subId" + subId);
-            return true;
-        }
-        return PreferenceManager
-                .getDefaultSharedPreferences(mContext)
-                .getBoolean(MWI_SHOULD_CHECK_VVM_CONFIGURATION_KEY_PREFIX + subId, true);
-    }
     /**
      * Updates the message waiting indicator (voicemail) notification.
      *
@@ -552,7 +510,12 @@ public class NotificationMgr {
 // QTI_END: 2018-02-21: Telephony: MSIM: Add subId to voicemail intent
 
         if (shouldManageNotificationThroughDefaultDialer(userHandle)) {
-            int subId = phone.getSubId();
+            // It is possible that the phone is null here when we are dismissing the
+            // notification.  In that case we can't get the subId, so we will default to
+            // unknown.  That is reasonable as it will just mean we will send the broadcast
+            // always in the logic below.
+            int subId = phone == null ?
+                SubscriptionManager.INVALID_SUBSCRIPTION_ID : phone.getSubId();
             // We want to determine if the count of voicemails that we notified to the dialer app
             // has changed or not.  mLastMwiCountSent will initially contain no entry for a subId
             // meaning no count was ever sent to dialer.  The previous count is an Integer (not int)
@@ -566,11 +529,15 @@ public class NotificationMgr {
             Integer previousCount = wasCountSentYet ? mLastMwiCountSent.get(subId) : null;
             boolean didCountChange = !wasCountSentYet || !Objects.equals(previousCount, count);
             mLastMwiCountSent.put(subId, count);
+            String previousNumber = mLastMwiVoicemailNumber.get(subId);
+            boolean voicemailNumberChanged = !Objects.equals(number, previousNumber);
+            mLastMwiVoicemailNumber.put(subId, number);
 
             Log.i(LOG_TAG,
                     "maybeSendVoicemailNotificationUsingDefaultDialer: count: " + (wasCountSentYet
                             ? previousCount : "undef") + "->" + count + " (changed="
-                            + didCountChange + ")");
+                            + didCountChange + ")" + ", voicemailNumberChanged="
+                            + voicemailNumberChanged);
 
             Intent intent = getShowVoicemailIntentForDefaultDialer(userHandle);
 
@@ -583,7 +550,7 @@ public class NotificationMgr {
              * TelephonyCallback#onMessageWaitingIndicatorChanged occurs, we have to sent the
              * broadcast even if the count didn't actually change.
              */
-            if (!didCountChange && isRefresh) {
+            if (!didCountChange && isRefresh && !voicemailNumberChanged) {
                 Log.i(LOG_TAG, "maybeSendVoicemailNotificationUsingDefaultDialer: skip bcast to:"
                         + intent.getPackage() + ", user:" + userHandle);
                 // It's "technically" being sent through the dialer, but we just skipped that so
@@ -1016,62 +983,6 @@ public class NotificationMgr {
                     log("updateNetworkSelection()... state = " + serviceState
                             + " not updating network due to invalid subId " + subId);
                 }
-                dismissNetworkSelectionNotificationForInactiveSubId();
-            }
-        }
-    }
-
-    /**
-     * Update notification about no service of user selected operator.
-     * For dismissNetworkSelectionNotificationOnSimDisable feature disabled.
-     *
-     * @param serviceState Phone service state
-     * @param subId The subscription ID
-     */
-    private void updateNetworkSelectionForFeatureDisabled(int serviceState, int subId) {
-        int phoneId = SubscriptionManager.getPhoneId(subId);
-        Phone phone = SubscriptionManager.isValidPhoneId(phoneId)
-                ? PhoneFactory.getPhone(phoneId) : PhoneFactory.getDefaultPhone();
-        if (TelephonyCapabilities.supportsNetworkSelection(phone)) {
-            if (SubscriptionManager.isValidSubscriptionId(subId)) {
-                SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mContext);
-                String selectedNetworkOperatorName =
-                        sp.getString(Phone.NETWORK_SELECTION_NAME_KEY + subId, "");
-                // get the shared preference of network_selection.
-                // empty is auto mode, otherwise it is the operator alpha name
-                // in case there is no operator name, check the operator numeric
-                if (TextUtils.isEmpty(selectedNetworkOperatorName)) {
-                    selectedNetworkOperatorName =
-                            sp.getString(Phone.NETWORK_SELECTION_KEY + subId, "");
-                }
-                boolean isManualSelection;
-                // if restoring manual selection is controlled by framework, then get network
-                // selection from shared preference, otherwise get from real network indicators.
-                boolean restoreSelection = !mContext.getResources().getBoolean(
-                        com.android.internal.R.bool.skip_restoring_network_selection);
-                if (restoreSelection) {
-                    isManualSelection = !TextUtils.isEmpty(selectedNetworkOperatorName);
-                } else {
-                    isManualSelection = phone.getServiceStateTracker().mSS.getIsManualSelection();
-                }
-
-                if (DBG) {
-                    log("updateNetworkSelection()..." + "state = " + serviceState + " new network "
-                            + (isManualSelection ? selectedNetworkOperatorName : ""));
-                }
-
-                if (isManualSelection
-                        && isSubscriptionVisibleToUser(
-                              mSubscriptionManager.getActiveSubscriptionInfo(subId))) {
-                    mSelectedNetworkOperatorName.put(subId, selectedNetworkOperatorName);
-                    shouldShowNotification(serviceState, subId);
-                } else {
-                    dismissNetworkSelectionNotification(subId);
-                    clearUpNetworkSelectionNotificationParam(subId);
-                }
-            } else {
-                if (DBG) log("updateNetworkSelection()..." + "state = " +
-                        serviceState + " not updating network due to invalid subId " + subId);
                 dismissNetworkSelectionNotificationForInactiveSubId();
             }
         }
