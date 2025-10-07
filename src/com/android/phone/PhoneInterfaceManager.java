@@ -243,6 +243,7 @@ import com.android.internal.telephony.subscription.SubscriptionManagerService;
 import com.android.internal.telephony.uicc.IccCardApplicationStatus.AppType;
 import com.android.internal.telephony.uicc.IccIoResult;
 import com.android.internal.telephony.uicc.IccUtils;
+import com.android.internal.telephony.uicc.PinStorage;
 import com.android.internal.telephony.uicc.SIMRecords;
 import com.android.internal.telephony.uicc.UiccCard;
 import com.android.internal.telephony.uicc.UiccCardApplication;
@@ -2132,10 +2133,19 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
 
                 case CMD_PREPARE_UNATTENDED_REBOOT:
                     request = (MainThreadRequest) msg.obj;
-                    request.result =
-                            UiccController.getInstance().getPinStorage()
-                                    .prepareUnattendedReboot(request.workSource);
-                    notifyRequester(request);
+                    PinStorage pinStorage = UiccController.getInstance().getPinStorage();
+                    if (!mFeatureFlags.useWorkerThreadForPinstorageKeystoreApis()) {
+                        MainThreadRequest finalRequest = request;
+                        pinStorage.post(() -> {
+                            finalRequest.result =
+                                    pinStorage.prepareUnattendedReboot(finalRequest.workSource);
+                            notifyRequester(finalRequest);
+                        });
+                    } else {
+                        request.result =
+                                pinStorage.prepareUnattendedReboot(request.workSource);
+                        notifyRequester(request);
+                    }
                     break;
 
                 default:
