@@ -43,10 +43,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
+import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -70,6 +74,12 @@ public class PhoneInformationV2FragmentSatellite extends Fragment {
     private PhoneInfoSharedViewModel mViewModel;
     private PhoneInformationV2PhoneId mListener;
     private Switch mEnforceSatelliteChannel;
+    private RadioGroup mForceCampSatelliteSelectionRadioGroup;
+    private Spinner mManualOverrideBand;
+    private EditText mSatelliteChannels;
+    private Button mForceCampSatelliteButton;
+    private int[] mSelectedManualOverrideBandIndex = new int[2];
+    private final PersistableBundle[] mPreviousSatelliteBand = new PersistableBundle[2];
     private Switch mMockSatellite;
     private Switch mMockSatelliteDataSwitch;
     private RadioGroup mMockSatelliteData;
@@ -171,13 +181,33 @@ public class PhoneInformationV2FragmentSatellite extends Fragment {
                 (Switch) view.findViewById(R.id.satellite_data_controller_switch);
         mMockSatelliteData = view.findViewById(R.id.satellite_data_controller);
         mEnforceSatelliteChannel = (Switch) view.findViewById(R.id.enforce_satellite_channel);
+        mForceCampSatelliteSelectionRadioGroup =
+                view.findViewById(R.id.force_camp_satellite_selection_radio_group);
+        mManualOverrideBand = (Spinner) view.findViewById(R.id.manual_band_selector);
+        mSatelliteChannels = (EditText) view.findViewById(R.id.satellite_channel_number);
+        mForceCampSatelliteButton = (Button) view.findViewById(R.id.force_camp_satellite_button);
+
         if (!Build.isDebuggable()) {
             mMockSatellite.setVisibility(View.GONE);
             mMockSatelliteDataSwitch.setVisibility(View.GONE);
             mMockSatelliteData.setVisibility(View.GONE);
             mEnforceSatelliteChannel.setVisibility(View.GONE);
+            mForceCampSatelliteSelectionRadioGroup.setVisibility(View.GONE);
+            mManualOverrideBand.setVisibility(View.GONE);
+            mSatelliteChannels.setVisibility(View.GONE);
+            view.findViewById(R.id.manual_override_fields).setVisibility(View.GONE);
+            mForceCampSatelliteButton.setVisibility(View.GONE);
+        } else {
+            ArrayAdapter<String> mManualOverrideBandAdapter = new ArrayAdapter<>(mContext,
+                    android.R.layout.simple_spinner_item, PhoneInformationUtil.BAND_LABELS);
+            mManualOverrideBandAdapter
+                    .setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            mManualOverrideBand.setAdapter(mManualOverrideBandAdapter);
         }
 
+        mForceCampSatelliteSelectionRadioGroup.setVisibility(View.GONE);
+        view.findViewById(R.id.manual_override_fields).setVisibility(View.GONE);
+        mForceCampSatelliteButton.setVisibility(View.GONE);
         mSatelliteEnableNonEmergencyModeButton =
                 (Button) view.findViewById(R.id.satellite_enable_non_emergency_mode);
         mNbIotConfigViewerButton = (Button) view.findViewById(R.id.nb_iot_config_viewer);
@@ -337,6 +367,11 @@ public class PhoneInformationV2FragmentSatellite extends Fragment {
         updateSelectionVisuals();
         mEnforceSatelliteChannel.setChecked(mOriginalSystemChannels[mPhoneId] != null);
         mEnforceSatelliteChannel.setOnCheckedChangeListener(mForceSatelliteChannelOnChangeListener);
+        mForceCampSatelliteSelectionRadioGroup.setOnCheckedChangeListener(
+                mForceCampSatelliteSelectionRadioGroupListener);
+        mManualOverrideBand.setSelection(mSelectedManualOverrideBandIndex[mPhoneId]);
+        mManualOverrideBand.setOnItemSelectedListener(mManualOverrideBandSelectedListener);
+        mForceCampSatelliteButton.setOnClickListener(mForceCampSatelliteConnectHandler);
     }
 
     @Override
@@ -345,7 +380,6 @@ public class PhoneInformationV2FragmentSatellite extends Fragment {
         log("onPause: unregister phone & data intents");
     }
 
-    private static final int SATELLITE_CHANNEL = 8665;
     private final OnCheckedChangeListener mForceSatelliteChannelOnChangeListener =
             (buttonView, isChecked) -> {
                 if (!isValidSubscription(mSubId)) {
@@ -356,81 +390,239 @@ public class PhoneInformationV2FragmentSatellite extends Fragment {
                     loge("Force satellite channel cm == null");
                     return;
                 }
-                TelephonyManager tm = mTelephonyManager.createForSubscriptionId(mSubId);
-                // To be used in thread in case mPhone changes.
-                int subId = mSubId;
-                int phoneId = mPhoneId;
                 if (isChecked) {
-                    (new Thread(() -> {
-                        // Override carrier config
-                        PersistableBundle originalBundle = PhoneInformationUtil.getCarrierConfig(
-                                mContext).getConfigForSubId(
-                                subId, KEY_SATELLITE_ATTACH_SUPPORTED_BOOL,
-                                KEY_SATELLITE_ENTITLEMENT_SUPPORTED_BOOL,
-                                CarrierConfigManager.KEY_EMERGENCY_MESSAGING_SUPPORTED_BOOL);
-                        PersistableBundle overrideBundle = new PersistableBundle();
-                        overrideBundle.putBoolean(KEY_SATELLITE_ATTACH_SUPPORTED_BOOL, true);
-                        overrideBundle.putBoolean(KEY_SATELLITE_ENTITLEMENT_SUPPORTED_BOOL, true);
-                        overrideBundle.putBoolean(
-                                CarrierConfigManager.KEY_EMERGENCY_MESSAGING_SUPPORTED_BOOL, true);
-
-                        // Set only allow LTE network type
-                        try {
-                            tm.setAllowedNetworkTypesForReason(
-                                    TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_TEST,
-                                    RadioAccessFamily.getRafFromNetworkType(
-                                            RILConstants.NETWORK_MODE_LTE_ONLY));
-                            log("Force satellite channel set to LTE only");
-                        } catch (Exception e) {
-                            loge("Force satellite channel failed to set network" + " type to LTE "
-                                    + e);
-                            return;
-                        }
-
-                        // Set force channel selection
-                        List<RadioAccessSpecifier> mock = List.of(new RadioAccessSpecifier(
-                                AccessNetworkConstants.AccessNetworkType.EUTRAN,
-                                new int[]{AccessNetworkConstants.EutranBand.BAND_25},
-                                new int[]{SATELLITE_CHANNEL}));
-                        try {
-                            log("Force satellite channel new channels " + mock);
-                            tm.setSystemSelectionChannels(mock);
-                        } catch (Exception e) {
-                            loge("Force satellite channel failed to set channels" + " " + e);
-                            return;
-                        }
-                        log("Force satellite channel new config " + overrideBundle);
-                        PhoneInformationUtil.getCarrierConfig(mContext)
-                                .overrideConfig(subId, overrideBundle, false);
-
-                        mOriginalSystemChannels[phoneId] = originalBundle;
-                        log("Force satellite channel old " + mock + originalBundle);
-                    })).start();
+                    mForceCampSatelliteSelectionRadioGroup.clearCheck();
+                    setForceCampSatelliteSelectionRadioGroupVisibility(true);
+                    updateForceCampUI();
                 } else {
-                    (new Thread(() -> {
-                        try {
-                            tm.setSystemSelectionChannels(
-                                    Collections.emptyList() /* isSpecifyChannels false */);
-                            log("Force satellite channel successfully cleared" + " channels ");
-                            tm.setAllowedNetworkTypesForReason(
-                                    TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_TEST,
-                                    TelephonyManager.getAllNetworkTypesBitmask());
-                            log("Force satellite channel successfully reset" + " network type to "
-                                    + TelephonyManager.getAllNetworkTypesBitmask());
-                            PersistableBundle original = mOriginalSystemChannels[phoneId];
-                            if (original != null) {
-                                PhoneInformationUtil.getCarrierConfig(mContext)
-                                        .overrideConfig(subId, original, false);
-                                log("Force satellite channel successfully" + " restored config to "
-                                        + original);
-                                mOriginalSystemChannels[phoneId] = null;
-                            }
-                        } catch (Exception e) {
-                            loge("Force satellite channel: Can't clear mock " + e);
-                        }
-                    })).start();
+                    setForceCampSatelliteSelectionRadioGroupVisibility(false);
+                    clearForcedSatelliteChannel();
                 }
             };
+
+    private final RadioGroup.OnCheckedChangeListener
+            mForceCampSatelliteSelectionRadioGroupListener = (group, checkedId) -> {
+                switch (checkedId) {
+                    case (R.id.starlink_band) -> {
+                        log("Force satellite channel set to STARLINK_BAND");
+                        setManualOverrideBandVisibility(false);
+                    }
+                    case (R.id.ast_band) -> {
+                        log("Force satellite channel set to AST_BAND");
+                        setManualOverrideBandVisibility(false);
+                    }
+                    case (R.id.manual_override_band) -> {
+                        setManualOverrideBandVisibility(true);
+                        mManualOverrideBand.setSelection(
+                                mSelectedManualOverrideBandIndex[mPhoneId]);
+                    }
+                }
+            };
+
+    private final AdapterView.OnItemSelectedListener mManualOverrideBandSelectedListener =
+            new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+                    log("mManualOverrideBandSelectedListener: " + pos);
+                    mSelectedManualOverrideBandIndex[mPhoneId] = pos;
+                    if (pos == 0) {
+                        log("mManualOverrideBandSelectedListener: No band selected");
+                    }
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {}
+            };
+
+    private final View.OnClickListener mForceCampSatelliteConnectHandler =
+            v -> {
+                int[] satelliteBands = PhoneInformationUtil.STARLINK_BAND;
+                int[] satelliteChannels = PhoneInformationUtil.STARLINK_CHANNELS;
+                int selectedId = mForceCampSatelliteSelectionRadioGroup.getCheckedRadioButtonId();
+
+                switch (selectedId) {
+                    case (R.id.starlink_band) -> {
+                        satelliteBands = PhoneInformationUtil.STARLINK_BAND;
+                        satelliteChannels = PhoneInformationUtil.STARLINK_CHANNELS;
+                        log("Connect start with starlink");
+                    }
+                    case (R.id.ast_band) -> {
+                        satelliteBands = PhoneInformationUtil.AST_BAND;
+                        satelliteChannels = PhoneInformationUtil.AST_CHANNELS;
+                        log("Connect start with ast");
+                    }
+                    case (R.id.manual_override_band) -> {
+                        int band = PhoneInformationUtil
+                                .BAND_VALUES[mSelectedManualOverrideBandIndex[mPhoneId]];
+                        if (band == -1) {
+                            loge("Manual override band not selected");
+                            return;
+                        }
+                        satelliteBands = new int[]{band};
+                        String channelText = mSatelliteChannels.getText().toString();
+                        try {
+                            int channel = Integer.parseInt(channelText);
+                            satelliteChannels = new int[]{channel};
+                        } catch (NumberFormatException e) {
+                            log(
+                                    "Could not convert to satellite channel, connecting without"
+                                            + " channel.");
+                            satelliteChannels = new int[0];
+                        }
+                        log(
+                                "Connect start with manual override band"
+                                        + Arrays.toString(satelliteBands)
+                                        + "and channel "
+                                        + Arrays.toString(satelliteChannels));
+                    }
+                }
+                forceSatelliteChannel(satelliteBands, selectedId, satelliteChannels);
+            };
+
+    private void forceSatelliteChannel(
+            int[] satelliteBands, int satelliteBandRadioButton, int[] satelliteChannels) {
+
+        int subId = mSubId;
+        int phoneId = mPhoneId;
+        TelephonyManager tm = mTelephonyManager.createForSubscriptionId(mSubId);
+
+        (new Thread(() -> {
+            PersistableBundle originalBundle = PhoneInformationUtil.getCarrierConfig(mContext)
+                    .getConfigForSubId(subId, KEY_SATELLITE_ATTACH_SUPPORTED_BOOL,
+                            KEY_SATELLITE_ENTITLEMENT_SUPPORTED_BOOL,
+                            CarrierConfigManager.KEY_EMERGENCY_MESSAGING_SUPPORTED_BOOL);
+            mOriginalSystemChannels[phoneId] = originalBundle;
+
+            PersistableBundle overrideBundle = new PersistableBundle();
+            overrideBundle.putBoolean(KEY_SATELLITE_ATTACH_SUPPORTED_BOOL, true);
+            overrideBundle.putBoolean(KEY_SATELLITE_ENTITLEMENT_SUPPORTED_BOOL, true);
+            overrideBundle.putBoolean(
+                    CarrierConfigManager.KEY_EMERGENCY_MESSAGING_SUPPORTED_BOOL, true);
+            PhoneInformationUtil.getCarrierConfig(mContext)
+                    .overrideConfig(subId, overrideBundle, false);
+
+            try {
+                tm.setAllowedNetworkTypesForReason(
+                        TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_TEST,
+                        RadioAccessFamily.getRafFromNetworkType(
+                                RILConstants.NETWORK_MODE_LTE_ONLY));
+                log("Force satellite channel set to LTE only");
+            } catch (Exception e) {
+                loge("Force satellite channel failed to set network type to LTE " + e);
+                return;
+            }
+
+            List<RadioAccessSpecifier> mock = List.of(new RadioAccessSpecifier(
+                    AccessNetworkConstants.AccessNetworkType.EUTRAN,
+                    satelliteBands,
+                    satelliteChannels));
+            try {
+                log("Force satellite channel new channels " + mock);
+                tm.setSystemSelectionChannels(mock);
+            } catch (Exception e) {
+                loge("Force satellite channel failed to set channels " + e);
+                return;
+            }
+
+            PersistableBundle b = new PersistableBundle();
+            b.putIntArray(PhoneInformationUtil.KEY_SATELLITE_BANDS, satelliteBands);
+            b.putInt(PhoneInformationUtil.KEY_FORCE_CAMP_SATELLITE_BAND_SELECTED,
+                    satelliteBandRadioButton);
+            b.putIntArray(PhoneInformationUtil.KEY_SATELLITE_CHANNELS, satelliteChannels);
+            mPreviousSatelliteBand[phoneId] = b;
+
+            mHandler.post(() -> {
+                enableSatelliteBandControls(false);
+                mForceCampSatelliteButton.setText(
+                        R.string.force_camp_satellite_button_connected_string);
+            });
+        })).start();
+    }
+
+    private void clearForcedSatelliteChannel() {
+        TelephonyManager tm = mTelephonyManager.createForSubscriptionId(mSubId);
+        int subId = mSubId;
+        int phoneId = mPhoneId;
+
+        (new Thread(() -> {
+            try {
+                tm.setSystemSelectionChannels(Collections.emptyList());
+                log("Force satellite channel successfully cleared channels");
+                tm.setAllowedNetworkTypesForReason(
+                        TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_TEST,
+                        TelephonyManager.getAllNetworkTypesBitmask());
+                log("Force satellite channel successfully reset network type to "
+                        + TelephonyManager.getAllNetworkTypesBitmask());
+                PersistableBundle original = mOriginalSystemChannels[phoneId];
+                if (original != null) {
+                    PhoneInformationUtil.getCarrierConfig(mContext)
+                            .overrideConfig(subId, original, false);
+                    log("Force satellite channel successfully restored config to " + original);
+                    mOriginalSystemChannels[phoneId] = null;
+                }
+                mPreviousSatelliteBand[phoneId] = null;
+            } catch (Exception e) {
+                loge("Force satellite channel: Can't clear mock " + e);
+            }
+
+            mHandler.post(() -> {
+                enableSatelliteBandControls(true);
+                mSelectedManualOverrideBandIndex[phoneId] = 0;
+                mPreviousSatelliteBand[phoneId] = null;
+                mSatelliteChannels.setText("");
+                mForceCampSatelliteButton.setText(
+                        R.string.force_camp_satellite_button_string);
+            });
+        })).start();
+    }
+
+    private void updateForceCampUI() {
+        int checkId = R.id.starlink_band;
+        if (mPreviousSatelliteBand[mPhoneId] != null) {
+            checkId = mPreviousSatelliteBand[mPhoneId].getInt(
+                    PhoneInformationUtil.KEY_FORCE_CAMP_SATELLITE_BAND_SELECTED);
+            int[] satelliteChannels = mPreviousSatelliteBand[mPhoneId].getIntArray(
+                    PhoneInformationUtil.KEY_SATELLITE_CHANNELS);
+            if (checkId == R.id.manual_override_band) {
+                setManualOverrideBandVisibility(true);
+                mManualOverrideBand.setSelection(mSelectedManualOverrideBandIndex[mPhoneId]);
+                if (satelliteChannels != null && satelliteChannels.length > 0
+                        && satelliteChannels[0] != -1) {
+                    mSatelliteChannels.setText(String.valueOf(satelliteChannels[0]));
+                }
+            }
+        }
+        mForceCampSatelliteSelectionRadioGroup.check(checkId);
+    }
+
+    private void setForceCampSatelliteSelectionRadioGroupVisibility(boolean isChecked) {
+        if (isChecked) {
+            mForceCampSatelliteSelectionRadioGroup.setVisibility(View.VISIBLE);
+            mForceCampSatelliteButton.setVisibility(View.VISIBLE);
+        } else {
+            mForceCampSatelliteSelectionRadioGroup.setVisibility(View.GONE);
+            mForceCampSatelliteButton.setVisibility(View.GONE);
+            setManualOverrideBandVisibility(false);
+        }
+    }
+
+    private void setManualOverrideBandVisibility(boolean visible) {
+        View view = getView();
+        if (view != null) {
+            view.findViewById(R.id.manual_override_fields).setVisibility(
+                    visible ? View.VISIBLE : View.GONE);
+        }
+    }
+
+    private void enableSatelliteBandControls(boolean enable) {
+        mForceCampSatelliteButton.setEnabled(enable);
+        mSatelliteChannels.setEnabled(enable);
+        mManualOverrideBand.setEnabled(enable);
+        mForceCampSatelliteSelectionRadioGroup.setEnabled(enable);
+        for (int i = 0; i < mForceCampSatelliteSelectionRadioGroup.getChildCount(); i++) {
+            mForceCampSatelliteSelectionRadioGroup.getChildAt(i).setEnabled(enable);
+        }
+    }
 
     /**
      * This method will do extra check to validate the subId.
@@ -450,7 +642,9 @@ public class PhoneInformationV2FragmentSatellite extends Fragment {
     }
 
     private void updateSatelliteChannelDisplay(int phoneId) {
-        if (mEnforceSatelliteChannel.isChecked()) return;
+        if (mEnforceSatelliteChannel.isChecked()) {
+            return;
+        }
         // Assume in testing mode
         (new Thread(() -> {
             TelephonyManager tm = mTelephonyManager.createForSubscriptionId(
@@ -461,18 +655,78 @@ public class PhoneInformationV2FragmentSatellite extends Fragment {
                         TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_TEST);
                 long lteNetworkBitMask = RadioAccessFamily.getRafFromNetworkType(
                         RILConstants.NETWORK_MODE_LTE_ONLY);
+                if (channels.size() != 1) {
+                    return;
+                }
+                RadioAccessSpecifier channel = channels.getFirst();
+                boolean radioAccessNetworkCheck = (channel.getRadioAccessNetwork()
+                        == AccessNetworkConstants.AccessNetworkType.EUTRAN);
+                boolean forceCampChecked = (radioAccessNetworkCheck
+                        || (networkTypeBitMask & lteNetworkBitMask) == networkTypeBitMask);
+                if (!forceCampChecked) {
+                    mHandler.post(() -> {
+                        log("Force satellite get channel " + channels
+                                + " get networkTypeBitMask " + networkTypeBitMask + " lte "
+                                + lteNetworkBitMask);
+                        // if SATELLITE_CHANNEL is the current channel
+                        mEnforceSatelliteChannel.setChecked(false);
+                    });
+                    return;
+                }
+                int[] satelliteBands = channel.getBands();
+                int[] satelliteChannels = channel.getChannels();
+
+                boolean starlinkCheck = Arrays.stream(satelliteChannels).anyMatch(c -> {
+                    for (int starlinkChannel : PhoneInformationUtil.STARLINK_CHANNELS) {
+                        if (c == starlinkChannel) {
+                            return true;
+                        }
+                    }
+                    return false;
+                });
+
+                boolean astCheck = Arrays.stream(satelliteChannels).anyMatch(c -> {
+                    for (int astChannel : PhoneInformationUtil.AST_CHANNELS) {
+                        if (c == astChannel) {
+                            return true;
+                        }
+                    }
+                    return false;
+                });
+
+                int satelliteBandRadioButton;
+                if (starlinkCheck) {
+                    satelliteBandRadioButton = R.id.starlink_band;
+                } else if (astCheck) {
+                    satelliteBandRadioButton = R.id.ast_band;
+                } else {
+                    satelliteBandRadioButton = R.id.manual_override_band;
+                    mSelectedManualOverrideBandIndex[phoneId] = 0;
+                    if (satelliteBands.length > 0) {
+                        int band = satelliteBands[0];
+                        for (int i = 0; i < PhoneInformationUtil.BAND_VALUES.length; i++) {
+                            if (band == PhoneInformationUtil.BAND_VALUES[i]) {
+                                mSelectedManualOverrideBandIndex[phoneId] = i;
+                            }
+                        }
+                    }
+                }
+                PersistableBundle satelliteBandsBundle = new PersistableBundle();
+                satelliteBandsBundle.putIntArray(
+                        PhoneInformationUtil.KEY_SATELLITE_BANDS, satelliteBands);
+                satelliteBandsBundle.putInt(PhoneInformationUtil
+                                .KEY_FORCE_CAMP_SATELLITE_BAND_SELECTED, satelliteBandRadioButton);
+                satelliteBandsBundle.putIntArray(PhoneInformationUtil
+                        .KEY_SATELLITE_CHANNELS, satelliteChannels);
+                mPreviousSatelliteBand[phoneId] = satelliteBandsBundle;
+
                 mHandler.post(() -> {
-                    log("Force satellite get channel " + channels + " get networkTypeBitMask "
-                            + networkTypeBitMask + " lte " + lteNetworkBitMask);
+                    log("Force satellite get channel " + channels
+                            + " get networkTypeBitMask " + networkTypeBitMask + " lte "
+                            + lteNetworkBitMask);
                     // if SATELLITE_CHANNEL is the current channel
-                    mEnforceSatelliteChannel.setChecked(channels.stream().filter(
-                            specifier -> specifier.getRadioAccessNetwork()
-                                    == AccessNetworkConstants.AccessNetworkType.EUTRAN)
-                            .flatMapToInt(specifier -> Arrays.stream(specifier.getChannels()))
-                            .anyMatch(channel -> channel == SATELLITE_CHANNEL)
-                            // OR ALLOWED_NETWORK_TYPES_REASON_TEST
-                            // is LTE only.
-                            || (networkTypeBitMask & lteNetworkBitMask) == networkTypeBitMask);
+                    mEnforceSatelliteChannel.setChecked(true);
+                    enableSatelliteBandControls(false);
                 });
             } catch (Exception e) {
                 loge("updateSatelliteChannelDisplay " + e);
