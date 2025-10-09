@@ -386,32 +386,33 @@ public class PhoneInformationUtil {
         return isAvailable;
     }
 
-    public static final String[] PREFERRED_NETWORK_LABELS = {
-            "GSM/WCDMA preferred",
-            "GSM only",
-            "WCDMA only",
-            "GSM/WCDMA auto (PRL)",
-            "GSM/WCDMA/LTE (PRL)",
-            "LTE only",
-            "LTE/WCDMA",
-            "TDSCDMA only",
-            "TDSCDMA/WCDMA",
-            "LTE/TDSCDMA",
-            "TDSCDMA/GSM",
-            "LTE/TDSCDMA/GSM",
-            "TDSCDMA/GSM/WCDMA",
-            "LTE/TDSCDMA/WCDMA",
-            "LTE/TDSCDMA/GSM/WCDMA",
-            "NR only",
-            "NR/LTE",
-            "NR/LTE/GSM/WCDMA",
-            "NR/LTE/WCDMA",
-            "NR/LTE/TDSCDMA",
-            "NR/LTE/TDSCDMA/GSM",
-            "NR/LTE/TDSCDMA/WCDMA",
-            "NR/LTE/TDSCDMA/GSM/WCDMA",
-            "Unknown"
-    };
+    public static final String[][] PREFERRED_NETWORK_LABELS = {
+            {"GSM/WCDMA preferred",
+                    "GSM only",
+                    "WCDMA only",
+                    "GSM/WCDMA auto (PRL)",
+                    "GSM/WCDMA/LTE (PRL)",
+                    "LTE only",
+                    "LTE/WCDMA",
+                    "TDSCDMA only",
+                    "TDSCDMA/WCDMA",
+                    "LTE/TDSCDMA",
+                    "TDSCDMA/GSM",
+                    "LTE/TDSCDMA/GSM",
+                    "TDSCDMA/GSM/WCDMA",
+                    "LTE/TDSCDMA/WCDMA",
+                    "LTE/TDSCDMA/GSM/WCDMA",
+                    "NR only",
+                    "NR/LTE",
+                    "NR/LTE/GSM/WCDMA",
+                    "NR/LTE/WCDMA",
+                    "NR/LTE/TDSCDMA",
+                    "NR/LTE/TDSCDMA/GSM",
+                    "NR/LTE/TDSCDMA/WCDMA",
+                    "NR/LTE/TDSCDMA/GSM/WCDMA",
+                    "Unknown"
+            }, {"0", "1", "2", "3", "9", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20",
+            "23", "24", "26", "28", "29", "30", "31", "32", "34"}};
 
     public static final Integer[]SIGNAL_STRENGTH_LEVEL =
             new Integer[] {
