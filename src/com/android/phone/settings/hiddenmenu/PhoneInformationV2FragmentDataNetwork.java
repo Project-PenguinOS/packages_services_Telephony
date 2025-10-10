@@ -249,12 +249,12 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
                 new ArrayAdapter<String>(
                         mContext,
                         android.R.layout.simple_spinner_item,
-                        PhoneInformationUtil.PREFERRED_NETWORK_LABELS[0]);
+                        PhoneInformationUtil.PREFERRED_NETWORK_LABELS);
         mPreferredNetworkTypeAdapter.setDropDownViewResource(
                 android.R.layout.simple_spinner_dropdown_item);
         mPreferredNetworkType.setAdapter(mPreferredNetworkTypeAdapter);
         mPreferredNetworkTypeResult =
-                PhoneInformationUtil.PREFERRED_NETWORK_LABELS[0].length - 1; // Unknown
+                PhoneInformationUtil.PREFERRED_NETWORK_LABELS.length - 1; // Unknown
 
         mMockSignalStrength = (Spinner) view.findViewById(R.id.signalStrength);
         if (!Build.isDebuggable() || !mSystemUser) {
@@ -429,7 +429,7 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
         mPreferredNetworkTypeResult =
                 b.getInt(
                         "mPreferredNetworkTypeResult",
-                        PhoneInformationUtil.PREFERRED_NETWORK_LABELS[0].length - 1);
+                        PhoneInformationUtil.PREFERRED_NETWORK_LABELS.length - 1);
 
         mPhoneId = b.getInt("mSelectedPhoneIndex", 0);
         mSubId = SubscriptionManager.getSubscriptionId(mPhoneId);
@@ -790,9 +790,9 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
     }
 
     private void updatePreferredNetworkType(int type) {
-        if (type >= PhoneInformationUtil.PREFERRED_NETWORK_LABELS[0].length || type < 0) {
+        if (type >= PhoneInformationUtil.PREFERRED_NETWORK_LABELS.length || type < 0) {
             log("Network type: unknown type value=" + type);
-            type = PhoneInformationUtil.PREFERRED_NETWORK_LABELS[0].length - 1; // set to Unknown
+            type = PhoneInformationUtil.PREFERRED_NETWORK_LABELS.length - 1; // set to Unknown
         }
         mPreferredNetworkTypeResult = type;
 
@@ -1076,9 +1076,8 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
                 public void onItemSelected(AdapterView parent, View v, int pos, long id) {
                     if (mPreferredNetworkTypeResult != pos
                             && pos >= 0
-                            && pos <= PhoneInformationUtil.PREFERRED_NETWORK_LABELS[0].length - 2) {
-                        mPreferredNetworkTypeResult = Integer.parseInt(
-                                PhoneInformationUtil.PREFERRED_NETWORK_LABELS[1][pos]);
+                            && pos <= PhoneInformationUtil.PREFERRED_NETWORK_LABELS.length - 2) {
+                        mPreferredNetworkTypeResult = pos;
                         new Thread(
                                         () -> {
                                             mTelephonyManager.setAllowedNetworkTypesForReason(
