@@ -707,7 +707,7 @@
     <string name="change_pin_system_error" msgid="7772788809875146873">"PIN ਸਥਾਪਤ ਕਰਨ ਦੇ ਅਯੋਗ"</string>
     <string name="mobile_data_status_roaming_turned_off_subtext" msgid="6840673347416227054">" ਡਾਟਾ  ਰੋਮਿੰਗ ਬੰਦ ਹੈ"</string>
     <string name="mobile_data_status_roaming_turned_on_subtext" msgid="5615757897768777865">" ਡਾਟਾ  ਰੋਮਿੰਗ ਚਾਲੂ ਹੈ"</string>
-    <string name="mobile_data_status_roaming_without_plan_subtext" msgid="6536671968072284677">"ਇਸ ਵੇਲੇ ਰੋਮਿੰਗ ਵਿੱਚ ਹੈ,  ਡਾਟਾ  ਪਲਾਨ ਦੀ ਲੋੜ ਹੈ"</string>
+    <string name="mobile_data_status_roaming_without_plan_subtext" msgid="6536671968072284677">"ਇਸ ਵੇਲੇ ਰੋਮਿੰਗ ਵਿੱਚ ਹੈ, ਡਾਟਾ ਪਲਾਨ ਦੀ ਲੋੜ ਹੈ"</string>
     <string name="mobile_data_status_roaming_with_plan_subtext" msgid="2576177169108123095">"ਇਸ ਵੇਲੇ ਰੋਮਿੰਗ ਵਿੱਚ ਹੈ,  ਡਾਟਾ  ਪਲਾਨ ਕਿਰਿਆਸ਼ੀਲ ਹੈ"</string>
     <string name="mobile_data_status_no_plan_subtext" msgid="170331026419263657">"ਕੋਈ ਮੋਬਾਈਲ  ਡਾਟਾ  ਨਹੀਂ ਬਚਿਆ ਹੈ"</string>
     <string name="mobile_data_activate_prepaid" msgid="4276738964416795596">"ਕੋਈ ਮੋਬਾਈਲ  ਡਾਟਾ  ਨਹੀਂ ਬਚਿਆ ਹੈ"</string>
