@@ -31,17 +31,21 @@ import android.content.res.Resources;
 import android.os.Build;
 import android.os.PersistableBundle;
 import android.os.SystemProperties;
+import android.telephony.AccessNetworkConstants;
 import android.telephony.CarrierConfigManager;
+import android.telephony.CellIdentityCdma;
 import android.telephony.CellIdentityGsm;
 import android.telephony.CellIdentityLte;
 import android.telephony.CellIdentityNr;
 import android.telephony.CellIdentityWcdma;
 import android.telephony.CellInfo;
+import android.telephony.CellInfoCdma;
 import android.telephony.CellInfoGsm;
 import android.telephony.CellInfoLte;
 import android.telephony.CellInfoNr;
 import android.telephony.CellInfoWcdma;
 import android.telephony.CellSignalStrength;
+import android.telephony.CellSignalStrengthCdma;
 import android.telephony.CellSignalStrengthGsm;
 import android.telephony.CellSignalStrengthLte;
 import android.telephony.CellSignalStrengthNr;
@@ -153,6 +157,23 @@ public class PhoneInformationUtil {
         return regStr + connector + connStatStr;
     }
 
+    private static String buildCdmaInfoString(CellInfoCdma ci) {
+        CellIdentityCdma cidCdma = ci.getCellIdentity();
+        CellSignalStrengthCdma ssCdma = ci.getCellSignalStrength();
+
+        return String.format(
+                "%-3.3s %-5.5s %-5.5s %-5.5s %-6.6s %-6.6s %-6.6s %-6.6s %-5.5s",
+                getConnectionStatusString(ci),
+                getCellInfoDisplayString(cidCdma.getSystemId()),
+                getCellInfoDisplayString(cidCdma.getNetworkId()),
+                getCellInfoDisplayString(cidCdma.getBasestationId()),
+                getCellInfoDisplayString(ssCdma.getCdmaDbm()),
+                getCellInfoDisplayString(ssCdma.getCdmaEcio()),
+                getCellInfoDisplayString(ssCdma.getEvdoDbm()),
+                getCellInfoDisplayString(ssCdma.getEvdoEcio()),
+                getCellInfoDisplayString(ssCdma.getEvdoSnr()));
+    }
+
     private static String buildGsmInfoString(CellInfoGsm ci) {
         CellIdentityGsm cidGsm = ci.getCellIdentity();
         CellSignalStrengthGsm ssGsm = ci.getCellSignalStrength();
@@ -244,6 +265,8 @@ public class PhoneInformationUtil {
                     wcdmaCells.append(buildWcdmaInfoString((CellInfoWcdma) ci));
                 } else if (ci instanceof CellInfoGsm) {
                     gsmCells.append(buildGsmInfoString((CellInfoGsm) ci));
+                } else if (ci instanceof CellInfoCdma) {
+                    cdmaCells.append(buildCdmaInfoString((CellInfoCdma) ci));
                 } else if (ci instanceof CellInfoNr) {
                     nrCells.append(buildNrInfoString((CellInfoNr) ci));
                 }
@@ -391,7 +414,13 @@ public class PhoneInformationUtil {
             "GSM only",
             "WCDMA only",
             "GSM/WCDMA auto (PRL)",
+            "CDMA/EvDo auto (PRL)",
+            "CDMA only",
+            "EvDo only",
+            "CDMA/EvDo/GSM/WCDMA (PRL)",
+            "CDMA + LTE/EvDo (PRL)",
             "GSM/WCDMA/LTE (PRL)",
+            "LTE/CDMA/EvDo/GSM/WCDMA (PRL)",
             "LTE only",
             "LTE/WCDMA",
             "TDSCDMA only",
@@ -402,14 +431,19 @@ public class PhoneInformationUtil {
             "TDSCDMA/GSM/WCDMA",
             "LTE/TDSCDMA/WCDMA",
             "LTE/TDSCDMA/GSM/WCDMA",
+            "TDSCDMA/CDMA/EvDo/GSM/WCDMA ",
+            "LTE/TDSCDMA/CDMA/EvDo/GSM/WCDMA",
             "NR only",
             "NR/LTE",
+            "NR/LTE/CDMA/EvDo",
             "NR/LTE/GSM/WCDMA",
+            "NR/LTE/CDMA/EvDo/GSM/WCDMA",
             "NR/LTE/WCDMA",
             "NR/LTE/TDSCDMA",
             "NR/LTE/TDSCDMA/GSM",
             "NR/LTE/TDSCDMA/WCDMA",
             "NR/LTE/TDSCDMA/GSM/WCDMA",
+            "NR/LTE/TDSCDMA/CDMA/EvDo/GSM/WCDMA",
             "Unknown"
     };
 
@@ -429,9 +463,16 @@ public class PhoneInformationUtil {
                 ServiceState.RIL_RADIO_TECHNOLOGY_GPRS,
                 ServiceState.RIL_RADIO_TECHNOLOGY_EDGE,
                 ServiceState.RIL_RADIO_TECHNOLOGY_UMTS,
+                ServiceState.RIL_RADIO_TECHNOLOGY_IS95A,
+                ServiceState.RIL_RADIO_TECHNOLOGY_IS95B,
+                ServiceState.RIL_RADIO_TECHNOLOGY_1xRTT,
+                ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_0,
+                ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_A,
                 ServiceState.RIL_RADIO_TECHNOLOGY_HSDPA,
                 ServiceState.RIL_RADIO_TECHNOLOGY_HSUPA,
                 ServiceState.RIL_RADIO_TECHNOLOGY_HSPA,
+                ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_B,
+                ServiceState.RIL_RADIO_TECHNOLOGY_EHRPD,
                 ServiceState.RIL_RADIO_TECHNOLOGY_LTE,
                 ServiceState.RIL_RADIO_TECHNOLOGY_HSPAP,
                 ServiceState.RIL_RADIO_TECHNOLOGY_GSM,
@@ -736,4 +777,97 @@ public class PhoneInformationUtil {
     private static void loge(String s) {
         Log.e(TAG, s);
     }
+
+    // Starlink configs
+    public static final int SATELLITE_CHANNEL_STARLINK_US = 8665;
+    public static final int[] STARLINK_CHANNELS = {SATELLITE_CHANNEL_STARLINK_US};
+    public static final int[] STARLINK_BAND = {AccessNetworkConstants.EutranBand.BAND_25};
+
+    // AST configs
+    public static final int SATELLITE_CHANNEL_AST_US_1 = 2625;
+    public static final int SATELLITE_CHANNEL_AST_US_2 = 2630;
+    public static final int[] AST_CHANNELS = {SATELLITE_CHANNEL_AST_US_1,
+            SATELLITE_CHANNEL_AST_US_2};
+    public static final int[] AST_BAND = {AccessNetworkConstants.EutranBand.BAND_5};
+
+    public static final Integer[] BAND_VALUES =
+            new Integer[]{
+                    -1,
+                    AccessNetworkConstants.EutranBand.BAND_1,
+                    AccessNetworkConstants.EutranBand.BAND_2,
+                    AccessNetworkConstants.EutranBand.BAND_3,
+                    AccessNetworkConstants.EutranBand.BAND_4,
+                    AccessNetworkConstants.EutranBand.BAND_5,
+                    AccessNetworkConstants.EutranBand.BAND_6,
+                    AccessNetworkConstants.EutranBand.BAND_7,
+                    AccessNetworkConstants.EutranBand.BAND_8,
+                    AccessNetworkConstants.EutranBand.BAND_9,
+                    AccessNetworkConstants.EutranBand.BAND_10,
+                    AccessNetworkConstants.EutranBand.BAND_11,
+                    AccessNetworkConstants.EutranBand.BAND_12,
+                    AccessNetworkConstants.EutranBand.BAND_13,
+                    AccessNetworkConstants.EutranBand.BAND_14,
+                    AccessNetworkConstants.EutranBand.BAND_17,
+                    AccessNetworkConstants.EutranBand.BAND_18,
+                    AccessNetworkConstants.EutranBand.BAND_19,
+                    AccessNetworkConstants.EutranBand.BAND_20,
+                    AccessNetworkConstants.EutranBand.BAND_21,
+                    AccessNetworkConstants.EutranBand.BAND_22,
+                    AccessNetworkConstants.EutranBand.BAND_23,
+                    AccessNetworkConstants.EutranBand.BAND_24,
+                    AccessNetworkConstants.EutranBand.BAND_25,
+                    AccessNetworkConstants.EutranBand.BAND_26,
+                    AccessNetworkConstants.EutranBand.BAND_27,
+                    AccessNetworkConstants.EutranBand.BAND_28,
+                    AccessNetworkConstants.EutranBand.BAND_30,
+                    AccessNetworkConstants.EutranBand.BAND_31,
+                    AccessNetworkConstants.EutranBand.BAND_33,
+                    AccessNetworkConstants.EutranBand.BAND_34,
+                    AccessNetworkConstants.EutranBand.BAND_35,
+                    AccessNetworkConstants.EutranBand.BAND_36,
+                    AccessNetworkConstants.EutranBand.BAND_37,
+                    AccessNetworkConstants.EutranBand.BAND_38,
+                    AccessNetworkConstants.EutranBand.BAND_39,
+                    AccessNetworkConstants.EutranBand.BAND_40,
+                    AccessNetworkConstants.EutranBand.BAND_41,
+                    AccessNetworkConstants.EutranBand.BAND_42,
+                    AccessNetworkConstants.EutranBand.BAND_43,
+                    AccessNetworkConstants.EutranBand.BAND_44,
+                    AccessNetworkConstants.EutranBand.BAND_45,
+                    AccessNetworkConstants.EutranBand.BAND_46,
+                    AccessNetworkConstants.EutranBand.BAND_47,
+                    AccessNetworkConstants.EutranBand.BAND_48,
+                    AccessNetworkConstants.EutranBand.BAND_49,
+                    AccessNetworkConstants.EutranBand.BAND_50,
+                    AccessNetworkConstants.EutranBand.BAND_51,
+                    AccessNetworkConstants.EutranBand.BAND_52,
+                    AccessNetworkConstants.EutranBand.BAND_53,
+                    AccessNetworkConstants.EutranBand.BAND_65,
+                    AccessNetworkConstants.EutranBand.BAND_66,
+                    AccessNetworkConstants.EutranBand.BAND_68,
+                    AccessNetworkConstants.EutranBand.BAND_70,
+                    AccessNetworkConstants.EutranBand.BAND_71,
+                    AccessNetworkConstants.EutranBand.BAND_72,
+                    AccessNetworkConstants.EutranBand.BAND_73,
+                    AccessNetworkConstants.EutranBand.BAND_74,
+                    AccessNetworkConstants.EutranBand.BAND_85,
+                    AccessNetworkConstants.EutranBand.BAND_87,
+                    AccessNetworkConstants.EutranBand.BAND_88
+            };
+
+    public static final String[] BAND_LABELS = {
+            "SELECT", "BAND_1", "BAND_2", "BAND_3", "BAND_4", "BAND_5", "BAND_6", "BAND_7",
+            "BAND_8", "BAND_9", "BAND_10", "BAND_11", "BAND_12", "BAND_13", "BAND_14", "BAND_17",
+            "BAND_18", "BAND_19", "BAND_20", "BAND_21", "BAND_22", "BAND_23", "BAND_24", "BAND_25",
+            "BAND_26", "BAND_27", "BAND_28", "BAND_30", "BAND_31", "BAND_33", "BAND_34", "BAND_35",
+            "BAND_36", "BAND_37", "BAND_38", "BAND_39", "BAND_40", "BAND_41", "BAND_42", "BAND_43",
+            "BAND_44", "BAND_45", "BAND_46", "BAND_47", "BAND_48", "BAND_49", "BAND_50", "BAND_51",
+            "BAND_52", "BAND_53", "BAND_65", "BAND_66", "BAND_68", "BAND_70", "BAND_71", "BAND_72",
+            "BAND_73", "BAND_74", "BAND_85", "BAND_87", "BAND_88"
+    };
+
+    public static final String KEY_SATELLITE_BANDS = "force_camp_satellite_bands";
+    public static final String KEY_FORCE_CAMP_SATELLITE_BAND_SELECTED =
+            "force_camp_satellite_band_selected";
+    public static final String KEY_SATELLITE_CHANNELS = "force_camp_satellite_channels";
 }
