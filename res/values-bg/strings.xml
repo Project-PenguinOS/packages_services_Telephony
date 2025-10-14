@@ -182,7 +182,7 @@
     <string name="register_on_network" msgid="4194770527833960423">"Извършва се регистрация на <xliff:g id="NETWORK">%s</xliff:g>…"</string>
     <string name="not_allowed" msgid="8541221928746104798">"SIM картата ви не позволява връзка с тази мрежа."</string>
     <string name="connect_later" msgid="1950138106010005425">"В момента не може да се осъществи връзка с тази мрежа. Опитайте отново по-късно."</string>
-    <string name="registration_done" msgid="5337407023566953292">"Регистрация в мрежа."</string>
+    <string name="registration_done" msgid="5337407023566953292">"Регистрирано в мрежа."</string>
     <string name="already_auto" msgid="8607068290733079336">"Вече е избрано автоматично"</string>
     <string name="select_automatically" msgid="779750291257872651">"Автоматично избиране на мрежа"</string>
     <string name="manual_mode_disallowed_summary" msgid="3970048592179890197">"Не е налице при връзка към %1$s"</string>
@@ -191,7 +191,7 @@
     <string name="preferred_network_mode_title" msgid="5253395265169539830">"Предпочитан тип мрежа"</string>
     <string name="preferred_network_mode_summary" msgid="3787989000044330064">"Промяна на операционния режим на мрежата"</string>
     <string name="preferred_network_mode_dialogtitle" msgid="2781447433514459696">"Предпочитан тип мрежа"</string>
-    <string name="forbidden_network" msgid="5081729819561333023">"(забранена)"</string>
+    <string name="forbidden_network" msgid="5081729819561333023">"(забранено)"</string>
     <string name="choose_network_title" msgid="5335832663422653082">"Избиране на мрежа"</string>
     <string name="network_disconnected" msgid="8844141106841160825">"Връзката е прекратена"</string>
     <string name="network_connected" msgid="2760235679963580224">"Има връзка"</string>
@@ -878,8 +878,8 @@
     <string name="radioInfo_menu_viewSDN" msgid="2613431584522392842">"Преглед на номера за набиране на услуги"</string>
     <string name="radioInfo_menu_getIMS" msgid="1950869267853198232">"Състояние на услугата IMS"</string>
     <string name="radio_info_ims_reg_status_title" msgid="6875885401313992007">"Състояние на услугата IMS"</string>
-    <string name="radio_info_ims_reg_status_registered" msgid="7095182114078864326">"Регистриран"</string>
-    <string name="radio_info_ims_reg_status_not_registered" msgid="8045821447288876085">"Не е регистриран"</string>
+    <string name="radio_info_ims_reg_status_registered" msgid="7095182114078864326">"Регистрирано"</string>
+    <string name="radio_info_ims_reg_status_not_registered" msgid="8045821447288876085">"Не е регистрирано"</string>
     <string name="radio_info_ims_feature_status_available" msgid="6493200914756969292">"Налице"</string>
     <string name="radio_info_ims_feature_status_unavailable" msgid="8930391136839759778">"Не е налице"</string>
     <string name="radio_info_ims_reg_status" msgid="25582845222446390">"Регистрация за услугата IMS: <xliff:g id="STATUS">%1$s</xliff:g>\nLTE телефония: <xliff:g id="AVAILABILITY_0">%2$s</xliff:g>\nWi-Fi телефония: <xliff:g id="AVAILABILITY_1">%3$s</xliff:g>\nВидеообаждания: <xliff:g id="AVAILABILITY_2">%4$s</xliff:g>\nИнтерфейс на UT: <xliff:g id="AVAILABILITY_3">%5$s</xliff:g>"</string>

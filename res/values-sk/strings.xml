@@ -126,7 +126,7 @@
     <string name="disable_cfnrc_forbidden" msgid="775348748084726890">"Váš operátor neumožňuje zakázanie presmerovaní, keď je telefón nedostupný."</string>
     <string name="registration_cf_forbidden" msgid="4386482610771190420">"Váš operátor nepodporuje presmerovanie hovorov."</string>
     <string name="cdma_call_waiting" msgid="4565070960879673216">"Chcete zapnúť funkciu Čakajúci hovor?"</string>
-    <string name="enable_cdma_call_waiting_setting" msgid="5906811747921744307">"Počas hovoru budete dostávať upozornenia na prichádzajúce hovory"</string>
+    <string name="enable_cdma_call_waiting_setting" msgid="5906811747921744307">"Počas volania budete dostávať upozornenia na prichádzajúce hovory"</string>
     <string name="enable_cdma_cw" msgid="811047045863422232">"Zapnúť"</string>
     <string name="disable_cdma_cw" msgid="7119290446496301734">"Zrušiť"</string>
     <string name="cdma_call_waiting_in_ims_on" msgid="6390979414188659218">"CDMA – čakajúci hovor službe IMS – zapnuté"</string>
@@ -182,10 +182,10 @@
     <string name="register_on_network" msgid="4194770527833960423">"Prebieha registrácia v sieti <xliff:g id="NETWORK">%s</xliff:g>..."</string>
     <string name="not_allowed" msgid="8541221928746104798">"Vaša SIM karta nepovoľuje pripojenie k tejto sieti."</string>
     <string name="connect_later" msgid="1950138106010005425">"V tejto chvíli sa nedá pripojiť k sieti. Skúste to neskôr."</string>
-    <string name="registration_done" msgid="5337407023566953292">"Prihlásenie k sieti prebehlo úspešne."</string>
+    <string name="registration_done" msgid="5337407023566953292">"Prihlásenie k sieti prebehlo úspešne."</string>
     <string name="already_auto" msgid="8607068290733079336">"Už v automatickom výbere"</string>
     <string name="select_automatically" msgid="779750291257872651">"Vybrať sieť automaticky"</string>
-    <string name="manual_mode_disallowed_summary" msgid="3970048592179890197">"Nedostupné, ak ste pripojený/-á k sieti %1$s"</string>
+    <string name="manual_mode_disallowed_summary" msgid="3970048592179890197">"Nedostupné, ak ste pripojený k sieti %1$s"</string>
     <string name="network_select_title" msgid="4117305053881611988">"Sieť"</string>
     <string name="register_automatically" msgid="3907580547590554834">"Automatická registrácia..."</string>
     <string name="preferred_network_mode_title" msgid="5253395265169539830">"Preferovaný typ siete"</string>
@@ -405,13 +405,13 @@
     <string name="eo_enable" msgid="107713355461019817">"Pracovné príležitosti povolené"</string>
     <string name="eo_disable" msgid="3955421278929647485">"Pracovné príležitosti zakázané"</string>
     <string name="enable_disable_mhh" msgid="715930476289202466">"Lekárstvo, zdravie a nemocnica"</string>
-    <string name="mhh_enable" msgid="7224396815285147008">"Lekárstvo, zdravie a nemocnica povolené"</string>
-    <string name="mhh_disable" msgid="5503643028885686265">"Lekárstvo, zdravie a nemocnica zakázané"</string>
+    <string name="mhh_enable" msgid="7224396815285147008">"Lekárstvo, zdravie a nemocnica povolené"</string>
+    <string name="mhh_disable" msgid="5503643028885686265">"Lekárstvo, zdravie a nemocnica zakázané"</string>
     <string name="enable_disable_technology_news" msgid="2794845609698078400">"Technologické správy"</string>
     <string name="technology_news_enable" msgid="1908991199492598311">"Technologické správy povolené"</string>
     <string name="technology_news_disable" msgid="8388582607149800889">"Technologické správy zakázané"</string>
     <string name="enable_disable_multi_category" msgid="5958248155437940625">"Viac kategórií"</string>
-    <string name="multi_category_enable" msgid="4531915767817483960">"Viac kategórií povolených"</string>
+    <string name="multi_category_enable" msgid="4531915767817483960">"Viac povolených kategórií"</string>
     <string name="multi_category_disable" msgid="6325934413701238104">"Viacero kategórií zakázané"</string>
     <string name="network_recommended" msgid="3444321100580250926">" (odporúčané)"</string>
     <string name="network_lte" msgid="7206879277095094280">"LTE (odporúčané)"</string>
@@ -506,7 +506,7 @@
     <string name="disable_pin_ok" msgid="888505244389647754">"Kód PIN bol vymazaný"</string>
     <string name="pin_failed" msgid="4527347792881939652">"Kód PIN je nesprávny"</string>
     <string name="pin_changed" msgid="7291153750090452808">"Kód PIN bola aktualizovaný"</string>
-    <string name="puk_requested" msgid="2061337960609806851">"Heslo je nesprávne. Kód PIN je teraz blokovaný. Požaduje sa kód PUK."</string>
+    <string name="puk_requested" msgid="2061337960609806851">"Heslo je nesprávne. Kód PIN bol zablokovaný. Požaduje sa kód PUK."</string>
     <string name="enter_pin2_text" msgid="7266379426804295979">"PIN2"</string>
     <string name="oldPin2Label" msgid="4648543187859997203">"Pôvodný kód PIN2"</string>
     <string name="newPin2Label" msgid="1840905981784453939">"Nový kód PIN2"</string>
@@ -627,7 +627,7 @@
     <string name="ota_hfa_activation_title" msgid="3300556778212729671">"Prebieha aktivácia..."</string>
     <string name="ota_hfa_activation_dialog_message" msgid="7921718445773342996">"V telefóne prebieha aktivácia mobilnej dátovej služby.\n\nMôže to trvať až 5 minút."</string>
     <string name="ota_skip_activation_dialog_title" msgid="7666611236789203797">"Preskočiť aktiváciu?"</string>
-    <string name="ota_skip_activation_dialog_message" msgid="6691722887019708713">"Ak preskočíte aktiváciu, nemôžete volať ani sa pripájať k mobilným dátovým sieťam (môžete sa ale pripojiť k sieťam Wi‑Fi). Ak svoj telefón neaktivujete, bude sa pri každom zapnutí zobrazovať výzva na aktiváciu."</string>
+    <string name="ota_skip_activation_dialog_message" msgid="6691722887019708713">"Ak preskočíte aktiváciu, nebudete môcť uskutočňovať hovory ani sa pripájať k mobilným dátovým sieťam (môžete sa ale pripojiť k sieťam Wi‑Fi). Ak svoj telefón neaktivujete, bude sa pri každom zapnutí zobrazovať výzva na aktiváciu."</string>
     <string name="ota_skip_activation_dialog_skip_label" msgid="5908029466817825633">"Preskočiť"</string>
     <string name="ota_activate" msgid="7939695753665438357">"Aktivovať"</string>
     <string name="ota_title_activate_success" msgid="1272135024761004889">"Telefón je aktivovaný."</string>
@@ -879,7 +879,7 @@
     <string name="radioInfo_menu_getIMS" msgid="1950869267853198232">"Stav služby IMS"</string>
     <string name="radio_info_ims_reg_status_title" msgid="6875885401313992007">"Stav IMS"</string>
     <string name="radio_info_ims_reg_status_registered" msgid="7095182114078864326">"Registrované"</string>
-    <string name="radio_info_ims_reg_status_not_registered" msgid="8045821447288876085">"Bez registrácie"</string>
+    <string name="radio_info_ims_reg_status_not_registered" msgid="8045821447288876085">"Neregistrované"</string>
     <string name="radio_info_ims_feature_status_available" msgid="6493200914756969292">"K dispozícii"</string>
     <string name="radio_info_ims_feature_status_unavailable" msgid="8930391136839759778">"Nie je k dispozícii"</string>
     <string name="radio_info_ims_reg_status" msgid="25582845222446390">"Registrácia IMS: <xliff:g id="STATUS">%1$s</xliff:g>\nHlas cez LTE: <xliff:g id="AVAILABILITY_0">%2$s</xliff:g>\nHlas cez Wi‑Fi: <xliff:g id="AVAILABILITY_1">%3$s</xliff:g>\nVideohovory: <xliff:g id="AVAILABILITY_2">%4$s</xliff:g>\nRozhranie UT: <xliff:g id="AVAILABILITY_3">%5$s</xliff:g>"</string>

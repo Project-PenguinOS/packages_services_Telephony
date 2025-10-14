@@ -411,7 +411,7 @@
     <string name="technology_news_enable" msgid="1908991199492598311">"Lajmet teknologjike u aktivizuan"</string>
     <string name="technology_news_disable" msgid="8388582607149800889">"Lajmet teknologjike u çaktivizuan"</string>
     <string name="enable_disable_multi_category" msgid="5958248155437940625">"Multi-kategoria"</string>
-    <string name="multi_category_enable" msgid="4531915767817483960">"\"Multi-kategoria\" u aktivizua"</string>
+    <string name="multi_category_enable" msgid="4531915767817483960">"Multikategoria u aktivizua"</string>
     <string name="multi_category_disable" msgid="6325934413701238104">"\"Multi-kategoria\" u çaktivizua"</string>
     <string name="network_recommended" msgid="3444321100580250926">" (rekomandohet)"</string>
     <string name="network_lte" msgid="7206879277095094280">"LTE (rekomandohet)"</string>

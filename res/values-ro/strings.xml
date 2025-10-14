@@ -707,8 +707,8 @@
     <string name="change_pin_system_error" msgid="7772788809875146873">"Nu s-a putut seta codul PIN"</string>
     <string name="mobile_data_status_roaming_turned_off_subtext" msgid="6840673347416227054">"Roamingul de date este dezactivat."</string>
     <string name="mobile_data_status_roaming_turned_on_subtext" msgid="5615757897768777865">"Roamingul de date este activat."</string>
-    <string name="mobile_data_status_roaming_without_plan_subtext" msgid="6536671968072284677">"În prezent, se folosește roaming. Este necesar un abonament de date."</string>
-    <string name="mobile_data_status_roaming_with_plan_subtext" msgid="2576177169108123095">"În prezent, se folosește roaming. Abonamentul de date este activ."</string>
+    <string name="mobile_data_status_roaming_without_plan_subtext" msgid="6536671968072284677">"În prezent, se folosește roaming. Este necesar un plan de date."</string>
+    <string name="mobile_data_status_roaming_with_plan_subtext" msgid="2576177169108123095">"Momentan, se folosește roaming. Planul de date este activ."</string>
     <string name="mobile_data_status_no_plan_subtext" msgid="170331026419263657">"Ai epuizat abonamentul de date mobile."</string>
     <string name="mobile_data_activate_prepaid" msgid="4276738964416795596">"Ai epuizat abonamentul de date mobile."</string>
     <string name="mobile_data_activate_prepaid_summary" msgid="6846085278531605925">"Adaugă date mobile prin <xliff:g id="PROVIDER_NAME">%s</xliff:g>"</string>
