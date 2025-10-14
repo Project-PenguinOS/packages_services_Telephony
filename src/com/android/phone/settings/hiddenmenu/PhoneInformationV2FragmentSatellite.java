@@ -63,6 +63,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneFactory;
 import com.android.internal.telephony.RILConstants;
+import com.android.internal.telephony.satellite.SatelliteController;
 import com.android.phone.R;
 
 import java.util.Arrays;
@@ -487,6 +488,8 @@ public class PhoneInformationV2FragmentSatellite extends Fragment {
         TelephonyManager tm = mTelephonyManager.createForSubscriptionId(mSubId);
 
         (new Thread(() -> {
+            // Do not store current plmn as satellite plmn in allPlmnList during testing
+            SatelliteController.getInstance().setSatelliteIgnorePlmnListFromStorage(true);
             PersistableBundle originalBundle = PhoneInformationUtil.getCarrierConfig(mContext)
                     .getConfigForSubId(subId, KEY_SATELLITE_ATTACH_SUPPORTED_BOOL,
                             KEY_SATELLITE_ENTITLEMENT_SUPPORTED_BOOL,
@@ -546,6 +549,8 @@ public class PhoneInformationV2FragmentSatellite extends Fragment {
 
         (new Thread(() -> {
             try {
+                // Reset to original configuration
+                SatelliteController.getInstance().setSatelliteIgnorePlmnListFromStorage(false);
                 tm.setSystemSelectionChannels(Collections.emptyList());
                 log("Force satellite channel successfully cleared channels");
                 tm.setAllowedNetworkTypesForReason(
@@ -885,6 +890,9 @@ public class PhoneInformationV2FragmentSatellite extends Fragment {
                                         mTelephonyManager, mPhoneId, mSubId, originalBundle));
                         log("mMockSatelliteListener: old " + originalBundle);
                         log("mMockSatelliteListener: new " + overrideBundle);
+                        // Do not store current plmn as satellite plmn in allPlmnList during testing
+                        SatelliteController.getInstance()
+                            .setSatelliteIgnorePlmnListFromStorage(true);
                         PhoneInformationUtil.getCarrierConfig(mContext).overrideConfig(subId,
                                 overrideBundle, false);
                     } else {
@@ -893,6 +901,9 @@ public class PhoneInformationV2FragmentSatellite extends Fragment {
                                     mCarrierSatelliteOriginalBundle[phoneId], false);
                             mCarrierSatelliteOriginalBundle[phoneId] = null;
                             mViewModel.setSatelliteEnabledBundle(null, phoneId);
+                            // Reset to original configuration
+                            SatelliteController.getInstance()
+                                .setSatelliteIgnorePlmnListFromStorage(false);
                             log(
                                     "mMockSatelliteListener: Successfully cleared mock for phone "
                                             + phoneId);
