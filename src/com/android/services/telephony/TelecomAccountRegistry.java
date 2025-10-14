@@ -1966,7 +1966,7 @@ public class TelecomAccountRegistry {
      * Waits for Telecom to come up first and then sets up.
      */
     public void setupOnBoot() {
-        if (Flags.delayPhoneAccountRegistration() && !isTelecomReady()) {
+        if (!isTelecomReady()) {
             Log.i(this, "setupOnBoot: delaying start for Telecom...");
             mTelecomReadyBackoff.start();
         } else {

@@ -34,7 +34,6 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.PersistableBundle;
 import android.os.UserHandle;
-import android.platform.test.flag.junit.SetFlagsRule;
 import android.telecom.PhoneAccount;
 import android.telecom.TelecomManager;
 import android.telephony.CarrierConfigManager;
@@ -51,13 +50,11 @@ import com.android.TelephonyTestBase;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.SimultaneousCallingTracker;
-import com.android.internal.telephony.flags.Flags;
 import com.android.phone.PhoneInterfaceManager;
 import com.android.phone.R;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -70,9 +67,6 @@ public class TelecomAccountRegistryTest extends TelephonyTestBase {
 
     private static final String TAG = "TelecomAccountRegistryTest";
     private static final int TEST_SUB_ID = 1;
-
-    @Rule
-    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     // We need more functions that what TelephonyTestBase.mContext supports.
     // Use a local mocked Context to make life easier.
@@ -99,7 +93,6 @@ public class TelecomAccountRegistryTest extends TelephonyTestBase {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        mSetFlagsRule.disableFlags(Flags.FLAG_DELAY_PHONE_ACCOUNT_REGISTRATION);
 
         replaceInstance(PhoneInterfaceManager.class, "sInstance", null, mPhoneInterfaceManager);
         when(mPhone.getPhoneType()).thenReturn(PhoneConstants.PHONE_TYPE_GSM);
@@ -146,6 +139,9 @@ public class TelecomAccountRegistryTest extends TelephonyTestBase {
         // Use mocked ContentProvider since we can't really mock ContentResolver
         mContentResolver = ContentResolver.wrap(mContentProvider);
         when(mMockedContext.getContentResolver()).thenReturn(mContentResolver);
+
+        //Simulate isTelecomReady is true so setupOnBootInternal is called during test setup.
+        when(mTelecomManager.getSystemDialerPackage()).thenReturn("");
 
         mTestableLooper = TestableLooper.get(this);
         when(mMockedContext.getMainLooper()).thenReturn(mTestableLooper.getLooper());
