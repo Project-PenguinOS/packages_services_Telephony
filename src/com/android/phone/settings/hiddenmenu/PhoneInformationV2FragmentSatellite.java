@@ -21,6 +21,7 @@ import static android.telephony.CarrierConfigManager.KEY_SATELLITE_ATTACH_SUPPOR
 import static android.telephony.CarrierConfigManager.KEY_SATELLITE_DATA_SUPPORT_MODE_INT;
 import static android.telephony.CarrierConfigManager.KEY_SATELLITE_ENTITLEMENT_SUPPORTED_BOOL;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -66,6 +67,7 @@ import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.satellite.SatelliteController;
 import com.android.phone.R;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -82,6 +84,7 @@ public class PhoneInformationV2FragmentSatellite extends Fragment {
     private int[] mSelectedManualOverrideBandIndex = new int[2];
     private final PersistableBundle[] mPreviousSatelliteBand = new PersistableBundle[2];
     private Switch mMockSatellite;
+    private final List<ContentValues> mOriginalApnSettings = new ArrayList<>();
     private Switch mMockSatelliteDataSwitch;
     private RadioGroup mMockSatelliteData;
     private Button mEsosButton;
@@ -878,6 +881,12 @@ public class PhoneInformationV2FragmentSatellite extends Fragment {
                         mCarrierSatelliteOriginalBundle[phoneId] = originalBundle;
                         mViewModel.setSatelliteEnabledBundle(originalBundle, phoneId);
 
+                        // APN modification
+                        mOriginalApnSettings.clear();
+                        mOriginalApnSettings.addAll(
+                                PhoneInformationUtil.updateApnInfrastructureBitmaskForSatellite(
+                                        mContext, subId, TAG));
+
                         PersistableBundle overrideBundle = new PersistableBundle();
                         overrideBundle.putBoolean(KEY_SATELLITE_ATTACH_SUPPORTED_BOOL, true);
                         // NOTE: In case of TMO setting KEY_SATELLITE_ENTITLEMENT_SUPPORTED_BOOL
@@ -888,6 +897,9 @@ public class PhoneInformationV2FragmentSatellite extends Fragment {
                                 KEY_CARRIER_SUPPORTED_SATELLITE_SERVICES_PER_PROVIDER_BUNDLE,
                                 PhoneInformationUtil.getSatelliteServicesBundleForOperatorPlmn(
                                         mTelephonyManager, mPhoneId, mSubId, originalBundle));
+                        // Do not store current plmn as satellite plmn in allPlmnList during testing
+                        SatelliteController.getInstance()
+                                .setSatelliteIgnorePlmnListFromStorage(true);
                         log("mMockSatelliteListener: old " + originalBundle);
                         log("mMockSatelliteListener: new " + overrideBundle);
                         // Do not store current plmn as satellite plmn in allPlmnList during testing
@@ -897,6 +909,11 @@ public class PhoneInformationV2FragmentSatellite extends Fragment {
                                 overrideBundle, false);
                     } else {
                         try {
+                            // APN restoration
+                            PhoneInformationUtil.restoreOriginalApns(mContext,
+                                    mOriginalApnSettings, TAG);
+                            mOriginalApnSettings.clear();
+
                             PhoneInformationUtil.getCarrierConfig(mContext).overrideConfig(subId,
                                     mCarrierSatelliteOriginalBundle[phoneId], false);
                             mCarrierSatelliteOriginalBundle[phoneId] = null;
@@ -907,6 +924,9 @@ public class PhoneInformationV2FragmentSatellite extends Fragment {
                             log(
                                     "mMockSatelliteListener: Successfully cleared mock for phone "
                                             + phoneId);
+                            // Reset to original configuration
+                            SatelliteController.getInstance()
+                                    .setSatelliteIgnorePlmnListFromStorage(false);
                         } catch (Exception e) {
                             loge(
                                     "mMockSatelliteListener: Can't clear mock because invalid sub"

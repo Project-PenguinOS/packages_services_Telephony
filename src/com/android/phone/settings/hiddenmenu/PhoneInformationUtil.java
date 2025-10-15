@@ -24,13 +24,19 @@ import static android.telephony.CarrierConfigManager.KEY_SATELLITE_ENTITLEMENT_S
 import static com.android.internal.telephony.configupdate.ConfigProviderAdaptor.DOMAIN_SATELLITE;
 
 import android.content.ComponentName;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.database.Cursor;
+import android.database.DatabaseUtils;
+import android.net.Uri;
 import android.os.Build;
 import android.os.PersistableBundle;
 import android.os.SystemProperties;
+import android.provider.Telephony;
 import android.telephony.AccessNetworkConstants;
 import android.telephony.CarrierConfigManager;
 import android.telephony.CellIdentityCdma;
@@ -54,6 +60,7 @@ import android.telephony.NetworkRegistrationInfo;
 import android.telephony.ServiceState;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.telephony.data.ApnSetting;
 import android.telephony.ims.ImsMmTelManager;
 import android.telephony.ims.feature.MmTelFeature;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
@@ -70,7 +77,9 @@ import com.android.internal.telephony.configupdate.TelephonyConfigUpdateInstallR
 import com.android.internal.telephony.satellite.SatelliteConfig;
 import com.android.internal.telephony.satellite.SatelliteConfigParser;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class PhoneInformationUtil {
     private static final String DSDS_MODE_PROPERTY = "ro.boot.hardware.dsds";
@@ -870,4 +879,189 @@ public class PhoneInformationUtil {
     public static final String KEY_FORCE_CAMP_SATELLITE_BAND_SELECTED =
             "force_camp_satellite_band_selected";
     public static final String KEY_SATELLITE_CHANNELS = "force_camp_satellite_channels";
+
+    /**
+     * Utility function to take an old APN setting and a Infrastructure bitmask value
+     * to construct new APN setting to be updated with the infrastructure bitmask value
+     * to allow satellite on current APN
+     *
+     * @param oldApn
+     * @param newInfrastructureBitmask
+     * @return newApnSetting with correct new bitmask and other old values
+     */
+    public static ApnSetting createUpdatedApnSetting(ApnSetting oldApn,
+            int newInfrastructureBitmask) {
+        if (oldApn == null) {
+            return null;
+        }
+        return new ApnSetting.Builder()
+                .setEntryName(oldApn.getEntryName())
+                .setApnName(oldApn.getApnName())
+                .setProxyAddress(oldApn.getProxyAddressAsString())
+                .setProxyPort(oldApn.getProxyPort())
+                .setMmsc(oldApn.getMmsc())
+                .setMmsProxyAddress(oldApn.getMmsProxyAddressAsString())
+                .setMmsProxyPort(oldApn.getMmsProxyPort())
+                .setUser(oldApn.getUser())
+                .setPassword(oldApn.getPassword())
+                .setAuthType(oldApn.getAuthType())
+                .setApnTypeBitmask(oldApn.getApnTypeBitmask())
+                .setOperatorNumeric(oldApn.getOperatorNumeric())
+                .setProtocol(oldApn.getProtocol())
+                .setRoamingProtocol(oldApn.getRoamingProtocol())
+                .setMtuV4(oldApn.getMtuV4())
+                .setMtuV6(oldApn.getMtuV6())
+                .setCarrierEnabled(oldApn.isEnabled())
+                .setNetworkTypeBitmask(oldApn.getNetworkTypeBitmask())
+                .setLingeringNetworkTypeBitmask(oldApn.getLingeringNetworkTypeBitmask())
+                .setProfileId(oldApn.getProfileId())
+                .setPersistent(oldApn.isPersistent())
+                .setMaxConns(oldApn.getMaxConns())
+                .setWaitTime(oldApn.getWaitTime())
+                .setMaxConnsTime(oldApn.getMaxConnsTime())
+                .setMvnoType(oldApn.getMvnoType())
+                .setMvnoMatchData(oldApn.getMvnoMatchData())
+                .setApnSetId(oldApn.getApnSetId())
+                .setCarrierId(oldApn.getCarrierId())
+                .setSkip464Xlat(oldApn.getSkip464Xlat())
+                .setAlwaysOn(oldApn.isAlwaysOn())
+                .setInfrastructureBitmask(newInfrastructureBitmask)
+                .setEsimBootstrapProvisioning(oldApn.isEsimBootstrapProvisioning())
+                .build();
+    }
+
+    // In PhoneInformationUtil.java
+
+    private static String apnTypesToString(int bitmask) {
+        List<String> types = new ArrayList<>();
+        if ((bitmask & ApnSetting.TYPE_DEFAULT) == ApnSetting.TYPE_DEFAULT) {
+            types.add("DEFAULT");
+        }
+        if ((bitmask & ApnSetting.TYPE_MMS) == ApnSetting.TYPE_MMS) {
+            types.add("MMS");
+        }
+        if ((bitmask & ApnSetting.TYPE_SUPL) == ApnSetting.TYPE_SUPL) {
+            types.add("SUPL");
+        }
+        if ((bitmask & ApnSetting.TYPE_DUN) == ApnSetting.TYPE_DUN) {
+            types.add("DUN");
+        }
+        if ((bitmask & ApnSetting.TYPE_HIPRI) == ApnSetting.TYPE_HIPRI) {
+            types.add("HIPRI");
+        }
+        if ((bitmask & ApnSetting.TYPE_FOTA) == ApnSetting.TYPE_FOTA) {
+            types.add("FOTA");
+        }
+        if ((bitmask & ApnSetting.TYPE_IMS) == ApnSetting.TYPE_IMS) {
+            types.add("IMS");
+        }
+        if ((bitmask & ApnSetting.TYPE_CBS) == ApnSetting.TYPE_CBS) {
+            types.add("CBS");
+        }
+        if ((bitmask & ApnSetting.TYPE_IA) == ApnSetting.TYPE_IA) {
+            types.add("IA");
+        }
+        if ((bitmask & ApnSetting.TYPE_EMERGENCY) == ApnSetting.TYPE_EMERGENCY) {
+            types.add("EMERGENCY");
+        }
+        return TextUtils.join(", ", types);
+    }
+
+
+    /**
+     *
+     * Update Infrastructure bitmask value in APN setting to enable satellite
+     *
+     * @param context
+     * @param subId
+     * @param logTag
+     * @return
+     */
+    public static List<ContentValues> updateApnInfrastructureBitmaskForSatellite(
+            Context context, int subId, String logTag) {
+        List<ContentValues> originalApnSettings = new ArrayList<>();
+        try {
+            ContentResolver resolver = context.getContentResolver();
+            // Use the modern SIM_APN_URI, which is aware of the current subscription.
+            Uri uri = Telephony.Carriers.SIM_APN_URI;
+            Cursor cursor = resolver.query(uri, null,
+                    Telephony.Carriers.CARRIER_ENABLED + " = 1", null, null);
+
+            if (cursor != null) {
+                while (cursor.moveToNext()) {
+                    ApnSetting oldApn = ApnSetting.makeApnSetting(cursor);
+
+                    Log.d(logTag, "UpdateAPN: Checking APN: " + oldApn.getApnName()
+                            + ", Types: " + apnTypesToString(oldApn.getApnTypeBitmask())
+                            + ", Infrastructure Bitmask: " + oldApn.getInfrastructureBitmask());
+
+                    if ((oldApn.canHandleType(ApnSetting.TYPE_DEFAULT))
+                            || (oldApn.canHandleType(ApnSetting.TYPE_IA))) {
+
+                        if ((oldApn.getInfrastructureBitmask()
+                                & ApnSetting.INFRASTRUCTURE_SATELLITE) == 0) {
+                            ContentValues originalValues = new ContentValues();
+                            DatabaseUtils.cursorRowToContentValues(cursor, originalValues);
+                            originalApnSettings.add(originalValues);
+
+                            int newInfrastructureBitmask =
+                                    oldApn.getInfrastructureBitmask()
+                                            | ApnSetting.INFRASTRUCTURE_SATELLITE;
+                            ApnSetting newApn = createUpdatedApnSetting(oldApn,
+                                    newInfrastructureBitmask);
+
+                            Log.d(logTag, "UpdateAPN: New APN: " + newApn.getApnName()
+                                    + ", Types: " + apnTypesToString(newApn.getApnTypeBitmask())
+                                    + ", Infrastructure Bitmask: "
+                                    + newApn.getInfrastructureBitmask());
+
+                            if (newApn != null) {
+                                ContentValues newValues = newApn.toContentValues();
+                                String where = Telephony.Carriers.APN + " = ?";
+                                String[] selectionArgs = new String[]{oldApn.getApnName()};
+
+                                int rowsUpdated = resolver.update(Telephony.Carriers.CONTENT_URI,
+                                        newValues, where, selectionArgs);
+                                Log.d(logTag, "UpdateAPN: Rows updated: " + rowsUpdated);
+                            }
+                        }
+                    }
+                }
+                cursor.close();
+            }
+        } catch (Exception e) {
+            Log.e(logTag, "Error modifying APN for satellite mock: " + e);
+        }
+        return originalApnSettings;
+    }
+
+    /**
+     *
+     * Restore APN settings to original values
+     *
+     * @param context
+     * @param originalApnSettings
+     * @param logTag
+     */
+    public static void restoreOriginalApns(Context context,
+            List<ContentValues> originalApnSettings, String logTag) {
+        if (originalApnSettings == null || originalApnSettings.isEmpty()) {
+            return;
+        }
+        try {
+            ContentResolver resolver = context.getContentResolver();
+            for (ContentValues values : originalApnSettings) {
+                String where = Telephony.Carriers.APN + " = ?";
+                String[] selectionArgs = new String[]{values.getAsString(Telephony.Carriers.APN)};
+                ContentValues restoreValues = new ContentValues();
+                restoreValues.put(Telephony.Carriers.INFRASTRUCTURE_BITMASK,
+                        values.getAsInteger(Telephony.Carriers.INFRASTRUCTURE_BITMASK));
+                int rowsUpdated = resolver.update(Telephony.Carriers.CONTENT_URI,
+                        restoreValues, where, selectionArgs);
+                Log.d(logTag, "UpdateAPN: RestoreAPN: Rows updated: " + rowsUpdated);
+            }
+        } catch (Exception e) {
+            Log.e(logTag, "Error restoring APNs: " + e);
+        }
+    }
 }
