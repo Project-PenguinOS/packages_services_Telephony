@@ -110,7 +110,7 @@
     <string name="sum_cfu_enabled_no_number" msgid="7287752761743377930">"नंबर अनुपलब्‍ध आहे"</string>
     <string name="sum_cfu_disabled" msgid="5010617134210809853">"बंद"</string>
     <string name="labelCFB" msgid="615265213360512768">"व्यस्त असताना"</string>
-    <string name="messageCFB" msgid="1958017270393563388">"नंबर व्‍यस्‍त असताना"</string>
+    <string name="messageCFB" msgid="1958017270393563388">"नंबर व्यस्त असताना"</string>
     <string name="sum_cfb_enabled" msgid="332037613072049492">"<xliff:g id="PHONENUMBER">{0}</xliff:g> वर फॉरवर्ड करत आहे"</string>
     <string name="sum_cfb_disabled" msgid="3589913334164866035">"बंद"</string>
     <string name="disable_cfb_forbidden" msgid="4831494744351633961">"तुमचा फोन व्‍यस्‍त असताना तुमचा ऑपरेटर कॉल अग्रेषण करणे अक्षम करण्‍यास समर्थन करीत नाही."</string>

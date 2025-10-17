@@ -96,6 +96,7 @@ import android.telephony.ActivityStatsTechSpecificInfo;
 import android.telephony.Annotation.ApnType;
 import android.telephony.Annotation.DataActivityType;
 import android.telephony.Annotation.ThermalMitigationResult;
+import android.telephony.Annotation.TtyMode;
 import android.telephony.AnomalyReporter;
 import android.telephony.CallForwardingInfo;
 import android.telephony.CarrierConfigManager;
@@ -2755,7 +2756,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     }
 
     @Override
-    public @TelephonyManager.TtyMode int getCurrentTtyMode() {
+    public @TtyMode int getCurrentTtyMode() {
         enforceReadPrivilegedPermission("Needs READ_PRIVILEGED_PHONE_STATE for "
                 + "getCurrentTtyMode");
         enforceTelephonyFeatureWithException(getCurrentPackageName(),

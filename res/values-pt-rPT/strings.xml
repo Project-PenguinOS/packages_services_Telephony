@@ -185,7 +185,7 @@
     <string name="registration_done" msgid="5337407023566953292">"Registado na rede."</string>
     <string name="already_auto" msgid="8607068290733079336">"A seleção automática já está ativada."</string>
     <string name="select_automatically" msgid="779750291257872651">"Selecionar automaticamente a rede"</string>
-    <string name="manual_mode_disallowed_summary" msgid="3970048592179890197">"Indisponível quando está ligado a %1$s"</string>
+    <string name="manual_mode_disallowed_summary" msgid="3970048592179890197">"Indisponível quando tem ligação a %1$s"</string>
     <string name="network_select_title" msgid="4117305053881611988">"Rede"</string>
     <string name="register_automatically" msgid="3907580547590554834">"Registo automático..."</string>
     <string name="preferred_network_mode_title" msgid="5253395265169539830">"Tipo de rede preferencial"</string>

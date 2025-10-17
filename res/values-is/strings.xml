@@ -627,7 +627,7 @@
     <string name="ota_hfa_activation_title" msgid="3300556778212729671">"Virkjar..."</string>
     <string name="ota_hfa_activation_dialog_message" msgid="7921718445773342996">"Síminn er að virkja farsímagagnaþjónustuna.\n\nÞetta getur tekið allt að fimm mínútur."</string>
     <string name="ota_skip_activation_dialog_title" msgid="7666611236789203797">"Sleppa virkjun?"</string>
-    <string name="ota_skip_activation_dialog_message" msgid="6691722887019708713">"Ef þú sleppir því að virkja símann getur þú ekki hringt úr honum eða tengst farsímagagnaþjónustu (þótt þú getir tengst Wi-Fi netum). Þar til þú hefur virkjað símann verður þú verður beðin(n) um að virkja hann í hvert sinn sem þú kveikir á honum."</string>
+    <string name="ota_skip_activation_dialog_message" msgid="6691722887019708713">"Ef þú sleppir því að virkja símann getur þú ekki hringt úr honum eða tengst farsímagagnaþjónustu (þótt þú getir tengst Wi-Fi netum). Þar til þú hefur virkjað símann verður þú beðin(n) um að virkja hann í hvert sinn sem þú kveikir á honum."</string>
     <string name="ota_skip_activation_dialog_skip_label" msgid="5908029466817825633">"Sleppa"</string>
     <string name="ota_activate" msgid="7939695753665438357">"Virkja"</string>
     <string name="ota_title_activate_success" msgid="1272135024761004889">"Síminn hefur verið virkjaður."</string>
