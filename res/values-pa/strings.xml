@@ -481,7 +481,7 @@
     <string name="delete_fdn_contact" msgid="7027405651994507077">"ਫਿਕਸਡ ਡਾਇਲਿੰਗ ਨੰਬਰ ਮਿਟਾਓ"</string>
     <string name="deleting_fdn_contact" msgid="6872320570844460428">"ਫਿਕਸਡ ਡਾਇਲਿੰਗ ਨੰਬਰ ਮਿਟਾ ਰਿਹਾ ਹੈ…"</string>
     <string name="fdn_contact_deleted" msgid="1680714996763848838">"ਫਿਕਸਡ ਡਾਇਲਿੰਗ ਨੰਬਰ ਮਿਟਾਇਆ।"</string>
-    <string name="pin2_invalid" msgid="2313954262684494442">"FDN ਅੱਪਡੇਟ ਨਹੀਂ ਕੀਤਾ ਗਿਆ ਸੀ ਕਿਉਂਕਿ ਤੁਸੀਂ ਇੱਕ ਗ਼ਲਤ PIN ਟਾਈਪ ਕੀਤਾ ਸੀ।"</string>
+    <string name="pin2_invalid" msgid="7366835930615792402">"PIN2 ਗਲਤ ਹੈ। FDN ਅੱਪਡੇਟ ਨਹੀਂ ਕੀਤਾ ਗਿਆ।"</string>
     <string name="fdn_invalid_number" msgid="9067189814657840439">"FDN ਨੂੰ ਅੱਪਡੇਟ ਨਹੀਂ ਕੀਤਾ ਗਿਆ ਕਿਉਂਕਿ ਨੰਬਰ <xliff:g id="FDN_NUMBER_LIMIT_LENGTH">%d</xliff:g> ਅੰਕਾਂ ਤੋਂ ਵੱਧ ਹੈ।"</string>
     <string name="pin2_or_fdn_invalid" msgid="7542639487955868181">"FDN ਅੱਪਡੇਟ ਨਹੀਂ ਕੀਤਾ ਗਿਆ ਸੀ। PIN2 ਗ਼ਲਤ ਸੀ ਜਾਂ ਫ਼ੋਨ ਨੰਬਰ ਅਸਵੀਕਾਰ ਕੀਤਾ ਗਿਆ ਸੀ।"</string>
     <string name="fdn_failed" msgid="216592346853420250">"FDN ਓਪਰੇਸ਼ਨ ਅਸਫਲ।"</string>
