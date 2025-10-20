@@ -520,4 +520,6 @@ ul.</string>
     <string name="sim_is_not_ready">SIM card is not ready</string>
 <!-- QTI_BEGIN: 2018-02-26: Telephony: * Telephony: SIM De-personalization-->
 <!-- QTI_END: 2018-02-26: Telephony: * Telephony: SIM De-personalization-->
+    <string name="enable_volte">Enable VoLTE</string>
+    <string name="enable_vonr">Enable VoNR</string>
 </resources>
