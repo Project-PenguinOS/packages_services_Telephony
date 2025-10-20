@@ -2355,6 +2355,27 @@ public class TelephonyConnectionService extends ConnectionService {
             if (phone != null) {
                 boolean isEmergency = mTelephonyManagerProxy.isCurrentEmergencyNumber(number);
                 Log.i(this, "placeOutgoingConnection isEmergency=" + isEmergency);
+
+                // When an emergency call is dialed, the dialed number should be recognized
+                // as an emergency number, and kept until the call is initiated.
+                // However, if an abnormal behavior, such as a modem crash, misidentifies
+                // the dialed number as a normal one after the domain selection, the call will be
+                // processed incorrectly. To prevent this, the current call should be disconnected
+                // normally, so the user can try again.
+                if (mEmergencyConnection == connection && !isEmergency) {
+                    Log.i(this, "placeOutgoingConnection: "
+                            + "Dialed emergency number is recognized as a non-emergency number");
+                    onLocalHangup(connection);
+                    connection.unregisterForCallEvents();
+                    connection.setTelephonyConnectionDisconnected(
+                            DisconnectCauseUtil.toTelecomDisconnectCause(
+                                    android.telephony.DisconnectCause.OUTGOING_FAILURE,
+                                    "Emergency call is placed using a non-emergency number",
+                                    phone.getPhoneId()));
+                    connection.close();
+                    return;
+                }
+
                 if (isEmergency) {
                     handleEmergencyCallStartedForSatelliteSOSMessageRecommender(connection, phone);
                     if (!getAllConnections().isEmpty()) {

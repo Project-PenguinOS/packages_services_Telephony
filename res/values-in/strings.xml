@@ -271,7 +271,7 @@
     <string name="preferred_network_mode_nr_lte_tdscdma_wcdma_summary" msgid="5912457779733343522">"Mode jaringan pilihan: NR/LTE/TDSCDMA/WCDMA"</string>
     <string name="preferred_network_mode_nr_lte_tdscdma_gsm_wcdma_summary" msgid="6769797110309412576">"Mode jaringan pilihan: NR/LTE/TDSCDMA/GSM/WCDMA"</string>
     <string name="preferred_network_mode_nr_lte_tdscdma_cdma_evdo_gsm_wcdma_summary" msgid="4260661428277578573">"Mode jaringan pilihan: NR/LTE/TDSCDMA/CDMA/EvDo/GSM/WCDMA"</string>
-    <string name="call_category" msgid="4394703838833058138">"Memanggil"</string>
+    <string name="call_category" msgid="4394703838833058138">"Panggilan"</string>
     <string name="network_operator_category" msgid="4992217193732304680">"Jaringan"</string>
     <string name="enhanced_4g_lte_mode_title" msgid="4213420368777080540">"Mode LTE 4G yang Ditingkatkan"</string>
     <!-- no translation found for enhanced_4g_lte_mode_title_variant:0 (7240155150166394308) -->
@@ -974,6 +974,7 @@
     <string name="satellite_config_version_label" msgid="1153447193166314791">"versi:"</string>
     <string name="satellite_config_version_for_skylo_label" msgid="7068241597009832840">"versi skylo:"</string>
     <string name="satellite_max_allowed_data_mode_label" msgid="1808484802651916339">"mode data maks. yang diizinkan:"</string>
+    <string name="satellite_provider_plmn_list_label" msgid="7289533883006851963">"semua plmn penyedia layanan satelit:"</string>
     <string name="satellite_config_version_for_starlink_label" msgid="7984209491963621773">"versi starlink:"</string>
     <string name="satellite_config_service_type_label" msgid="21749170241956082">"subId/plmn/servicetype:"</string>
     <string name="satellite_config_allow_access_label" msgid="3806779900418131140">"allow_access:"</string>

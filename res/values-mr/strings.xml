@@ -110,7 +110,7 @@
     <string name="sum_cfu_enabled_no_number" msgid="7287752761743377930">"नंबर अनुपलब्‍ध आहे"</string>
     <string name="sum_cfu_disabled" msgid="5010617134210809853">"बंद"</string>
     <string name="labelCFB" msgid="615265213360512768">"व्यस्त असताना"</string>
-    <string name="messageCFB" msgid="1958017270393563388">"नंबर व्‍यस्‍त असताना"</string>
+    <string name="messageCFB" msgid="1958017270393563388">"नंबर व्यस्त असताना"</string>
     <string name="sum_cfb_enabled" msgid="332037613072049492">"<xliff:g id="PHONENUMBER">{0}</xliff:g> वर फॉरवर्ड करत आहे"</string>
     <string name="sum_cfb_disabled" msgid="3589913334164866035">"बंद"</string>
     <string name="disable_cfb_forbidden" msgid="4831494744351633961">"तुमचा फोन व्‍यस्‍त असताना तुमचा ऑपरेटर कॉल अग्रेषण करणे अक्षम करण्‍यास समर्थन करीत नाही."</string>
@@ -687,7 +687,7 @@
     <string name="message_decode_error" msgid="1061856591500290887">"मेसेज डीकोड करताना एक एरर आली."</string>
     <string name="callFailed_cdma_activation" msgid="5392057031552253550">"सिम कार्डने तुमची सेवा सक्रिय केली आहे आणि आपल्या फोनच्या रोमिंग क्षमता अपडेट केल्या."</string>
     <string name="callFailed_cdma_call_limit" msgid="1074219746093031412">"बरेच सक्रिय कॉल आहेत. कृपया नवीन एक कॉल करण्यापूर्वी विद्यमान कॉल समाप्त करा किंवा विलीन करा."</string>
-    <string name="callFailed_imei_not_accepted" msgid="7257903653685147251">"कनेक्ट करण्यात अक्षम, कृपया एक वैध सिम कार्ड घाला."</string>
+    <string name="callFailed_imei_not_accepted" msgid="7257903653685147251">"कनेक्ट करू शकत नाही, कृपया एक वैध सिम कार्ड घाला."</string>
     <string name="callFailed_wifi_lost" msgid="1788036730589163141">"वाय-फाय कनेक्शन गमावले. कॉल समाप्त झाला."</string>
     <string name="dialFailed_low_battery" msgid="6857904237423407056">"बॅटरी कमी असल्यामुळे तुमचा व्हिडिओ कॉल लावता येणार नाही."</string>
     <string name="callFailed_low_battery" msgid="4056828320214416182">"बॅटरी कमी असल्यामुळे व्हिडिओ कॉल बंद झाला."</string>
@@ -707,8 +707,8 @@
     <string name="change_pin_system_error" msgid="7772788809875146873">"पिन सेट करण्यात अक्षम"</string>
     <string name="mobile_data_status_roaming_turned_off_subtext" msgid="6840673347416227054">"डेटा रोमिंग बंद केलेले आहे"</string>
     <string name="mobile_data_status_roaming_turned_on_subtext" msgid="5615757897768777865">"डेटा रोमिंग सुरू केलेले आहे"</string>
-    <string name="mobile_data_status_roaming_without_plan_subtext" msgid="6536671968072284677">"सध्या रोमिंग, डेटा योजना आवश्यक आहे"</string>
-    <string name="mobile_data_status_roaming_with_plan_subtext" msgid="2576177169108123095">"सध्या रोमिंग, डेटा योजना सक्रिय आहे"</string>
+    <string name="mobile_data_status_roaming_without_plan_subtext" msgid="6536671968072284677">"सध्या रोमिंगमध्ये आहे, डेटा प्लॅन आवश्यक आहे"</string>
+    <string name="mobile_data_status_roaming_with_plan_subtext" msgid="2576177169108123095">"सध्या रोमिंगमध्ये आहे, डेटा प्लॅन अ‍ॅक्टिव्ह आहे"</string>
     <string name="mobile_data_status_no_plan_subtext" msgid="170331026419263657">"मोबाइल डेटा शिल्लक नाही"</string>
     <string name="mobile_data_activate_prepaid" msgid="4276738964416795596">"मोबाइल डेटा शिल्लक नाही"</string>
     <string name="mobile_data_activate_prepaid_summary" msgid="6846085278531605925">"<xliff:g id="PROVIDER_NAME">%s</xliff:g> द्वारे मोबाइल डेटा जोडा"</string>
@@ -949,7 +949,7 @@
     <string name="band_mode_loading" msgid="795923726636735967">"बँड सूची लोड करत आहे…"</string>
     <string name="band_mode_set" msgid="6657819412803771421">"सेट करा"</string>
     <string name="band_mode_failed" msgid="1707488541847192924">"करता आले नाही"</string>
-    <string name="band_mode_succeeded" msgid="2230018000534761063">"यशस्वी"</string>
+    <string name="band_mode_succeeded" msgid="2230018000534761063">"यशस्वी झाले"</string>
     <string name="phone_info_label" product="tablet" msgid="7477478709388477397">"टॅबलेट माहिती"</string>
     <string name="phone_info_label" product="default" msgid="1784175881556791433">"फोनची माहिती"</string>
     <string name="tab_title_device_details" msgid="6988777232978544580">"डिव्हाइससंबंधित तपशील"</string>
@@ -974,6 +974,7 @@
     <string name="satellite_config_version_label" msgid="1153447193166314791">"आवृत्ती:"</string>
     <string name="satellite_config_version_for_skylo_label" msgid="7068241597009832840">"Skylo ची आवृत्ती:"</string>
     <string name="satellite_max_allowed_data_mode_label" msgid="1808484802651916339">"कमाल डेटाची अनुमती असलेला मोड:"</string>
+    <string name="satellite_provider_plmn_list_label" msgid="7289533883006851963">"सर्व सॅटेलाइट पुरवठादारांचे plmns:"</string>
     <string name="satellite_config_version_for_starlink_label" msgid="7984209491963621773">"Starlink ची आवृत्ती:"</string>
     <string name="satellite_config_service_type_label" msgid="21749170241956082">"subId/plmn/servicetype:"</string>
     <string name="satellite_config_allow_access_label" msgid="3806779900418131140">"allow_access:"</string>

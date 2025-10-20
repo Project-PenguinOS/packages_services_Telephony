@@ -625,7 +625,7 @@
     <string name="ota_title_activate" msgid="4049645324841263423">"Aktibatu telefonoa"</string>
     <string name="ota_touch_activate" msgid="838764494319694754">"Telefono-zerbitzua aktibatzeko, dei berezi bat egin behar da.\n\n\"Aktibatu\" sakatu ondoren, telefonoa aktibatzeko, entzun ematen zaizkizun argibideak."</string>
     <string name="ota_hfa_activation_title" msgid="3300556778212729671">"Aktibatzen…"</string>
-    <string name="ota_hfa_activation_dialog_message" msgid="7921718445773342996">"Telefonoa mugikorretarako datu-zerbitzua aktibatzen ari da.\n\nEragiketa gehienez 5 minutu luza daiteke."</string>
+    <string name="ota_hfa_activation_dialog_message" msgid="7921718445773342996">"Telefonoa datu-konexioaren zerbitzua aktibatzen ari da.\n\nEragiketa gehienez 5 minutu luza daiteke."</string>
     <string name="ota_skip_activation_dialog_title" msgid="7666611236789203797">"Aktibazioa saltatu nahi duzu?"</string>
     <string name="ota_skip_activation_dialog_message" msgid="6691722887019708713">"Aktibazioa saltatzen baduzu, ezingo duzu deirik egin, ez eta datu-konexioaren sareetara konektatu ere, baina Wi-Fi sareetara konektatu ahal izango duzu. Telefonoa aktibatzen duzun arte, pizten duzun bakoitzean eskatuko zaizu aktibatzeko."</string>
     <string name="ota_skip_activation_dialog_skip_label" msgid="5908029466817825633">"Saltatu"</string>
@@ -974,6 +974,7 @@
     <string name="satellite_config_version_label" msgid="1153447193166314791">"bertsioa:"</string>
     <string name="satellite_config_version_for_skylo_label" msgid="7068241597009832840">"skylo-ren bertsioa:"</string>
     <string name="satellite_max_allowed_data_mode_label" msgid="1808484802651916339">"baimendutako gehieneko datuen modua:"</string>
+    <string name="satellite_provider_plmn_list_label" msgid="7289533883006851963">"PLMN satelite-hornitzaile guztiak:"</string>
     <string name="satellite_config_version_for_starlink_label" msgid="7984209491963621773">"starlink-en bertsioa:"</string>
     <string name="satellite_config_service_type_label" msgid="21749170241956082">"subId/plmn/servicetype:"</string>
     <string name="satellite_config_allow_access_label" msgid="3806779900418131140">"allow_access:"</string>

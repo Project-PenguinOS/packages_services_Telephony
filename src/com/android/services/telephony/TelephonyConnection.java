@@ -1367,39 +1367,43 @@ abstract class TelephonyConnection extends Connection implements Holdable, Commu
     public void performUnhold() {
         Log.v(this, "performUnhold");
         if (Call.State.HOLDING == mConnectionState) {
-            try {
-                Phone phone = mOriginalConnection.getCall().getPhone();
-                // New behavior for IMS -- don't use the clunky switchHoldingAndActive logic.
-                if (phone.getPhoneType() == PhoneConstants.PHONE_TYPE_IMS) {
-                    ImsPhone imsPhone = (ImsPhone) phone;
-                    imsPhone.unholdHeldCall();
-                    return;
-                }
-                // Here's the deal--Telephony hold/unhold is weird because whenever there exists
-                // more than one call, one of them must always be active. In other words, if you
-                // have an active call and holding call, and you put the active call on hold, it
-                // will automatically activate the holding call. This is weird with how Telecom
-                // sends its commands. When a user opts to "unhold" a background call, telecom
-                // issues hold commands to all active calls, and then the unhold command to the
-                // background call. This means that we get two commands...each of which reduces to
-                // switchHoldingAndActive(). The result is that they simply cancel each other out.
-                // To fix this so that it works well with telecom we add a minor hack. If we
-                // have one telephony call, everything works as normally expected. But if we have
-                // two or more calls, we will ignore all requests to "unhold" knowing that the hold
-                // requests already do what we want. If you've read up to this point, I'm very sorry
-                // that we are doing this. I didn't think of a better solution that wouldn't also
-                // make the Telecom APIs very ugly.
-
-                if (!hasMultipleTopLevelCalls()) {
-                    mOriginalConnection.getCall().getPhone().switchHoldingAndActive();
-                } else {
-                    Log.i(this, "Skipping unhold command for %s", this);
-                }
-            } catch (CallStateException e) {
-                Log.e(this, e, "Exception occurred while trying to release call from hold.");
-            }
+            sendUnhold();
         } else {
             Log.w(this, "Cannot release a call that is not already on hold from hold.");
+        }
+    }
+
+    private void sendUnhold() {
+        try {
+            Phone phone = mOriginalConnection.getCall().getPhone();
+            // New behavior for IMS -- don't use the clunky switchHoldingAndActive logic.
+            if (phone.getPhoneType() == PhoneConstants.PHONE_TYPE_IMS) {
+                ImsPhone imsPhone = (ImsPhone) phone;
+                imsPhone.unholdHeldCall();
+                return;
+            }
+            // Here's the deal--Telephony hold/unhold is weird because whenever there exists
+            // more than one call, one of them must always be active. In other words, if you
+            // have an active call and holding call, and you put the active call on hold, it
+            // will automatically activate the holding call. This is weird with how Telecom
+            // sends its commands. When a user opts to "unhold" a background call, telecom
+            // issues hold commands to all active calls, and then the unhold command to the
+            // background call. This means that we get two commands...each of which reduces to
+            // switchHoldingAndActive(). The result is that they simply cancel each other out.
+            // To fix this so that it works well with telecom we add a minor hack. If we
+            // have one telephony call, everything works as normally expected. But if we have
+            // two or more calls, we will ignore all requests to "unhold" knowing that the hold
+            // requests already do what we want. If you've read up to this point, I'm very sorry
+            // that we are doing this. I didn't think of a better solution that wouldn't also
+            // make the Telecom APIs very ugly.
+
+            if (!hasMultipleTopLevelCalls()) {
+                mOriginalConnection.getCall().getPhone().switchHoldingAndActive();
+            } else {
+                Log.i(this, "Skipping unhold command for %s", this);
+            }
+        } catch (CallStateException e) {
+            Log.e(this, e, "Exception occurred while trying to release call from hold.");
         }
     }
 
@@ -2618,12 +2622,11 @@ abstract class TelephonyConnection extends Connection implements Holdable, Commu
                             preciseDisconnectCause =
                                     mOriginalConnection.getPreciseDisconnectCause();
                         }
-                        int disconnectCause = mOriginalConnection.getDisconnectCause();
                         if ((mHangupDisconnectCause != DisconnectCause.NOT_VALID)
-                                && (mHangupDisconnectCause != disconnectCause)) {
-                            Log.i(LOG_TAG, "setDisconnected: override cause: " + disconnectCause
+                                && (mHangupDisconnectCause != cause)) {
+                            Log.i(LOG_TAG, "setDisconnected: override cause: " + cause
                                     + " -> " + mHangupDisconnectCause);
-                            disconnectCause = mHangupDisconnectCause;
+                            cause = mHangupDisconnectCause;
                         }
                         ImsReasonInfo imsReasonInfo = null;
                         if (isImsConnection()) {
@@ -2631,14 +2634,27 @@ abstract class TelephonyConnection extends Connection implements Holdable, Commu
                                     (ImsPhoneConnection) mOriginalConnection;
                             imsReasonInfo = imsPhoneConnection.getImsReasonInfo();
                         }
-                        setTelephonyConnectionDisconnected(
-                                DisconnectCauseUtil.toTelecomDisconnectCause(
-                                        disconnectCause,
+                        android.telecom.DisconnectCause disconnectCause = DisconnectCauseUtil
+                                .toTelecomDisconnectCause(
+                                        cause,
                                         preciseDisconnectCause,
                                         mOriginalConnection.getVendorDisconnectCause(),
                                         getPhone().getPhoneId(), imsReasonInfo,
                                         new FlagsAdapterImpl(),
-                                        shouldTreatAsEmergencyCall()));
+                                        shouldTreatAsEmergencyCall());
+                        setTelephonyConnectionDisconnected(disconnectCause);
+
+                        // Check carrier config and that the call was remotely disconnected
+                        boolean isAutoUnholdSupported = Flags.supportAutoUnhold()
+                                && getCarrierConfig().getBoolean(
+                                        CarrierConfigManager
+                                                .KEY_AUTO_UNHOLD_ON_REMOTE_DISCONNECT_BOOL)
+                                && disconnectCause.getCode()
+                                == android.telecom.DisconnectCause.REMOTE;
+                        // Try unholding the background call if it exists.
+                        if (isAutoUnholdSupported) {
+                            sendUnhold();
+                        }
                         close();
                     }
                     break;

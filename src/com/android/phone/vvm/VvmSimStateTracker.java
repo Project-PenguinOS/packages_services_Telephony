@@ -28,6 +28,7 @@ import android.telecom.PhoneAccountHandle;
 import android.telecom.TelecomManager;
 import android.telephony.CarrierConfigManager;
 import android.telephony.ServiceState;
+import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
@@ -172,6 +173,13 @@ public class VvmSimStateTracker extends BroadcastReceiver {
                     return;
                 }
 
+                // Ignore bootstrap SIM so VvmService is not notified
+                if (isBootstrapSubscription(context, subId)) {
+                    VvmLog.i(TAG, "onReceive: carrier config changed. Ignore bootstrap SIM"
+                                    + " with subId=" + subId);
+                    return;
+                }
+
                 PhoneAccountHandle phoneAccountHandle =
                         PhoneAccountHandleConverter.fromSubId(subId);
 
@@ -284,5 +292,20 @@ public class VvmSimStateTracker extends BroadcastReceiver {
             PhoneAccountHandle phoneAccountHandle) {
         return context.getSystemService(TelephonyManager.class)
                 .createForPhoneAccountHandle(phoneAccountHandle);
+    }
+
+    private boolean isBootstrapSubscription(Context context, int subId) {
+        SubscriptionManager subscriptionManager
+                = context.getSystemService(SubscriptionManager.class);
+        if (subscriptionManager != null) {
+            SubscriptionInfo subInfo = subscriptionManager.getActiveSubscriptionInfo(subId);
+            if (subInfo != null && subInfo.getProfileClass()
+                                == SubscriptionManager.PROFILE_CLASS_PROVISIONING) {
+                VvmLog.i(TAG, "isBootstrapSubscription: Found bootstrap subscription subId="
+                        + subId);
+                    return true;
+            }
+        }
+        return false;
     }
 }

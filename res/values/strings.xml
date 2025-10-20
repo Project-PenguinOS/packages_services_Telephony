@@ -15,6 +15,8 @@
 -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- DO NOT TRANSLATE. Internal key for a telephony attribution tag. -->
+    <string name="telephony_attribution_tag">Telephony</string>
 
     <!-- Official label of the phone app, as seen in "Manage Applications"
          and other settings UIs.  This is the version of the label for
@@ -1051,7 +1053,7 @@
     <!-- "Delete FDN Contact" screen: status message displayed in a popup (toast) -->
     <string name="fdn_contact_deleted">Fixed dialing number deleted.</string>
     <!-- FDN settings: error message displayed in a popup (toast) -->
-    <string name="pin2_invalid">FDN wasn\'t updated because you typed an incorrect PIN.</string>
+    <string name="pin2_invalid">Incorrect PIN2. FDN not updated.</string>
     <!-- FDN settings: error message displayed in a popup (toast) -->
     <string name="fdn_invalid_number">FDN wasn\'t updated because the number exceeds <xliff:g id="FDN_NUMBER_LIMIT_LENGTH">%d</xliff:g> digits.</string>
     <!-- FDN settings: error message displayed in a popup (toast), when the entered
@@ -2301,6 +2303,8 @@
     <string name="satellite_config_version_for_skylo_label">skylo version: </string>
     <!-- Satellite config viewer screen. Label for the max allowed data mode -->
     <string name="satellite_max_allowed_data_mode_label">max allowed data mode: </string>
+    <!-- Satellite config viewer screen. Label for the satellite provider plmn list -->
+    <string name="satellite_provider_plmn_list_label">all satellite providers plmns: </string>
     <!-- Satellite config viewer screen. Label for the config data version for starlink -->
     <string name="satellite_config_version_for_starlink_label">starlink version: </string>
     <!-- Satellite config viewer screen. Label for the subId/plmn/servicetype -->

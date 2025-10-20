@@ -126,7 +126,7 @@
     <string name="disable_cfnrc_forbidden" msgid="775348748084726890">"O seu operador não suporta a desativação do encaminhamento de chamadas quando o telemóvel não está acessível."</string>
     <string name="registration_cf_forbidden" msgid="4386482610771190420">"O seu operador não suporta encaminhamento de chamadas."</string>
     <string name="cdma_call_waiting" msgid="4565070960879673216">"Ativar chamada em espera?"</string>
-    <string name="enable_cdma_call_waiting_setting" msgid="5906811747921744307">"Durante uma chamada, será notificado sobre as chamadas recebidas."</string>
+    <string name="enable_cdma_call_waiting_setting" msgid="5906811747921744307">"Durante uma chamada, recebe notificações sobre as chamadas recebidas."</string>
     <string name="enable_cdma_cw" msgid="811047045863422232">"Ativar"</string>
     <string name="disable_cdma_cw" msgid="7119290446496301734">"Cancelar"</string>
     <string name="cdma_call_waiting_in_ims_on" msgid="6390979414188659218">"Chamada em espera CDMA em IMS ativada"</string>
@@ -185,7 +185,7 @@
     <string name="registration_done" msgid="5337407023566953292">"Registado na rede."</string>
     <string name="already_auto" msgid="8607068290733079336">"A seleção automática já está ativada."</string>
     <string name="select_automatically" msgid="779750291257872651">"Selecionar automaticamente a rede"</string>
-    <string name="manual_mode_disallowed_summary" msgid="3970048592179890197">"Indisponível quando está ligado a %1$s"</string>
+    <string name="manual_mode_disallowed_summary" msgid="3970048592179890197">"Indisponível quando tem ligação a %1$s"</string>
     <string name="network_select_title" msgid="4117305053881611988">"Rede"</string>
     <string name="register_automatically" msgid="3907580547590554834">"Registo automático..."</string>
     <string name="preferred_network_mode_title" msgid="5253395265169539830">"Tipo de rede preferencial"</string>
@@ -974,6 +974,7 @@
     <string name="satellite_config_version_label" msgid="1153447193166314791">"versão:"</string>
     <string name="satellite_config_version_for_skylo_label" msgid="7068241597009832840">"versão do Skylo:"</string>
     <string name="satellite_max_allowed_data_mode_label" msgid="1808484802651916339">"modo de dados máximo permitido:"</string>
+    <string name="satellite_provider_plmn_list_label" msgid="7289533883006851963">"plmns de todos os fornecedores de satélite:"</string>
     <string name="satellite_config_version_for_starlink_label" msgid="7984209491963621773">"versão do Starlink:"</string>
     <string name="satellite_config_service_type_label" msgid="21749170241956082">"subId/plmn/servicetype:"</string>
     <string name="satellite_config_allow_access_label" msgid="3806779900418131140">"permitir acesso:"</string>

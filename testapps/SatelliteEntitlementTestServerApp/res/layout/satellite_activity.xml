@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".SatelliteEntitlementTestServerApp"
     android:orientation="vertical"
-    android:gravity="center_vertical">>
+    android:gravity="center_vertical">
     <Button
         android:id="@+id/serverButton"
         android:layout_width="wrap_content"

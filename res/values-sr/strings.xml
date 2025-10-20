@@ -707,7 +707,7 @@
     <string name="change_pin_system_error" msgid="7772788809875146873">"Подешавање PIN-а није успело"</string>
     <string name="mobile_data_status_roaming_turned_off_subtext" msgid="6840673347416227054">"Пренос података у ромингу је искључен"</string>
     <string name="mobile_data_status_roaming_turned_on_subtext" msgid="5615757897768777865">"Пренос података у ромингу је укључен"</string>
-    <string name="mobile_data_status_roaming_without_plan_subtext" msgid="6536671968072284677">"Тренутно сте у ромингу, потребан вам је пакет за пренос података"</string>
+    <string name="mobile_data_status_roaming_without_plan_subtext" msgid="6536671968072284677">"Тренутно сте у ромингу, потребан вам је тарифни пакет за податке"</string>
     <string name="mobile_data_status_roaming_with_plan_subtext" msgid="2576177169108123095">"Тренутно сте у ромингу, пакет за пренос података је активан"</string>
     <string name="mobile_data_status_no_plan_subtext" msgid="170331026419263657">"Нема преосталих мобилних података"</string>
     <string name="mobile_data_activate_prepaid" msgid="4276738964416795596">"Нема преосталих мобилних података"</string>
@@ -974,6 +974,7 @@
     <string name="satellite_config_version_label" msgid="1153447193166314791">"верзија:"</string>
     <string name="satellite_config_version_for_skylo_label" msgid="7068241597009832840">"skylo верзија:"</string>
     <string name="satellite_max_allowed_data_mode_label" msgid="1808484802651916339">"режим максимално дозвољених података:"</string>
+    <string name="satellite_provider_plmn_list_label" msgid="7289533883006851963">"сви plmn-ови добављача сателитских услуга:"</string>
     <string name="satellite_config_version_for_starlink_label" msgid="7984209491963621773">"starlink верзија:"</string>
     <string name="satellite_config_service_type_label" msgid="21749170241956082">"subId/plmn/servicetype:"</string>
     <string name="satellite_config_allow_access_label" msgid="3806779900418131140">"дозволи_приступ:"</string>

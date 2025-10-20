@@ -585,7 +585,7 @@
     <string name="fire_type_description" msgid="6565200468934914930">"Hỏa hoạn"</string>
     <string name="description_concat_format" msgid="2014471565101724088">"%1$s, %2$s"</string>
     <string name="dialerKeyboardHintText" msgid="1115266533703764049">"Sử dụng bàn phím để quay số"</string>
-    <string name="onscreenHoldText" msgid="4025348842151665191">"Giữ"</string>
+    <string name="onscreenHoldText" msgid="4025348842151665191">"Giữ máy"</string>
     <string name="onscreenEndCallText" msgid="6138725377654842757">"Kết thúc"</string>
     <string name="onscreenShowDialpadText" msgid="658465753816164079">"Bàn phím số"</string>
     <string name="onscreenMuteText" msgid="5470306116733843621">"Tắt tiếng"</string>
@@ -974,6 +974,7 @@
     <string name="satellite_config_version_label" msgid="1153447193166314791">"phiên bản:"</string>
     <string name="satellite_config_version_for_skylo_label" msgid="7068241597009832840">"phiên bản skylo:"</string>
     <string name="satellite_max_allowed_data_mode_label" msgid="1808484802651916339">"chế độ dữ liệu tối đa được phép:"</string>
+    <string name="satellite_provider_plmn_list_label" msgid="7289533883006851963">"tất cả mạng di động công cộng mặt đất của các nhà cung cấp dịch vụ vệ tinh:"</string>
     <string name="satellite_config_version_for_starlink_label" msgid="7984209491963621773">"phiên bản starlink:"</string>
     <string name="satellite_config_service_type_label" msgid="21749170241956082">"subId/plmn/servicetype:"</string>
     <string name="satellite_config_allow_access_label" msgid="3806779900418131140">"allow_access:"</string>

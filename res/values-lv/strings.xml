@@ -193,7 +193,7 @@
     <string name="preferred_network_mode_dialogtitle" msgid="2781447433514459696">"Ieteicamais tīkla veids"</string>
     <string name="forbidden_network" msgid="5081729819561333023">"(aizliegts)"</string>
     <string name="choose_network_title" msgid="5335832663422653082">"Izvēlēties tīklu"</string>
-    <string name="network_disconnected" msgid="8844141106841160825">"Savienojums pārtraukts"</string>
+    <string name="network_disconnected" msgid="8844141106841160825">"Atvienots"</string>
     <string name="network_connected" msgid="2760235679963580224">"Savienojums izveidots"</string>
     <string name="network_connecting" msgid="160901383582774987">"Notiek savienojuma izveide..."</string>
     <string name="network_could_not_connect" msgid="6547460848093727998">"Nevarēja izveidot savienojumu"</string>
@@ -881,7 +881,7 @@
     <string name="radio_info_ims_reg_status_registered" msgid="7095182114078864326">"Reģistrēts"</string>
     <string name="radio_info_ims_reg_status_not_registered" msgid="8045821447288876085">"Nav reģistrēts"</string>
     <string name="radio_info_ims_feature_status_available" msgid="6493200914756969292">"Pieejams"</string>
-    <string name="radio_info_ims_feature_status_unavailable" msgid="8930391136839759778">"Nav pieejama"</string>
+    <string name="radio_info_ims_feature_status_unavailable" msgid="8930391136839759778">"Nav pieejams"</string>
     <string name="radio_info_ims_reg_status" msgid="25582845222446390">"Tūlītējās ziņojumapmaiņas reģistrācija: <xliff:g id="STATUS">%1$s</xliff:g>\nBalss pārraide ar LTE: <xliff:g id="AVAILABILITY_0">%2$s</xliff:g>\nBalss pārraide ar Wi-Fi: <xliff:g id="AVAILABILITY_1">%3$s</xliff:g>\nVideozvani: <xliff:g id="AVAILABILITY_2">%4$s</xliff:g>\nUT saskarne: <xliff:g id="AVAILABILITY_3">%5$s</xliff:g>"</string>
     <string name="radioInfo_service_in" msgid="45753418231446400">"Darbojas"</string>
     <string name="radioInfo_service_out" msgid="287972405416142312">"Nedarbojas"</string>
@@ -974,6 +974,7 @@
     <string name="satellite_config_version_label" msgid="1153447193166314791">"versija:"</string>
     <string name="satellite_config_version_for_skylo_label" msgid="7068241597009832840">"skylo versija:"</string>
     <string name="satellite_max_allowed_data_mode_label" msgid="1808484802651916339">"maksimāli atļautais datu režīms:"</string>
+    <string name="satellite_provider_plmn_list_label" msgid="7289533883006851963">"visi satelīta pakalpojumu nodrošinātāju PLMN tīkli:"</string>
     <string name="satellite_config_version_for_starlink_label" msgid="7984209491963621773">"starlink versija:"</string>
     <string name="satellite_config_service_type_label" msgid="21749170241956082">"subId/plmn/servicetype:"</string>
     <string name="satellite_config_allow_access_label" msgid="3806779900418131140">"atļaut piekļuvi:"</string>

@@ -606,7 +606,7 @@
     <string name="hac_mode_summary" msgid="7774989500136009881">"শ্ৰৱণ যন্ত্ৰ খাপ খুউৱাৰ সুবিধা অন কৰক"</string>
     <string name="rtt_mode_title" msgid="3075948111362818043">"প্ৰকৃত সময়ত বাৰ্তা (RTT) কল"</string>
     <string name="rtt_mode_summary" msgid="8631541375609989562">"ভইচ কল চলি থকাৰ সময়ত বাৰ্তা পঠিওৱাৰ অনুমতি দিয়ক"</string>
-    <string name="rtt_mode_more_information" msgid="587500128658756318">"RTTয়ে বধিৰ বা শ্ৰৱণশক্তি কম থকা, বাকশক্তি সম্পৰ্কীয় দিব্য়াংগ বা কল কৰোঁতে কণ্ঠস্বৰতকৈ অধিক সুবিধাৰ প্ৰয়োজন হোৱা ব্য়ক্তিসকলক সহায় কৰে।&lt;br&gt; &lt;a href=<xliff:g id="URL">http://support.google.com/mobile?p=telephony_rtt</xliff:g>&gt;অধিক জানক&lt;/a&gt;\n       &lt;br&gt;&lt;br&gt; - RTT কলসমূহক বাৰ্তাৰ ট্ৰান্সক্ৰিপ্ট হিচাপে ছেভ কৰা হয়\n       &lt;br&gt; - RTT ভিডিঅ\' কলৰ বাবে উপলব্ধ নহয়"</string>
+    <string name="rtt_mode_more_information" msgid="587500128658756318">"RTTয়ে বধিৰ বা শ্ৰৱণশক্তি কম থকা, বাকশক্তি সম্পৰ্কীয় দিব্যাংগ বা কল কৰোঁতে কণ্ঠস্বৰতকৈ অধিক সুবিধাৰ প্ৰয়োজন হোৱা ব্যক্তিসকলক সহায় কৰে।&lt;br&gt; &lt;a href=<xliff:g id="URL">http://support.google.com/mobile?p=telephony_rtt</xliff:g>&gt;অধিক জানক&lt;/a&gt;\n       &lt;br&gt;&lt;br&gt; - RTT কলসমূহক বাৰ্তাৰ ট্ৰান্সক্ৰিপ্ট হিচাপে ছেভ কৰা হয়\n       &lt;br&gt; - RTT ভিডিঅ\' কলৰ বাবে উপলব্ধ নহয়"</string>
     <string name="no_rtt_when_roaming" msgid="5268008247378355389">"টোকা: ৰ’মিঙত থাকোঁতে RTT উপলব্ধ নহয়"</string>
   <string-array name="tty_mode_entries">
     <item msgid="3238070884803849303">"TTY বন্ধ হৈ আছে"</item>
@@ -974,6 +974,7 @@
     <string name="satellite_config_version_label" msgid="1153447193166314791">"সংস্কৰণ:"</string>
     <string name="satellite_config_version_for_skylo_label" msgid="7068241597009832840">"Skyloৰ সংস্কৰণ:"</string>
     <string name="satellite_max_allowed_data_mode_label" msgid="1808484802651916339">"সৰ্বোচ্চ অনুমোদিত ডেটা ম’ড:"</string>
+    <string name="satellite_provider_plmn_list_label" msgid="7289533883006851963">"আটাইবোৰ উপগ্ৰহ সেৱা প্ৰদানকাৰীৰ plmns:"</string>
     <string name="satellite_config_version_for_starlink_label" msgid="7984209491963621773">"Starlinkৰ সংস্কৰণ:"</string>
     <string name="satellite_config_service_type_label" msgid="21749170241956082">"subId/plmn/servicetype:"</string>
     <string name="satellite_config_allow_access_label" msgid="3806779900418131140">"allow_access:"</string>

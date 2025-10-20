@@ -16,6 +16,8 @@
 
 package com.android.phone;
 
+import static com.android.internal.telephony.util.TelephonyUtils.TELEPHONY_FEATURE_ENFORCEMENT_VENDOR_API_LEVEL;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -42,11 +44,11 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.os.Build;
 import android.os.UserHandle;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.telephony.RadioAccessFamily;
 import android.telephony.Rlog;
 import android.telephony.TelephonyManager;
@@ -542,10 +544,9 @@ public class PhoneInterfaceManagerTest extends TelephonyTestBase {
     @Test
     @EnableCompatChanges({TelephonyManager.ENABLE_FEATURE_MAPPING})
     public void testWithoutTelephonyFeatureAndCompatChanges() throws Exception {
-        // Replace field to set SDK version of vendor partition to Android V
-        int vendorApiLevel = Build.VERSION_CODES.VANILLA_ICE_CREAM;
+        // Replace field to set vendor API level to the one where the exceptions are enabled.
         replaceInstance(PhoneInterfaceManager.class, "mVendorApiLevel", mPhoneInterfaceManager,
-                vendorApiLevel);
+                TELEPHONY_FEATURE_ENFORCEMENT_VENDOR_API_LEVEL);
 
         // telephony features is not defined, expect UnsupportedOperationException.
         doReturn(false).when(mPackageManager).hasSystemFeature(
@@ -737,5 +738,74 @@ public class PhoneInterfaceManagerTest extends TelephonyTestBase {
         assertNotNull(actualSimTypes);
         assertEquals(1, actualSimTypes.length);
         assertArrayEquals(expectedSimTypes, actualSimTypes);
+    }
+
+    @Test
+    public void testGetCurrentTtyMode_returnsCorrectValue() {
+        // Setup: Mock permissions and feature checks to pass
+        doNothing().when(mPhoneInterfaceManager).enforceReadPrivilegedPermission(anyString());
+        doReturn(mPhone).when(mPhoneInterfaceManager).getDefaultPhone();
+        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        when(mPhone.getContext()).thenReturn(context);
+
+        // Set the TTY mode setting to a specific value
+        int expectedTtyMode = TelephonyManager.TTY_MODE_HCO;
+        Settings.Secure.putIntForUser(context.getContentResolver(),
+                Settings.Secure.PREFERRED_TTY_MODE, expectedTtyMode, context.getUserId());
+
+        // Action: Call the method under test
+        int actualTtyMode = mPhoneInterfaceManager.getCurrentTtyMode();
+
+        // Assert: The correct TTY mode is returned
+        assertEquals(expectedTtyMode, actualTtyMode);
+
+        // Cleanup
+        Settings.Secure.putIntForUser(context.getContentResolver(),
+                Settings.Secure.PREFERRED_TTY_MODE, TelephonyManager.TTY_MODE_OFF,
+                context.getUserId());
+    }
+
+    @Test
+    public void testGetCurrentTtyMode_settingNotFound_returnsDefault() {
+        // Setup: Mock permissions and feature checks to pass
+        doNothing().when(mPhoneInterfaceManager).enforceReadPrivilegedPermission(anyString());
+        doReturn(mPhone).when(mPhoneInterfaceManager).getDefaultPhone();
+        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        when(mPhone.getContext()).thenReturn(context);
+
+        // Ensure the setting is not present
+        Settings.Secure.putIntForUser(context.getContentResolver(),
+                Settings.Secure.PREFERRED_TTY_MODE, TelephonyManager.TTY_MODE_OFF,
+                context.getUserId());
+
+        // Action: Call the method under test
+        int actualTtyMode = mPhoneInterfaceManager.getCurrentTtyMode();
+
+        // Assert: The default TTY mode is returned
+        assertEquals(TelephonyManager.TTY_MODE_OFF, actualTtyMode);
+    }
+
+    @Test
+    public void testGetCurrentTtyMode_noPermission_throwsSecurityException() {
+        // Setup: Mock permission check to fail
+        doThrow(new SecurityException("Test Exception")).when(mPhoneInterfaceManager)
+                .enforceReadPrivilegedPermission(anyString());
+
+        // Action & Assert: Expect a SecurityException
+        assertThrows(SecurityException.class, () -> mPhoneInterfaceManager.getCurrentTtyMode());
+    }
+
+    @Test
+    public void testGetCurrentTtyMode_featureNotSupported_throwsException() throws Exception {
+        // Setup: Mock permissions to pass, but feature check to fail
+        doNothing().when(mPhoneInterfaceManager).enforceReadPrivilegedPermission(anyString());
+        replaceInstance(PhoneInterfaceManager.class, "mVendorApiLevel", mPhoneInterfaceManager,
+                TELEPHONY_FEATURE_ENFORCEMENT_VENDOR_API_LEVEL);
+        doReturn(false).when(mPackageManager)
+                .hasSystemFeature(PackageManager.FEATURE_TELEPHONY_CALLING);
+
+        // Action & Assert: Expect an UnsupportedOperationException
+        assertThrows(UnsupportedOperationException.class,
+                () -> mPhoneInterfaceManager.getCurrentTtyMode());
     }
 }

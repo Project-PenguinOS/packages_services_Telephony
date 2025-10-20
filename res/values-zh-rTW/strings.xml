@@ -974,6 +974,7 @@
     <string name="satellite_config_version_label" msgid="1153447193166314791">"版本："</string>
     <string name="satellite_config_version_for_skylo_label" msgid="7068241597009832840">"Skylo 版本："</string>
     <string name="satellite_max_allowed_data_mode_label" msgid="1808484802651916339">"允許使用的最高資料模式："</string>
+    <string name="satellite_provider_plmn_list_label" msgid="7289533883006851963">"所有衛星電視業者公眾陸地行動網路："</string>
     <string name="satellite_config_version_for_starlink_label" msgid="7984209491963621773">"Starlink 版本："</string>
     <string name="satellite_config_service_type_label" msgid="21749170241956082">"子 ID/PLMN/服務類型："</string>
     <string name="satellite_config_allow_access_label" msgid="3806779900418131140">"允許存取："</string>

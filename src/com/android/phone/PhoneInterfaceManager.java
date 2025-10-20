@@ -96,6 +96,7 @@ import android.telephony.ActivityStatsTechSpecificInfo;
 import android.telephony.Annotation.ApnType;
 import android.telephony.Annotation.DataActivityType;
 import android.telephony.Annotation.ThermalMitigationResult;
+import android.telephony.Annotation.TtyMode;
 import android.telephony.AnomalyReporter;
 import android.telephony.CallForwardingInfo;
 import android.telephony.CarrierConfigManager;
@@ -243,6 +244,7 @@ import com.android.internal.telephony.subscription.SubscriptionManagerService;
 import com.android.internal.telephony.uicc.IccCardApplicationStatus.AppType;
 import com.android.internal.telephony.uicc.IccIoResult;
 import com.android.internal.telephony.uicc.IccUtils;
+import com.android.internal.telephony.uicc.PinStorage;
 import com.android.internal.telephony.uicc.SIMRecords;
 import com.android.internal.telephony.uicc.UiccCard;
 import com.android.internal.telephony.uicc.UiccCardApplication;
@@ -2132,10 +2134,19 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
 
                 case CMD_PREPARE_UNATTENDED_REBOOT:
                     request = (MainThreadRequest) msg.obj;
-                    request.result =
-                            UiccController.getInstance().getPinStorage()
-                                    .prepareUnattendedReboot(request.workSource);
-                    notifyRequester(request);
+                    PinStorage pinStorage = UiccController.getInstance().getPinStorage();
+                    if (!mFeatureFlags.useWorkerThreadForPinstorageKeystoreApis()) {
+                        MainThreadRequest finalRequest = request;
+                        pinStorage.post(() -> {
+                            finalRequest.result =
+                                    pinStorage.prepareUnattendedReboot(finalRequest.workSource);
+                            notifyRequester(finalRequest);
+                        });
+                    } else {
+                        request.result =
+                                pinStorage.prepareUnattendedReboot(request.workSource);
+                        notifyRequester(request);
+                    }
                     break;
 
                 default:
@@ -2740,6 +2751,25 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
+    }
+
+    @Override
+    public @TtyMode int getCurrentTtyMode() {
+        enforceReadPrivilegedPermission("Needs READ_PRIVILEGED_PHONE_STATE for "
+                + "getCurrentTtyMode");
+        enforceTelephonyFeatureWithException(getCurrentPackageName(),
+                PackageManager.FEATURE_TELEPHONY_CALLING, "getCurrentTtyMode");
+        final Phone defaultPhone = getDefaultPhone();
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return Settings.Secure.getIntForUser(defaultPhone.getContext().getContentResolver(),
+                    Settings.Secure.PREFERRED_TTY_MODE, defaultPhone.getContext().getUserId());
+        } catch (Settings.SettingNotFoundException e) {
+            Log.w(LOG_TAG, "Secure setting not found: ", e);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+        return TelephonyManager.TTY_MODE_OFF;
     }
 
     @Deprecated
@@ -3369,6 +3399,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
 
     @Override
     public List<CellInfo> getAllCellInfo(String callingPackage, String callingFeatureId) {
+        log("getAllCellInfo: package=" + callingPackage + ", uid=" + Binder.getCallingUid());
         mApp.getSystemService(AppOpsManager.class)
                 .checkPackage(Binder.getCallingUid(), callingPackage);
 
@@ -3395,12 +3426,9 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
 
         mAppOps = Objects.requireNonNull(
             getDefaultPhone().getContext().getSystemService(AppOpsManager.class));
-        mAppOps.noteOpNoThrow(
-            mAppOps.OP_READ_CELL_INFO,
-            Binder.getCallingUid(),
-            getDefaultPhone().getContext().getPackageName(),
-            getDefaultPhone().getContext().getAttributionTag(),
-            "getAllCellInfo reporting cell info");
+        mAppOps.noteOpNoThrow(mAppOps.OP_READ_CELL_INFO,
+                Binder.getCallingUid(), callingPackage, callingFeatureId,
+                "getAllCellInfo reporting cell info");
 
         final int targetSdk = TelephonyPermissions.getTargetSdk(mApp, callingPackage);
         if (targetSdk >= android.os.Build.VERSION_CODES.Q) {
@@ -3480,12 +3508,8 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
 
         mAppOps = Objects.requireNonNull(
             getDefaultPhone().getContext().getSystemService(AppOpsManager.class));
-        mAppOps.noteOpNoThrow(
-            mAppOps.OP_READ_CELL_INFO,
-            Binder.getCallingUid(),
-            getDefaultPhone().getContext().getPackageName(),
-            getDefaultPhone().getContext().getAttributionTag(),
-            "requestCellInfoUpdate reporting cell info");
+        mAppOps.noteOpNoThrow(mAppOps.OP_READ_CELL_INFO, Binder.getCallingUid(),
+                callingPackage, callingFeatureId, "requestCellInfoUpdate reporting cell info");
 
         final Phone phone = getPhoneFromSubId(subId);
         if (phone == null) throw new IllegalArgumentException("Invalid Subscription Id: " + subId);
@@ -5492,7 +5516,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     }
 
     /**
-     * {@hide}
+     * @hide
      * Returns Default subId, 0 in the case of single standby.
      */
     private int getDefaultSubscription() {
@@ -5949,7 +5973,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     }
 
     /**
-     * Generate a radio modem reset. Used for device configuration by some CDMA operators.
+     * Generate a radio modem reset.
      *
      * @param slotIndex - device slot.
      *
@@ -6834,14 +6858,17 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
      * @param subId the id of the subscription.
      * @param reason the reason the allowed network type change is taking place
      * @param allowedNetworkTypes the allowed network types.
+     * @param callingPackage the package that changed set the allowed network types.
      * @return true on success; false on any failure.
      */
     @Override
     public boolean setAllowedNetworkTypesForReason(int subId,
             @TelephonyManager.AllowedNetworkTypesReason int reason,
-            @TelephonyManager.NetworkTypeBitMask long allowedNetworkTypes) {
+            @TelephonyManager.NetworkTypeBitMask long allowedNetworkTypes,
+            @NonNull String callingPackage) {
         TelephonyPermissions.enforceCallingOrSelfModifyPermissionOrCarrierPrivilege(
                 mApp, subId, "setAllowedNetworkTypesForReason");
+        String reasonStr = Phone.convertAllowedNetworkTypeMapIndexToDbName(reason);
         // If the caller only has carrier privileges, then they should not be able to override
         // any network types which were set for security reasons.
         if (mApp.checkCallingOrSelfPermission(Manifest.permission.MODIFY_PHONE_STATE)
@@ -6849,14 +6876,15 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
                 && reason == TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G) {
             throw new SecurityException(
                     "setAllowedNetworkTypesForReason cannot be called with carrier privileges for"
-                            + " reason " + reason);
+                            + " reason " + reasonStr);
         }
 
         enforceTelephonyFeatureWithException(getCurrentPackageName(),
                 PackageManager.FEATURE_TELEPHONY_RADIO_ACCESS, "setAllowedNetworkTypesForReason");
 
         if (!TelephonyManager.isValidAllowedNetworkTypesReason(reason)) {
-            loge("setAllowedNetworkTypesForReason: Invalid allowed network type reason: " + reason);
+            loge("setAllowedNetworkTypesForReason: Invalid allowed network type reason: "
+                    + reason);
             return false;
         }
         if (!SubscriptionManager.isUsableSubscriptionId(subId)) {
@@ -6864,8 +6892,10 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
             return false;
         }
 
-        log("setAllowedNetworkTypesForReason: subId=" + subId + ", reason=" + reason + " value: "
-                + TelephonyManager.convertNetworkTypeBitmaskToString(allowedNetworkTypes));
+        log("setAllowedNetworkTypesForReason: subId=" + subId
+                + ", reason=" + reasonStr + ", value="
+                + TelephonyManager.convertNetworkTypeBitmaskToString(allowedNetworkTypes)
+                + ", callingPackage=" + callingPackage);
 
         Phone phone = getPhone(subId);
         if (phone == null) {
@@ -6873,7 +6903,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         }
 
         if (allowedNetworkTypes == phone.getAllowedNetworkTypes(reason)) {
-            log("setAllowedNetworkTypesForReason: " + reason + "does not change value");
+            log("setAllowedNetworkTypesForReason: " + reasonStr + ". Already has this value.");
             return true;
         }
 
@@ -7943,7 +7973,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     }
 
     /**
-     * {@hide}
+     * @hide
      * Returns the IMS Registration Status on a particular subid
      *
      * @param subId
@@ -8670,7 +8700,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     }
 
     /**
-     * {@hide}
+     * @hide
      * Set the allowed carrier list and the excluded carrier list, indicating the priority between
      * the two lists.
      * Require system privileges. In the future we may add this to carrier APIs.
@@ -8701,7 +8731,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     }
 
     /**
-     * {@hide}
+     * @hide
      * Get the allowed carrier list and the excluded carrier list, including the priority between
      * the two lists.
      * Require system privileges. In the future we may add this to carrier APIs.
@@ -8787,7 +8817,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
      * Action set from carrier signalling broadcast receivers to enable/disable radio
      * @param subId the subscription ID that this action applies to.
      * @param enabled control enable or disable radio.
-     * {@hide}
+     * @hide
      */
     @Override
     public void carrierActionSetRadioEnabled(int subId, boolean enabled) {
@@ -8872,7 +8902,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
      *
      * @param subId the subscription ID that this action applies to.
      * @param report control start/stop reporting the default network status.
-     * {@hide}
+     * @hide
      */
     @Override
     public void carrierActionReportDefaultNetworkStatus(int subId, boolean report) {
@@ -8901,7 +8931,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     /**
      * Action set from carrier signalling broadcast receivers to reset all carrier actions
      * @param subId the subscription ID that this action applies to.
-     * {@hide}
+     * @hide
      */
     @Override
     public void carrierActionResetAll(int subId) {
@@ -14066,6 +14096,29 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     }
 
     /**
+     * This API can be used for testing purposes to uncap the max allowed data mode.
+     *
+     * @return {@code true} if the max allowed data mode is uncapped successfully,
+     * {@code false} otherwise.
+     */
+    public boolean uncapMaxAllowedSatelliteDataMode() {
+        Log.d(LOG_TAG, "uncapMaxAllowedSatelliteDataMode");
+        TelephonyPermissions.enforceDebugBuildsOnly("uncapMaxAllowedSatelliteDataMode");
+        TelephonyPermissions.enforceShellOnly(
+                Binder.getCallingUid(),
+                "uncapMaxAllowedSatelliteDataMode");
+        TelephonyPermissions.enforceCallingOrSelfModifyPermissionOrCarrierPrivilege(mApp,
+                SubscriptionManager.INVALID_SUBSCRIPTION_ID,
+                "uncapMaxAllowedSatelliteDataMode");
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return mSatelliteController.uncapMaxAllowedDataMode();
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    /**
      * Sets the service defined in ComponentName to be bound.
      *
      * This should only be used for testing.
@@ -14293,23 +14346,8 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
      */
     private void enforceTelephonyFeatureWithException(@Nullable String callingPackage,
             @NonNull String telephonyFeature, @NonNull String methodName) {
-        if (callingPackage == null || mPackageManager == null) {
-            return;
-        }
-
-        if (!CompatChanges.isChangeEnabled(ENABLE_FEATURE_MAPPING, callingPackage,
-                Binder.getCallingUserHandle())
-                || mVendorApiLevel < Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-            // Skip to check associated telephony feature,
-            // if compatibility change is not enabled for the current process or
-            // the SDK version of vendor partition is less than Android V.
-            return;
-        }
-
-        if (!mPackageManager.hasSystemFeature(telephonyFeature)) {
-            throw new UnsupportedOperationException(
-                    methodName + " is unsupported without " + telephonyFeature);
-        }
+        TelephonyUtils.enforceTelephonyFeatureWithException(callingPackage, mPackageManager,
+                mVendorApiLevel, telephonyFeature, methodName);
     }
 
     /**
@@ -14322,28 +14360,8 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
             @Nullable String callingPackage,
             @NonNull List<String> anyOfTelephonyFeatures,
             @NonNull String methodName) {
-        if (callingPackage == null || mPackageManager == null) {
-            return;
-        }
-
-        if (!CompatChanges.isChangeEnabled(ENABLE_FEATURE_MAPPING, callingPackage,
-                Binder.getCallingUserHandle())
-                || mVendorApiLevel < Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-            // Skip to check associated telephony feature,
-            // if compatibility change is not enabled for the current process or
-            // the SDK version of vendor partition is less than Android V.
-            return;
-        }
-        for (String feature : anyOfTelephonyFeatures) {
-            if (mPackageManager.hasSystemFeature(feature)) {
-                // At least one feature is present, so the requirement is satisfied.
-                return;
-            }
-        }
-
-        // No features were found.
-        throw new UnsupportedOperationException(
-                methodName + " is unsupported without any of " + anyOfTelephonyFeatures);
+        TelephonyUtils.enforceTelephonyFeatureWithException(callingPackage, mPackageManager,
+                mVendorApiLevel, anyOfTelephonyFeatures, methodName);
     }
 
     /**

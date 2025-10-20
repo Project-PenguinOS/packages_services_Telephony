@@ -21,6 +21,8 @@
         android:sharedUserId="android.uid.phone"
         android:sharedUserLabel="@string/phoneAppLabel">
 
+    <attribution android:tag="telephony" android:label="@string/telephony_attribution_tag"/>
+
     <!-- Allows broadcasting for SlicePurchaseController events. -->
     <protected-broadcast android:name="com.android.phone.slice.action.START_SLICE_PURCHASE_APP" />
     <protected-broadcast android:name="com.android.phone.slice.action.SLICE_PURCHASE_APP_RESPONSE_TIMEOUT" />
@@ -186,6 +188,9 @@
 
     <!-- Needed to query for current companion device associations, used when handling OTP SMS -->
     <uses-permission android:name="android.permission.MANAGE_COMPANION_DEVICES"/>
+
+    <!-- Used by Satellite module to check if Google Messages is the default SMS app. -->
+    <uses-permission android:name="android.permission.MONITOR_DEFAULT_SMS_PACKAGE"/>
 
     <application android:name="PhoneApp"
             android:persistent="true"
