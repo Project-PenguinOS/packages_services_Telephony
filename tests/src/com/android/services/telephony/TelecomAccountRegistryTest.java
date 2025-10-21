@@ -20,7 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -67,6 +67,7 @@ public class TelecomAccountRegistryTest extends TelephonyTestBase {
 
     private static final String TAG = "TelecomAccountRegistryTest";
     private static final int TEST_SUB_ID = 1;
+    private static final long TIMEOUT = 10000;
 
     // We need more functions that what TelephonyTestBase.mContext supports.
     // Use a local mocked Context to make life easier.
@@ -236,7 +237,7 @@ public class TelecomAccountRegistryTest extends TelephonyTestBase {
     private PhoneAccount verifyAndCaptureRegisteredPhoneAccount() {
         ArgumentCaptor<PhoneAccount> phoneAccountArgumentCaptor =
                 ArgumentCaptor.forClass(PhoneAccount.class);
-        verify(mTelecomManager, atLeastOnce()).registerPhoneAccount(
+        verify(mTelecomManager, timeout(TIMEOUT).atLeastOnce()).registerPhoneAccount(
                 phoneAccountArgumentCaptor.capture());
         return phoneAccountArgumentCaptor.getValue();
     }
@@ -255,11 +256,7 @@ public class TelecomAccountRegistryTest extends TelephonyTestBase {
         intent.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, subId);
         mUserSwitchedAndConfigChangedReceiver.onReceive(mMockedContext, intent);
         mTestableLooper.processAllMessages();
-    }
 
-    private void onSubscriptionsChanged() {
-        Log.d(TAG, "Change subscriptions...");
-        mOnSubscriptionsChangedListener.onSubscriptionsChanged();
     }
 
     private void onAddSubscriptionListenerFailed() {
@@ -287,6 +284,7 @@ public class TelecomAccountRegistryTest extends TelephonyTestBase {
         Log.d(TAG, "Broadcast ACTION_LOCALE_CHANGED...");
         Intent intent = new Intent(Intent.ACTION_LOCALE_CHANGED);
         mLocaleChangedBroadcastReceiver.onReceive(mMockedContext, intent);
+        mTestableLooper.processAllMessages();
     }
 
     private void onNetworkCountryChanged() {
