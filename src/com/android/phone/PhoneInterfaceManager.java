@@ -40,6 +40,7 @@ import android.Manifest;
 import android.Manifest.permission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.PermissionManuallyEnforced;
 import android.annotation.RequiresPermission;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
@@ -411,6 +412,13 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     private static final int MIN_IDENTIFIER_DISCLOSURE_VERSION = 202;
     // Null cipher notification support was added in IRadioNetwork 2.2
     private static final int MIN_NULL_CIPHER_NOTIFICATION_VERSION = 202;
+
+    // TODO: b/419394842 - Remove and use defined build version code when available.
+    private static final int BUILD_VERSION_CODE_C = android.os.Build.VERSION_CODES.BAKLAVA + 1;
+
+    @ChangeId
+    @EnabledSince(targetSdkVersion = BUILD_VERSION_CODE_C)
+    static final long TELEPHONY_MANAGER_API_PERMISSION_ENABLED = 417788332;
 
     /** The singleton instance. */
     private static PhoneInterfaceManager sInstance;
@@ -3293,7 +3301,14 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     }
 
     @Override
+    @PermissionManuallyEnforced
     public String getNetworkCountryIsoForPhone(int phoneId) {
+        if (mFeatureFlags.guardIdentifierAndNetworkCountryApis()
+                && CompatChanges.isChangeEnabled(TELEPHONY_MANAGER_API_PERMISSION_ENABLED)) {
+            mApp.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.QUERY_NETWORK_COUNTRY, null);
+        }
+
         if (!mApp.getResources().getBoolean(
                 com.android.internal.R.bool.config_force_phone_globals_creation)) {
             enforceTelephonyFeatureWithException(getCurrentPackageName(),
