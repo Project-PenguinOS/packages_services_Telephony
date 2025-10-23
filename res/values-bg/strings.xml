@@ -481,8 +481,7 @@
     <string name="delete_fdn_contact" msgid="7027405651994507077">"Изтриване на фиксирани номера за набиране"</string>
     <string name="deleting_fdn_contact" msgid="6872320570844460428">"Фиксираните номера за набиране се изтриват…"</string>
     <string name="fdn_contact_deleted" msgid="1680714996763848838">"Фиксираните номера за набиране са изтрити."</string>
-    <!-- no translation found for pin2_invalid (7366835930615792402) -->
-    <skip />
+    <string name="pin2_invalid" msgid="7366835930615792402">"Неправилен PIN2. FDN не е актуализиран."</string>
     <string name="fdn_invalid_number" msgid="9067189814657840439">"FDN не бе актуализиран, защото номерът надвишава <xliff:g id="FDN_NUMBER_LIMIT_LENGTH">%d</xliff:g> цифри."</string>
     <string name="pin2_or_fdn_invalid" msgid="7542639487955868181">"FDN не е актуализирано. PIN2 бе неправилен или телефонният номер бе отхвърлен."</string>
     <string name="fdn_failed" msgid="216592346853420250">"Операцията с фиксираните номера за набиране (FDN) не бе успешна."</string>

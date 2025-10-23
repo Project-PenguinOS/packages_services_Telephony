@@ -481,8 +481,7 @@
     <string name="delete_fdn_contact" msgid="7027405651994507077">"Xóa số quay định sẵn"</string>
     <string name="deleting_fdn_contact" msgid="6872320570844460428">"Đang xóa số quay định sẵn…"</string>
     <string name="fdn_contact_deleted" msgid="1680714996763848838">"Đã thêm số quay định sẵn."</string>
-    <!-- no translation found for pin2_invalid (7366835930615792402) -->
-    <skip />
+    <string name="pin2_invalid" msgid="7366835930615792402">"Mã PIN2 không chính xác. Chưa cập nhật FDN."</string>
     <string name="fdn_invalid_number" msgid="9067189814657840439">"Số gọi định sẵn (FDN) chưa cập nhật do vượt quá <xliff:g id="FDN_NUMBER_LIMIT_LENGTH">%d</xliff:g> chữ số."</string>
     <string name="pin2_or_fdn_invalid" msgid="7542639487955868181">"FDN không được cập nhật. Mã PIN2 không đúng hoặc số điện thoại đã bị từ chối."</string>
     <string name="fdn_failed" msgid="216592346853420250">"Thao tác FDN không thành công."</string>
