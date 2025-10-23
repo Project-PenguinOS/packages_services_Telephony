@@ -481,8 +481,7 @@
     <string name="delete_fdn_contact" msgid="7027405651994507077">"حذف رقم الاتصال الثابت"</string>
     <string name="deleting_fdn_contact" msgid="6872320570844460428">"جارٍ حذف رقم الاتصال الثابت..."</string>
     <string name="fdn_contact_deleted" msgid="1680714996763848838">"تم حذف رقم الاتصال الثابت."</string>
-    <!-- no translation found for pin2_invalid (7366835930615792402) -->
-    <skip />
+    <string name="pin2_invalid" msgid="7366835930615792402">"‏رمز PIN2 غير صحيح. لم يتم تعديل رقم FDN."</string>
     <string name="fdn_invalid_number" msgid="9067189814657840439">"‏لم يتم تحديث FDN نظرًا لأن الرقم يتجاوز طوله <xliff:g id="FDN_NUMBER_LIMIT_LENGTH">%d</xliff:g> رقمًا."</string>
     <string name="pin2_or_fdn_invalid" msgid="7542639487955868181">"‏لم يتم تحديث FDN. رقم PIN2 غير صحيح، أو تم رفض رقم الهاتف."</string>
     <string name="fdn_failed" msgid="216592346853420250">"‏تعذّر إتمام عملية FDN!"</string>

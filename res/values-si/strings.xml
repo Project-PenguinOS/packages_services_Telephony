@@ -481,8 +481,7 @@
     <string name="delete_fdn_contact" msgid="7027405651994507077">"ස්ථිර ඇමතුම් අංකය මකන්න"</string>
     <string name="deleting_fdn_contact" msgid="6872320570844460428">"ස්ථිර ඇමතුම් අංකය මකමින්..."</string>
     <string name="fdn_contact_deleted" msgid="1680714996763848838">"ස්ථාවර ඇමතුම් අංකය මකන ලදි."</string>
-    <!-- no translation found for pin2_invalid (7366835930615792402) -->
-    <skip />
+    <string name="pin2_invalid" msgid="7366835930615792402">"වැරදි PIN2. FDN යාවත්කාලීන කර නැත."</string>
     <string name="fdn_invalid_number" msgid="9067189814657840439">"අංකය ඉලක්කම් <xliff:g id="FDN_NUMBER_LIMIT_LENGTH">%d</xliff:g> ඉක්මවන නිසා FDN යාවත්කාලීන නොකරන ලදී."</string>
     <string name="pin2_or_fdn_invalid" msgid="7542639487955868181">"FDN යාවත්කාලින නොවුණි. PIN2 වැරදියි, නැති නම් දුරකථන අංකය ප්‍රතික්ෂේප විය."</string>
     <string name="fdn_failed" msgid="216592346853420250">"FDN ක්‍රියාවලිය අසමත්."</string>
