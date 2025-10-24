@@ -110,7 +110,7 @@
     <string name="sum_cfu_enabled_no_number" msgid="7287752761743377930">"Ο αριθμός δεν είναι διαθέσιμος"</string>
     <string name="sum_cfu_disabled" msgid="5010617134210809853">"Ανενεργό"</string>
     <string name="labelCFB" msgid="615265213360512768">"Όταν η γραμμή είναι απασχολημένη"</string>
-    <string name="messageCFB" msgid="1958017270393563388">"Αριθμός όταν είμαι απασχολημένος/ή"</string>
+    <string name="messageCFB" msgid="1958017270393563388">"Αριθμός όταν είμαι απασχολημένος"</string>
     <string name="sum_cfb_enabled" msgid="332037613072049492">"Προώθηση στο <xliff:g id="PHONENUMBER">{0}</xliff:g>"</string>
     <string name="sum_cfb_disabled" msgid="3589913334164866035">"Ανενεργό"</string>
     <string name="disable_cfb_forbidden" msgid="4831494744351633961">"Ο φορέας σας δεν υποστηρίζει την απενεργοποίηση της προώθησης κλήσεων όταν το τηλέφωνό σας είναι απασχολημένο."</string>

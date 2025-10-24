@@ -707,7 +707,7 @@
     <string name="change_pin_system_error" msgid="7772788809875146873">"Podešavanje PIN-a nije uspelo"</string>
     <string name="mobile_data_status_roaming_turned_off_subtext" msgid="6840673347416227054">"Prenos podataka u romingu je isključen"</string>
     <string name="mobile_data_status_roaming_turned_on_subtext" msgid="5615757897768777865">"Prenos podataka u romingu je uključen"</string>
-    <string name="mobile_data_status_roaming_without_plan_subtext" msgid="6536671968072284677">"Trenutno ste u romingu, potreban vam je paket za prenos podataka"</string>
+    <string name="mobile_data_status_roaming_without_plan_subtext" msgid="6536671968072284677">"Trenutno ste u romingu, potreban vam je tarifni paket za podatke"</string>
     <string name="mobile_data_status_roaming_with_plan_subtext" msgid="2576177169108123095">"Trenutno ste u romingu, paket za prenos podataka je aktivan"</string>
     <string name="mobile_data_status_no_plan_subtext" msgid="170331026419263657">"Nema preostalih mobilnih podataka"</string>
     <string name="mobile_data_activate_prepaid" msgid="4276738964416795596">"Nema preostalih mobilnih podataka"</string>

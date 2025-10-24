@@ -150,7 +150,7 @@
     <string name="radio_off_error" msgid="8321564164914232181">"அமைப்புகளைப் பார்ப்பதற்கு முன், ரேடியோவை இயக்கவும்."</string>
     <string name="close_dialog" msgid="1074977476136119408">"சரி"</string>
     <string name="enable" msgid="2636552299455477603">"இயக்கு"</string>
-    <string name="disable" msgid="1122698860799462116">"முடக்கு"</string>
+    <string name="disable" msgid="1122698860799462116">"ஆஃப் செய்"</string>
     <string name="change_num" msgid="6982164494063109334">"புதுப்பி"</string>
   <string-array name="clir_display_values">
     <item msgid="8477364191403806960">"நெட்வொர்க் பொருத்து"</item>

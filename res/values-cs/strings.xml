@@ -182,7 +182,7 @@
     <string name="register_on_network" msgid="4194770527833960423">"Probíhá registrace v síti <xliff:g id="NETWORK">%s</xliff:g>..."</string>
     <string name="not_allowed" msgid="8541221928746104798">"Vaše SIM karta nepovoluje připojení k této síti."</string>
     <string name="connect_later" msgid="1950138106010005425">"K této síti se momentálně nelze přihlásit. Zkuste to znovu později."</string>
-    <string name="registration_done" msgid="5337407023566953292">"Přihlášení k síti bylo úspěšné."</string>
+    <string name="registration_done" msgid="5337407023566953292">"Přihlášení k síti bylo úspěšné."</string>
     <string name="already_auto" msgid="8607068290733079336">"Už v automatickém výběru."</string>
     <string name="select_automatically" msgid="779750291257872651">"Vybírat síť automaticky"</string>
     <string name="manual_mode_disallowed_summary" msgid="3970048592179890197">"Nedostupné, když jste připojeni k síti %1$s"</string>
@@ -627,7 +627,7 @@
     <string name="ota_hfa_activation_title" msgid="3300556778212729671">"Aktivace..."</string>
     <string name="ota_hfa_activation_dialog_message" msgid="7921718445773342996">"V telefonu se aktivuje mobilní datová služba.\n\nMůže to trvat až 5 minut."</string>
     <string name="ota_skip_activation_dialog_title" msgid="7666611236789203797">"Přeskočit aktivaci?"</string>
-    <string name="ota_skip_activation_dialog_message" msgid="6691722887019708713">"Pokud přeskočíte aktivaci, nemůžete volat ani se připojovat k mobilním datovým sítím (můžete se ale připojit k sítím Wi-Fi). Dokud svůj telefon neaktivujete, bude se zobrazovat výzva k aktivaci při každém zapnutí."</string>
+    <string name="ota_skip_activation_dialog_message" msgid="6691722887019708713">"Pokud přeskočíte aktivaci, nemůžete volat ani se připojovat k mobilním datovým sítím (můžete se ale připojit k sítím Wi-Fi). Dokud svůj telefon neaktivujete, bude se zobrazovat výzva k aktivaci při každém zapnutí."</string>
     <string name="ota_skip_activation_dialog_skip_label" msgid="5908029466817825633">"Přeskočit"</string>
     <string name="ota_activate" msgid="7939695753665438357">"Aktivovat"</string>
     <string name="ota_title_activate_success" msgid="1272135024761004889">"Telefon je aktivován."</string>

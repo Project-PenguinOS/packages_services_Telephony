@@ -627,7 +627,7 @@
     <string name="ota_hfa_activation_title" msgid="3300556778212729671">"S\'està activant..."</string>
     <string name="ota_hfa_activation_dialog_message" msgid="7921718445773342996">"El telèfon està activant el vostre servei de dades mòbils.\n\nAquest procés pot durar fins a 5 minuts."</string>
     <string name="ota_skip_activation_dialog_title" msgid="7666611236789203797">"Voleu ometre l\'activació?"</string>
-    <string name="ota_skip_activation_dialog_message" msgid="6691722887019708713">"Si ometeu l\'activació, no podreu fer trucades ni connectar-vos a xarxes de dades mòbils (tot i que podreu connectar-vos a xarxes Wi-fi). Fins que activeu el telèfon, se us demanarà que ho feu cada cop que l\'engegueu."</string>
+    <string name="ota_skip_activation_dialog_message" msgid="6691722887019708713">"Si omets l\'activació, no podràs fer trucades ni connectar-te a xarxes de dades mòbils (tot i que podràs connectar-te a xarxes Wi-Fi). Fins que activis el telèfon, se\'t demanarà que ho facis cada cop que l\'engeguis."</string>
     <string name="ota_skip_activation_dialog_skip_label" msgid="5908029466817825633">"Omet"</string>
     <string name="ota_activate" msgid="7939695753665438357">"Activa"</string>
     <string name="ota_title_activate_success" msgid="1272135024761004889">"El telèfon està activat."</string>
@@ -815,7 +815,7 @@
     <string name="supp_service_incoming_calls_barred" msgid="2034627421274447674">"S\'han prohibit les trucades entrants."</string>
     <string name="supp_service_outgoing_calls_barred" msgid="5205725332394087112">"S\'han prohibit les trucades sortints."</string>
     <string name="supp_service_call_forwarding_active" msgid="7910162960395132464">"La desviació de trucada està activada."</string>
-    <string name="supp_service_additional_call_forwarded" msgid="8772753260008398632">"S\'ha desviat una de les trucades."</string>
+    <string name="supp_service_additional_call_forwarded" msgid="8772753260008398632">"S\'ha desviat una altra trucada."</string>
     <string name="supp_service_additional_ect_connected" msgid="8525934162945220237">"S\'ha completat la transferència explícita de la trucada."</string>
     <string name="supp_service_additional_ect_connecting" msgid="7046240728781222753">"S\'està processant la transferència explícita de la trucada."</string>
     <string name="supp_service_call_on_hold" msgid="2836811319594503059">"S\'ha posat la trucada en espera."</string>
