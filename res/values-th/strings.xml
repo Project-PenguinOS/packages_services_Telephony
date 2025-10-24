@@ -806,7 +806,7 @@
     <string name="messageCallBarring" msgid="5537730400652466912">"ป้อนรหัสผ่าน"</string>
     <string name="call_barring_settings" msgid="4616607285790258919">"การตั้งค่าระงับการโทร"</string>
     <string name="callFailed_NetworkBusy" msgid="5437103975842913681">"เครือข่ายไม่ว่าง โปรดลองโทรอีกครั้ง"</string>
-    <string name="callFailed_NetworkCongested" msgid="6801283142342775380">"เครือข่ายแออัด ติดต่อโอเปอเรเตอร์อุปกรณ์เคลื่อนที่เพื่อขอความช่วยเหลือ"</string>
+    <string name="callFailed_NetworkCongested" msgid="6801283142342775380">"เครือข่ายแออัด ติดต่อโอเปอเรเตอร์มือถือเพื่อขอความช่วยเหลือ"</string>
     <string name="supp_service_notification_call_deflected" msgid="4980942818105909813">"มีการส่งต่อสาย"</string>
     <string name="supp_service_notification_call_forwarded" msgid="7102930311735433088">"มีการโอนสาย"</string>
     <string name="supp_service_notification_call_waiting" msgid="4577403881609445324">"กำลังรอสาย"</string>

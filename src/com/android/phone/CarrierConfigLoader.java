@@ -25,13 +25,11 @@ package com.android.phone;
 import static android.content.pm.PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION;
 import static android.service.carrier.CarrierService.ICarrierServiceWrapper.KEY_CONFIG_BUNDLE;
 import static android.service.carrier.CarrierService.ICarrierServiceWrapper.RESULT_ERROR;
-import static android.telephony.TelephonyManager.ENABLE_FEATURE_MAPPING;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
-import android.app.compat.CompatChanges;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -39,6 +37,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Binder;
@@ -997,11 +996,8 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
             mServiceConnection[phoneId] = serviceConnection;
         }
         try {
-            if (mFeatureFlags.supportCarrierServicesForHsum()
-                    ? mContext.bindServiceAsUser(carrierService, serviceConnection,
-                    Context.BIND_AUTO_CREATE, UserHandle.of(ActivityManager.getCurrentUser()))
-                    : mContext.bindService(carrierService, serviceConnection,
-                            Context.BIND_AUTO_CREATE)) {
+            if (mContext.bindServiceAsUser(carrierService, serviceConnection,
+                    Context.BIND_AUTO_CREATE, UserHandle.of(ActivityManager.getCurrentUser()))) {
                 if (eventId == EVENT_CONNECTED_TO_DEFAULT_FOR_NO_SIM_CONFIG) {
                     mServiceBoundForNoSimConfig[phoneId] = true;
                 } else {
@@ -1378,10 +1374,8 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
     @Nullable
     private String getPackageVersion(@NonNull String packageName) {
         try {
-            PackageInfo info = mFeatureFlags.supportCarrierServicesForHsum()
-                    ? mContext.getPackageManager().getPackageInfoAsUser(packageName, 0,
-                    ActivityManager.getCurrentUser())
-                    : mContext.getPackageManager().getPackageInfo(packageName, 0);
+            PackageInfo info = mContext.getPackageManager().getPackageInfoAsUser(packageName, 0,
+                    ActivityManager.getCurrentUser());
             return Long.toString(info.getLongVersionCode());
         } catch (PackageManager.NameNotFoundException e) {
             return null;
@@ -1564,6 +1558,13 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
     public void overrideConfig(int subscriptionId, @Nullable PersistableBundle overrides,
             boolean persistent) {
         overrideConfig_enforcePermission();
+
+        // Do not allow shell UID to override the carrier config. This will not impact
+        // the CTS and telephony shell commands as they use different uids
+        if (TelephonyPermissions.isShell(getCallingUid())) {
+            throw new SecurityException("overrideConfig cannot be invoked by shell");
+        }
+
         int phoneId = SubscriptionManager.getPhoneId(subscriptionId);
         if (!SubscriptionManager.isValidPhoneId(phoneId)) {
             logd("Ignore invalid phoneId: " + phoneId + " for subId: " + subscriptionId);
@@ -1579,6 +1580,11 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
             overrideConfig(mOverrideConfigs, phoneId, overrides);
 
             if (persistent) {
+                if (isUserBuild() && !isSystemApp()) {
+                    throw new SecurityException("overrideConfig with persistent=true only can be "
+                            + "invoked by system app");
+                }
+
                 overrideConfig(mPersistentOverrideConfigs, phoneId, overrides);
 
                 if (overrides != null) {
@@ -1599,6 +1605,25 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
                     + persistent + ", overrides=" + overrides);
             updateSubscriptionDatabase(phoneId);
         });
+    }
+
+    private boolean isSystemApp() {
+        try {
+            String callingPackage = mContext.getPackageManager().getNameForUid(
+                    Binder.getCallingUid());
+
+            ApplicationInfo appInfo = mContext.getPackageManager().getApplicationInfo(
+                    callingPackage, 0);
+            return (appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0
+                    || (appInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0;
+        } catch (Exception e) {
+            loge("isSystemApp: failed to get application info: " + e);
+            return false;
+        }
+    }
+
+    private boolean isUserBuild() {
+        return "user".equals(android.os.Build.TYPE);
     }
 
     private void overrideConfig(@NonNull PersistableBundle[] currentOverrides, int phoneId,
@@ -2049,23 +2074,8 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
      */
     private void enforceTelephonyFeatureWithException(@Nullable String callingPackage,
             @NonNull String methodName) {
-        if (callingPackage == null || mPackageManager == null) {
-            return;
-        }
-
-        if (!CompatChanges.isChangeEnabled(ENABLE_FEATURE_MAPPING, callingPackage,
-                Binder.getCallingUserHandle())
-                || mVendorApiLevel < Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-            // Skip to check associated telephony feature,
-            // if compatibility change is not enabled for the current process or
-            // the SDK version of vendor partition is less than Android V.
-            return;
-        }
-
-        if (!mPackageManager.hasSystemFeature(FEATURE_TELEPHONY_SUBSCRIPTION)) {
-            throw new UnsupportedOperationException(
-                    methodName + " is unsupported without " + FEATURE_TELEPHONY_SUBSCRIPTION);
-        }
+        TelephonyUtils.enforceTelephonyFeatureWithException(callingPackage, mPackageManager,
+                mVendorApiLevel, FEATURE_TELEPHONY_SUBSCRIPTION, methodName);
     }
 
     private class CarrierServiceConnection implements ServiceConnection {

@@ -567,7 +567,7 @@
     <string name="incall_error_satellite_enabled" msgid="5247740814607087814">"Қоңырау шалу үшін алдымен жерсерік байланысын аяқтаңыз."</string>
     <string name="incall_error_carrier_roaming_satellite_mode" msgid="678603203562886361">"Мобильдік не Wi-Fi желісіне қосылмастан хабар алмаса аласыз."</string>
     <string name="emergency_information_hint" msgid="9208897544917793012">"Төтенше жағдайға арналған ақпарат"</string>
-    <string name="emergency_information_owner_hint" msgid="6256909888049185316">"Иесі"</string>
+    <string name="emergency_information_owner_hint" msgid="6256909888049185316">"Ие"</string>
     <string name="emergency_information_confirm_hint" msgid="5109017615894918914">"Ақпаратты көру үшін қайта түртіңіз"</string>
     <string name="emergency_enable_radio_dialog_title" msgid="2667568200755388829">"Құтқару қызметіне қоңырау шалу"</string>
     <string name="single_emergency_number_title" msgid="8413371079579067196">"Төтенше жағдай қызметі"</string>
