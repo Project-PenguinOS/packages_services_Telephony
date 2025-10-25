@@ -147,6 +147,9 @@ public class TelecomAccountRegistryTest extends TelephonyTestBase {
         when(mMockedContext.getMainLooper()).thenReturn(mTestableLooper.getLooper());
         mTelecomAccountRegistry = new TelecomAccountRegistry(mMockedContext);
         mTelecomAccountRegistry.setupOnBoot();
+        // Benign; in the unflagged context this does nothing, but in the flagged context this will
+        // process the handler-posted setup.
+        mTestableLooper.processAllMessages();
 
         // Capture OnSubscriptionsChangedListener
         ArgumentCaptor<OnSubscriptionsChangedListener> subChangeListenerCaptor =
