@@ -193,7 +193,7 @@
     <string name="preferred_network_mode_dialogtitle" msgid="2781447433514459696">"Ieteicamais tīkla veids"</string>
     <string name="forbidden_network" msgid="5081729819561333023">"(aizliegts)"</string>
     <string name="choose_network_title" msgid="5335832663422653082">"Izvēlēties tīklu"</string>
-    <string name="network_disconnected" msgid="8844141106841160825">"Savienojums pārtraukts"</string>
+    <string name="network_disconnected" msgid="8844141106841160825">"Atvienots"</string>
     <string name="network_connected" msgid="2760235679963580224">"Savienojums izveidots"</string>
     <string name="network_connecting" msgid="160901383582774987">"Notiek savienojuma izveide..."</string>
     <string name="network_could_not_connect" msgid="6547460848093727998">"Nevarēja izveidot savienojumu"</string>

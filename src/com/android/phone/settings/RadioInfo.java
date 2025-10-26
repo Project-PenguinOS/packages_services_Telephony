@@ -44,6 +44,7 @@ import android.content.BroadcastReceiver;
 // QTI_END: 2023-07-12: Telephony: Gray out the "Enable DSDS" button upon switch
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -332,7 +333,7 @@ public class RadioInfo extends AppCompatActivity {
     private int[] mSelectedSignalStrengthIndex = new int[2];
     private int[] mSelectedMockDataNetworkTypeIndex = new int[2];
     private int[] mSelectedManualOverrideBandIndex = new int[2];
-
+    private final List<ContentValues> mOriginalApnSettings = new ArrayList<>();
     private String mEuiccInfoResult = "";
 
     private int mPreferredNetworkTypeResult;
@@ -2571,6 +2572,12 @@ public class RadioInfo extends AppCompatActivity {
                                 KEY_CARRIER_SUPPORTED_SATELLITE_SERVICES_PER_PROVIDER_BUNDLE);
                         mCarrierSatelliteOriginalBundle[phoneId] = originalBundle;
 
+                        // APN modification
+                        mOriginalApnSettings.clear();
+                        mOriginalApnSettings.addAll(
+                                PhoneInformationUtil.updateApnInfrastructureBitmaskForSatellite(
+                                        mContext, subId, TAG));
+
                         PersistableBundle overrideBundle = new PersistableBundle();
                         overrideBundle.putBoolean(KEY_SATELLITE_ATTACH_SUPPORTED_BOOL, true);
                         // NOTE: In case of TMO setting KEY_SATELLITE_ENTITLEMENT_SUPPORTED_BOOL
@@ -2590,6 +2597,11 @@ public class RadioInfo extends AppCompatActivity {
                                 .overrideConfig(subId, overrideBundle, false);
                     } else {
                         try {
+                            // APN restoration
+                            PhoneInformationUtil.restoreOriginalApns(mContext,
+                                    mOriginalApnSettings, TAG);
+                            mOriginalApnSettings.clear();
+
                             PhoneInformationUtil.getCarrierConfig(mContext).overrideConfig(subId,
                                     mCarrierSatelliteOriginalBundle[phoneId], false);
                             mCarrierSatelliteOriginalBundle[phoneId] = null;

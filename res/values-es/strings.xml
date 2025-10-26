@@ -182,7 +182,7 @@
     <string name="register_on_network" msgid="4194770527833960423">"Registrándose en <xliff:g id="NETWORK">%s</xliff:g>..."</string>
     <string name="not_allowed" msgid="8541221928746104798">"La tarjeta SIM no permite establecer conexión con esta red."</string>
     <string name="connect_later" msgid="1950138106010005425">"No se puede conectar a la red en este momento. Inténtalo de nuevo más tarde."</string>
-    <string name="registration_done" msgid="5337407023566953292">"Conexión con la red establecida"</string>
+    <string name="registration_done" msgid="5337407023566953292">"Registrado/a en la red."</string>
     <string name="already_auto" msgid="8607068290733079336">"Ya estás en la selección automática."</string>
     <string name="select_automatically" msgid="779750291257872651">"Seleccionar red automáticamente"</string>
     <string name="manual_mode_disallowed_summary" msgid="3970048592179890197">"No disponible cuando se ha conectado con %1$s"</string>
