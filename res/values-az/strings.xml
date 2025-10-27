@@ -481,7 +481,7 @@
     <string name="delete_fdn_contact" msgid="7027405651994507077">"Sabit yığım nömrəsini silin"</string>
     <string name="deleting_fdn_contact" msgid="6872320570844460428">"Sabit yığım nömrəsi silinir…"</string>
     <string name="fdn_contact_deleted" msgid="1680714996763848838">"Sabit yığım nömrəsi silindi."</string>
-    <string name="pin2_invalid" msgid="2313954262684494442">"Yanlış PIN daxil etdiyiniz üçün FDN güncəlləşdirilmədi."</string>
+    <string name="pin2_invalid" msgid="7366835930615792402">"Yanlış PIN2. FDN yenilənmədi."</string>
     <string name="fdn_invalid_number" msgid="9067189814657840439">"Nömrə <xliff:g id="FDN_NUMBER_LIMIT_LENGTH">%d</xliff:g> rəqəmi keçdiyindən FDN yenilənmədi."</string>
     <string name="pin2_or_fdn_invalid" msgid="7542639487955868181">"FDN güncəlləşdirilmədi. PIN2 yanlış idi və ya telefon nömrəsi rədd edildi."</string>
     <string name="fdn_failed" msgid="216592346853420250">"FDN əməliyyatı aılnmadı."</string>

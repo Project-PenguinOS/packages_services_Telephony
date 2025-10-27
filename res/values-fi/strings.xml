@@ -481,7 +481,7 @@
     <string name="delete_fdn_contact" msgid="7027405651994507077">"Poista sallittu numero"</string>
     <string name="deleting_fdn_contact" msgid="6872320570844460428">"Poistetaan sallittua numeroa…"</string>
     <string name="fdn_contact_deleted" msgid="1680714996763848838">"Sallittu numero poistettu."</string>
-    <string name="pin2_invalid" msgid="2313954262684494442">"Sallittuja numeroita ei päivitetty, koska annoit väärän PIN-koodin."</string>
+    <string name="pin2_invalid" msgid="7366835930615792402">"Väärä PIN2-koodi. Sallittuja numeroita ei päivitetty."</string>
     <string name="fdn_invalid_number" msgid="9067189814657840439">"Sallittuja numeroita ei päivitetty, koska numerossa oli yli <xliff:g id="FDN_NUMBER_LIMIT_LENGTH">%d</xliff:g> merkkiä."</string>
     <string name="pin2_or_fdn_invalid" msgid="7542639487955868181">"FDN-numeroa ei päivitetty. PIN2 on virheellinen tai puhelinnumero hylättiin."</string>
     <string name="fdn_failed" msgid="216592346853420250">"FDN-toiminto epäonnistui."</string>

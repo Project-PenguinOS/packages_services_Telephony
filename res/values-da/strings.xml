@@ -481,7 +481,7 @@
     <string name="delete_fdn_contact" msgid="7027405651994507077">"Slet nummer til begrænset opkald"</string>
     <string name="deleting_fdn_contact" msgid="6872320570844460428">"Sletter nummer til begrænset opkald..."</string>
     <string name="fdn_contact_deleted" msgid="1680714996763848838">"Nummeret til begrænset opkald blev slettet."</string>
-    <string name="pin2_invalid" msgid="2313954262684494442">"Nummeret til begrænset opkald blev ikke opdateret, fordi du har indtastet en forkert pinkode."</string>
+    <string name="pin2_invalid" msgid="7366835930615792402">"Forkert pinkode2. FDN blev ikke opdateret."</string>
     <string name="fdn_invalid_number" msgid="9067189814657840439">"Nummeret til begrænset opkald blev ikke opdateret, fordi nummeret er mere end <xliff:g id="FDN_NUMBER_LIMIT_LENGTH">%d</xliff:g> cifre."</string>
     <string name="pin2_or_fdn_invalid" msgid="7542639487955868181">"Nummeret til begrænset opkald blev ikke opdateret. PIN2-koden var forkert, eller telefonnummeret blev afvist."</string>
     <string name="fdn_failed" msgid="216592346853420250">"Handlingen mislykkedes."</string>

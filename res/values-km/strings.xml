@@ -481,7 +481,7 @@
     <string name="delete_fdn_contact" msgid="7027405651994507077">"លុប​លេខ​ហៅ​ថេរ"</string>
     <string name="deleting_fdn_contact" msgid="6872320570844460428">"កំពុង​លុប​លេខ​​ហៅ​ថេរ…"</string>
     <string name="fdn_contact_deleted" msgid="1680714996763848838">"បាន​លុប​លេខ​ហៅ​ថេរ។"</string>
-    <string name="pin2_invalid" msgid="2313954262684494442">"មិន​បាន​ធ្វើ​បច្ចុប្បន្នភាព FDN ពី​ព្រោះ​អ្នក​បាន​វាយ​បញ្ចូល​កូដ PIN មិន​ត្រឹមត្រូវ។"</string>
+    <string name="pin2_invalid" msgid="7366835930615792402">"កូដ PIN2 មិន​ត្រឹមត្រូវទេ។ មិនបាន​ធ្វើបច្ចុប្បន្នភាព FDN ឡើយ។"</string>
     <string name="fdn_invalid_number" msgid="9067189814657840439">"FDN មិន​ត្រូវ​បាន​ធ្វើ​បច្ចុប្បន្នភាព​ទេ ដោយ​សារ​លេខ​លើស​ពី <xliff:g id="FDN_NUMBER_LIMIT_LENGTH">%d</xliff:g> ខ្ទង់។"</string>
     <string name="pin2_or_fdn_invalid" msgid="7542639487955868181">"មិន​បាន​ធ្វើ​បច្ចុប្បន្នភាព។ កូដ PIN2 មិន​ត្រឹមត្រូវ ឬ​លេខ​ទូរស័ព្ទ​ត្រូវ​បាន​ច្រានចោល។"</string>
     <string name="fdn_failed" msgid="216592346853420250">"បាន​បរាជ័យ​ក្នុង​ការ​ប្រតិបត្តិការ FDN ។"</string>

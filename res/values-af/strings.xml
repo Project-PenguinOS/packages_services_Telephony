@@ -481,7 +481,7 @@
     <string name="delete_fdn_contact" msgid="7027405651994507077">"Vee belbeperking-nommer uit"</string>
     <string name="deleting_fdn_contact" msgid="6872320570844460428">"Verwyder belbeperking-nommer…"</string>
     <string name="fdn_contact_deleted" msgid="1680714996763848838">"Belbeperking-nommer uitgevee."</string>
-    <string name="pin2_invalid" msgid="2313954262684494442">"FDN is nie opgedateer nie omdat jy \'n verkeerde PIN ingevoer het."</string>
+    <string name="pin2_invalid" msgid="7366835930615792402">"Verkeerde PIN2. FDN is nie opgedateer nie."</string>
     <string name="fdn_invalid_number" msgid="9067189814657840439">"FDN is nie opgedateer nie, omdat die getal <xliff:g id="FDN_NUMBER_LIMIT_LENGTH">%d</xliff:g>syfers oorskry."</string>
     <string name="pin2_or_fdn_invalid" msgid="7542639487955868181">"FDN is nie bygewerk nie. Die PIN2 was verkeerd of die foonnommer is verwerp."</string>
     <string name="fdn_failed" msgid="216592346853420250">"FDN-bewerking het misluk."</string>

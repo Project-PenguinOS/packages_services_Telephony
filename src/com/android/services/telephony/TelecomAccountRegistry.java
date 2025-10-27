@@ -1721,7 +1721,13 @@ public class TelecomAccountRegistry {
             Log.i(this, "setupOnBoot: delaying start for Telecom...");
             mTelecomReadyBackoff.start();
         } else {
-            setupOnBootInternal();
+            if (Flags.initializeTelecomAccountRegistryAsync()) {
+                Log.i(this, "setupOnBoot: Posting to handler...");
+                mHandler.post(() -> setupOnBootInternal());
+            } else {
+                setupOnBootInternal();
+            }
+
         }
     }
 
