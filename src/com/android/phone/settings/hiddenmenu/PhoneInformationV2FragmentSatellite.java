@@ -300,11 +300,18 @@ public class PhoneInformationV2FragmentSatellite extends Fragment {
         mSatelliteDataOriginalBundle[1] = mViewModel.getSatelliteDataModeBundle(1);
         mMockSatellite.setChecked(
                 Boolean.TRUE.equals(mViewModel.getSatelliteEnabled(mPhoneId).getValue()));
-        mMockSatelliteData.setEnabled(
-                Boolean.TRUE.equals(mViewModel.getSatelliteDataEnabled(mPhoneId).getValue()));
-        setDataModeChangeVisibility(
-                Boolean.TRUE.equals(mViewModel.getSatelliteDataEnabled(mPhoneId).getValue()));
-        mViewModel.getSatelliteDataMode(mPhoneId);
+        boolean isSatelliteDataEnabled =
+                Boolean.TRUE.equals(mViewModel.getSatelliteDataEnabled(mPhoneId).getValue());
+        mMockSatelliteDataSwitch.setChecked(isSatelliteDataEnabled);
+        mMockSatelliteData.setEnabled(isSatelliteDataEnabled);
+        setDataModeChangeVisibility(isSatelliteDataEnabled);
+
+        if (isSatelliteDataEnabled) {
+            Integer dataMode = mViewModel.getSatelliteDataMode(mPhoneId).getValue();
+            if (dataMode != null && dataMode != 0) {
+                mMockSatelliteData.check(dataMode);
+            }
+        }
     }
 
     private void updateSelectionVisuals() {
