@@ -181,8 +181,7 @@ public class TelecomAccountRegistry {
             Log.i(this, "Registered phoneAccount: %s with handle: %s",
                     mAccount, mAccount.getAccountHandle());
             mIncomingCallNotifier = new PstnIncomingCallNotifier((Phone) mPhone);
-            mPhoneCapabilitiesNotifier = new PstnPhoneCapabilitiesNotifier((Phone) mPhone,
-                    this);
+            mPhoneCapabilitiesNotifier = new PstnPhoneCapabilitiesNotifier((Phone) mPhone, this);
 
             if (mIsTestAccount || isEmergency) {
                 // For test and emergency entries, there is no sub ID that can be assigned, so do
@@ -1279,33 +1278,72 @@ public class TelecomAccountRegistry {
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (Intent.ACTION_USER_SWITCHED.equals(intent.getAction())) {
-                Log.i(this, "TelecomAccountRegistry: User changed, re-registering phone accounts.");
+            // Perform the operations via a handler so that we don't perform expensive operations
+            // on the main thread while holding up the broadcast. Instead post it on the handler
+            // instantiated on the main looper and using goAsync, allow this to be processed
+            // with an extended timeout (60s for bg broadcast) as a short term fix.
+            // Todo: b/455592276 to investigate a long term solution to move these ops onto a
+            // separate thread instead of the main thread. Doing so has caused several issues
+            // so we need to investigate the current dependencies in order to make a safe
+            // transition.
+            final PendingResult result = goAsync();
+            mHandler.post(() -> {
+                try {
+                    if (Intent.ACTION_USER_SWITCHED.equals(intent.getAction())) {
+                        Log.i(this, "TelecomAccountRegistry: User changed, re-registering phone "
+                                + "accounts.");
 
-                UserHandle currentUser = intent.getParcelableExtra(Intent.EXTRA_USER);
-                mDoesUserSupportVideoCalling = currentUser == null ? true : currentUser.isSystem();
+                        UserHandle currentUser = intent.getParcelableExtra(Intent.EXTRA_USER);
+                        mDoesUserSupportVideoCalling = currentUser == null
+                                ? true : currentUser.isSystem();
 
-                // Any time the user changes, re-register the accounts.
-                tearDownAccounts();
-                setupAccounts();
-            } else if (CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED.equals(
-                    intent.getAction())) {
-                Log.i(this, "TelecomAccountRegistry: Carrier-config changed, "
-                        + "checking for phone account updates.");
-                int subId = intent.getIntExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX,
-                        SubscriptionManager.INVALID_SUBSCRIPTION_ID);
-                handleCarrierConfigChange(subId);
-            }
+                        // Any time the user changes, re-register the accounts.
+                        tearDownAccounts();
+                        setupAccounts();
+                    } else if (CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED.equals(
+                            intent.getAction())) {
+                        Log.i(this, "TelecomAccountRegistry: Carrier-config changed, "
+                                + "checking for phone account updates.");
+                        int subId = intent.getIntExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX,
+                                SubscriptionManager.INVALID_SUBSCRIPTION_ID);
+                        handleCarrierConfigChange(subId);
+                    }
+                } finally {
+                    // Ensure that we finish the pending result to notify that we're done processing
+                    // the broadcast.
+                    if (result != null) {
+                        result.finish();
+                    }
+                }
+            });
         }
     };
 
     private BroadcastReceiver mLocaleChangeReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.i(this, "TelecomAccountRegistry: Locale change; re-registering "
-                    + "phone accounts.");
-            tearDownAccounts();
-            setupAccounts();
+            // Perform the operations via a handler so that we don't perform expensive operations
+            // on the main thread and potentially cause an ANR.
+            // Todo: b/455592276 to investigate a long term solution to move these ops onto a
+            // separate thread instead of the main thread. Doing so has caused several issues
+            // so we need to investigate the current dependencies in order to make a safe
+            // transition. Currently, we'll only extend the timer by 2x but that doesn't
+            // necessarily prevent future ANRs and can hold up other broadcasts in the process.
+            final PendingResult result = goAsync();
+            mHandler.post(() -> {
+                try {
+                    Log.i(this, "TelecomAccountRegistry: Locale change; re-registering "
+                            + "phone accounts.");
+                    tearDownAccounts();
+                    setupAccounts();
+                } finally {
+                    // Ensure that we finish the pending result to notify that we're done processing
+                    // the broadcast.
+                    if (result != null) {
+                        result.finish();
+                    }
+                }
+            });
         }
     };
 
@@ -1992,5 +2030,9 @@ public class TelecomAccountRegistry {
                 }
             }
         }
+    }
+
+    public Handler getHandler() {
+        return mHandler;
     }
 }
