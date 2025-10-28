@@ -418,7 +418,6 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
 
     private final PhoneGlobals mApp;
     private FeatureFlags mFeatureFlags;
-    private com.android.server.telecom.flags.FeatureFlags mTelecomFeatureFlags;
     private final CallManager mCM;
     private final ImsResolver mImsResolver;
 
@@ -2328,7 +2327,6 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     private PhoneInterfaceManager(PhoneGlobals app, FeatureFlags featureFlags) {
         mApp = app;
         mFeatureFlags = featureFlags;
-        mTelecomFeatureFlags = new com.android.server.telecom.flags.FeatureFlagsImpl();
         mCM = PhoneGlobals.getInstance().mCM;
         mImsResolver = ImsResolver.getInstance();
         mSatelliteController = SatelliteController.getInstance();
@@ -12271,7 +12269,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
 
         Context context = getPhoneFromSubIdOrDefault(subId).getContext();
 
-        if (mTelecomFeatureFlags.telecomMainUserInGetRespondMessageApp()){
+        if (com.android.server.telecom.flags.Flags.telecomMainUserInGetRespondMessageApp()) {
             UserHandle mainUser = null;
             Context userContext = context;
             final long identity = Binder.clearCallingIdentity();
@@ -12461,7 +12459,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
             long logcatStartTimestampMillis, boolean enableTelecomDump,
             boolean enableTelephonyDump) {
         // Verify that the caller has READ_DROPBOX_DATA permission.
-        if (mTelecomFeatureFlags.telecomResolveHiddenDependencies()
+        if (com.android.server.telecom.flags.Flags.telecomResolveHiddenDependencies()
                 && Flags.enableReadDropboxPermission()) {
             mApp.enforceCallingPermission(permission.READ_DROPBOX_DATA,
                     "persistEmergencyCallDiagnosticData");
