@@ -239,6 +239,7 @@ import com.android.internal.telephony.imsphone.ImsPhone;
 import com.android.internal.telephony.imsphone.ImsPhoneCallTracker;
 import com.android.internal.telephony.metrics.RcsStats;
 import com.android.internal.telephony.satellite.SatelliteController;
+import com.android.internal.telephony.satellite.SatelliteServiceUtils;
 import com.android.internal.telephony.subscription.SubscriptionInfoInternal;
 import com.android.internal.telephony.subscription.SubscriptionManagerService;
 import com.android.internal.telephony.uicc.IccCardApplicationStatus.AppType;
@@ -14669,6 +14670,30 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         }
 
         return satelliteMode;
+    }
+
+    /**
+     * Get whether device is connected to satellite via carrier, either manually or automatically.
+     *
+     * In case of automatic connection, it checks if the device is connected to satellite within the
+     * {@link CarrierConfigManager#KEY_SATELLITE_CONNECTION_HYSTERESIS_SEC_INT} duration,
+     * {@code false} otherwise.
+     *
+     * @param subId The subscription ID of the carrier.
+     * @return {@code true} if the device is connected to satellite using the phone within the
+     *         {@link CarrierConfigManager#KEY_SATELLITE_CONNECTION_HYSTERESIS_SEC_INT} duration,
+     *         {@code false} otherwise.
+     */
+    @Override
+    public boolean isInCarrierRoamingNtnMode(int subId) {
+        enforceSatelliteCommunicationPermission("isInCarrierRoamingNtnMode");
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return mSatelliteController.isInSatelliteModeForCarrierRoaming(
+                    SatelliteServiceUtils.getPhone(subId));
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     /**
