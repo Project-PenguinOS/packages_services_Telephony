@@ -481,7 +481,7 @@
     <string name="delete_fdn_contact" msgid="7027405651994507077">"ಸ್ಥಿರ ಡಯಲಿಂಗ್‌‌ ಸಂಖ್ಯೆಯನ್ನು ಅಳಿಸಿ"</string>
     <string name="deleting_fdn_contact" msgid="6872320570844460428">"ಸ್ಥಿರ ಡಯಲಿಂಗ್‌‌ ಸಂಖ್ಯೆಯನ್ನು ಅಳಿಸಲಾಗುತ್ತಿದೆ…"</string>
     <string name="fdn_contact_deleted" msgid="1680714996763848838">"ಸ್ಥಿರ ಡಯಲಿಂಗ್ ಸಂಖ್ಯೆಯನ್ನು ಅಳಿಸಲಾಗಿದೆ."</string>
-    <string name="pin2_invalid" msgid="2313954262684494442">"ನೀವು ತಪ್ಪಾದ ಪಿನ್‌ ಟೈಪ್‌ ಮಾಡಿರುವ ಕಾರಣ ಎಫ್‌ಡಿಎನ್‌ ಅನ್ನು ನವೀಕರಿಸಲಾಗಲಿಲ್ಲ."</string>
+    <string name="pin2_invalid" msgid="7366835930615792402">"ತಪ್ಪಾದ ಪಿನ್‌2. FDN ಅನ್ನು ಅಪ್‌ಡೇಟ್ ಮಾಡಲಾಗಿಲ್ಲ."</string>
     <string name="fdn_invalid_number" msgid="9067189814657840439">"ಸಂಖ್ಯೆಯು <xliff:g id="FDN_NUMBER_LIMIT_LENGTH">%d</xliff:g> ಅಂಕಿಗಳನ್ನು ಮೀರುತ್ತಿರುವ ಕಾರಣ FDN ಅನ್ನು ಅಪ್‌ಡೇಟ್ ಮಾಡಲಾಗಲಿಲ್ಲ."</string>
     <string name="pin2_or_fdn_invalid" msgid="7542639487955868181">"ಎಫ್‌ಡಿಎನ್‌ ಅನ್ನು ನವೀಕರಿಸಲಾಗಲಿಲ್ಲ. PIN2 ತಪ್ಪಾಗಿದೆ ಅಥವಾ ಫೋನ್ ಸಂಖ್ಯೆಯನ್ನು ತಿರಸ್ಕರಿಸಲಾಗಿದೆ."</string>
     <string name="fdn_failed" msgid="216592346853420250">"ಎಫ್‌ಡಿಎನ್‌ ಕಾರ್ಯಾಚರಣೆ ವಿಫಲವಾಗಿದೆ."</string>

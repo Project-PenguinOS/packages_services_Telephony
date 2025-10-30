@@ -481,7 +481,7 @@
     <string name="delete_fdn_contact" msgid="7027405651994507077">"Выдаліць дазволены нумар"</string>
     <string name="deleting_fdn_contact" msgid="6872320570844460428">"Выдаленне дазволенага нумару..."</string>
     <string name="fdn_contact_deleted" msgid="1680714996763848838">"Дазволены нумар выдалены."</string>
-    <string name="pin2_invalid" msgid="2313954262684494442">"Дазволены нумар не быў абноўлены, таму што вы набралі няправільны PIN-код."</string>
+    <string name="pin2_invalid" msgid="7366835930615792402">"Няправільны PIN2-код. Дазволены нумар не абноўлены."</string>
     <string name="fdn_invalid_number" msgid="9067189814657840439">"Дазволены нумар не абноўлены, бо не можа складацца больш чым з <xliff:g id="FDN_NUMBER_LIMIT_LENGTH">%d</xliff:g> лічбаў."</string>
     <string name="pin2_or_fdn_invalid" msgid="7542639487955868181">"Cпiс дазволеных нумароў не адноўлены. PIN2 ўведзены няправiльна, або нумар быў адхiлены."</string>
     <string name="fdn_failed" msgid="216592346853420250">"Аперацыя з дазволеным нумарам не ўдалася."</string>

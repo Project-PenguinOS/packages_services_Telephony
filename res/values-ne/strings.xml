@@ -481,7 +481,8 @@
     <string name="delete_fdn_contact" msgid="7027405651994507077">"स्थिर डायल गर्ने नम्बर मेट्नुहोस्"</string>
     <string name="deleting_fdn_contact" msgid="6872320570844460428">"स्थिर डायल गर्ने नम्बर मेट्दै..."</string>
     <string name="fdn_contact_deleted" msgid="1680714996763848838">"स्थिर डायल गर्ने नम्बर मेटियो।"</string>
-    <string name="pin2_invalid" msgid="2313954262684494442">"FDN अद्यावधिक भएको थिएन किनकि तपाईंले गलत PIN टाइप गर्नुभयो।"</string>
+    <!-- no translation found for pin2_invalid (7366835930615792402) -->
+    <skip />
     <string name="fdn_invalid_number" msgid="9067189814657840439">"उक्त सङ्ख्याले <xliff:g id="FDN_NUMBER_LIMIT_LENGTH">%d</xliff:g> अङ्कको अधिकतम सीमा नाघेकाले FDN अद्यावधिक गरिएन।"</string>
     <string name="pin2_or_fdn_invalid" msgid="7542639487955868181">"FDN अद्यावधिक भएको थिएन। PIN2 गलत थियो वा फोन नम्बर अस्वीकार भएको थियो।"</string>
     <string name="fdn_failed" msgid="216592346853420250">"FDN कार्य बिफल भयो।"</string>
