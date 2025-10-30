@@ -481,7 +481,7 @@
     <string name="delete_fdn_contact" msgid="7027405651994507077">"நிலையான அழைப்பு எண்ணை நீக்கு"</string>
     <string name="deleting_fdn_contact" msgid="6872320570844460428">"நிலையான அழைப்பு எண்ணை நீக்குகிறது…"</string>
     <string name="fdn_contact_deleted" msgid="1680714996763848838">"நிலையான அழைப்பு எண் நீக்கப்பட்டது."</string>
-    <string name="pin2_invalid" msgid="2313954262684494442">"தவறான பின்னை உள்ளிட்டுள்ளதால், FDN புதுப்பிக்கப்படவில்லை."</string>
+    <string name="pin2_invalid" msgid="7366835930615792402">"தவறான பின்2. FDN புதுப்பிக்கப்படவில்லை."</string>
     <string name="fdn_invalid_number" msgid="9067189814657840439">"உள்ளிட்ட எண் <xliff:g id="FDN_NUMBER_LIMIT_LENGTH">%d</xliff:g> இலக்கங்களுக்கும் அதிகமாக உள்ளதால் FDN புதுப்பிக்கப்படவில்லை."</string>
     <string name="pin2_or_fdn_invalid" msgid="7542639487955868181">"FDN புதுப்பிக்கப்படவில்லை. PIN2 தவறானது அல்லது மொபைல் எண் நிராகரிக்கப்பட்டது."</string>
     <string name="fdn_failed" msgid="216592346853420250">"FDN செயல்பாடு தோல்வி."</string>

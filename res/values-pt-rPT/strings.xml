@@ -481,7 +481,8 @@
     <string name="delete_fdn_contact" msgid="7027405651994507077">"Eliminar números autorizados"</string>
     <string name="deleting_fdn_contact" msgid="6872320570844460428">"A eliminar números autorizados..."</string>
     <string name="fdn_contact_deleted" msgid="1680714996763848838">"Números autorizados eliminados."</string>
-    <string name="pin2_invalid" msgid="2313954262684494442">"Os números autorizados não foram atualizados porque introduziu um PIN incorreto."</string>
+    <!-- no translation found for pin2_invalid (7366835930615792402) -->
+    <skip />
     <string name="fdn_invalid_number" msgid="9067189814657840439">"O FDN não foi atualizado porque o número excede <xliff:g id="FDN_NUMBER_LIMIT_LENGTH">%d</xliff:g> dígitos."</string>
     <string name="pin2_or_fdn_invalid" msgid="7542639487955868181">"Não foram atualizados os números autorizados. O PIN2 estava errado ou o número de telefone foi rejeitado."</string>
     <string name="fdn_failed" msgid="216592346853420250">"Falha de FDN."</string>

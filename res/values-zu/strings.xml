@@ -481,7 +481,8 @@
     <string name="delete_fdn_contact" msgid="7027405651994507077">"Susa othintana naye wokudayela okungaguquki"</string>
     <string name="deleting_fdn_contact" msgid="6872320570844460428">"Isusa othintana naye wokudayela okungaguquki..."</string>
     <string name="fdn_contact_deleted" msgid="1680714996763848838">"Othintana naye wokudayela okungaguquki ususiwe"</string>
-    <string name="pin2_invalid" msgid="2313954262684494442">"I-FDN ayivuselelwanga ngoba uthayiphe i-PIN engalungile."</string>
+    <!-- no translation found for pin2_invalid (7366835930615792402) -->
+    <skip />
     <string name="fdn_invalid_number" msgid="9067189814657840439">"I-FDN ayizange ibuyekezwe ngoba inombolo idlula amadijithi angu-<xliff:g id="FDN_NUMBER_LIMIT_LENGTH">%d</xliff:g>."</string>
     <string name="pin2_or_fdn_invalid" msgid="7542639487955868181">"I-FDN ayibuyekeziwe. I-PIN2 kade ingalungile, noma inombolo yefoni yenqatshelwe."</string>
     <string name="fdn_failed" msgid="216592346853420250">"Umsebenzi we-FDN wehlulekile."</string>
