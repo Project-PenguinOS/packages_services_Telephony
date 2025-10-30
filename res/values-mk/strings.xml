@@ -481,7 +481,7 @@
     <string name="delete_fdn_contact" msgid="7027405651994507077">"Избриши број на фиксно бирање"</string>
     <string name="deleting_fdn_contact" msgid="6872320570844460428">"Бришење број на фиксно бирање..."</string>
     <string name="fdn_contact_deleted" msgid="1680714996763848838">"Бројот на фиксно бирање е избришан."</string>
-    <string name="pin2_invalid" msgid="2313954262684494442">"FDN не се ажурираше зашто внесовте погрешен PIN."</string>
+    <string name="pin2_invalid" msgid="7366835930615792402">"Неточен PIN2. FDN не е ажуриран."</string>
     <string name="fdn_invalid_number" msgid="9067189814657840439">"FDN не е ажуриран затоа што бројот содржи повеќе од <xliff:g id="FDN_NUMBER_LIMIT_LENGTH">%d</xliff:g> цифри."</string>
     <string name="pin2_or_fdn_invalid" msgid="7542639487955868181">"FDN не се ажурираше. PIN2 кодот е неточен или телефонскиот број е одбиен."</string>
     <string name="fdn_failed" msgid="216592346853420250">"Операцијата со FDN не успеа."</string>

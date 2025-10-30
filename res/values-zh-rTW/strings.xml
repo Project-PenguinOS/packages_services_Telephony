@@ -481,7 +481,8 @@
     <string name="delete_fdn_contact" msgid="7027405651994507077">"刪除固定撥號"</string>
     <string name="deleting_fdn_contact" msgid="6872320570844460428">"正在刪除固定撥號…"</string>
     <string name="fdn_contact_deleted" msgid="1680714996763848838">"已刪除固定撥號。"</string>
-    <string name="pin2_invalid" msgid="2313954262684494442">"您所輸入的 PIN 不正確，因此未更新 FDN。"</string>
+    <!-- no translation found for pin2_invalid (7366835930615792402) -->
+    <skip />
     <string name="fdn_invalid_number" msgid="9067189814657840439">"固定撥號的號碼超過 <xliff:g id="FDN_NUMBER_LIMIT_LENGTH">%d</xliff:g> 位數，因此無法更新。"</string>
     <string name="pin2_or_fdn_invalid" msgid="7542639487955868181">"未更新 FDN。可能是因為 PIN2 碼不正確或電話號碼遭拒。"</string>
     <string name="fdn_failed" msgid="216592346853420250">"FDN 操作失敗。"</string>
