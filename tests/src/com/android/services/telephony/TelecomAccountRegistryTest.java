@@ -237,6 +237,84 @@ public class TelecomAccountRegistryTest extends TelephonyTestBase {
                 PhoneAccount.CAPABILITY_EMERGENCY_CALLS_ONLY)).isTrue();
     }
 
+    @Test
+    public void lowBatteryAlert_validConfig_extrasSet() {
+        // This test assumes Flags.supportLowBatteryAlert() is true.
+        PersistableBundle bundle = new PersistableBundle();
+        bundle.putInt(CarrierConfigManager.KEY_LOW_BATTERY_ALERT_INTERVAL_INT, 30);
+        bundle.putInt(CarrierConfigManager.KEY_LOW_BATTERY_ALERT_THRESHOLD_INT, 15);
+        overrideSubscriptionServiceCapabilities(bundle);
+
+        // Trigger account registration
+        onLocaleChanged();
+
+        PhoneAccount phoneAccount = verifyAndCaptureRegisteredPhoneAccount();
+        assertThat(phoneAccount.getExtras()).isNotNull();
+        assertThat(phoneAccount.getExtras().getInt(
+                PhoneAccount.EXTRA_LOW_BATTERY_ALERT_INTERVAL_SECONDS)).isEqualTo(30);
+        assertThat(phoneAccount.getExtras().getInt(
+                PhoneAccount.EXTRA_LOW_BATTERY_ALERT_LEVEL_THRESHOLD)).isEqualTo(15);
+    }
+
+    @Test
+    public void lowBatteryAlert_intervalDisabled_extrasNotSet() {
+        // This test assumes Flags.supportLowBatteryAlert() is true.
+        PersistableBundle bundle = new PersistableBundle();
+        bundle.putInt(CarrierConfigManager.KEY_LOW_BATTERY_ALERT_INTERVAL_INT,
+                PhoneAccount.LOW_BATTERY_ALERT_DISABLED);
+        bundle.putInt(CarrierConfigManager.KEY_LOW_BATTERY_ALERT_THRESHOLD_INT, 15);
+        overrideSubscriptionServiceCapabilities(bundle);
+
+        // Trigger account registration
+        onLocaleChanged();
+
+        PhoneAccount phoneAccount = verifyAndCaptureRegisteredPhoneAccount();
+        assertThat(phoneAccount.getExtras()).isNotNull();
+        assertThat(phoneAccount.getExtras().containsKey(
+                PhoneAccount.EXTRA_LOW_BATTERY_ALERT_INTERVAL_SECONDS)).isFalse();
+        assertThat(phoneAccount.getExtras().containsKey(
+                PhoneAccount.EXTRA_LOW_BATTERY_ALERT_LEVEL_THRESHOLD)).isFalse();
+    }
+
+    @Test
+    public void lowBatteryAlert_thresholdDisabled_extrasNotSet() {
+        // This test assumes Flags.supportLowBatteryAlert() is true.
+        PersistableBundle bundle = new PersistableBundle();
+        bundle.putInt(CarrierConfigManager.KEY_LOW_BATTERY_ALERT_INTERVAL_INT, 30);
+        bundle.putInt(CarrierConfigManager.KEY_LOW_BATTERY_ALERT_THRESHOLD_INT,
+                PhoneAccount.LOW_BATTERY_ALERT_DISABLED);
+        overrideSubscriptionServiceCapabilities(bundle);
+
+        // Trigger account registration
+        onLocaleChanged();
+
+        PhoneAccount phoneAccount = verifyAndCaptureRegisteredPhoneAccount();
+        assertThat(phoneAccount.getExtras()).isNotNull();
+        assertThat(phoneAccount.getExtras().containsKey(
+                PhoneAccount.EXTRA_LOW_BATTERY_ALERT_INTERVAL_SECONDS)).isFalse();
+        assertThat(phoneAccount.getExtras().containsKey(
+                PhoneAccount.EXTRA_LOW_BATTERY_ALERT_LEVEL_THRESHOLD)).isFalse();
+    }
+
+    @Test
+    public void lowBatteryAlert_configMissing_extrasNotSet() {
+        // This test assumes Flags.supportLowBatteryAlert() is true.
+        // When config is not set, getInt should return the default value, which is
+        // LOW_BATTERY_ALERT_DISABLED.
+        PersistableBundle bundle = new PersistableBundle();
+        overrideSubscriptionServiceCapabilities(bundle);
+
+        // Trigger account registration
+        onLocaleChanged();
+
+        PhoneAccount phoneAccount = verifyAndCaptureRegisteredPhoneAccount();
+        assertThat(phoneAccount.getExtras()).isNotNull();
+        assertThat(phoneAccount.getExtras().containsKey(
+                PhoneAccount.EXTRA_LOW_BATTERY_ALERT_INTERVAL_SECONDS)).isFalse();
+        assertThat(phoneAccount.getExtras().containsKey(
+                PhoneAccount.EXTRA_LOW_BATTERY_ALERT_LEVEL_THRESHOLD)).isFalse();
+    }
+
     private PhoneAccount verifyAndCaptureRegisteredPhoneAccount() {
         ArgumentCaptor<PhoneAccount> phoneAccountArgumentCaptor =
                 ArgumentCaptor.forClass(PhoneAccount.class);
@@ -246,7 +324,6 @@ public class TelecomAccountRegistryTest extends TelephonyTestBase {
     }
 
     private void onUserSwitched(UserHandle userHandle) {
-        Log.d(TAG, "Broadcast ACTION_USER_SWITCHED...");
         Intent intent = new Intent(Intent.ACTION_USER_SWITCHED);
         intent.putExtra(Intent.EXTRA_USER, userHandle);
         mUserSwitchedAndConfigChangedReceiver.onReceive(mMockedContext, intent);
@@ -254,7 +331,6 @@ public class TelecomAccountRegistryTest extends TelephonyTestBase {
     }
 
     private void onCarrierConfigChanged(int subId) {
-        Log.d(TAG, "Broadcast ACTION_CARRIER_CONFIG_CHANGED...");
         Intent intent = new Intent(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED);
         intent.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, subId);
         mUserSwitchedAndConfigChangedReceiver.onReceive(mMockedContext, intent);
@@ -263,7 +339,6 @@ public class TelecomAccountRegistryTest extends TelephonyTestBase {
     }
 
     private void onAddSubscriptionListenerFailed() {
-        Log.d(TAG, "Add subscription listener failed...");
         mOnSubscriptionsChangedListener.onAddListenerFailed();
     }
 
@@ -284,14 +359,12 @@ public class TelecomAccountRegistryTest extends TelephonyTestBase {
     }
 
     private void onLocaleChanged() {
-        Log.d(TAG, "Broadcast ACTION_LOCALE_CHANGED...");
         Intent intent = new Intent(Intent.ACTION_LOCALE_CHANGED);
         mLocaleChangedBroadcastReceiver.onReceive(mMockedContext, intent);
         mTestableLooper.processAllMessages();
     }
 
     private void onNetworkCountryChanged() {
-        Log.d(TAG, "Broadcast ACTION_NETWORK_COUNTRY_CHANGED...");
         Intent intent = new Intent(TelephonyManager.ACTION_NETWORK_COUNTRY_CHANGED);
         mLocaleChangedBroadcastReceiver.onReceive(mMockedContext, intent);
     }
@@ -301,6 +374,16 @@ public class TelecomAccountRegistryTest extends TelephonyTestBase {
         bundle.putIntArray(CarrierConfigManager.KEY_CELLULAR_SERVICE_CAPABILITIES_INT_ARRAY,
                 capabilities);
 
+        when(mPhoneGlobals.getCarrierConfigForSubId(anyInt())).thenReturn(bundle);
+        mTestableLooper.processAllMessages();
+    }
+
+    private void overrideSubscriptionServiceCapabilities(PersistableBundle bundle) {
+        if (bundle.getIntArray(
+                CarrierConfigManager.KEY_CELLULAR_SERVICE_CAPABILITIES_INT_ARRAY) == null) {
+            bundle.putIntArray(CarrierConfigManager.KEY_CELLULAR_SERVICE_CAPABILITIES_INT_ARRAY,
+                    new int[]{SubscriptionManager.SERVICE_CAPABILITY_VOICE});
+        }
         when(mPhoneGlobals.getCarrierConfigForSubId(anyInt())).thenReturn(bundle);
         mTestableLooper.processAllMessages();
     }
