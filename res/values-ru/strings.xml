@@ -481,8 +481,7 @@
     <string name="delete_fdn_contact" msgid="7027405651994507077">"Удалить номер ограниченного набора"</string>
     <string name="deleting_fdn_contact" msgid="6872320570844460428">"Выполняется удаление номера ограниченного набора…"</string>
     <string name="fdn_contact_deleted" msgid="1680714996763848838">"Номер ограниченного набора удален."</string>
-    <!-- no translation found for pin2_invalid (7366835930615792402) -->
-    <skip />
+    <string name="pin2_invalid" msgid="7366835930615792402">"Неверный PIN2. Разрешенный номер не обновлен."</string>
     <string name="fdn_invalid_number" msgid="9067189814657840439">"Разрешенный номер не обновлен, так как не может содержать более <xliff:g id="FDN_NUMBER_LIMIT_LENGTH">%d</xliff:g> цифр."</string>
     <string name="pin2_or_fdn_invalid" msgid="7542639487955868181">"Список разрешенных номеров не обновлен. Указан неверный PIN2 или номер телефона."</string>
     <string name="fdn_failed" msgid="216592346853420250">"Не удалось включить FDN"</string>

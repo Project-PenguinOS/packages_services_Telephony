@@ -481,8 +481,7 @@
     <string name="delete_fdn_contact" msgid="7027405651994507077">"발신 허용 번호 삭제"</string>
     <string name="deleting_fdn_contact" msgid="6872320570844460428">"발신 허용 번호를 삭제하는 중..."</string>
     <string name="fdn_contact_deleted" msgid="1680714996763848838">"발신 허용 번호가 삭제되었습니다."</string>
-    <!-- no translation found for pin2_invalid (7366835930615792402) -->
-    <skip />
+    <string name="pin2_invalid" msgid="7366835930615792402">"잘못된 PIN2입니다. FDN이 업데이트되지 않았습니다."</string>
     <string name="fdn_invalid_number" msgid="9067189814657840439">"숫자가 <xliff:g id="FDN_NUMBER_LIMIT_LENGTH">%d</xliff:g>자리를 초과하여 FDN을 업데이트하지 못했습니다."</string>
     <string name="pin2_or_fdn_invalid" msgid="7542639487955868181">"FDN이 업데이트되지 않았습니다. PIN2가 잘못되었거나 전화번호가 거부되었습니다."</string>
     <string name="fdn_failed" msgid="216592346853420250">"FDN 작업이 실패했습니다."</string>
