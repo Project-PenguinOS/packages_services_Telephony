@@ -363,7 +363,7 @@ public class ImsConferenceController {
 
                 // If the conference is full, don't allow anything to be conferenced with it.
                 if (imsConference.isFullConference()) {
-                    if (com.android.server.telecom.flags.Flags.multiPartyAnchorConf()) {
+                    if (android.telecom.flags.Flags.multiPartyAnchorConf()) {
                         imsConference.setConferenceables(Collections.<Conferenceable>emptyList());
                     } else {
                         imsConference
@@ -371,7 +371,7 @@ public class ImsConferenceController {
                     }
                 }
 
-                if (com.android.server.telecom.flags.Flags.multiPartyAnchorConf() &&
+                if (android.telecom.flags.Flags.multiPartyAnchorConf() &&
                         imsConference.getCarrierConfig() != null &&
                         imsConference.getCarrierConfig().isMultiPartyAnchorConfSupported()) {
                     // Remove conferenceables from different PhoneAccountHandles.
@@ -568,7 +568,7 @@ public class ImsConferenceController {
             boolean shouldLocalDisconnectOnEmptyConference = bundle.getBoolean(
                     CarrierConfigManager.KEY_LOCAL_DISCONNECT_EMPTY_IMS_CONFERENCE_BOOL);
             boolean isMultiPartyAnchorConfSupported = false;
-            if (com.android.server.telecom.flags.Flags.multiPartyAnchorConf()){
+            if (android.telecom.flags.Flags.multiPartyAnchorConf()){
                 isMultiPartyAnchorConfSupported = bundle.getBoolean(
                         CarrierConfigManager.KEY_SUPPORT_MULTI_PARTY_ANCHOR_CONFERENCE_BOOL);
             }
