@@ -481,8 +481,7 @@
     <string name="delete_fdn_contact" msgid="7027405651994507077">"Vast nummer verwijderen"</string>
     <string name="deleting_fdn_contact" msgid="6872320570844460428">"Vast nummer verwijderen..."</string>
     <string name="fdn_contact_deleted" msgid="1680714996763848838">"Vast nummer verwijderd."</string>
-    <!-- no translation found for pin2_invalid (7366835930615792402) -->
-    <skip />
+    <string name="pin2_invalid" msgid="7366835930615792402">"Ongeldige PIN2. Update voor FDN niet uitgevoerd."</string>
     <string name="fdn_invalid_number" msgid="9067189814657840439">"FDN is niet geüpdatet omdat het nummer langer is dan <xliff:g id="FDN_NUMBER_LIMIT_LENGTH">%d</xliff:g> tekens."</string>
     <string name="pin2_or_fdn_invalid" msgid="7542639487955868181">"FDN is niet bijgewerkt. De PIN2 was onjuist of het telefoonnummer is geweigerd."</string>
     <string name="fdn_failed" msgid="216592346853420250">"FDN-bewerking mislukt."</string>

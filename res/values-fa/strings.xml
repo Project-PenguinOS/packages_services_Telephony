@@ -64,7 +64,7 @@
     <string name="apn_settings" msgid="1978652203074756623">"نام‌های نقاط دسترسی"</string>
     <string name="settings_label" msgid="9101778088412567956">"تنظیمات شبکه"</string>
     <string name="phone_accounts" msgid="1216879437523774604">"حساب‌های تماس"</string>
-    <string name="phone_accounts_make_calls_with" msgid="16747814788918145">"برقراری تماس‌ها با"</string>
+    <string name="phone_accounts_make_calls_with" msgid="16747814788918145">"برقراری تماس با"</string>
     <string name="phone_accounts_make_sip_calls_with" msgid="4691221006731847255">"‏برقراری تماس‌های SIP با"</string>
     <string name="phone_accounts_ask_every_time" msgid="6192347582666047168">"ابتدا سؤال شود"</string>
     <string name="phone_accounts_default_account_label" msgid="5107598881335931101">"شبکه‌ در دسترس نیست"</string>
@@ -481,8 +481,7 @@
     <string name="delete_fdn_contact" msgid="7027405651994507077">"حذف شماره شماره گیری ثابت"</string>
     <string name="deleting_fdn_contact" msgid="6872320570844460428">"در حال حذف شماره شماره گیری ثابت..."</string>
     <string name="fdn_contact_deleted" msgid="1680714996763848838">"شماره شماره گیری ثابت حذف شد."</string>
-    <!-- no translation found for pin2_invalid (7366835930615792402) -->
-    <skip />
+    <string name="pin2_invalid" msgid="7366835930615792402">"‏پین ۲ اشتباه است. FDN به‌روز نشد."</string>
     <string name="fdn_invalid_number" msgid="9067189814657840439">"‏FDN به‌روزرسانی نشد، زیرا شماره از <xliff:g id="FDN_NUMBER_LIMIT_LENGTH">%d</xliff:g> رقم بیشتر است."</string>
     <string name="pin2_or_fdn_invalid" msgid="7542639487955868181">"‏FDN به‌روز نشد. پین۲ اشتباه بود یا شماره تلفن رد شد."</string>
     <string name="fdn_failed" msgid="216592346853420250">"‏عملیات FDN ناموفق بود."</string>

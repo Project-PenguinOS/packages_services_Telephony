@@ -104,10 +104,11 @@ public class PhoneInformationV2 extends AppCompatActivity
                 int subId = SubscriptionManager.getSubscriptionId(i);
 
                 Log.d(TAG, "onDestroy: subId for phone (" + i + "): " + subId);
-                // Revert satellite carrier config overrides by restoring the original bundle
-                if (Boolean.TRUE.equals(mViewModel.getSatelliteEnabled(i).getValue())) {
-                    carrierConfigManager.overrideConfig(subId, null, false);
+                if (!SubscriptionManager.isValidSubscriptionId(subId)) {
+                    continue;
                 }
+                // Revert satellite carrier config overrides by restoring the original bundle
+                carrierConfigManager.overrideConfig(subId, null, false);
 
                 if (Boolean.TRUE.equals(mViewModel.getSatelliteDataEnabled(i).getValue())) {
                     PhoneInformationUtil.restoreMaxAllowedDataMode();

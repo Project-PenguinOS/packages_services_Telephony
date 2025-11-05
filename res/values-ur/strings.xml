@@ -481,8 +481,7 @@
     <string name="delete_fdn_contact" msgid="7027405651994507077">"فکسڈ ڈائلنگ نمبر حذف کریں"</string>
     <string name="deleting_fdn_contact" msgid="6872320570844460428">"فکسڈ ڈائلنگ نمبر حذف کر رہا ہے…"</string>
     <string name="fdn_contact_deleted" msgid="1680714996763848838">"فکسڈ ڈائلنگ نمبر حذف ہوگیا۔"</string>
-    <!-- no translation found for pin2_invalid (7366835930615792402) -->
-    <skip />
+    <string name="pin2_invalid" msgid="7366835930615792402">"‏غلط PIN2۔ ‫FDN اپ ڈیٹ نہیں ہوا۔"</string>
     <string name="fdn_invalid_number" msgid="9067189814657840439">"‏FDN اپ ڈیٹ نہیں ہوا کیونکہ <xliff:g id="FDN_NUMBER_LIMIT_LENGTH">%d</xliff:g> نمبر ہندسوں سے زائد ہے۔"</string>
     <string name="pin2_or_fdn_invalid" msgid="7542639487955868181">"‏FDN اپ ڈیٹ نہیں ہوا تھا کیونکہ PIN2 غلط تھا یا فون نمبر مسترد کر دیا گیا تھا۔"</string>
     <string name="fdn_failed" msgid="216592346853420250">"‏FDN کا عمل ناکام ہوگیا۔"</string>
