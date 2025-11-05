@@ -169,6 +169,7 @@ import android.telephony.satellite.ISatelliteTransmissionUpdateCallback;
 import android.telephony.satellite.ISelectedNbIotSatelliteSubscriptionCallback;
 import android.telephony.satellite.NtnSignalStrength;
 import android.telephony.satellite.NtnSignalStrengthCallback;
+import android.telephony.satellite.PlmnSatelliteConfig;
 import android.telephony.satellite.SatelliteCapabilities;
 import android.telephony.satellite.SatelliteDatagram;
 import android.telephony.satellite.SatelliteDatagramCallback;
@@ -14670,6 +14671,30 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
 
         return satelliteMode;
     }
+
+
+    /**
+     * Get the satellite configuration for the given PLMN.
+     *
+     * @param subId current subscription id.
+     * @param plmn PLMN for which the satellite configuration is requested.
+     * @return {@link PlmnSatelliteConfig} object containing the satellite configuration for the
+     * given PLMN.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     */
+    @Override
+    public @NonNull PlmnSatelliteConfig getPlmnSatelliteConfig(int subId, String plmn) {
+        enforceSatelliteCommunicationPermission("getPlmnSatelliteConfig");
+
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return mSatelliteController.getPlmnSatelliteConfig(subId, plmn);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
 
     /**
      * This API can be used by only CTS to update CTS mode testing.
