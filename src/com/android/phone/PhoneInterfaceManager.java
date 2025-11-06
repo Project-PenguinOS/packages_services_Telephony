@@ -2316,6 +2316,12 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         synchronized (PhoneInterfaceManager.class) {
             if (sInstance == null) {
                 sInstance = new PhoneInterfaceManager(app, featureFlags);
+                if (featureFlags.publishTelephonyServicesAfterConstruction()) {
+                    TelephonyFrameworkInitializer
+                            .getTelephonyServiceManager()
+                            .getTelephonyServiceRegisterer()
+                            .register(sInstance);
+                }
             } else {
                 Log.wtf(LOG_TAG, "init() called multiple times!  sInstance = " + sInstance);
             }
@@ -2346,7 +2352,9 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         mTelephonyShellCommand = new TelephonyShellCommand(this, getDefaultPhone().getContext());
 
         PropertyInvalidatedCache.invalidateCache(TelephonyManager.CACHE_KEY_PHONE_ACCOUNT_TO_SUBID);
-        publish();
+        if (!mFeatureFlags.publishTelephonyServicesAfterConstruction()) {
+            publish();
+        }
         CarrierAllowListInfo.loadInstance(mApp);
 
         // Create the SatelliteEntitlementController singleton, for using the get the
