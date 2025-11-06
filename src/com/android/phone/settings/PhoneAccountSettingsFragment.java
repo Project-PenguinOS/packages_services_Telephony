@@ -190,16 +190,16 @@ public class PhoneAccountSettingsFragment extends PreferenceFragment
     @Override
     public boolean onPreferenceClick(Preference preference) {
         if (preference == mButtonVibratingForMoCallAccepted) {
-            final int prefs = mButtonVibratingForMoCallAccepted.isChecked()
+            mCallConnectedIndicator = mButtonVibratingForMoCallAccepted.isChecked()
                     ? mCallConnectedIndicator | TelecomManager.CALL_CONNECTED_INDICATOR_VIBRATION
                     : mCallConnectedIndicator & ~TelecomManager.CALL_CONNECTED_INDICATOR_VIBRATION;
-            mTelecomManager.setCallConnectedIndicatorPreference(prefs);
+            mTelecomManager.setCallConnectedIndicatorPreference(mCallConnectedIndicator);
             return true;
         } else if (preference == mButtonPlayingToneForMoCallAccepted) {
-            final int prefs = mButtonPlayingToneForMoCallAccepted.isChecked()
+            mCallConnectedIndicator = mButtonPlayingToneForMoCallAccepted.isChecked()
                     ? mCallConnectedIndicator | TelecomManager.CALL_CONNECTED_INDICATOR_TONE
                     : mCallConnectedIndicator & ~TelecomManager.CALL_CONNECTED_INDICATOR_TONE;
-            mTelecomManager.setCallConnectedIndicatorPreference(prefs);
+            mTelecomManager.setCallConnectedIndicatorPreference(mCallConnectedIndicator);
             return true;
         }
         return false;
