@@ -12,6 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Changes from Qualcomm Technologies, Inc. are provided under the following license:
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+ * SPDX-License-Identifier: BSD-3-Clause-Clear
  */
 
 package com.android.phone;
@@ -198,9 +202,14 @@ public class GsmUmtsCallBarringOptions extends TimeConsumingPreferenceActivity
         }
 
         // Submit the disable all request
+        disableAllBarringWithPassword(password);
+    }
+
+    protected void disableAllBarringWithPassword(String password) {
         mButtonDisableAll.setText("");
         Message onComplete = mHandler.obtainMessage(EVENT_DISABLE_ALL_COMPLETE);
-        mPhone.setCallBarring(CommandsInterface.CB_FACILITY_BA_ALL, false, password, onComplete, 0);
+        mPhone.setCallBarring(CommandsInterface.CB_FACILITY_BA_ALL, false, password, onComplete,
+            CallBarringEditPreference.getServiceClassForCallBarring(mPhone));
         this.onStarted(mButtonDisableAll, false);
     }
 
@@ -516,9 +525,14 @@ public class GsmUmtsCallBarringOptions extends TimeConsumingPreferenceActivity
         }
 
 // QTI_END: 2018-05-08: Telephony: IMS: Call barring enhancement for UT
-        // Deactivate all option is unavailable when sim card is not ready or Ut is enabled.
-        if (isSimReady && useDisableaAll) {
-            mButtonDisableAll.setEnabled(true);
+        // Deactivate all option is unavailable when sim card is not ready or when the feature
+        // is not supported by Modem
+        if (isSimReady) {
+            if(useDisableaAll) {
+                mButtonDisableAll.setEnabled(true);
+            } else {
+                mButtonDisableAll.init(this,mPhone);
+            }
         } else {
             mButtonDisableAll.setEnabled(false);
         }
@@ -609,6 +623,7 @@ public class GsmUmtsCallBarringOptions extends TimeConsumingPreferenceActivity
         for (CallBarringEditPreference pref : mPreferences) {
             pref.deInit();
         }
+        mButtonDisableAll.deInit();
     }
 
 // QTI_END: 2023-04-26: Telephony: IMS: Fix serviceConnection leaked issue
@@ -856,4 +871,8 @@ public class GsmUmtsCallBarringOptions extends TimeConsumingPreferenceActivity
         }
     }
 // QTI_END: 2022-12-14: Telephony: IMS: Display call barring password UI conditionally
+
+    boolean getIsPasswordRequiredOverIms(){
+        return mPasswordRequiredOverIms;
+    }
 }
