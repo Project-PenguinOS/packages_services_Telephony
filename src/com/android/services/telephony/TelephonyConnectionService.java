@@ -263,6 +263,7 @@ public class TelephonyConnectionService extends ConnectionService {
     private EmergencyCallDomainSelectionConnection mEmergencyCallDomainSelectionConnection;
     private TelephonyConnection mEmergencyConnection;
     private TelephonyConnection mAlternateEmergencyConnection;
+    private TelephonyConnection mForcedEmergencyRoutingConnection;
     private TelephonyConnection mNormalRoutingEmergencyConnection;
     private Executor mDomainSelectionMainExecutor;
     private DomainSelectionConnection mDomainSelectionConnection;
@@ -2421,7 +2422,12 @@ public class TelephonyConnectionService extends ConnectionService {
                                 // A normal routing number is dialed when airplane mode is enabled,
                                 // but normal service is not acquired.
                                 setNormalRoutingEmergencyConnection(null);
-                                mAlternateEmergencyConnection = connection;
+                                if (Flags.useEmergencyRoutingCause()) {
+                                    mForcedEmergencyRoutingConnection = connection;
+                                } else {
+                                    mAlternateEmergencyConnection = connection;
+                                }
+
                                 onEmergencyRedial(connection, phone, true);
                                 return;
                             }
@@ -2723,7 +2729,12 @@ public class TelephonyConnectionService extends ConnectionService {
             mIsEmergencyCallPending = true;
             mEmergencyConnection = (TelephonyConnection) resultConnection;
             if (routing == EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY) {
-                mAlternateEmergencyConnection = (TelephonyConnection) resultConnection;
+                if (Flags.useEmergencyRoutingCause()) {
+                    mForcedEmergencyRoutingConnection = (TelephonyConnection) resultConnection;
+                } else {
+                    mAlternateEmergencyConnection = (TelephonyConnection) resultConnection;
+                }
+
             }
             handleEmergencyCallStartedForSatelliteSOSMessageRecommender(mEmergencyConnection,
                     phone);
@@ -2782,6 +2793,7 @@ public class TelephonyConnectionService extends ConnectionService {
                 } else {
                     mEmergencyConnection = null;
                     mAlternateEmergencyConnection = null;
+                    mForcedEmergencyRoutingConnection = null;
                     String reason = "Couldn't setup emergency call";
                     if (result == android.telephony.DisconnectCause.POWER_OFF) {
                         reason = "Failed to turn on radio.";
@@ -2843,9 +2855,18 @@ public class TelephonyConnectionService extends ConnectionService {
             }
             Bundle extras = request.getExtras();
             extras.putInt(PhoneConstants.EXTRA_DIAL_DOMAIN, result);
-            if (resultConnection == mAlternateEmergencyConnection) {
+            if (Flags.useEmergencyRoutingCause()) {
+                if (resultConnection == mAlternateEmergencyConnection) {
+                    extras.putInt(PhoneConstants.EXTRA_EMERGENCY_ROUTING_UPDATE_CAUSE,
+                            PhoneConstants.EMERGENCY_ROUTING_UPDATE_CAUSE_ALTERNATE_SERVICE);
+                } else if (resultConnection == mForcedEmergencyRoutingConnection) {
+                    extras.putInt(PhoneConstants.EXTRA_EMERGENCY_ROUTING_UPDATE_CAUSE,
+                            PhoneConstants.EMERGENCY_ROUTING_UPDATE_CAUSE_DYNAMIC_ROUTING);
+                }
+            } else if (resultConnection == mAlternateEmergencyConnection) {
                 extras.putBoolean(PhoneConstants.EXTRA_USE_EMERGENCY_ROUTING, true);
             }
+
             CompletableFuture<Void> rejectFuture = checkAndRejectIncomingCall(phone, (ret) -> {
                 if (!ret) {
                     Log.i(this, "createEmergencyConnection reject incoming call failed");
@@ -3043,6 +3064,7 @@ public class TelephonyConnectionService extends ConnectionService {
         }
         mIsEmergencyCallPending = false;
         mAlternateEmergencyConnection = null;
+        mForcedEmergencyRoutingConnection = null;
         if (!isActive) {
             mEmergencyConnection = null;
         }
@@ -3351,7 +3373,13 @@ public class TelephonyConnectionService extends ConnectionService {
         final Bundle extras = new Bundle();
         extras.putInt(PhoneConstants.EXTRA_DIAL_DOMAIN, domain);
         if (connection == mAlternateEmergencyConnection) {
-            extras.putBoolean(PhoneConstants.EXTRA_USE_EMERGENCY_ROUTING, true);
+            if (Flags.useEmergencyRoutingCause()) {
+                extras.putInt(PhoneConstants.EXTRA_EMERGENCY_ROUTING_UPDATE_CAUSE,
+                        PhoneConstants.EMERGENCY_ROUTING_UPDATE_CAUSE_ALTERNATE_SERVICE);
+            } else {
+                extras.putBoolean(PhoneConstants.EXTRA_USE_EMERGENCY_ROUTING, true);
+            }
+
             if (connection.getEmergencyServiceCategory() != null) {
                 extras.putInt(PhoneConstants.EXTRA_EMERGENCY_SERVICE_CATEGORY,
                         connection.getEmergencyServiceCategory());
@@ -3360,6 +3388,9 @@ public class TelephonyConnectionService extends ConnectionService {
                 extras.putStringArrayList(PhoneConstants.EXTRA_EMERGENCY_URNS,
                         new ArrayList<>(connection.getEmergencyUrns()));
             }
+        } else if (connection == mForcedEmergencyRoutingConnection) {
+            extras.putInt(PhoneConstants.EXTRA_EMERGENCY_ROUTING_UPDATE_CAUSE,
+                    PhoneConstants.EMERGENCY_ROUTING_UPDATE_CAUSE_DYNAMIC_ROUTING);
         }
 
         CompletableFuture<Void> future = checkAndRejectIncomingCall(phone, (ret) -> {
@@ -3497,6 +3528,7 @@ public class TelephonyConnectionService extends ConnectionService {
             } else {
                 mEmergencyConnection = null;
                 mAlternateEmergencyConnection = null;
+                mForcedEmergencyRoutingConnection = null;
                 c.setTelephonyConnectionDisconnected(
                         mDisconnectCauseFactory.toTelecomDisconnectCause(result, "unknown error"));
                 c.close();
