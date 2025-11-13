@@ -10113,10 +10113,24 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
 
     @TelephonyManager.IsMultiSimSupportedResult
     private int isMultiSimSupportedInternal() {
-        // If the device has less than 2 SIM cards, indicate that multisim is restricted.
-        int numPhysicalSlots = UiccController.getInstance().getUiccSlots().length;
-        if (numPhysicalSlots < 2) {
-            loge("isMultiSimSupportedInternal: requires at least 2 cards");
+        UiccSlot[] slots = UiccController.getInstance().getUiccSlots();
+        if (slots == null) {
+            loge("isMultiSimSupportedInternal: slots is null");
+            return TelephonyManager.MULTISIM_NOT_SUPPORTED_BY_HARDWARE;
+        }
+
+        // If the device has less than 2 SIM cards, indicate that multisim is restricted,
+        // unless MEP is supported.
+        boolean isMepSupported = false;
+        for (UiccSlot slot : slots) {
+            if (slot != null && slot.isMultipleEnabledProfileSupported()) {
+                isMepSupported = true;
+                break;
+            }
+        }
+
+        if (slots.length < 2 && !isMepSupported) {
+            loge("isMultiSimSupportedInternal: requires at least 2 cards or MEP support");
             return TelephonyManager.MULTISIM_NOT_SUPPORTED_BY_HARDWARE;
         }
         // Check if the hardware supports multisim functionality. If usage of multisim is not
