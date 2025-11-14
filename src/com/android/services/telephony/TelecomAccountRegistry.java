@@ -227,11 +227,9 @@ public class TelecomAccountRegistry {
             mIsEmergency = isEmergency;
             mIsTestAccount = isTest;
             mIsAdhocConfCapable = mPhone.isImsRegistered();
-            if (Flags.simultaneousCallingIndications()) {
-                mSCT = SimultaneousCallingTracker.getInstance();
-                mSimultaneousCallSupportedSubIds =
-                        mSCT.getSubIdsSupportingSimultaneousCalling(mPhone.getSubId());
-            }
+            mSCT = SimultaneousCallingTracker.getInstance();
+            mSimultaneousCallSupportedSubIds =
+                    mSCT.getSubIdsSupportingSimultaneousCalling(mPhone.getSubId());
             mAccount = registerPstnPhoneAccount(isEmergency, isTest);
 // QTI_BEGIN: 2023-07-20: Telephony: Fix subid matching for PhoneAccounts
             mSubId = getSubId();
@@ -303,20 +301,18 @@ public class TelecomAccountRegistry {
             mImsManagerConnector.connect();
 // QTI_END: 2020-08-10: Telephony: IMS: Fix 4g conference call option not seen at times.
 
-            if (Flags.simultaneousCallingIndications()) {
-                //Register SimultaneousCallingTracker listener:
-                mSimultaneousCallingTrackerListener = new SimultaneousCallingTracker.Listener() {
-                    @Override
-                    public void onSimultaneousCallingSupportChanged(Map<Integer,
-                            Set<Integer>> simultaneousCallSubSupportMap) {
-                        updateSimultaneousCallSubSupportMap(simultaneousCallSubSupportMap);
-                    }
-                };
-                SimultaneousCallingTracker.getInstance()
-                        .addListener(mSimultaneousCallingTrackerListener);
-                Log.d(LOG_TAG, "Finished registering mSimultaneousCallingTrackerListener for "
-                        + "phoneId = " + mPhone.getPhoneId() + "; subId = " + mPhone.getSubId());
-            }
+            //Register SimultaneousCallingTracker listener:
+            mSimultaneousCallingTrackerListener = new SimultaneousCallingTracker.Listener() {
+                @Override
+                public void onSimultaneousCallingSupportChanged(Map<Integer,
+                        Set<Integer>> simultaneousCallSubSupportMap) {
+                    updateSimultaneousCallSubSupportMap(simultaneousCallSubSupportMap);
+                }
+            };
+            SimultaneousCallingTracker.getInstance()
+                    .addListener(mSimultaneousCallingTrackerListener);
+            Log.d(LOG_TAG, "Finished registering mSimultaneousCallingTrackerListener for "
+                    + "phoneId = " + mPhone.getPhoneId() + "; subId = " + mPhone.getSubId());
         }
 
         void teardown() {
@@ -326,10 +322,8 @@ public class TelecomAccountRegistry {
                 mMmTelManager.unregisterMmTelCapabilityCallback(mMmtelCapabilityCallback);
 // QTI_END: 2020-08-10: Telephony: IMS: Fix 4g conference call option not seen at times.
             }
-            if (Flags.simultaneousCallingIndications()) {
-                SimultaneousCallingTracker.getInstance()
-                        .removeListener(mSimultaneousCallingTrackerListener);
-            }
+            SimultaneousCallingTracker.getInstance()
+                    .removeListener(mSimultaneousCallingTrackerListener);
 // QTI_BEGIN: 2020-08-10: Telephony: IMS: Fix 4g conference call option not seen at times.
             mImsManagerConnector.disconnect();
 // QTI_END: 2020-08-10: Telephony: IMS: Fix 4g conference call option not seen at times.
@@ -700,14 +694,12 @@ public class TelecomAccountRegistry {
                     .setExtras(extras)
                     .setGroupId(groupId);
 
-            if (Flags.simultaneousCallingIndications()) {
-                Set <PhoneAccountHandle> simultaneousCallingHandles =
-                        mSimultaneousCallSupportedSubIds.stream()
-                                .map(subscriptionId -> PhoneUtils.makePstnPhoneAccountHandleWithId(
-                                        String.valueOf(subscriptionId), userToRegister))
-                                .collect(Collectors.toSet());
-                accountBuilder.setSimultaneousCallingRestriction(simultaneousCallingHandles);
-            }
+            Set <PhoneAccountHandle> simultaneousCallingHandles =
+                    mSimultaneousCallSupportedSubIds.stream()
+                            .map(subscriptionId -> PhoneUtils.makePstnPhoneAccountHandleWithId(
+                                    String.valueOf(subscriptionId), userToRegister))
+                            .collect(Collectors.toSet());
+            accountBuilder.setSimultaneousCallingRestriction(simultaneousCallingHandles);
 
 
             return accountBuilder.build();
@@ -1074,7 +1066,6 @@ public class TelecomAccountRegistry {
 
         public void updateSimultaneousCallSubSupportMap(Map<Integer,
                 Set<Integer>> simultaneousCallSubSupportMap) {
-            if (!Flags.simultaneousCallingIndications()) { return; }
             //Check if the simultaneous call support subIds for this account have changed:
             Set<Integer> updatedSimultaneousCallSupportSubIds = new HashSet<>(3);
             updatedSimultaneousCallSupportSubIds.addAll(
