@@ -10314,8 +10314,13 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
      */
     @Override
     public @Nullable String getCurrentPackageName() {
-        PackageManager pm = mApp.getBaseContext().createContextAsUser(
-                Binder.getCallingUserHandle(), 0).getPackageManager();
+        PackageManager pm;
+        try {
+            pm = mApp.getBaseContext().createContextAsUser(
+                    Binder.getCallingUserHandle(), 0).getPackageManager();
+        } catch (IllegalStateException ex) {
+            return null;
+        }
         if (pm == null) return null;
         String[] callingUids = pm.getPackagesForUid(Binder.getCallingUid());
         return (callingUids == null) ? null : callingUids[0];
