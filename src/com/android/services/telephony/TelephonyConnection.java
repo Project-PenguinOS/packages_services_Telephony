@@ -1108,7 +1108,7 @@ abstract class TelephonyConnection extends Connection implements Holdable, Commu
     }
 
     @Override
-    public void onReject(@android.telecom.Call.RejectReason int rejectReason) {
+    public void onReject(/*@android.telecom.Call.RejectReason*/ int rejectReason) {
         performReject(rejectReason);
     }
 
@@ -2296,7 +2296,7 @@ abstract class TelephonyConnection extends Connection implements Holdable, Commu
         }
     }
 
-    protected void reject(@android.telecom.Call.RejectReason int rejectReason) {
+    protected void reject(/*@android.telecom.Call.RejectReason*/ int rejectReason) {
         if (mOriginalConnection != null) {
             mHangupDisconnectCause = android.telephony.DisconnectCause.INCOMING_REJECTED;
             try {
