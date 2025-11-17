@@ -333,6 +333,8 @@ public class PhoneInformationV2FragmentDeviceDetails extends Fragment {
                         + subMgr.getPhoneNumber(subId, SubscriptionManager.PHONE_NUMBER_SOURCE_UICC)
                         + ", IMS:"
                         + subMgr.getPhoneNumber(subId, SubscriptionManager.PHONE_NUMBER_SOURCE_IMS)
+                        + ", TS43:"
+                        + subMgr.getPhoneNumber(subId, SubscriptionManager.PHONE_NUMBER_SOURCE_TS43)
                         + " }";
         mLine1Number.setText(number);
     }

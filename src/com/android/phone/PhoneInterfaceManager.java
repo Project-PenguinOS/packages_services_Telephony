@@ -40,6 +40,7 @@ import android.Manifest;
 import android.Manifest.permission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.PermissionManuallyEnforced;
 import android.annotation.RequiresPermission;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
@@ -411,6 +412,13 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     private static final int MIN_IDENTIFIER_DISCLOSURE_VERSION = 202;
     // Null cipher notification support was added in IRadioNetwork 2.2
     private static final int MIN_NULL_CIPHER_NOTIFICATION_VERSION = 202;
+
+    // TODO: b/419394842 - Remove and use defined build version code when available.
+    private static final int BUILD_VERSION_CODE_C = android.os.Build.VERSION_CODES.BAKLAVA + 1;
+
+    @ChangeId
+    @EnabledSince(targetSdkVersion = BUILD_VERSION_CODE_C)
+    static final long TELEPHONY_MANAGER_API_PERMISSION_ENABLED = 417788332;
 
     /** The singleton instance. */
     private static PhoneInterfaceManager sInstance;
@@ -2316,6 +2324,12 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         synchronized (PhoneInterfaceManager.class) {
             if (sInstance == null) {
                 sInstance = new PhoneInterfaceManager(app, featureFlags);
+                if (featureFlags.publishTelephonyServicesAfterConstruction()) {
+                    TelephonyFrameworkInitializer
+                            .getTelephonyServiceManager()
+                            .getTelephonyServiceRegisterer()
+                            .register(sInstance);
+                }
             } else {
                 Log.wtf(LOG_TAG, "init() called multiple times!  sInstance = " + sInstance);
             }
@@ -2346,7 +2360,9 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         mTelephonyShellCommand = new TelephonyShellCommand(this, getDefaultPhone().getContext());
 
         PropertyInvalidatedCache.invalidateCache(TelephonyManager.CACHE_KEY_PHONE_ACCOUNT_TO_SUBID);
-        publish();
+        if (!mFeatureFlags.publishTelephonyServicesAfterConstruction()) {
+            publish();
+        }
         CarrierAllowListInfo.loadInstance(mApp);
 
         // Create the SatelliteEntitlementController singleton, for using the get the
@@ -3291,7 +3307,14 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     }
 
     @Override
+    @PermissionManuallyEnforced
     public String getNetworkCountryIsoForPhone(int phoneId) {
+        if (mFeatureFlags.guardIdentifierAndNetworkCountryApis()
+                && CompatChanges.isChangeEnabled(TELEPHONY_MANAGER_API_PERMISSION_ENABLED)) {
+            mApp.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.QUERY_NETWORK_COUNTRY, null);
+        }
+
         if (!mApp.getResources().getBoolean(
                 com.android.internal.R.bool.config_force_phone_globals_creation)) {
             enforceTelephonyFeatureWithException(getCurrentPackageName(),
@@ -10105,10 +10128,24 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
 
     @TelephonyManager.IsMultiSimSupportedResult
     private int isMultiSimSupportedInternal() {
-        // If the device has less than 2 SIM cards, indicate that multisim is restricted.
-        int numPhysicalSlots = UiccController.getInstance().getUiccSlots().length;
-        if (numPhysicalSlots < 2) {
-            loge("isMultiSimSupportedInternal: requires at least 2 cards");
+        UiccSlot[] slots = UiccController.getInstance().getUiccSlots();
+        if (slots == null) {
+            loge("isMultiSimSupportedInternal: slots is null");
+            return TelephonyManager.MULTISIM_NOT_SUPPORTED_BY_HARDWARE;
+        }
+
+        // If the device has less than 2 SIM cards, indicate that multisim is restricted,
+        // unless MEP is supported.
+        boolean isMepSupported = false;
+        for (UiccSlot slot : slots) {
+            if (slot != null && slot.isMultipleEnabledProfileSupported()) {
+                isMepSupported = true;
+                break;
+            }
+        }
+
+        if (slots.length < 2 && !isMepSupported) {
+            loge("isMultiSimSupportedInternal: requires at least 2 cards or MEP support");
             return TelephonyManager.MULTISIM_NOT_SUPPORTED_BY_HARDWARE;
         }
         // Check if the hardware supports multisim functionality. If usage of multisim is not
@@ -10292,8 +10329,13 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
      */
     @Override
     public @Nullable String getCurrentPackageName() {
-        PackageManager pm = mApp.getBaseContext().createContextAsUser(
-                Binder.getCallingUserHandle(), 0).getPackageManager();
+        PackageManager pm;
+        try {
+            pm = mApp.getBaseContext().createContextAsUser(
+                    Binder.getCallingUserHandle(), 0).getPackageManager();
+        } catch (IllegalStateException ex) {
+            return null;
+        }
         if (pm == null) return null;
         String[] callingUids = pm.getPackagesForUid(Binder.getCallingUid());
         return (callingUids == null) ? null : callingUids[0];
@@ -12164,7 +12206,6 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     public String getModemService() {
         String result;
         Log.d(LOG_TAG, "getModemService");
-        TelephonyPermissions.enforceShellOnly(Binder.getCallingUid(), "getModemService");
         TelephonyPermissions
                 .enforceCallingOrSelfReadPrivilegedPhoneStatePermissionOrCarrierPrivilege(
                         mApp, SubscriptionManager.INVALID_SUBSCRIPTION_ID,

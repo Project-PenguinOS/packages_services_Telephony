@@ -519,7 +519,13 @@ public class PhoneGlobals extends ContextWrapper {
             DomainSelectionResolver.make(this, dssComponentName);
 
             if (mFeatureFlags.enablePhoneNumberParsingApi()) {
-                TelephonyServicesInitializer.initialize();
+                Log.v(LOG_TAG, "PhoneGlobal enablePhoneNumberParsingApi");
+                if (mFeatureFlags.getPhoneNumberTs43Api()) {
+                    Log.v(LOG_TAG, "PhoneGlobal TelephonyServicesInitializer.initialize(this)");
+                    TelephonyServicesInitializer.initialize(this);
+                } else {
+                    TelephonyServicesInitializer.initialize();
+                }
             }
 
             // Initialize the telephony framework
