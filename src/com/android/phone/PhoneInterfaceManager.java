@@ -3167,7 +3167,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     @Override
     public int getCallState() {
         if (CompatChanges.isChangeEnabled(
-                TelecomManager.ENABLE_GET_CALL_STATE_PERMISSION_PROTECTION,
+                TelephonyManager.ENABLE_GET_CALL_STATE_PERMISSION_PROTECTION,
                 Binder.getCallingUid())) {
             // Do not allow this API to be called on API version 31+, it should only be
             // called on old apps using this Binder call directly.
@@ -3186,7 +3186,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     @Override
     public int getCallStateForSubscription(int subId, String callingPackage, String featureId) {
         if (CompatChanges.isChangeEnabled(
-                TelecomManager.ENABLE_GET_CALL_STATE_PERMISSION_PROTECTION,
+                TelephonyManager.ENABLE_GET_CALL_STATE_PERMISSION_PROTECTION,
                 Binder.getCallingUid())) {
             // Check READ_PHONE_STATE for API version 31+
             if (!TelephonyPermissions.checkCallingOrSelfReadPhoneState(mApp, subId, callingPackage,
