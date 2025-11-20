@@ -19,7 +19,6 @@ import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.SwitchPreference;
 // QTI_BEGIN: 2020-02-11: Telephony: Add vibrating for outgoing call accepted support
-import android.provider.Settings;
 // QTI_END: 2020-02-11: Telephony: Add vibrating for outgoing call accepted support
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
@@ -227,12 +226,6 @@ public class PhoneAccountSettingsFragment extends PreferenceFragment
     @Override
     public boolean onPreferenceChange(Preference pref, Object objValue) {
 // QTI_BEGIN: 2021-05-11: Telephony: Fix to toggle vibrating for outgoing call accepted.
-        if (pref == mButtonVibratingForMoCallAccepted) {
-            Settings.Global.putInt(getActivity().getContentResolver(),
-                    android.provider.Settings.Global.VIBRATING_FOR_OUTGOING_CALL_ACCEPTED,
-                    mButtonVibratingForMoCallAccepted.isChecked() ? 0 : 1);
-            return true;
-        }
 // QTI_END: 2021-05-11: Telephony: Fix to toggle vibrating for outgoing call accepted.
         return false;
     }

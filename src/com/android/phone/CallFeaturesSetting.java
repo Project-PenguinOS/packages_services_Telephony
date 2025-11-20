@@ -451,9 +451,8 @@ public class CallFeaturesSetting extends PreferenceActivity
             getPreferenceScreen().removePreference(mButtonVibratingForMoCallAccepted);
             getPreferenceScreen().removePreference(mButtonPlayingToneForMoCallAccepted);
         } else {
-            final int vibrating = Settings.Global.getInt(getContentResolver(),
-                    Settings.Global.VIBRATING_FOR_OUTGOING_CALL_ACCEPTED, 1);
-            mButtonVibratingForMoCallAccepted.setChecked(vibrating != 0);
+            mButtonVibratingForMoCallAccepted.setChecked((mCallConnectedIndicator
+                    & TelecomManager.CALL_CONNECTED_INDICATOR_VIBRATION) > 0);
             mButtonVibratingForMoCallAccepted.setOnPreferenceChangeListener(this);
             mButtonPlayingToneForMoCallAccepted.setChecked((mCallConnectedIndicator
                     & TelecomManager.CALL_CONNECTED_INDICATOR_TONE) > 0);
