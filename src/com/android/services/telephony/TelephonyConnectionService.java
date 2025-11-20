@@ -1803,7 +1803,7 @@ public class TelephonyConnectionService extends ConnectionService {
                             "Found no ringing call",
                             phone.getPhoneId()));
 
-            long time = extras.getLong(TelecomManager.EXTRA_CALL_CREATED_EPOCH_TIME_MILLIS);
+            long time = extras.getLong(TelephonyManager.EXTRA_CALL_CREATED_EPOCH_TIME_MILLIS);
             if (time != 0) {
                 Log.i(this, "onCreateIncomingConnection. Set connect time info.");
                 connection.setConnectTimeMillis(time);
