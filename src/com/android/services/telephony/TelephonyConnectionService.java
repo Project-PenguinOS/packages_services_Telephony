@@ -1795,7 +1795,8 @@ public class TelephonyConnectionService extends ConnectionService {
         Call call = phone.getRingingCall();
         if (!call.getState().isRinging()
                 || (disconnectMessage != null
-                && disconnectMessage.equals(TelecomManager.CALL_AUTO_DISCONNECT_MESSAGE_STRING))) {
+                && disconnectMessage.equals(
+                TelephonyManager.CALL_AUTO_DISCONNECT_MESSAGE_STRING))) {
             Log.i(this, "onCreateIncomingConnection, no ringing call");
             Connection connection = Connection.createFailedConnection(
                     mDisconnectCauseFactory.toTelecomDisconnectCause(
