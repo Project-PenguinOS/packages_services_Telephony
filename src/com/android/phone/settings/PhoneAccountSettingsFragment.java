@@ -19,7 +19,6 @@ import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.SwitchPreference;
 // QTI_BEGIN: 2020-02-11: Telephony: Add vibrating for outgoing call accepted support
-import android.provider.Settings;
 // QTI_END: 2020-02-11: Telephony: Add vibrating for outgoing call accepted support
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
@@ -226,21 +225,9 @@ public class PhoneAccountSettingsFragment extends PreferenceFragment
      */
     @Override
     public boolean onPreferenceChange(Preference pref, Object objValue) {
+// QTI_BEGIN: 2021-05-11: Telephony: Fix to toggle vibrating for outgoing call accepted.
+// QTI_END: 2021-05-11: Telephony: Fix to toggle vibrating for outgoing call accepted.
         return false;
-    }
-
-    // Temporary changes for backforward compatibility as aconfig isn't enabled
-    public static void enableVibratingIndicator(Context context, boolean enabled) {
-        Settings.Global.putInt(context.getContentResolver(),
-                android.provider.Settings.Global.VIBRATING_FOR_OUTGOING_CALL_ACCEPTED,
-                enabled ? 1 : 0);
-    }
-
-    public static boolean getVibratingIndicatorPreference(Context context) {
-        final int pref = Settings.Global.getInt(
-                context.getContentResolver(),
-                Settings.Global.VIBRATING_FOR_OUTGOING_CALL_ACCEPTED, 1);
-        return pref != 0;
     }
 
     @Override
@@ -250,7 +237,6 @@ public class PhoneAccountSettingsFragment extends PreferenceFragment
                     ? mCallConnectedIndicator | TelecomManager.CALL_CONNECTED_INDICATOR_VIBRATION
                     : mCallConnectedIndicator & ~TelecomManager.CALL_CONNECTED_INDICATOR_VIBRATION;
             mTelecomManager.setCallConnectedIndicatorPreference(mCallConnectedIndicator);
-            enableVibratingIndicator(getActivity(), mButtonVibratingForMoCallAccepted.isChecked());
             return true;
         } else if (preference == mButtonPlayingToneForMoCallAccepted) {
             mCallConnectedIndicator = mButtonPlayingToneForMoCallAccepted.isChecked()
@@ -572,12 +558,10 @@ public class PhoneAccountSettingsFragment extends PreferenceFragment
         }
 
         if (mButtonVibratingForMoCallAccepted != null) {
-            if (mTelephonyManager.isMultiSimEnabled() /*&& getResources().getBoolean(
-                    R.bool.show_call_connected_indicator_preference)*/) {
-                final boolean isVibratingEnabled = getVibratingIndicatorPreference(getActivity());
+            if (mTelephonyManager.isMultiSimEnabled() && getResources().getBoolean(
+                    R.bool.show_call_connected_indicator_preference)) {
                 mButtonVibratingForMoCallAccepted.setChecked((mCallConnectedIndicator
-                        & TelecomManager.CALL_CONNECTED_INDICATOR_VIBRATION) > 0
-                        || isVibratingEnabled);
+                        & TelecomManager.CALL_CONNECTED_INDICATOR_VIBRATION) > 0);
                 mButtonVibratingForMoCallAccepted.setOnPreferenceClickListener(this);
                 mMakeAndReceiveCallsCategoryPresent = true;
             } else {

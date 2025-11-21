@@ -212,8 +212,6 @@ public class CallFeaturesSetting extends PreferenceActivity
                     : mCallConnectedIndicator & ~TelecomManager.CALL_CONNECTED_INDICATOR_VIBRATION;
             mTelecomManager.setCallConnectedIndicatorPreference(mCallConnectedIndicator);
 
-            PhoneAccountSettingsFragment.enableVibratingIndicator(this,
-                    mButtonVibratingForMoCallAccepted.isChecked());
             return true;
 // QTI_END: 2020-02-11: Telephony: Add vibrating for outgoing call accepted support
         } else if (preference == mButtonPlayingToneForMoCallAccepted) {
@@ -437,7 +435,7 @@ public class CallFeaturesSetting extends PreferenceActivity
         if (!getResources().getBoolean(
                 R.bool.show_call_connected_indicator_preference)) {
             Preference phoneAccountSettingsPreference = findPreference(PHONE_ACCOUNT_SETTINGS_KEY);
-            //getPreferenceScreen().removePreference(mButtonVibratingForMoCallAccepted);
+            getPreferenceScreen().removePreference(mButtonVibratingForMoCallAccepted);
             getPreferenceScreen().removePreference(mButtonPlayingToneForMoCallAccepted);
         }
         mCallConnectedIndicator = mTelecomManager.getCallConnectedIndicatorPreference();
@@ -453,11 +451,8 @@ public class CallFeaturesSetting extends PreferenceActivity
             getPreferenceScreen().removePreference(mButtonVibratingForMoCallAccepted);
             getPreferenceScreen().removePreference(mButtonPlayingToneForMoCallAccepted);
         } else {
-            final boolean isVibratingEnabled =
-                    PhoneAccountSettingsFragment.getVibratingIndicatorPreference(this);
             mButtonVibratingForMoCallAccepted.setChecked((mCallConnectedIndicator
-                    & TelecomManager.CALL_CONNECTED_INDICATOR_VIBRATION) > 0
-                    || isVibratingEnabled);
+                    & TelecomManager.CALL_CONNECTED_INDICATOR_VIBRATION) > 0);
             mButtonVibratingForMoCallAccepted.setOnPreferenceChangeListener(this);
             mButtonPlayingToneForMoCallAccepted.setChecked((mCallConnectedIndicator
                     & TelecomManager.CALL_CONNECTED_INDICATOR_TONE) > 0);
