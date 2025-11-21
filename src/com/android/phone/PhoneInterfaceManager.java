@@ -412,6 +412,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     private static final int MIN_IDENTIFIER_DISCLOSURE_VERSION = 202;
     // Null cipher notification support was added in IRadioNetwork 2.2
     private static final int MIN_NULL_CIPHER_NOTIFICATION_VERSION = 202;
+    private static final int MIN_NETWORK_ALERT_VERSION = 204;
 
     /** The singleton instance. */
     private static PhoneInterfaceManager sInstance;
@@ -14237,6 +14238,26 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         enforceReadPrivilegedPermission("isCellularIdentifierDisclosureNotificationEnabled");
         checkForIdentifierDisclosureNotificationSupport();
         return getDefaultPhone().getIdentifierDisclosureNotificationsPreferenceEnabled();
+    }
+
+    /**
+     * Get list of supported network security alerts from the modem.
+     *
+     * @throws SecurityException if the caller does not have the required privileges
+     */
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public @NonNull int[] getSupportedNetworkAlertCategories() {
+        enforceReadPrivilegedPermission("getSupportedNetworkAlertCategories");
+        if (getHalVersion(HAL_SERVICE_NETWORK) < MIN_NETWORK_ALERT_VERSION) {
+            throw new UnsupportedOperationException(
+                    "Network alert operations require HAL 2.4 or above");
+        }
+        try {
+            return getDefaultPhone().getSupportedNetworkAlertCategories();
+        } catch (UnsupportedOperationException e) {
+            Log.e(LOG_TAG, "getSupportedNetworkAlertCategories: UnsupportedOperationException", e);
+            return new int[0];
+        }
     }
 
     /**
