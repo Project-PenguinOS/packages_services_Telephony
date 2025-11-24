@@ -12,6 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Changes from Qualcomm Technologies, Inc. are provided under the following license:
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+ * SPDX-License-Identifier: BSD-3-Clause-Clear
  */
 
 package com.android.phone;
@@ -22,6 +26,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.EditText;
 
+import com.android.internal.telephony.Phone;
 import com.android.phone.settings.fdn.EditPinPreference;
 
 /**
@@ -30,6 +35,8 @@ import com.android.phone.settings.fdn.EditPinPreference;
 public class CallBarringDeselectAllPreference extends EditPinPreference {
     private static final String LOG_TAG = "CallBarringDeselectAllPreference";
     private static final boolean DBG = (PhoneGlobals.DBG_LEVEL >= 2);
+    private TimeConsumingPreferenceListener mTcpListener;
+    QtiCallBarringDeselectAllHelper mQtiCallBarringDeselectAllHelper;
 
     /**
      * CallBarringDeselectAllPreference constructor.
@@ -39,10 +46,30 @@ public class CallBarringDeselectAllPreference extends EditPinPreference {
      */
     public CallBarringDeselectAllPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mQtiCallBarringDeselectAllHelper =
+            new QtiCallBarringDeselectAllHelper(CallBarringDeselectAllPreference.this);
+    }
+
+    public void deInit() {
+        mQtiCallBarringDeselectAllHelper.deInit();
+        mQtiCallBarringDeselectAllHelper = null;
+    }
+
+    public void init(TimeConsumingPreferenceListener listener, Phone phone) {
+        mTcpListener = listener;
+        if(mQtiCallBarringDeselectAllHelper != null) {
+            mQtiCallBarringDeselectAllHelper.init(phone);
+        }
     }
 
     @Override
     protected void showDialog(Bundle state) {
+        if (mTcpListener instanceof GsmUmtsCallBarringOptions) {
+           if (!((GsmUmtsCallBarringOptions)mTcpListener).getIsPasswordRequiredOverIms()) {
+                ((GsmUmtsCallBarringOptions)mTcpListener).disableAllBarringWithPassword("");
+                return;
+            }
+        }
         setDialogMessage(getContext().getString(R.string.messageCallBarring));
         super.showDialog(state);
     }

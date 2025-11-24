@@ -534,7 +534,7 @@ public class CallBarringEditPreference extends EditPinPreference {
 // QTI_END: 2022-12-14: Telephony: IMS: Display call barring password UI conditionally
     }
 
-    private static int getServiceClassForCallBarring(Phone phone) {
+    protected static int getServiceClassForCallBarring(Phone phone) {
         int serviceClass = CarrierConfigManager.SERVICE_CLASS_VOICE;
         PersistableBundle carrierConfig = PhoneGlobals.getInstance()
                 .getCarrierConfigForSubId(phone.getSubId());
