@@ -601,7 +601,7 @@ public class TelephonyConnectionService extends ConnectionService {
                     new TelephonyConnection.TelephonyConnectionListener() {
                 @Override
                 public void onStateChanged(Connection connection,
-                        @Connection.ConnectionState int state) {
+                        /*@Connection.ConnectionState*/ int state) {
                     TelephonyConnection c = (TelephonyConnection) connection;
                     Log.i(this, "onStateChanged normal routing callId=" + c.getTelecomCallId()
                             + ", state=" + state);
@@ -629,7 +629,7 @@ public class TelephonyConnectionService extends ConnectionService {
 
                 @Override
                 public void onStateChanged(Connection connection,
-                        @Connection.ConnectionState int state) {
+                        /*@Connection.ConnectionState*/ int state) {
                     if (mEmergencyCallDomainSelectionConnection == null) return;
                     if (connection == null) return;
                     TelephonyConnection c = (TelephonyConnection) connection;
@@ -666,7 +666,7 @@ public class TelephonyConnectionService extends ConnectionService {
             new TelephonyConnection.TelephonyConnectionListener() {
                 @Override
                 public void onStateChanged(Connection connection,
-                        @Connection.ConnectionState int state) {
+                        /*@Connection.ConnectionState*/ int state) {
                     if (connection == null) {
                         Log.d(this,
                                 "onStateChanged for satellite listener: connection is null");
@@ -703,7 +703,7 @@ public class TelephonyConnectionService extends ConnectionService {
             new TelephonyConnection.TelephonyConnectionListener() {
                 @Override
                 public void onStateChanged(
-                        Connection connection, @Connection.ConnectionState int state) {
+                        Connection connection, /*@Connection.ConnectionState*/ int state) {
                     TelephonyConnection c = (TelephonyConnection) connection;
                     if (c != null) {
                         switch(c.getState()) {
@@ -735,7 +735,7 @@ public class TelephonyConnectionService extends ConnectionService {
 
         @Override
         public void onStateChanged(
-                Connection connection, @Connection.ConnectionState int state) {
+                Connection connection, /*@Connection.ConnectionState*/ int state) {
             TelephonyConnection c = (TelephonyConnection) connection;
             if (c != null) {
                 switch (c.getState()) {
@@ -768,7 +768,7 @@ public class TelephonyConnectionService extends ConnectionService {
 
         @Override
         public void onStateChanged(
-                Connection connection, @Connection.ConnectionState int state) {
+                Connection connection, /*@Connection.ConnectionState*/ int state) {
             TelephonyConnection c = (TelephonyConnection) connection;
             if (c != null) {
                 switch (c.getState()) {
@@ -1795,7 +1795,8 @@ public class TelephonyConnectionService extends ConnectionService {
         Call call = phone.getRingingCall();
         if (!call.getState().isRinging()
                 || (disconnectMessage != null
-                && disconnectMessage.equals(TelecomManager.CALL_AUTO_DISCONNECT_MESSAGE_STRING))) {
+                && disconnectMessage.equals(
+                TelephonyManager.CALL_AUTO_DISCONNECT_MESSAGE_STRING))) {
             Log.i(this, "onCreateIncomingConnection, no ringing call");
             Connection connection = Connection.createFailedConnection(
                     mDisconnectCauseFactory.toTelecomDisconnectCause(
@@ -1803,7 +1804,7 @@ public class TelephonyConnectionService extends ConnectionService {
                             "Found no ringing call",
                             phone.getPhoneId()));
 
-            long time = extras.getLong(TelecomManager.EXTRA_CALL_CREATED_EPOCH_TIME_MILLIS);
+            long time = extras.getLong(TelephonyManager.EXTRA_CALL_CREATED_EPOCH_TIME_MILLIS);
             if (time != 0) {
                 Log.i(this, "onCreateIncomingConnection. Set connect time info.");
                 connection.setConnectTimeMillis(time);

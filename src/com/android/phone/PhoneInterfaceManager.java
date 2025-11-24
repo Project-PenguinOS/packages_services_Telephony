@@ -40,7 +40,6 @@ import android.Manifest;
 import android.Manifest.permission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.PermissionManuallyEnforced;
 import android.annotation.RequiresPermission;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
@@ -170,6 +169,7 @@ import android.telephony.satellite.ISatelliteTransmissionUpdateCallback;
 import android.telephony.satellite.ISelectedNbIotSatelliteSubscriptionCallback;
 import android.telephony.satellite.NtnSignalStrength;
 import android.telephony.satellite.NtnSignalStrengthCallback;
+import android.telephony.satellite.PlmnSatelliteConfig;
 import android.telephony.satellite.SatelliteCapabilities;
 import android.telephony.satellite.SatelliteDatagram;
 import android.telephony.satellite.SatelliteDatagramCallback;
@@ -240,6 +240,7 @@ import com.android.internal.telephony.imsphone.ImsPhone;
 import com.android.internal.telephony.imsphone.ImsPhoneCallTracker;
 import com.android.internal.telephony.metrics.RcsStats;
 import com.android.internal.telephony.satellite.SatelliteController;
+import com.android.internal.telephony.satellite.SatelliteServiceUtils;
 import com.android.internal.telephony.subscription.SubscriptionInfoInternal;
 import com.android.internal.telephony.subscription.SubscriptionManagerService;
 import com.android.internal.telephony.uicc.IccCardApplicationStatus.AppType;
@@ -412,13 +413,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     private static final int MIN_IDENTIFIER_DISCLOSURE_VERSION = 202;
     // Null cipher notification support was added in IRadioNetwork 2.2
     private static final int MIN_NULL_CIPHER_NOTIFICATION_VERSION = 202;
-
-    // TODO: b/419394842 - Remove and use defined build version code when available.
-    private static final int BUILD_VERSION_CODE_C = android.os.Build.VERSION_CODES.BAKLAVA + 1;
-
-    @ChangeId
-    @EnabledSince(targetSdkVersion = BUILD_VERSION_CODE_C)
-    static final long TELEPHONY_MANAGER_API_PERMISSION_ENABLED = 417788332;
+    private static final int MIN_NETWORK_ALERT_VERSION = 204;
 
     /** The singleton instance. */
     private static PhoneInterfaceManager sInstance;
@@ -3174,7 +3169,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     @Override
     public int getCallState() {
         if (CompatChanges.isChangeEnabled(
-                TelecomManager.ENABLE_GET_CALL_STATE_PERMISSION_PROTECTION,
+                TelephonyManager.ENABLE_GET_CALL_STATE_PERMISSION_PROTECTION,
                 Binder.getCallingUid())) {
             // Do not allow this API to be called on API version 31+, it should only be
             // called on old apps using this Binder call directly.
@@ -3193,7 +3188,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     @Override
     public int getCallStateForSubscription(int subId, String callingPackage, String featureId) {
         if (CompatChanges.isChangeEnabled(
-                TelecomManager.ENABLE_GET_CALL_STATE_PERMISSION_PROTECTION,
+                TelephonyManager.ENABLE_GET_CALL_STATE_PERMISSION_PROTECTION,
                 Binder.getCallingUid())) {
             // Check READ_PHONE_STATE for API version 31+
             if (!TelephonyPermissions.checkCallingOrSelfReadPhoneState(mApp, subId, callingPackage,
@@ -3307,14 +3302,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     }
 
     @Override
-    @PermissionManuallyEnforced
     public String getNetworkCountryIsoForPhone(int phoneId) {
-        if (mFeatureFlags.guardIdentifierAndNetworkCountryApis()
-                && CompatChanges.isChangeEnabled(TELEPHONY_MANAGER_API_PERMISSION_ENABLED)) {
-            mApp.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.QUERY_NETWORK_COUNTRY, null);
-        }
-
         if (!mApp.getResources().getBoolean(
                 com.android.internal.R.bool.config_force_phone_globals_creation)) {
             enforceTelephonyFeatureWithException(getCurrentPackageName(),
@@ -14254,6 +14242,26 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     }
 
     /**
+     * Get list of supported network security alerts from the modem.
+     *
+     * @throws SecurityException if the caller does not have the required privileges
+     */
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public @NonNull int[] getSupportedNetworkAlertCategories() {
+        enforceReadPrivilegedPermission("getSupportedNetworkAlertCategories");
+        if (getHalVersion(HAL_SERVICE_NETWORK) < MIN_NETWORK_ALERT_VERSION) {
+            throw new UnsupportedOperationException(
+                    "Network alert operations require HAL 2.4 or above");
+        }
+        try {
+            return getDefaultPhone().getSupportedNetworkAlertCategories();
+        } catch (UnsupportedOperationException e) {
+            Log.e(LOG_TAG, "getSupportedNetworkAlertCategories: UnsupportedOperationException", e);
+            return new int[0];
+        }
+    }
+
+    /**
      * Enables or disables notifications sent when cellular null cipher or integrity algorithms
      * are in use by the cellular modem.
      *
@@ -14710,6 +14718,54 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         }
 
         return satelliteMode;
+    }
+
+
+    /**
+     * Get the satellite configuration for the given PLMN.
+     *
+     * @param subId current subscription id.
+     * @param plmn PLMN for which the satellite configuration is requested.
+     * @return {@link PlmnSatelliteConfig} object containing the satellite configuration for the
+     * given PLMN.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     */
+    @Override
+    public @NonNull PlmnSatelliteConfig getPlmnSatelliteConfig(int subId, String plmn) {
+        enforceSatelliteCommunicationPermission("getPlmnSatelliteConfig");
+
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return mSatelliteController.getPlmnSatelliteConfig(subId, plmn);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+
+    /**
+     * Get whether device is connected to satellite via carrier, either manually or automatically.
+     *
+     * In case of automatic connection, it checks if the device is connected to satellite within the
+     * {@link CarrierConfigManager#KEY_SATELLITE_CONNECTION_HYSTERESIS_SEC_INT} duration,
+     * {@code false} otherwise.
+     *
+     * @param subId The subscription ID of the carrier.
+     * @return {@code true} if the device is connected to satellite using the phone within the
+     *         {@link CarrierConfigManager#KEY_SATELLITE_CONNECTION_HYSTERESIS_SEC_INT} duration,
+     *         {@code false} otherwise.
+     */
+    @Override
+    public boolean isInCarrierRoamingNtnMode(int subId) {
+        enforceSatelliteCommunicationPermission("isInCarrierRoamingNtnMode");
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return mSatelliteController.isInSatelliteModeForCarrierRoaming(
+                    SatelliteServiceUtils.getPhone(subId));
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     /**
