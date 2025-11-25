@@ -1808,10 +1808,6 @@ abstract class TelephonyConnection extends Connection implements Holdable,
 // QTI_BEGIN: 2023-01-16: Telephony: IMS: Remove vos support extra in IMS call after SRVCC
             extrasToRemove.add(QtiCallConstants.EXTRA_VIDEO_ONLINE_SERVICE_SUPPORTED);
 // QTI_END: 2023-01-16: Telephony: IMS: Remove vos support extra in IMS call after SRVCC
-// QTI_BEGIN: 2024-11-19: Telephony: IMS: Support visualized voice call and CRBT call
-            extrasToRemove.add(QtiCallConstants.EXTRA_IS_VISUALIZED_VOICE_CALL);
-            extrasToRemove.add(QtiCallConstants.EXTRA_IS_CRBT_CALL);
-// QTI_END: 2024-11-19: Telephony: IMS: Support visualized voice call and CRBT call
 // QTI_BEGIN: 2025-01-02: Telephony: IMS: Support glasses free 3d video
             extrasToRemove.add(QtiCallConstants.GLASSES_FREE_3D_VIDEO_TYPE_EXTRA_KEY);
 // QTI_END: 2025-01-02: Telephony: IMS: Support glasses free 3d video
