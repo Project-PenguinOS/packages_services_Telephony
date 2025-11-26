@@ -194,7 +194,7 @@ public class DisconnectCauseUtil {
      * {@link android.telecom.DisconnectCause} disconnect code.
      * @return The disconnect code as defined in {@link android.telecom.DisconnectCause}.
      */
-    private static @DisconnectCause.DisconnectCauseCode int toTelecomDisconnectCauseCode(
+    private static /*@DisconnectCause.DisconnectCauseCode*/ int toTelecomDisconnectCauseCode(
             int telephonyDisconnectCause, PersistableBundle carrierConfig) {
 
         // special case: some carriers determine what disconnect causes play the BUSY tone.

@@ -631,7 +631,7 @@ public class TelephonyConnectionService extends ConnectionService {
                     new TelephonyConnection.TelephonyConnectionListener() {
                 @Override
                 public void onStateChanged(Connection connection,
-                        @Connection.ConnectionState int state) {
+                        /*@Connection.ConnectionState*/ int state) {
                     TelephonyConnection c = (TelephonyConnection) connection;
                     Log.i(this, "onStateChanged normal routing callId=" + c.getTelecomCallId()
                             + ", state=" + state);
@@ -659,7 +659,7 @@ public class TelephonyConnectionService extends ConnectionService {
 
                 @Override
                 public void onStateChanged(Connection connection,
-                        @Connection.ConnectionState int state) {
+                        /*@Connection.ConnectionState*/ int state) {
                     if (mEmergencyCallDomainSelectionConnection == null) return;
                     if (connection == null) return;
                     TelephonyConnection c = (TelephonyConnection) connection;
@@ -696,7 +696,7 @@ public class TelephonyConnectionService extends ConnectionService {
             new TelephonyConnection.TelephonyConnectionListener() {
                 @Override
                 public void onStateChanged(Connection connection,
-                        @Connection.ConnectionState int state) {
+                        /*@Connection.ConnectionState*/ int state) {
                     if (connection == null) {
                         Log.d(this,
                                 "onStateChanged for satellite listener: connection is null");
@@ -733,7 +733,7 @@ public class TelephonyConnectionService extends ConnectionService {
             new TelephonyConnection.TelephonyConnectionListener() {
                 @Override
                 public void onStateChanged(
-                        Connection connection, @Connection.ConnectionState int state) {
+                        Connection connection, /*@Connection.ConnectionState*/ int state) {
                     TelephonyConnection c = (TelephonyConnection) connection;
                     if (c != null) {
                         switch(c.getState()) {
@@ -765,7 +765,7 @@ public class TelephonyConnectionService extends ConnectionService {
 
         @Override
         public void onStateChanged(
-                Connection connection, @Connection.ConnectionState int state) {
+                Connection connection, /*@Connection.ConnectionState*/ int state) {
             TelephonyConnection c = (TelephonyConnection) connection;
             if (c != null) {
                 switch (c.getState()) {
@@ -798,7 +798,7 @@ public class TelephonyConnectionService extends ConnectionService {
 
         @Override
         public void onStateChanged(
-                Connection connection, @Connection.ConnectionState int state) {
+                Connection connection, /*@Connection.ConnectionState*/ int state) {
             TelephonyConnection c = (TelephonyConnection) connection;
             if (c != null) {
                 switch (c.getState()) {
