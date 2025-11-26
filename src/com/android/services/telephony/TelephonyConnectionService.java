@@ -1972,13 +1972,6 @@ public class TelephonyConnectionService extends ConnectionService {
     }
 
     @Override
-    public void triggerConferenceRecalculate() {
-        if (mTelephonyConferenceController.shouldRecalculate()) {
-            mTelephonyConferenceController.recalculate();
-        }
-    }
-
-    @Override
     public Connection onCreateUnknownConnection(PhoneAccountHandle connectionManagerPhoneAccount,
             ConnectionRequest request) {
         Log.i(this, "onCreateUnknownConnection, request: " + request);
@@ -2072,6 +2065,9 @@ public class TelephonyConnectionService extends ConnectionService {
             return Connection.createCanceledConnection();
         } else {
             connection.updateState();
+            if (mTelephonyConferenceController.shouldRecalculate()) {
+                mTelephonyConferenceController.recalculate();
+            }
             return connection;
         }
     }
