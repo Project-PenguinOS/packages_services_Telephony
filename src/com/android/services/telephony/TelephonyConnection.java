@@ -1795,8 +1795,6 @@ abstract class TelephonyConnection extends Connection implements Holdable,
             extrasToRemove.add(QtiCallConstants.ORIENTATION_MODE_EXTRA_KEY);
 // QTI_END: 2020-05-29: Telephony: IMS: Remove ORIENTATION mode extra key in IMS call after SRVCC
 // QTI_BEGIN: 2021-06-06: Telephony: IMS: Remove CRS info extras in IMS call after SRVCC
-            extrasToRemove.add(QtiCallConstants.EXTRA_CRS_TYPE);
-            extrasToRemove.add(QtiCallConstants.EXTRA_ORIGINAL_CALL_TYPE);
             extrasToRemove.add(QtiCallConstants.EXTRA_IS_PREPARATORY);
 // QTI_END: 2021-06-06: Telephony: IMS: Remove CRS info extras in IMS call after SRVCC
 // QTI_BEGIN: 2023-02-07: Telephony: Remove the SRTP encryption info when SRVCC occur.
