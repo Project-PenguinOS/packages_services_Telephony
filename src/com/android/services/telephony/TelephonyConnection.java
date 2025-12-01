@@ -1849,12 +1849,6 @@ abstract class TelephonyConnection extends Connection implements Holdable,
         }
         mIsMultiParty = mOriginalConnection.isMultiparty();
 
-        // Also stash the number verification status in a hidden extra key in the connection.
-        // We do this because a RemoteConnection DOES NOT include a getNumberVerificationStatus
-        // method and we need to be able to pass the number verification status up to Telecom
-        // despite the missing pathway in the RemoteConnectionService API surface.
-        extrasToPut.putInt(Connection.EXTRA_CALLER_NUMBER_VERIFICATION_STATUS,
-                mOriginalConnection.getNumberVerificationStatus());
         if (mOriginalConnection.isActiveCallDisconnectedOnAnswer()) {
             extrasToPut.putBoolean(Connection.EXTRA_ANSWERING_DROPS_FG_CALL, true);
         } else {
@@ -3915,7 +3909,6 @@ abstract class TelephonyConnection extends Connection implements Holdable,
         if (!getPhone().getContext().getResources().getBoolean(
                 R.bool.config_use_device_to_device_communication)) {
             Log.i(this, "maybeConfigureDeviceToDeviceCommunication: not using D2D.");
-            notifyD2DAvailabilityChanged(false);
             return;
         }
         if (!isImsConnection()) {
@@ -3923,12 +3916,10 @@ abstract class TelephonyConnection extends Connection implements Holdable,
             if (mCommunicator != null) {
                 mCommunicator = null;
             }
-            notifyD2DAvailabilityChanged(false);
             return;
         }
         if (mTreatAsEmergencyCall || mIsNetworkIdentifiedEmergencyCall) {
             Log.i(this, "maybeConfigureDeviceToDeviceCommunication: emergency call; no D2D");
-            notifyD2DAvailabilityChanged(false);
             return;
         }
 
@@ -3982,19 +3973,7 @@ abstract class TelephonyConnection extends Connection implements Holdable,
             addTelephonyConnectionListener(mD2DCallStateAdapter);
         } else {
             Log.i(this, "maybeConfigureDeviceToDeviceCommunication: no transports; disabled.");
-            notifyD2DAvailabilityChanged(false);
         }
-    }
-
-    /**
-     * Notifies upper layers of the availability of D2D communication.
-     * @param isAvailable {@code true} if D2D is available, {@code false} otherwise.
-     */
-    private void notifyD2DAvailabilityChanged(boolean isAvailable) {
-        Bundle extras = new Bundle();
-        extras.putBoolean(Connection.EXTRA_IS_DEVICE_TO_DEVICE_COMMUNICATION_AVAILABLE,
-                isAvailable);
-        putTelephonyExtras(extras);
     }
 
     /**
@@ -4054,15 +4033,6 @@ abstract class TelephonyConnection extends Connection implements Holdable,
             extras.putInt(Connection.EXTRA_DEVICE_TO_DEVICE_MESSAGE_VALUE, dcMsgValue);
             sendConnectionEvent(Connection.EVENT_DEVICE_TO_DEVICE_MESSAGE, extras);
         }
-    }
-
-    /**
-     * Handles report from {@link Communicator} when the availability of D2D changes.
-     * @param isAvailable {@code true} if D2D is available, {@code false} if unavailable.
-     */
-    @Override
-    public void onD2DAvailabilitychanged(boolean isAvailable) {
-        notifyD2DAvailabilityChanged(isAvailable);
     }
 
     /**

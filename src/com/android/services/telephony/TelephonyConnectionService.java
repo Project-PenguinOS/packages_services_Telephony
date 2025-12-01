@@ -1974,7 +1974,8 @@ public class TelephonyConnectionService extends ConnectionService {
         Call call = phone.getRingingCall();
         if (!call.getState().isRinging()
                 || (disconnectMessage != null
-                && disconnectMessage.equals(TelecomManager.CALL_AUTO_DISCONNECT_MESSAGE_STRING))) {
+                && disconnectMessage.equals(
+                TelephonyManager.CALL_AUTO_DISCONNECT_MESSAGE_STRING))) {
             Log.i(this, "onCreateIncomingConnection, no ringing call");
             Connection connection = Connection.createFailedConnection(
                     mDisconnectCauseFactory.toTelecomDisconnectCause(
@@ -1984,7 +1985,7 @@ public class TelephonyConnectionService extends ConnectionService {
                             phone.getPhoneId()));
 // QTI_END: 2018-03-14: Telephony: IMS: No option to merge calls in VoWIFI
 
-            long time = extras.getLong(TelecomManager.EXTRA_CALL_CREATED_EPOCH_TIME_MILLIS);
+            long time = extras.getLong(TelephonyManager.EXTRA_CALL_CREATED_EPOCH_TIME_MILLIS);
             if (time != 0) {
                 Log.i(this, "onCreateIncomingConnection. Set connect time info.");
                 connection.setConnectTimeMillis(time);

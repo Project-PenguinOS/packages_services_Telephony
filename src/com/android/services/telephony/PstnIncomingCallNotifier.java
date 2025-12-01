@@ -25,6 +25,7 @@ import android.os.SystemClock;
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
 import android.telecom.TelecomManager;
+import android.telephony.TelephonyManager;
 import android.telephony.ims.ImsCallProfile;
 import android.text.TextUtils;
 
@@ -322,7 +323,7 @@ final class PstnIncomingCallNotifier {
             }
             if (((ImsPhoneConnection) connection).isIncomingCallAutoRejected()) {
                 extras.putString(TelecomManager.EXTRA_CALL_DISCONNECT_MESSAGE,
-                        TelecomManager.CALL_AUTO_DISCONNECT_MESSAGE_STRING);
+                        TelephonyManager.CALL_AUTO_DISCONNECT_MESSAGE_STRING);
             }
             ImsCall imsCall = ((ImsPhoneConnection) connection).getImsCall();
             if (imsCall != null) {
