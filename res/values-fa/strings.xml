@@ -588,7 +588,7 @@
     <string name="onscreenHoldText" msgid="4025348842151665191">"نگهداشت"</string>
     <string name="onscreenEndCallText" msgid="6138725377654842757">"پایان"</string>
     <string name="onscreenShowDialpadText" msgid="658465753816164079">"دکمه‌های شماره گیری"</string>
-    <string name="onscreenMuteText" msgid="5470306116733843621">"بی‌صدا"</string>
+    <string name="onscreenMuteText" msgid="5470306116733843621">"صامت"</string>
     <string name="onscreenAddCallText" msgid="9075675082903611677">"افزودن تماس"</string>
     <string name="onscreenMergeCallsText" msgid="3692389519611225407">"ادغام تماس‌ها"</string>
     <string name="onscreenSwapCallsText" msgid="2682542150803377991">"تعویض"</string>
