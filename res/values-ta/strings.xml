@@ -150,7 +150,7 @@
     <string name="radio_off_error" msgid="8321564164914232181">"அமைப்புகளைப் பார்ப்பதற்கு முன், ரேடியோவை இயக்கவும்."</string>
     <string name="close_dialog" msgid="1074977476136119408">"சரி"</string>
     <string name="enable" msgid="2636552299455477603">"இயக்கு"</string>
-    <string name="disable" msgid="1122698860799462116">"முடக்கு"</string>
+    <string name="disable" msgid="1122698860799462116">"ஆஃப் செய்"</string>
     <string name="change_num" msgid="6982164494063109334">"புதுப்பி"</string>
   <string-array name="clir_display_values">
     <item msgid="8477364191403806960">"நெட்வொர்க் பொருத்து"</item>
@@ -974,8 +974,7 @@
     <string name="satellite_config_version_label" msgid="1153447193166314791">"பதிப்பு:"</string>
     <string name="satellite_config_version_for_skylo_label" msgid="7068241597009832840">"skylo பதிப்பு:"</string>
     <string name="satellite_max_allowed_data_mode_label" msgid="1808484802651916339">"அதிகபட்சமாக அனுமதிக்கப்படும் டேட்டா பயன்முறை:"</string>
-    <!-- no translation found for satellite_provider_plmn_list_label (7289533883006851963) -->
-    <skip />
+    <string name="satellite_provider_plmn_list_label" msgid="7289533883006851963">"சாட்டிலைட் சேவை வழங்கும் எல்லா plmnகளும்:"</string>
     <string name="satellite_config_version_for_starlink_label" msgid="7984209491963621773">"starlink பதிப்பு:"</string>
     <string name="satellite_config_service_type_label" msgid="21749170241956082">"subId/plmn/servicetype:"</string>
     <string name="satellite_config_allow_access_label" msgid="3806779900418131140">"allow_access:"</string>

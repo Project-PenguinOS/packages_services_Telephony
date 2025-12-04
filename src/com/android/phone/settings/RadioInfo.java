@@ -44,6 +44,7 @@ import android.content.BroadcastReceiver;
 // QTI_END: 2023-07-12: Telephony: Gray out the "Enable DSDS" button upon switch
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -164,89 +165,12 @@ import com.qti.extphone.ServiceCallback;
  */
 public class RadioInfo extends AppCompatActivity {
     private static final String TAG = "RadioInfo";
-
     private static final boolean IS_USER_BUILD = "user".equals(Build.TYPE);
 
 // QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
     private String[] mUpdatedPrefNwLabels;
     private final HashMap<String, Integer> mPrefNwLabelToIntMap = new HashMap<>();
 // QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
-
-    private static final Integer[] BAND_VALUES =
-            new Integer[] {
-                -1,
-                AccessNetworkConstants.EutranBand.BAND_1,
-                AccessNetworkConstants.EutranBand.BAND_2,
-                AccessNetworkConstants.EutranBand.BAND_3,
-                AccessNetworkConstants.EutranBand.BAND_4,
-                AccessNetworkConstants.EutranBand.BAND_5,
-                AccessNetworkConstants.EutranBand.BAND_6,
-                AccessNetworkConstants.EutranBand.BAND_7,
-                AccessNetworkConstants.EutranBand.BAND_8,
-                AccessNetworkConstants.EutranBand.BAND_9,
-                AccessNetworkConstants.EutranBand.BAND_10,
-                AccessNetworkConstants.EutranBand.BAND_11,
-                AccessNetworkConstants.EutranBand.BAND_12,
-                AccessNetworkConstants.EutranBand.BAND_13,
-                AccessNetworkConstants.EutranBand.BAND_14,
-                AccessNetworkConstants.EutranBand.BAND_17,
-                AccessNetworkConstants.EutranBand.BAND_18,
-                AccessNetworkConstants.EutranBand.BAND_19,
-                AccessNetworkConstants.EutranBand.BAND_20,
-                AccessNetworkConstants.EutranBand.BAND_21,
-                AccessNetworkConstants.EutranBand.BAND_22,
-                AccessNetworkConstants.EutranBand.BAND_23,
-                AccessNetworkConstants.EutranBand.BAND_24,
-                AccessNetworkConstants.EutranBand.BAND_25,
-                AccessNetworkConstants.EutranBand.BAND_26,
-                AccessNetworkConstants.EutranBand.BAND_27,
-                AccessNetworkConstants.EutranBand.BAND_28,
-                AccessNetworkConstants.EutranBand.BAND_30,
-                AccessNetworkConstants.EutranBand.BAND_31,
-                AccessNetworkConstants.EutranBand.BAND_33,
-                AccessNetworkConstants.EutranBand.BAND_34,
-                AccessNetworkConstants.EutranBand.BAND_35,
-                AccessNetworkConstants.EutranBand.BAND_36,
-                AccessNetworkConstants.EutranBand.BAND_37,
-                AccessNetworkConstants.EutranBand.BAND_38,
-                AccessNetworkConstants.EutranBand.BAND_39,
-                AccessNetworkConstants.EutranBand.BAND_40,
-                AccessNetworkConstants.EutranBand.BAND_41,
-                AccessNetworkConstants.EutranBand.BAND_42,
-                AccessNetworkConstants.EutranBand.BAND_43,
-                AccessNetworkConstants.EutranBand.BAND_44,
-                AccessNetworkConstants.EutranBand.BAND_45,
-                AccessNetworkConstants.EutranBand.BAND_46,
-                AccessNetworkConstants.EutranBand.BAND_47,
-                AccessNetworkConstants.EutranBand.BAND_48,
-                AccessNetworkConstants.EutranBand.BAND_49,
-                AccessNetworkConstants.EutranBand.BAND_50,
-                AccessNetworkConstants.EutranBand.BAND_51,
-                AccessNetworkConstants.EutranBand.BAND_52,
-                AccessNetworkConstants.EutranBand.BAND_53,
-                AccessNetworkConstants.EutranBand.BAND_65,
-                AccessNetworkConstants.EutranBand.BAND_66,
-                AccessNetworkConstants.EutranBand.BAND_68,
-                AccessNetworkConstants.EutranBand.BAND_70,
-                AccessNetworkConstants.EutranBand.BAND_71,
-                AccessNetworkConstants.EutranBand.BAND_72,
-                AccessNetworkConstants.EutranBand.BAND_73,
-                AccessNetworkConstants.EutranBand.BAND_74,
-                AccessNetworkConstants.EutranBand.BAND_85,
-                AccessNetworkConstants.EutranBand.BAND_87,
-                AccessNetworkConstants.EutranBand.BAND_88
-            };
-
-    private static final String[] BAND_LABELS = {
-        "SELECT", "BAND_1", "BAND_2", "BAND_3", "BAND_4", "BAND_5", "BAND_6", "BAND_7", "BAND_8",
-        "BAND_9", "BAND_10", "BAND_11", "BAND_12", "BAND_13", "BAND_14", "BAND_17", "BAND_18",
-        "BAND_19", "BAND_20", "BAND_21", "BAND_22", "BAND_23", "BAND_24", "BAND_25", "BAND_26",
-        "BAND_27", "BAND_28", "BAND_30", "BAND_31", "BAND_33", "BAND_34", "BAND_35", "BAND_36",
-        "BAND_37", "BAND_38", "BAND_39", "BAND_40", "BAND_41", "BAND_42", "BAND_43", "BAND_44",
-        "BAND_45", "BAND_46", "BAND_47", "BAND_48", "BAND_49", "BAND_50", "BAND_51", "BAND_52",
-        "BAND_53", "BAND_65", "BAND_66", "BAND_68", "BAND_70", "BAND_71", "BAND_72", "BAND_73",
-        "BAND_74", "BAND_85", "BAND_87", "BAND_88"
-    };
 
     private static String[] sPhoneIndexLabels = new String[0];
 
@@ -368,6 +292,8 @@ public class RadioInfo extends AppCompatActivity {
     private Switch mCbrsDataSwitch;
     private Switch mDsdsSwitch;
     private Switch mRemovableEsimSwitch;
+    private Switch mEnableVoLteSwitch;
+    private Switch mEnableVoNrSwitch;
     private Spinner mPreferredNetworkType;
     private Spinner mMockSignalStrength;
     private Spinner mMockDataNetworkType;
@@ -407,7 +333,7 @@ public class RadioInfo extends AppCompatActivity {
     private int[] mSelectedSignalStrengthIndex = new int[2];
     private int[] mSelectedMockDataNetworkTypeIndex = new int[2];
     private int[] mSelectedManualOverrideBandIndex = new int[2];
-
+    private final List<ContentValues> mOriginalApnSettings = new ArrayList<>();
     private String mEuiccInfoResult = "";
 
     private int mPreferredNetworkTypeResult;
@@ -829,12 +755,16 @@ public class RadioInfo extends AppCompatActivity {
         mImsVtProvisionedSwitch = (Switch) findViewById(R.id.vt_provisioned_switch);
         mImsWfcProvisionedSwitch = (Switch) findViewById(R.id.wfc_provisioned_switch);
         mEabProvisionedSwitch = (Switch) findViewById(R.id.eab_provisioned_switch);
+        mEnableVoLteSwitch = (Switch) findViewById(R.id.enable_volte_switch);
+        mEnableVoNrSwitch = (Switch) findViewById(R.id.enable_vonr_switch);
 
         if (!isImsSupportedOnDevice()) {
             mImsVolteProvisionedSwitch.setVisibility(View.GONE);
             mImsVtProvisionedSwitch.setVisibility(View.GONE);
             mImsWfcProvisionedSwitch.setVisibility(View.GONE);
             mEabProvisionedSwitch.setVisibility(View.GONE);
+            mEnableVoLteSwitch.setVisibility(View.GONE);
+            mEnableVoNrSwitch.setVisibility(View.GONE);
         }
 
         mCbrsDataSwitch = (Switch) findViewById(R.id.cbrs_data_switch);
@@ -902,7 +832,7 @@ public class RadioInfo extends AppCompatActivity {
 
         if (!(!Build.isDebuggable() || !mSystemUser)) {
             ArrayAdapter<String> mManualOverrideBandAdapter = new ArrayAdapter<>(this,
-                    android.R.layout.simple_spinner_item, BAND_LABELS);
+                    android.R.layout.simple_spinner_item, PhoneInformationUtil.BAND_LABELS);
             mManualOverrideBandAdapter
                     .setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             mManualOverrideBand.setAdapter(mManualOverrideBandAdapter);
@@ -1145,6 +1075,9 @@ public class RadioInfo extends AppCompatActivity {
 
         updateCellInfo(mCellInfoResult);
         updateSubscriptionIds();
+
+        updateVoLteState();
+        updateVoNrState();
 
         mPingHostnameV4.setText(mPingHostnameResultV4);
         mPingHostnameV6.setText(mPingHostnameResultV6);
@@ -1948,6 +1881,29 @@ public class RadioInfo extends AppCompatActivity {
         return mTelephonyManager.getRadioPowerState() == TelephonyManager.RADIO_POWER_ON;
     }
 
+    private void updateVoLteState() {
+        ImsMmTelManager imsMmTelManager = mImsManager.getImsMmTelManager(mSubId);
+        mEnableVoLteSwitch.setChecked(PhoneInformationUtil.isVolteEnabled(imsMmTelManager));
+        mEnableVoLteSwitch.setOnCheckedChangeListener(mVoLteOnChangeListener);
+    }
+
+    private void updateVoNrState() {
+        mQueuedWork.execute(new Runnable() {
+            public void run() {
+                ImsMmTelManager imsMmTelManager = mImsManager.getImsMmTelManager(mSubId);
+                boolean voNrEnabled = PhoneInformationUtil.isVoNrEnabled(mTelephonyManager);
+                boolean voLteEnabled = PhoneInformationUtil.isVolteEnabled(imsMmTelManager);
+                mHandler.post(() -> {
+                    mEnableVoNrSwitch.setChecked(voNrEnabled);
+
+                    // Disable VoNr option if VoLte is disabled
+                    if (!voLteEnabled) mEnableVoNrSwitch.setEnabled(false);
+                });
+            }
+        });
+        mEnableVoNrSwitch.setOnCheckedChangeListener(mVoNrOnChangeListener);
+    }
+
     private void updateRadioPowerState() {
         // delightful hack to prevent on-checked-changed calls from
         // actually forcing the radio preference to its transient/current value.
@@ -2090,6 +2046,80 @@ public class RadioInfo extends AppCompatActivity {
                 mPhone.getTelephonyTester().setServiceStateTestIntent(intent);
             };
 
+    OnCheckedChangeListener mVoLteOnChangeListener = new OnCheckedChangeListener() {
+        @Override
+        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            Log.d(TAG, "VoLte button onCheckedChanged " + isChecked + " on subId=" + mSubId);
+            setVoLteEnabled(isChecked);
+        }
+    };
+
+    OnCheckedChangeListener mVoNrOnChangeListener = new OnCheckedChangeListener() {
+        @Override
+        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            Log.d(TAG, "VoNr button onCheckedChanged " + isChecked + " on subId=" + mSubId);
+            setVoNrEnabled(isChecked);
+        }
+    };
+
+    private void setVoLteEnabled(boolean isChecked) {
+        if (!SubscriptionManager.isValidSubscriptionId(mSubId) || (mTelephonyManager == null)) {
+            return;
+        }
+
+        mQueuedWork.execute(new Runnable() {
+            public void run() {
+                ImsMmTelManager imsMmTelManager = mImsManager.getImsMmTelManager(mSubId);
+                try {
+                    if (isChecked != PhoneInformationUtil.isVolteEnabled(imsMmTelManager)) {
+                        if (isChecked) {
+                            mTelephonyManager.enableIms(mPhoneId);
+                        } else {
+                            mTelephonyManager.disableIms(mPhoneId);
+                        }
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "fail to set VoLTE=" + isChecked + ". subId=" + mSubId, e);
+                }
+
+                mHandler.post(() -> {
+                     /**
+                      * 1. VoNr option is disabled if VoLte option is disabled
+                      * 2. VoNr option is enabled if VoLte option is enabled
+                      */
+                    if (!isChecked) {
+                        mEnableVoNrSwitch.setChecked(false);
+                        mEnableVoNrSwitch.setEnabled(false);
+                    } else {
+                        mEnableVoNrSwitch.setEnabled(true);
+                    }
+                });
+            }
+        });
+    }
+
+    public void setVoNrEnabled(boolean isChecked) {
+        if (!SubscriptionManager.isValidSubscriptionId(mSubId)
+                || (mTelephonyManager == null)) {
+            return;
+        }
+
+        mQueuedWork.execute(new Runnable() {
+            public void run() {
+                try {
+                    boolean isVoNrEnabled =
+                            PhoneInformationUtil.isVoNrEnabled(mTelephonyManager);
+                    if (isVoNrEnabled != isChecked) {
+                        mTelephonyManager.setVoNrEnabled(isChecked);
+                        Log.d(TAG, "set VoNR state to " + isChecked + " on subId=" + mSubId);
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "fail to set VoNr=" + isChecked + ". subId=" + mSubId, e);
+                }
+            }
+        });
+    }
+
     // satellite radio group function
     private final RadioGroup.OnCheckedChangeListener
             mForceCampSatelliteSelectionRadioGroupListener =
@@ -2129,18 +2159,6 @@ public class RadioInfo extends AppCompatActivity {
         setForceCampSatelliteSelectionRadioGroupVisibility(true);
         mForceCampSatelliteSelectionRadioGroup.check(checkId);
     }
-
-    // Starlink configs
-    private static final int SATELLITE_CHANNEL_STARLINK_US = 8665;
-    private static final int[] STARLINK_CHANNELS = { SATELLITE_CHANNEL_STARLINK_US };
-    private static final int[] STARLINK_BAND = { AccessNetworkConstants.EutranBand.BAND_25 };
-
-    // AST configs
-    private static final int SATELLITE_CHANNEL_AST_US_1 = 2625;
-    private static final int SATELLITE_CHANNEL_AST_US_2 = 2630;
-    private static final int[] AST_CHANNELS = { SATELLITE_CHANNEL_AST_US_1,
-            SATELLITE_CHANNEL_AST_US_2 };
-    private static final int[] AST_BAND = { AccessNetworkConstants.EutranBand.BAND_5 };
 
     private void forceSatelliteChannel(
             int[] satelliteBands, int satelliteBandRadioButton, int[] satelliteChannels) {
@@ -2343,7 +2361,7 @@ public class RadioInfo extends AppCompatActivity {
                 int[] satelliteChannels = channel.getChannels();
 
                 boolean starlinkCheck = Arrays.stream(satelliteChannels).anyMatch(c -> {
-                    for (int starlinkChannel : STARLINK_CHANNELS) {
+                    for (int starlinkChannel : PhoneInformationUtil.STARLINK_CHANNELS) {
                         if (c == starlinkChannel) {
                             return true;
                         }
@@ -2351,9 +2369,9 @@ public class RadioInfo extends AppCompatActivity {
                     return false;
                 });
 
-                boolean astCheck = Arrays.stream(satelliteBands).anyMatch(c -> {
-                    for (int astBand : AST_BAND) {
-                        if (c == astBand) {
+                boolean astCheck = Arrays.stream(satelliteChannels).anyMatch(c -> {
+                    for (int astChannel : PhoneInformationUtil.AST_CHANNELS) {
+                        if (c == astChannel) {
                             return true;
                         }
                     }
@@ -2370,8 +2388,8 @@ public class RadioInfo extends AppCompatActivity {
                     mSelectedManualOverrideBandIndex[phoneId] = 0;
                     if (satelliteBands.length > 0) {
                         int band = satelliteBands[0];
-                        for (int i = 0; i < BAND_VALUES.length; i++) {
-                            if (band == BAND_VALUES[i]) {
+                        for (int i = 0; i < PhoneInformationUtil.BAND_VALUES.length; i++) {
+                            if (band == PhoneInformationUtil.BAND_VALUES[i]) {
                                 mSelectedManualOverrideBandIndex[phoneId] = i;
                             }
                         }
@@ -2554,6 +2572,12 @@ public class RadioInfo extends AppCompatActivity {
                                 KEY_CARRIER_SUPPORTED_SATELLITE_SERVICES_PER_PROVIDER_BUNDLE);
                         mCarrierSatelliteOriginalBundle[phoneId] = originalBundle;
 
+                        // APN modification
+                        mOriginalApnSettings.clear();
+                        mOriginalApnSettings.addAll(
+                                PhoneInformationUtil.updateApnInfrastructureBitmaskForSatellite(
+                                        mContext, subId, TAG));
+
                         PersistableBundle overrideBundle = new PersistableBundle();
                         overrideBundle.putBoolean(KEY_SATELLITE_ATTACH_SUPPORTED_BOOL, true);
                         // NOTE: In case of TMO setting KEY_SATELLITE_ENTITLEMENT_SUPPORTED_BOOL
@@ -2564,17 +2588,28 @@ public class RadioInfo extends AppCompatActivity {
                                 KEY_CARRIER_SUPPORTED_SATELLITE_SERVICES_PER_PROVIDER_BUNDLE,
                                 PhoneInformationUtil.getSatelliteServicesBundleForOperatorPlmn(
                                         mTelephonyManager, mPhoneId, mSubId, originalBundle));
+                        // Do not store current plmn as satellite plmn in allPlmnList during testing
+                        SatelliteController.getInstance()
+                                .setSatelliteIgnorePlmnListFromStorage(true);
                         log("mMockSatelliteListener: old " + originalBundle);
                         log("mMockSatelliteListener: new " + overrideBundle);
                         PhoneInformationUtil.getCarrierConfig(mContext)
                                 .overrideConfig(subId, overrideBundle, false);
                     } else {
                         try {
+                            // APN restoration
+                            PhoneInformationUtil.restoreOriginalApns(mContext,
+                                    mOriginalApnSettings, TAG);
+                            mOriginalApnSettings.clear();
+
                             PhoneInformationUtil.getCarrierConfig(mContext).overrideConfig(subId,
                                     mCarrierSatelliteOriginalBundle[phoneId], false);
                             mCarrierSatelliteOriginalBundle[phoneId] = null;
                             log("mMockSatelliteListener: Successfully cleared mock for phone "
                                     + phoneId);
+                            // Reset to original configuration
+                            SatelliteController.getInstance()
+                                    .setSatelliteIgnorePlmnListFromStorage(false);
                         } catch (Exception e) {
                             loge("mMockSatelliteListener: Can't clear mock because invalid sub Id "
                                     + subId
@@ -2754,17 +2789,17 @@ public class RadioInfo extends AppCompatActivity {
                 public void onClick(View v) {
                     int satelliteBandRadioButton =
                             mForceCampSatelliteSelectionRadioGroup.getCheckedRadioButtonId();
-                    int[] satelliteBands = STARLINK_BAND;
-                    int[] satelliteChannels = STARLINK_CHANNELS;
+                    int[] satelliteBands = PhoneInformationUtil.STARLINK_BAND;
+                    int[] satelliteChannels = PhoneInformationUtil.STARLINK_CHANNELS;
                     switch (satelliteBandRadioButton) {
                         case (R.id.starlink_band) -> {
-                            satelliteBands = STARLINK_BAND;
-                            satelliteChannels = STARLINK_CHANNELS;
+                            satelliteBands = PhoneInformationUtil.STARLINK_BAND;
+                            satelliteChannels = PhoneInformationUtil.STARLINK_CHANNELS;
                             log("Connect start with starlink");
                         }
                         case (R.id.ast_band) -> {
-                            satelliteBands = AST_BAND;
-                            satelliteChannels = AST_CHANNELS;
+                            satelliteBands = PhoneInformationUtil.AST_BAND;
+                            satelliteChannels = PhoneInformationUtil.AST_CHANNELS;
                             log("Connect start with ast");
                         }
                         case (R.id.manual_override_band) -> {
@@ -2772,7 +2807,7 @@ public class RadioInfo extends AppCompatActivity {
                             if (index == 0) {
                                 return;
                             }
-                            satelliteBands = new int[] {BAND_VALUES[index]};
+                            satelliteBands = new int[] {PhoneInformationUtil.BAND_VALUES[index]};
                             String channelText = mSatelliteChannels.getText().toString();
                             try {
                                 int channel = Integer.parseInt(channelText);

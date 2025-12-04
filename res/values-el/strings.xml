@@ -110,7 +110,7 @@
     <string name="sum_cfu_enabled_no_number" msgid="7287752761743377930">"Ο αριθμός δεν είναι διαθέσιμος"</string>
     <string name="sum_cfu_disabled" msgid="5010617134210809853">"Ανενεργό"</string>
     <string name="labelCFB" msgid="615265213360512768">"Όταν η γραμμή είναι απασχολημένη"</string>
-    <string name="messageCFB" msgid="1958017270393563388">"Αριθμός όταν είμαι απασχολημένος/ή"</string>
+    <string name="messageCFB" msgid="1958017270393563388">"Αριθμός όταν είμαι απασχολημένος"</string>
     <string name="sum_cfb_enabled" msgid="332037613072049492">"Προώθηση στο <xliff:g id="PHONENUMBER">{0}</xliff:g>"</string>
     <string name="sum_cfb_disabled" msgid="3589913334164866035">"Ανενεργό"</string>
     <string name="disable_cfb_forbidden" msgid="4831494744351633961">"Ο φορέας σας δεν υποστηρίζει την απενεργοποίηση της προώθησης κλήσεων όταν το τηλέφωνό σας είναι απασχολημένο."</string>
@@ -974,8 +974,7 @@
     <string name="satellite_config_version_label" msgid="1153447193166314791">"έκδοση:"</string>
     <string name="satellite_config_version_for_skylo_label" msgid="7068241597009832840">"έκδοση skylo:"</string>
     <string name="satellite_max_allowed_data_mode_label" msgid="1808484802651916339">"μέγιστη επιτρεπόμενη λειτουργία δεδομένων:"</string>
-    <!-- no translation found for satellite_provider_plmn_list_label (7289533883006851963) -->
-    <skip />
+    <string name="satellite_provider_plmn_list_label" msgid="7289533883006851963">"όλα τα plmn των δορυφορικών παρόχων:"</string>
     <string name="satellite_config_version_for_starlink_label" msgid="7984209491963621773">"έκδοση starlink:"</string>
     <string name="satellite_config_service_type_label" msgid="21749170241956082">"subId/plmn/servicetype:"</string>
     <string name="satellite_config_allow_access_label" msgid="3806779900418131140">"allow_access:"</string>

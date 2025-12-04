@@ -182,7 +182,7 @@
     <string name="register_on_network" msgid="4194770527833960423">"Registrándose en <xliff:g id="NETWORK">%s</xliff:g>..."</string>
     <string name="not_allowed" msgid="8541221928746104798">"La tarjeta SIM no permite establecer conexión con esta red."</string>
     <string name="connect_later" msgid="1950138106010005425">"No se puede conectar a la red en este momento. Inténtalo de nuevo más tarde."</string>
-    <string name="registration_done" msgid="5337407023566953292">"Conexión con la red establecida"</string>
+    <string name="registration_done" msgid="5337407023566953292">"Registrado/a en la red."</string>
     <string name="already_auto" msgid="8607068290733079336">"Ya estás en la selección automática."</string>
     <string name="select_automatically" msgid="779750291257872651">"Seleccionar red automáticamente"</string>
     <string name="manual_mode_disallowed_summary" msgid="3970048592179890197">"No disponible cuando se ha conectado con %1$s"</string>
@@ -974,8 +974,7 @@
     <string name="satellite_config_version_label" msgid="1153447193166314791">"versión:"</string>
     <string name="satellite_config_version_for_skylo_label" msgid="7068241597009832840">"versión de skylo:"</string>
     <string name="satellite_max_allowed_data_mode_label" msgid="1808484802651916339">"modo de datos máximos permitidos:"</string>
-    <!-- no translation found for satellite_provider_plmn_list_label (7289533883006851963) -->
-    <skip />
+    <string name="satellite_provider_plmn_list_label" msgid="7289533883006851963">"todos los PLMNs de proveedores de satélite:"</string>
     <string name="satellite_config_version_for_starlink_label" msgid="7984209491963621773">"versión de starlink:"</string>
     <string name="satellite_config_service_type_label" msgid="21749170241956082">"subId/plmn/servicetype:"</string>
     <string name="satellite_config_allow_access_label" msgid="3806779900418131140">"allow_access:"</string>

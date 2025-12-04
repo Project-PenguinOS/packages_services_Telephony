@@ -405,7 +405,7 @@
     <string name="eo_enable" msgid="107713355461019817">"Oportunidades de empleo activadas"</string>
     <string name="eo_disable" msgid="3955421278929647485">"Oportunidades de empleo desactivadas"</string>
     <string name="enable_disable_mhh" msgid="715930476289202466">"Servicios de medicina, salud y hospitales"</string>
-    <string name="mhh_enable" msgid="7224396815285147008">"Se habilitaron los servicios de medicina, salud y hospitales."</string>
+    <string name="mhh_enable" msgid="7224396815285147008">"Se habilitaron los servicios de medicina, salud y hospitales"</string>
     <string name="mhh_disable" msgid="5503643028885686265">"Se inhabilitaron los servicios de medicina, salud y hospitales."</string>
     <string name="enable_disable_technology_news" msgid="2794845609698078400">"Noticias de tecnología"</string>
     <string name="technology_news_enable" msgid="1908991199492598311">"Noticias de tecnología desactivadas"</string>
@@ -545,7 +545,7 @@
     <string name="incall_error_power_off_wfc" msgid="9125661184694727052">"Desactivar el modo avión o conectarse a una red inalámbrica para hacer una llamada"</string>
     <string name="incall_error_power_off_thermal" product="default" msgid="8695809601655300168"><b>"Se sobrecalentó el teléfono"</b>\n\n"No se puede completar esta llamada. Vuelve a intentar cuando se enfríe el teléfono.\n\nDe todos modos, puedes hacer llamadas de emergencia."</string>
     <string name="incall_error_ecm_emergency_only" msgid="5622379058883722080">"Para realizar una llamada que no sea de emergencia, sal del modo de devolución de llamada de emergencia."</string>
-    <string name="incall_error_emergency_only" msgid="8786127461027964653">"No registrado en la red."</string>
+    <string name="incall_error_emergency_only" msgid="8786127461027964653">"No se registró en la red."</string>
     <string name="incall_error_out_of_service" msgid="1927265196942672791">"La red móvil no está disponible."</string>
     <string name="incall_error_out_of_service_2g" msgid="904434080740846116">"La red móvil no está disponible.\n\nConéctate a una red inalámbrica para realizar una llamada.\n\nLa conexión 2G está inhabilitada en este dispositivo, lo que podría afectar la conectividad. Ve a Configuración y habilita Permitir 2G para continuar."</string>
     <string name="incall_error_out_of_service_wfc" msgid="4497663185857190885">"La red móvil no está disponible. Conéctate a una red inalámbrica para realizar una llamada."</string>
@@ -627,7 +627,7 @@
     <string name="ota_hfa_activation_title" msgid="3300556778212729671">"Activando…"</string>
     <string name="ota_hfa_activation_dialog_message" msgid="7921718445773342996">"El teléfono está activando el servicio de datos móviles.\n\nEsto puede tardar hasta 5 minutos."</string>
     <string name="ota_skip_activation_dialog_title" msgid="7666611236789203797">"¿Deseas omitir la activación?"</string>
-    <string name="ota_skip_activation_dialog_message" msgid="6691722887019708713">"Si omites la activación, no puedes colocar llamadas o conectarte con redes móviles de datos (a pesar de que te puedes conectar a redes de Wi-Fi). Hasta que actives tu teléfono, se te solicitará que lo actives cada vez que lo enciendas."</string>
+    <string name="ota_skip_activation_dialog_message" msgid="6691722887019708713">"Si omites la activación, no puedes hacer llamadas ni conectarte con redes de datos móviles (aunque sí te puedes conectar a redes Wi-Fi). Se te solicitará que actives el teléfono cada vez que lo enciendas, hasta que lo hagas."</string>
     <string name="ota_skip_activation_dialog_skip_label" msgid="5908029466817825633">"Omitir"</string>
     <string name="ota_activate" msgid="7939695753665438357">"Activar"</string>
     <string name="ota_title_activate_success" msgid="1272135024761004889">"Se activó el teléfono."</string>
@@ -974,8 +974,7 @@
     <string name="satellite_config_version_label" msgid="1153447193166314791">"Versión:"</string>
     <string name="satellite_config_version_for_skylo_label" msgid="7068241597009832840">"versión de Skylo:"</string>
     <string name="satellite_max_allowed_data_mode_label" msgid="1808484802651916339">"modo de máx. de datos permitidos:"</string>
-    <!-- no translation found for satellite_provider_plmn_list_label (7289533883006851963) -->
-    <skip />
+    <string name="satellite_provider_plmn_list_label" msgid="7289533883006851963">"todos los PLMN de proveedores de satélite:"</string>
     <string name="satellite_config_version_for_starlink_label" msgid="7984209491963621773">"versión de Starlink:"</string>
     <string name="satellite_config_service_type_label" msgid="21749170241956082">"ID de suscripción, PLMN y tipo de servicio:"</string>
     <string name="satellite_config_allow_access_label" msgid="3806779900418131140">"Parámetro allow_access:"</string>

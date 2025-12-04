@@ -96,6 +96,7 @@ import android.telephony.ActivityStatsTechSpecificInfo;
 import android.telephony.Annotation.ApnType;
 import android.telephony.Annotation.DataActivityType;
 import android.telephony.Annotation.ThermalMitigationResult;
+import android.telephony.Annotation.TtyMode;
 import android.telephony.AnomalyReporter;
 import android.telephony.CallForwardingInfo;
 import android.telephony.CarrierConfigManager;
@@ -243,6 +244,7 @@ import com.android.internal.telephony.subscription.SubscriptionManagerService;
 import com.android.internal.telephony.uicc.IccCardApplicationStatus.AppType;
 import com.android.internal.telephony.uicc.IccIoResult;
 import com.android.internal.telephony.uicc.IccUtils;
+import com.android.internal.telephony.uicc.PinStorage;
 import com.android.internal.telephony.uicc.SIMRecords;
 import com.android.internal.telephony.uicc.UiccCard;
 import com.android.internal.telephony.uicc.UiccCardApplication;
@@ -2134,10 +2136,19 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
 
                 case CMD_PREPARE_UNATTENDED_REBOOT:
                     request = (MainThreadRequest) msg.obj;
-                    request.result =
-                            UiccController.getInstance().getPinStorage()
-                                    .prepareUnattendedReboot(request.workSource);
-                    notifyRequester(request);
+                    PinStorage pinStorage = UiccController.getInstance().getPinStorage();
+                    if (!mFeatureFlags.useWorkerThreadForPinstorageKeystoreApis()) {
+                        MainThreadRequest finalRequest = request;
+                        pinStorage.post(() -> {
+                            finalRequest.result =
+                                    pinStorage.prepareUnattendedReboot(finalRequest.workSource);
+                            notifyRequester(finalRequest);
+                        });
+                    } else {
+                        request.result =
+                                pinStorage.prepareUnattendedReboot(request.workSource);
+                        notifyRequester(request);
+                    }
                     break;
 
                 default:
@@ -2742,6 +2753,25 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
+    }
+
+    @Override
+    public @TtyMode int getCurrentTtyMode() {
+        enforceReadPrivilegedPermission("Needs READ_PRIVILEGED_PHONE_STATE for "
+                + "getCurrentTtyMode");
+        enforceTelephonyFeatureWithException(getCurrentPackageName(),
+                PackageManager.FEATURE_TELEPHONY_CALLING, "getCurrentTtyMode");
+        final Phone defaultPhone = getDefaultPhone();
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return Settings.Secure.getIntForUser(defaultPhone.getContext().getContentResolver(),
+                    Settings.Secure.PREFERRED_TTY_MODE, defaultPhone.getContext().getUserId());
+        } catch (Settings.SettingNotFoundException e) {
+            Log.w(LOG_TAG, "Secure setting not found: ", e);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+        return TelephonyManager.TTY_MODE_OFF;
     }
 
     @Deprecated
@@ -3371,6 +3401,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
 
     @Override
     public List<CellInfo> getAllCellInfo(String callingPackage, String callingFeatureId) {
+        log("getAllCellInfo: package=" + callingPackage + ", uid=" + Binder.getCallingUid());
         mApp.getSystemService(AppOpsManager.class)
                 .checkPackage(Binder.getCallingUid(), callingPackage);
 
@@ -3397,12 +3428,9 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
 
         mAppOps = Objects.requireNonNull(
             getDefaultPhone().getContext().getSystemService(AppOpsManager.class));
-        mAppOps.noteOpNoThrow(
-            mAppOps.OP_READ_CELL_INFO,
-            Binder.getCallingUid(),
-            getDefaultPhone().getContext().getPackageName(),
-            getDefaultPhone().getContext().getAttributionTag(),
-            "getAllCellInfo reporting cell info");
+        mAppOps.noteOpNoThrow(mAppOps.OP_READ_CELL_INFO,
+                Binder.getCallingUid(), callingPackage, callingFeatureId,
+                "getAllCellInfo reporting cell info");
 
         final int targetSdk = TelephonyPermissions.getTargetSdk(mApp, callingPackage);
         if (targetSdk >= android.os.Build.VERSION_CODES.Q) {
@@ -3482,12 +3510,8 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
 
         mAppOps = Objects.requireNonNull(
             getDefaultPhone().getContext().getSystemService(AppOpsManager.class));
-        mAppOps.noteOpNoThrow(
-            mAppOps.OP_READ_CELL_INFO,
-            Binder.getCallingUid(),
-            getDefaultPhone().getContext().getPackageName(),
-            getDefaultPhone().getContext().getAttributionTag(),
-            "requestCellInfoUpdate reporting cell info");
+        mAppOps.noteOpNoThrow(mAppOps.OP_READ_CELL_INFO, Binder.getCallingUid(),
+                callingPackage, callingFeatureId, "requestCellInfoUpdate reporting cell info");
 
         final Phone phone = getPhoneFromSubId(subId);
         if (phone == null) throw new IllegalArgumentException("Invalid Subscription Id: " + subId);
@@ -5494,7 +5518,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     }
 
     /**
-     * {@hide}
+     * @hide
      * Returns Default subId, 0 in the case of single standby.
      */
     private int getDefaultSubscription() {
@@ -5951,7 +5975,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     }
 
     /**
-     * Generate a radio modem reset. Used for device configuration by some CDMA operators.
+     * Generate a radio modem reset.
      *
      * @param slotIndex - device slot.
      *
@@ -7969,7 +7993,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     }
 
     /**
-     * {@hide}
+     * @hide
      * Returns the IMS Registration Status on a particular subid
      *
      * @param subId
@@ -8696,7 +8720,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     }
 
     /**
-     * {@hide}
+     * @hide
      * Set the allowed carrier list and the excluded carrier list, indicating the priority between
      * the two lists.
      * Require system privileges. In the future we may add this to carrier APIs.
@@ -8727,7 +8751,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     }
 
     /**
-     * {@hide}
+     * @hide
      * Get the allowed carrier list and the excluded carrier list, including the priority between
      * the two lists.
      * Require system privileges. In the future we may add this to carrier APIs.
@@ -8813,7 +8837,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
      * Action set from carrier signalling broadcast receivers to enable/disable radio
      * @param subId the subscription ID that this action applies to.
      * @param enabled control enable or disable radio.
-     * {@hide}
+     * @hide
      */
     @Override
     public void carrierActionSetRadioEnabled(int subId, boolean enabled) {
@@ -8898,7 +8922,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
      *
      * @param subId the subscription ID that this action applies to.
      * @param report control start/stop reporting the default network status.
-     * {@hide}
+     * @hide
      */
     @Override
     public void carrierActionReportDefaultNetworkStatus(int subId, boolean report) {
@@ -8927,7 +8951,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     /**
      * Action set from carrier signalling broadcast receivers to reset all carrier actions
      * @param subId the subscription ID that this action applies to.
-     * {@hide}
+     * @hide
      */
     @Override
     public void carrierActionResetAll(int subId) {
@@ -14086,6 +14110,29 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         try {
             return mSatelliteController.setMaxAllowedDataModeForCtsTest(
                     maxAllowedDataMode);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    /**
+     * This API can be used for testing purposes to uncap the max allowed data mode.
+     *
+     * @return {@code true} if the max allowed data mode is uncapped successfully,
+     * {@code false} otherwise.
+     */
+    public boolean uncapMaxAllowedSatelliteDataMode() {
+        Log.d(LOG_TAG, "uncapMaxAllowedSatelliteDataMode");
+        TelephonyPermissions.enforceDebugBuildsOnly("uncapMaxAllowedSatelliteDataMode");
+        TelephonyPermissions.enforceShellOnly(
+                Binder.getCallingUid(),
+                "uncapMaxAllowedSatelliteDataMode");
+        TelephonyPermissions.enforceCallingOrSelfModifyPermissionOrCarrierPrivilege(mApp,
+                SubscriptionManager.INVALID_SUBSCRIPTION_ID,
+                "uncapMaxAllowedSatelliteDataMode");
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return mSatelliteController.uncapMaxAllowedDataMode();
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
