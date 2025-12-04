@@ -512,7 +512,7 @@ public class ImsConference extends TelephonyConferenceBase implements Holdable {
 
         // Specify the connection time of the conference to be the connection time of the original
         // connection.
-// QTI_BEGIN: 2022-02-17: Telephony: IMS: Fix the crashes in MT conference call
+// QTI_BEGIN: 2022-02-16: Telephony: IMS: Fix the crashes in MT conference call
         com.android.internal.telephony.Connection originalConnection =
                 conferenceHost.getOriginalConnection();
         //In MT IMS conference call, it will cleanup TelephonyConnection which backed the original
@@ -524,7 +524,7 @@ public class ImsConference extends TelephonyConferenceBase implements Holdable {
             connectTime = originalConnection.getConnectTime();
             connectElapsedTime = originalConnection.getConnectTimeReal();
         }
-// QTI_END: 2022-02-17: Telephony: IMS: Fix the crashes in MT conference call
+// QTI_END: 2022-02-16: Telephony: IMS: Fix the crashes in MT conference call
         setConnectionTime(connectTime);
         setConnectionStartElapsedRealtimeMillis(connectElapsedTime);
         // Set the connectTime in the connection as well.
@@ -536,9 +536,7 @@ public class ImsConference extends TelephonyConferenceBase implements Holdable {
         setVideoProvider(conferenceHost, conferenceHost.getVideoProvider());
 
         int capabilities = Connection.CAPABILITY_MUTE |
-// QTI_BEGIN: 2020-03-19: Telephony: Ims: Clean-up old ConfURI implementation
                 Connection.CAPABILITY_CONFERENCE_HAS_NO_CHILDREN;
-// QTI_END: 2020-03-19: Telephony: Ims: Clean-up old ConfURI implementation
         if (mCarrierConfig.isHoldAllowed()) {
             capabilities |= Connection.CAPABILITY_SUPPORT_HOLD | Connection.CAPABILITY_HOLD;
             mIsHoldable = true;
@@ -627,10 +625,12 @@ public class ImsConference extends TelephonyConferenceBase implements Holdable {
                 Connection.PROPERTY_CROSS_SIM,
                 (properties & Connection.PROPERTY_CROSS_SIM) != 0);
 
+// QTI_BEGIN: 2025-10-26: Telephony: Conference : Propagate RTT property in conference connection.
         conferenceProperties = changeBitmask(conferenceProperties,
                 Connection.PROPERTY_IS_RTT,
                 (properties & Connection.PROPERTY_IS_RTT) != 0);
         Log.i(this, "applyHostProperties: confProp=%s", conferenceProperties);
+// QTI_END: 2025-10-26: Telephony: Conference : Propagate RTT property in conference connection.
         return conferenceProperties;
     }
 
@@ -1382,10 +1382,10 @@ public class ImsConference extends TelephonyConferenceBase implements Holdable {
         // active call.
         ConferenceParticipantConnection connection = new ConferenceParticipantConnection(
                 parent.getOriginalConnection(), participant,
-// QTI_BEGIN: 2020-12-01: Telephony: IMS: Set property PROPERTY_IS_PARTICIPANT_HOST
+// QTI_BEGIN: 2020-11-30: Telephony: IMS: Set property PROPERTY_IS_PARTICIPANT_HOST
                 !isConferenceHost() /* isRemotelyHosted */,
                 isParticipantHost(mConferenceHostAddress, participant.getHandle()));
-// QTI_END: 2020-12-01: Telephony: IMS: Set property PROPERTY_IS_PARTICIPANT_HOST
+// QTI_END: 2020-11-30: Telephony: IMS: Set property PROPERTY_IS_PARTICIPANT_HOST
 
         if (participant.getConnectTime() == 0) {
             connection.setConnectTimeMillis(parent.getConnectTimeMillis());
@@ -1631,32 +1631,26 @@ public class ImsConference extends TelephonyConferenceBase implements Holdable {
                 if (mConferenceHost == null) {
                     disconnectCause = new DisconnectCause(DisconnectCause.CANCELED);
                 } else {
-// QTI_BEGIN: 2022-02-17: Telephony: IMS: Fix the crashes in MT conference call
+// QTI_BEGIN: 2022-02-16: Telephony: IMS: Fix the crashes in MT conference call
                     com.android.internal.telephony.Connection originalConnection =
                                 mConferenceHost.getOriginalConnection();
-// QTI_END: 2022-02-17: Telephony: IMS: Fix the crashes in MT conference call
-// QTI_BEGIN: 2018-03-14: Telephony: IMS: No option to merge calls in VoWIFI
+// QTI_END: 2022-02-16: Telephony: IMS: Fix the crashes in MT conference call
                     if (mConferenceHost.getPhone() != null) {
-// QTI_END: 2018-03-14: Telephony: IMS: No option to merge calls in VoWIFI
-// QTI_BEGIN: 2022-02-17: Telephony: IMS: Fix the crashes in MT conference call
+// QTI_BEGIN: 2022-02-16: Telephony: IMS: Fix the crashes in MT conference call
                         disconnectCause = originalConnection != null ?
                                 DisconnectCauseUtil.toTelecomDisconnectCause(
                                 originalConnection.getDisconnectCause(),
                                 null, mConferenceHost.getPhone().getPhoneId())
                                 : new DisconnectCause(DisconnectCause.UNKNOWN);
-// QTI_END: 2022-02-17: Telephony: IMS: Fix the crashes in MT conference call
-// QTI_BEGIN: 2018-03-14: Telephony: IMS: No option to merge calls in VoWIFI
+// QTI_END: 2022-02-16: Telephony: IMS: Fix the crashes in MT conference call
                     } else {
-// QTI_END: 2018-03-14: Telephony: IMS: No option to merge calls in VoWIFI
-// QTI_BEGIN: 2022-02-17: Telephony: IMS: Fix the crashes in MT conference call
+// QTI_BEGIN: 2022-02-16: Telephony: IMS: Fix the crashes in MT conference call
                         disconnectCause = originalConnection != null ?
                                 DisconnectCauseUtil.toTelecomDisconnectCause(
                                 originalConnection.getDisconnectCause())
                                 : new DisconnectCause(DisconnectCause.UNKNOWN);
-// QTI_END: 2022-02-17: Telephony: IMS: Fix the crashes in MT conference call
-// QTI_BEGIN: 2018-03-14: Telephony: IMS: No option to merge calls in VoWIFI
+// QTI_END: 2022-02-16: Telephony: IMS: Fix the crashes in MT conference call
                     }
-// QTI_END: 2018-03-14: Telephony: IMS: No option to merge calls in VoWIFI
                 }
                 setDisconnected(disconnectCause);
                 disconnectConferenceParticipants();

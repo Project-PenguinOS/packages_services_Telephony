@@ -324,20 +324,10 @@
         <item name="android:listDivider">@null</item>
     </style>
 
-<!-- QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
-<!-- QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
     <style name="cfut_value">
-<!-- QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
-<!-- QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
         <item name="android:layout_width">80dip</item>
-<!-- QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
-<!-- QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
         <item name="android:layout_height">wrap_content</item>
-<!-- QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
-<!-- QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
-<!-- QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
-<!-- QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
         <item name="android:singleLine">true</item>
     </style>
 

@@ -40,9 +40,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-// QTI_BEGIN: 2021-08-10: Telephony: Add conferenceable connection if on the same sub
 import java.util.Objects;
-// QTI_END: 2021-08-10: Telephony: Add conferenceable connection if on the same sub
 import java.util.stream.Collectors;
 
 /**
@@ -259,9 +257,7 @@ public class ImsConferenceController {
      * Calculates the conference-capable state of all GSM connections in this connection service.
      * Connections from different {@link PhoneAccountHandle}s shall not be conferenceable.
      */
-// QTI_BEGIN: 2025-01-30: Telephony: Revert "Ad-hoc conference: Recalculate ad-hoc capabilities"
     private void recalculateConferenceable() {
-// QTI_END: 2025-01-30: Telephony: Revert "Ad-hoc conference: Recalculate ad-hoc capabilities"
         Log.v(this, "recalculateConferenceable : %d", mTelephonyConnections.size());
         HashSet<Conferenceable> conferenceableSet = new HashSet<>(mTelephonyConnections.size() +
                 mImsConferences.size());
@@ -478,10 +474,10 @@ public class ImsConferenceController {
         conferenceHostConnection.setVideoPauseSupported(connection.getVideoPauseSupported());
         conferenceHostConnection.setManageImsConferenceCallSupported(
                 connection.isManageImsConferenceCallSupported());
-// QTI_BEGIN: 2022-02-17: Telephony: IMS: Fix the crashes in MT conference call
+// QTI_BEGIN: 2022-02-16: Telephony: IMS: Fix the crashes in MT conference call
         conferenceHostConnection.setTelephonyConnectionService(
                 connection.getTelephonyConnectionService());
-// QTI_END: 2022-02-17: Telephony: IMS: Fix the crashes in MT conference call
+// QTI_END: 2022-02-16: Telephony: IMS: Fix the crashes in MT conference call
         // WARNING: do not try to copy the video provider from connection to
         // conferenceHostConnection here.  In connection.cloneConnection, part of the clone
         // process is to set the original connection so it's already set:

@@ -45,9 +45,7 @@ final class CdmaConnection extends TelephonyConnection {
 
     private static final int MSG_CALL_WAITING_MISSED = 1;
     private static final int MSG_DTMF_SEND_CONFIRMATION = 2;
-// QTI_BEGIN: 2018-03-22: Telephony: TeleService: Add support for call timer reset on CDMA MO call
     private static final int MSG_CDMA_LINE_CONTROL_INFO_REC = 3;
-// QTI_END: 2018-03-22: Telephony: TeleService: Add support for call timer reset on CDMA MO call
     private static final int TIMEOUT_CALL_WAITING_MILLIS = 20 * 1000;
 
     private final Handler mHandler = new Handler() {
@@ -62,11 +60,9 @@ final class CdmaConnection extends TelephonyConnection {
                 case MSG_DTMF_SEND_CONFIRMATION:
                     handleBurstDtmfConfirmation();
                     break;
-// QTI_BEGIN: 2018-03-22: Telephony: TeleService: Add support for call timer reset on CDMA MO call
                 case MSG_CDMA_LINE_CONTROL_INFO_REC:
                     handleCdmaConnectionTimeReset();
                     break;
-// QTI_END: 2018-03-22: Telephony: TeleService: Add support for call timer reset on CDMA MO call
                 default:
                     break;
             }
@@ -85,9 +81,7 @@ final class CdmaConnection extends TelephonyConnection {
     // Indicates that the DTMF confirmation from telephony is pending.
     private boolean mDtmfBurstConfirmationPending = false;
     private boolean mIsCallWaiting;
-// QTI_BEGIN: 2018-03-22: Telephony: TeleService: Add support for call timer reset on CDMA MO call
     private boolean mIsConnectionTimeReset = false;
-// QTI_END: 2018-03-22: Telephony: TeleService: Add support for call timer reset on CDMA MO call
 
     CdmaConnection(
             Connection connection,
@@ -317,21 +311,16 @@ final class CdmaConnection extends TelephonyConnection {
         mAllowMute = true;
         super.handleExitedEcmMode();
     }
-// QTI_BEGIN: 2018-03-22: Telephony: TeleService: Add support for call timer reset on CDMA MO call
 
     private void handleCdmaConnectionTimeReset() {
         boolean isImsCall = getOriginalConnection() instanceof ImsPhoneConnection;
-// QTI_END: 2018-03-22: Telephony: TeleService: Add support for call timer reset on CDMA MO call
         if (!isImsCall && !mIsConnectionTimeReset && isOutgoingCall()
-// QTI_BEGIN: 2018-03-22: Telephony: TeleService: Add support for call timer reset on CDMA MO call
                 && getOriginalConnection() != null
                 && getOriginalConnection().getState() == Call.State.ACTIVE
                 && getOriginalConnection().getDurationMillis() > 0) {
             mIsConnectionTimeReset = true;
             getOriginalConnection().resetConnectionTime();
-// QTI_END: 2018-03-22: Telephony: TeleService: Add support for call timer reset on CDMA MO call
             resetConnectionTime();
-// QTI_BEGIN: 2018-03-22: Telephony: TeleService: Add support for call timer reset on CDMA MO call
         }
     }
 
@@ -344,14 +333,11 @@ final class CdmaConnection extends TelephonyConnection {
     }
 
     @Override
-// QTI_END: 2018-03-22: Telephony: TeleService: Add support for call timer reset on CDMA MO call
     public void close() {
-// QTI_BEGIN: 2018-03-22: Telephony: TeleService: Add support for call timer reset on CDMA MO call
         mIsConnectionTimeReset = false;
         if (getPhone() != null) {
             getPhone().unregisterForLineControlInfo(mHandler);
         }
         super.close();
     }
-// QTI_END: 2018-03-22: Telephony: TeleService: Add support for call timer reset on CDMA MO call
 }

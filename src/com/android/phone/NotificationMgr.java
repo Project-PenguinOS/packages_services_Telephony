@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-// QTI_BEGIN: 2024-11-20: Telephony: Deprecate TDSCDMA
+// QTI_BEGIN: 2024-11-19: Telephony: Deprecate TDSCDMA
 /*
  * Changes from Qualcomm Innovation Center, Inc. are provided under the following license:
  * Copyright (c) 2024 Qualcomm Innovation Center, Inc. All rights reserved.
  * SPDX-License-Identifier: BSD-3-Clause-Clear
  */
 
-// QTI_END: 2024-11-20: Telephony: Deprecate TDSCDMA
+// QTI_END: 2024-11-19: Telephony: Deprecate TDSCDMA
 package com.android.phone;
 
-// QTI_BEGIN: 2024-11-20: Telephony: Deprecate TDSCDMA
+// QTI_BEGIN: 2024-11-19: Telephony: Deprecate TDSCDMA
 import static com.qti.extphone.ExtTelephonyManager.FEATURE_TDSCDMA_SUPPORT;
 
-// QTI_END: 2024-11-20: Telephony: Deprecate TDSCDMA
+// QTI_END: 2024-11-19: Telephony: Deprecate TDSCDMA
 import static android.Manifest.permission.READ_PHONE_STATE;
 
 import android.annotation.NonNull;
@@ -78,10 +78,10 @@ import com.android.internal.telephony.flags.FeatureFlagsImpl;
 import com.android.internal.telephony.util.NotificationChannelController;
 import com.android.phone.settings.VoicemailSettingsActivity;
 
-// QTI_BEGIN: 2024-11-20: Telephony: Deprecate TDSCDMA
+// QTI_BEGIN: 2024-11-19: Telephony: Deprecate TDSCDMA
 import com.qti.extphone.ExtTelephonyManager;
 
-// QTI_END: 2024-11-20: Telephony: Deprecate TDSCDMA
+// QTI_END: 2024-11-19: Telephony: Deprecate TDSCDMA
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -163,10 +163,10 @@ public class NotificationMgr {
     // feature flags
     private final FeatureFlags mFeatureFlags;
 
-// QTI_BEGIN: 2024-11-20: Telephony: Deprecate TDSCDMA
+// QTI_BEGIN: 2024-11-19: Telephony: Deprecate TDSCDMA
     private static ExtTelephonyManager sExtTelephonyManager;
 
-// QTI_END: 2024-11-20: Telephony: Deprecate TDSCDMA
+// QTI_END: 2024-11-19: Telephony: Deprecate TDSCDMA
     private final Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -195,9 +195,9 @@ public class NotificationMgr {
         mUserManager = (UserManager) app.getSystemService(Context.USER_SERVICE);
         mSubscriptionManager = SubscriptionManager.from(mContext);
         mTelephonyManager = (TelephonyManager) app.getSystemService(Context.TELEPHONY_SERVICE);
-// QTI_BEGIN: 2024-11-20: Telephony: Deprecate TDSCDMA
+// QTI_BEGIN: 2024-11-19: Telephony: Deprecate TDSCDMA
         sExtTelephonyManager = ExtTelephonyManager.getInstance(mContext);
-// QTI_END: 2024-11-20: Telephony: Deprecate TDSCDMA
+// QTI_END: 2024-11-19: Telephony: Deprecate TDSCDMA
         mFeatureFlags = new FeatureFlagsImpl();
     }
 
@@ -315,9 +315,7 @@ public class NotificationMgr {
                 + (visible ? "Y" : "N")
                 + " (changed:" + (mwiStateChanged ? "Y" : "N") + ")");
 
-// QTI_BEGIN: 2021-02-10: Telephony: Move IExtTelephony to IExtPhone
         if (visible) {
-// QTI_END: 2021-02-10: Telephony: Move IExtTelephony to IExtPhone
             if (phone == null) {
                 Log.w(LOG_TAG, "Found null phone for: " + subId);
                 return;
@@ -505,9 +503,7 @@ public class NotificationMgr {
      */
     private boolean maybeSendVoicemailNotificationUsingDefaultDialer(Phone phone, Integer count,
             String number, PendingIntent pendingIntent, boolean isSettingsIntent,
-// QTI_BEGIN: 2018-02-21: Telephony: MSIM: Add subId to voicemail intent
             UserHandle userHandle, boolean isRefresh, int qtiSubId) {
-// QTI_END: 2018-02-21: Telephony: MSIM: Add subId to voicemail intent
 
         if (shouldManageNotificationThroughDefaultDialer(userHandle)) {
             // It is possible that the phone is null here when we are dismissing the
@@ -563,9 +559,7 @@ public class NotificationMgr {
             intent.putExtra(TelephonyManager.EXTRA_PHONE_ACCOUNT_HANDLE,
                     PhoneUtils.makePstnPhoneAccountHandle(phone));
             intent.putExtra(TelephonyManager.EXTRA_IS_REFRESH, isRefresh);
-// QTI_BEGIN: 2018-02-21: Telephony: MSIM: Add subId to voicemail intent
             intent.putExtra(EXTRA_SUB_ID, qtiSubId);
-// QTI_END: 2018-02-21: Telephony: MSIM: Add subId to voicemail intent
             if (count != null) {
                 intent.putExtra(TelephonyManager.EXTRA_NOTIFICATION_COUNT, count);
             }
@@ -637,9 +631,7 @@ public class NotificationMgr {
      */
     /* package */ void updateCfi(int subId, boolean visible, boolean isRefresh) {
         logi("updateCfi: subId= " + subId + ", visible=" + (visible ? "Y" : "N"));
-// QTI_BEGIN: 2021-02-10: Telephony: Move IExtTelephony to IExtPhone
         if (visible) {
-// QTI_END: 2021-02-10: Telephony: Move IExtTelephony to IExtPhone
             // If Unconditional Call Forwarding (forward all calls) for VOICE
             // is enabled, just show a notification.  We'll default to expanded
             // view for now, so the there is less confusion about the icon.  If
@@ -901,16 +893,12 @@ public class NotificationMgr {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
                 Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
         // Use MobileNetworkSettings to handle the selection intent
-// QTI_BEGIN: 2020-01-30: Telephony: Remove hooks that lauched vendor network settings
         intent.setComponent(new ComponentName(
                 mContext.getString(R.string.mobile_network_settings_package),
                 mContext.getString(R.string.mobile_network_settings_class)));
-// QTI_END: 2020-01-30: Telephony: Remove hooks that lauched vendor network settings
         intent.putExtra(Settings.EXTRA_SUB_ID, subId);
         builder.setContentIntent(
-// QTI_BEGIN: 2024-12-19: Telephony: TeleService: use subId as requestCode to send the selection intent
                 PendingIntent.getActivity(mContext, subId, intent, PendingIntent.FLAG_IMMUTABLE));
-// QTI_END: 2024-12-19: Telephony: TeleService: use subId as requestCode to send the selection intent
         notifyAsUser(
                 Integer.toString(subId) /* tag */,
                 SELECTED_OPERATOR_FAIL_NOTIFICATION,
@@ -1133,12 +1121,12 @@ public class NotificationMgr {
 
     private static boolean isTdscdmaSupported(@NonNull TelephonyManager telephonyManager,
             @NonNull PersistableBundle carrierConfig) {
-// QTI_BEGIN: 2024-11-20: Telephony: Deprecate TDSCDMA
+// QTI_BEGIN: 2024-11-19: Telephony: Deprecate TDSCDMA
         if (!sExtTelephonyManager.isFeatureSupported(FEATURE_TDSCDMA_SUPPORT)) {
             return false;
         }
 
-// QTI_END: 2024-11-20: Telephony: Deprecate TDSCDMA
+// QTI_END: 2024-11-19: Telephony: Deprecate TDSCDMA
         if (carrierConfig.getBoolean(CarrierConfigManager.KEY_SUPPORT_TDSCDMA_BOOL)) {
             return true;
         }

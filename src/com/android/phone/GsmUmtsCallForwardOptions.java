@@ -9,24 +9,24 @@
 package com.android.phone;
 
 import android.app.ActionBar;
-// QTI_BEGIN: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_BEGIN: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
-// QTI_END: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_END: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
 import android.content.ContentProvider;
-// QTI_BEGIN: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_BEGIN: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
 import android.content.Context;
 import android.content.DialogInterface;
-// QTI_END: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_END: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
 import android.content.Intent;
-// QTI_BEGIN: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_BEGIN: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
 import android.content.IntentFilter;
-// QTI_END: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_END: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
 import android.database.Cursor;
-// QTI_BEGIN: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_BEGIN: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
 import android.net.ConnectivityManager;
-// QTI_END: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_END: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
 // QTI_BEGIN: 2024-03-18: Telephony: Allow to query CF from UI when Wi-Fi is on
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -35,13 +35,13 @@ import android.net.NetworkCapabilities;
 import android.os.Build;
 // QTI_END: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."
 import android.os.Bundle;
-// QTI_BEGIN: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_BEGIN: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
 import android.os.PersistableBundle;
-// QTI_END: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_END: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
 import android.os.Process;
-// QTI_BEGIN: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_BEGIN: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
 import android.os.SystemProperties;
-// QTI_END: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_END: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
 import android.os.UserHandle;
 import android.preference.Preference;
 import android.preference.PreferenceScreen;
@@ -52,28 +52,28 @@ import android.telephony.CarrierConfigManager;
 // QTI_BEGIN: 2018-06-11: Telephony: IMS: No prompt to notify user to switch off enhanced 4G
 import android.telephony.ims.feature.ImsFeature;
 // QTI_END: 2018-06-11: Telephony: IMS: No prompt to notify user to switch off enhanced 4G
-// QTI_BEGIN: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_BEGIN: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
 import android.telephony.SubscriptionManager;
-// QTI_END: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
-// QTI_BEGIN: 2018-05-14: Telephony: Check SIM status before query CF or hotswap SIM card in query CF UI
+// QTI_END: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_BEGIN: 2018-05-13: Telephony: Check SIM status before query CF or hotswap SIM card in query CF UI
 import android.telephony.TelephonyManager;
-// QTI_END: 2018-05-14: Telephony: Check SIM status before query CF or hotswap SIM card in query CF UI
+// QTI_END: 2018-05-13: Telephony: Check SIM status before query CF or hotswap SIM card in query CF UI
 // QTI_BEGIN: 2024-11-14: Telephony: Fix APN type checking issue
 import android.text.TextUtils;
 // QTI_END: 2024-11-14: Telephony: Fix APN type checking issue
 import android.util.Log;
 import android.view.MenuItem;
-// QTI_BEGIN: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_BEGIN: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
 import android.widget.Toast;
-// QTI_END: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_END: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
 // QTI_BEGIN: 2018-06-11: Telephony: IMS: No prompt to notify user to switch off enhanced 4G
 import com.android.ims.ImsException;
 import com.android.ims.ImsManager;
 // QTI_END: 2018-06-11: Telephony: IMS: No prompt to notify user to switch off enhanced 4G
-// QTI_BEGIN: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_BEGIN: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
-// QTI_END: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_END: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
 
 import com.android.internal.telephony.CallForwardInfo;
 import com.android.internal.telephony.CommandsInterface;
@@ -85,10 +85,10 @@ import org.codeaurora.ims.QtiCallConstants;
 // QTI_END: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."
 import java.util.ArrayList;
 
-// QTI_BEGIN: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_BEGIN: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
 public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
     implements DialogInterface.OnClickListener, DialogInterface.OnCancelListener {
-// QTI_END: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_END: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
     private static final boolean DBG = (PhoneGlobals.DBG_LEVEL >= 2);
     private static final String LOG_TAG = "GsmUmtsCallForwardOptions";
 
@@ -138,16 +138,16 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
 // QTI_BEGIN: 2018-03-30: Telephony: IMS: Add UT interface to query CF setting for service class.
     private int mServiceClass;
 // QTI_END: 2018-03-30: Telephony: IMS: Add UT interface to query CF setting for service class.
-// QTI_BEGIN: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_BEGIN: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
     private BroadcastReceiver mReceiver = null;
     private boolean mCheckData = false;
-// QTI_END: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_END: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
 // QTI_BEGIN: 2024-03-18: Telephony: Allow to query CF from UI when Wi-Fi is on
     private boolean mIsUtAllowedWhenWifiOn = false;
 // QTI_END: 2024-03-18: Telephony: Allow to query CF from UI when Wi-Fi is on
-// QTI_BEGIN: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_BEGIN: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
     AlertDialog.Builder builder = null;
-// QTI_END: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_END: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
 // QTI_BEGIN: 2018-06-11: Telephony: IMS: No prompt to notify user to switch off enhanced 4G
     private CarrierConfigManager mCarrierConfig;
 // QTI_END: 2018-06-11: Telephony: IMS: No prompt to notify user to switch off enhanced 4G
@@ -177,9 +177,9 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
 // QTI_BEGIN: 2018-06-11: Telephony: IMS: No prompt to notify user to switch off enhanced 4G
             PersistableBundle pb = mCarrierConfig.getConfigForSubId(mPhone.getSubId());
 // QTI_END: 2018-06-11: Telephony: IMS: No prompt to notify user to switch off enhanced 4G
-// QTI_BEGIN: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_BEGIN: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
             mCheckData = pb.getBoolean("check_mobile_data_for_cf");
-// QTI_END: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_END: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
 // QTI_BEGIN: 2024-03-18: Telephony: Allow to query CF from UI when Wi-Fi is on
             mIsUtAllowedWhenWifiOn = pb.getBoolean("allow_ut_when_wifi_on_bool");
             Log.d(LOG_TAG, "mCheckData = " + mCheckData + ", mIsUtAllowedWhenWifiOn = " +
@@ -320,7 +320,7 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
     }
 
 // QTI_END: 2024-11-14: Telephony: Fix APN type checking issue
-// QTI_BEGIN: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_BEGIN: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
     /**
      * Receiver for intent broadcasts the Phone app cares about.
      */
@@ -333,15 +333,15 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
                 final String apnType = intent.getStringExtra(PhoneConstants.DATA_APN_TYPE_KEY);
                 Log.d(LOG_TAG, "apntype is: " + apnType + " state is: " + state);
                 if (PhoneConstants.DataState.DISCONNECTED.name().equals(state) &&
-// QTI_END: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_END: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
 // QTI_BEGIN: 2024-11-14: Telephony: Fix APN type checking issue
                             hasDefaultAPNType(apnType)) {
 // QTI_END: 2024-11-14: Telephony: Fix APN type checking issue
-// QTI_BEGIN: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_BEGIN: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
                     Log.d(LOG_TAG, "default data is disconnected.");
                     checkDataStatus();
                 }
-// QTI_END: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_END: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
 // QTI_BEGIN: 2024-06-13: Telephony: Fix call forwarding alert issue in airplane mode
             } else if (action.equals(Intent.ACTION_AIRPLANE_MODE_CHANGED)) {
                 if (mPhone != null) {
@@ -352,52 +352,52 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
                     }
                 }
 // QTI_END: 2024-06-13: Telephony: Fix call forwarding alert issue in airplane mode
-// QTI_BEGIN: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_BEGIN: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
             }
         }
     }
 
     public void checkDataStatus() {
-// QTI_END: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_END: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
 // QTI_BEGIN: 2024-03-18: Telephony: Allow to query CF from UI when Wi-Fi is on
         if (mPhone == null) {
             return;
         }
 // QTI_END: 2024-03-18: Telephony: Allow to query CF from UI when Wi-Fi is on
-// QTI_BEGIN: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_BEGIN: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
         int sub = mPhone.getSubId();
-// QTI_END: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
-// QTI_BEGIN: 2018-05-14: Telephony: Check SIM status before query CF or hotswap SIM card in query CF UI
+// QTI_END: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_BEGIN: 2018-05-13: Telephony: Check SIM status before query CF or hotswap SIM card in query CF UI
         // Find out if the sim card is ready.
-// QTI_END: 2018-05-14: Telephony: Check SIM status before query CF or hotswap SIM card in query CF UI
+// QTI_END: 2018-05-13: Telephony: Check SIM status before query CF or hotswap SIM card in query CF UI
 // QTI_BEGIN: 2024-03-18: Telephony: Allow to query CF from UI when Wi-Fi is on
         boolean isSimReady = TelephonyManager.from(this)
                 .getSimState(SubscriptionManager.getSlotIndex(sub))
 // QTI_END: 2024-03-18: Telephony: Allow to query CF from UI when Wi-Fi is on
-// QTI_BEGIN: 2018-05-14: Telephony: Check SIM status before query CF or hotswap SIM card in query CF UI
+// QTI_BEGIN: 2018-05-13: Telephony: Check SIM status before query CF or hotswap SIM card in query CF UI
                 == TelephonyManager.SIM_STATE_READY;
         if (!isSimReady) {
             Log.d(LOG_TAG, "SIM is not ready!");
             String title = (String)this.getResources().getText(R.string.sim_is_not_ready);
             String message = (String)this.getResources()
-// QTI_END: 2018-05-14: Telephony: Check SIM status before query CF or hotswap SIM card in query CF UI
+// QTI_END: 2018-05-13: Telephony: Check SIM status before query CF or hotswap SIM card in query CF UI
 // QTI_BEGIN: 2024-03-18: Telephony: Allow to query CF from UI when Wi-Fi is on
                     .getText(R.string.sim_is_not_ready);
 // QTI_END: 2024-03-18: Telephony: Allow to query CF from UI when Wi-Fi is on
-// QTI_BEGIN: 2018-05-14: Telephony: Check SIM status before query CF or hotswap SIM card in query CF UI
+// QTI_BEGIN: 2018-05-13: Telephony: Check SIM status before query CF or hotswap SIM card in query CF UI
             showAlertDialog(title, message);
             return;
         }
-// QTI_END: 2018-05-14: Telephony: Check SIM status before query CF or hotswap SIM card in query CF UI
+// QTI_END: 2018-05-13: Telephony: Check SIM status before query CF or hotswap SIM card in query CF UI
 // QTI_BEGIN: 2024-03-18: Telephony: Allow to query CF from UI when Wi-Fi is on
         if (mPhone.isUtEnabled() && mCheckData) {
             // check whether the current data network is roaming and roaming is enabled
 // QTI_END: 2024-03-18: Telephony: Allow to query CF from UI when Wi-Fi is on
-// QTI_BEGIN: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_BEGIN: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
             boolean isDataRoaming = mPhone.getServiceState().getDataRoaming();
             boolean isDataRoamingEnabled = mPhone.getDataRoamingEnabled();
             boolean promptForDataRoaming = isDataRoaming && !isDataRoamingEnabled;
-// QTI_END: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_END: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
 // QTI_BEGIN: 2024-03-18: Telephony: Allow to query CF from UI when Wi-Fi is on
             Log.d(LOG_TAG, "sub = " + sub + ", isDataRoaming = " + isDataRoaming +
                     ", isDataRoamingEnabled = " + isDataRoamingEnabled);
@@ -440,17 +440,17 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
                     String title = (String)this.getResources()
                             .getText(R.string.no_network_available);
 // QTI_END: 2024-03-18: Telephony: Allow to query CF from UI when Wi-Fi is on
-// QTI_BEGIN: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_BEGIN: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
                     String message = (String)this.getResources()
-// QTI_END: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_END: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
 // QTI_BEGIN: 2024-03-18: Telephony: Allow to query CF from UI when Wi-Fi is on
                             .getText(R.string.cf_setting_network_alert);
 // QTI_END: 2024-03-18: Telephony: Allow to query CF from UI when Wi-Fi is on
-// QTI_BEGIN: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_BEGIN: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
                     showAlertDialog(title, message);
                     return;
                 }
-// QTI_END: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_END: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
 // QTI_BEGIN: 2024-03-18: Telephony: Allow to query CF from UI when Wi-Fi is on
                 Log.d(LOG_TAG, "network capabilities : " + caps);
                 // check if Wi-Fi is on
@@ -462,12 +462,10 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
                     showAlertDialog(title, message);
                     return;
 // QTI_END: 2024-03-18: Telephony: Allow to query CF from UI when Wi-Fi is on
-// QTI_BEGIN: 2019-05-30: Telephony: IMS: Show turn on data dialog before query CF over UT if mobile data is off per sub
                 }
-// QTI_END: 2019-05-30: Telephony: IMS: Show turn on data dialog before query CF over UT if mobile data is off per sub
-// QTI_BEGIN: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_BEGIN: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
             }
-// QTI_END: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_END: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
 // QTI_BEGIN: 2024-03-18: Telephony: Allow to query CF from UI when Wi-Fi is on
             // check if the current sub is the default sub
             if (sub != SubscriptionManager.getDefaultDataSubscriptionId()) {
@@ -475,7 +473,7 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
                 showDataInuseToast();
             }
 // QTI_END: 2024-03-18: Telephony: Allow to query CF from UI when Wi-Fi is on
-// QTI_BEGIN: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_BEGIN: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
         }
         initCallforwarding();
     }
@@ -491,33 +489,33 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
         return;
     }
 
-// QTI_END: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_END: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
 // QTI_BEGIN: 2024-03-18: Telephony: Allow to query CF from UI when Wi-Fi is on
     private NetworkCapabilities getNetworkCapabilities() {
 // QTI_END: 2024-03-18: Telephony: Allow to query CF from UI when Wi-Fi is on
-// QTI_BEGIN: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_BEGIN: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
         ConnectivityManager cm = (ConnectivityManager) getSystemService(
                 Context.CONNECTIVITY_SERVICE);
-// QTI_END: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_END: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
 // QTI_BEGIN: 2024-03-18: Telephony: Allow to query CF from UI when Wi-Fi is on
         if (cm == null) {
             return null;
 // QTI_END: 2024-03-18: Telephony: Allow to query CF from UI when Wi-Fi is on
-// QTI_BEGIN: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_BEGIN: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
         }
-// QTI_END: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_END: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
 // QTI_BEGIN: 2024-03-18: Telephony: Allow to query CF from UI when Wi-Fi is on
         Network activeNetwork = cm.getActiveNetwork();
         return cm.getNetworkCapabilities(activeNetwork);
 // QTI_END: 2024-03-18: Telephony: Allow to query CF from UI when Wi-Fi is on
-// QTI_BEGIN: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_BEGIN: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
     }
 
-// QTI_END: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_END: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
     @Override
     public void onResume() {
         super.onResume();
-// QTI_BEGIN: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_BEGIN: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
         if (mCheckData) {
             checkDataStatus();
         } else {
@@ -526,14 +524,14 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
     }
 
     private void initCallforwarding () {
-// QTI_END: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_END: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
         if (mFirstResume) {
             if (mIcicle == null) {
                 Log.d(LOG_TAG, "start to init ");
                 CallForwardEditPreference pref = mPreferences.get(mInitIndex);
-// QTI_BEGIN: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_BEGIN: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
                 pref.setExpectMore(canExpectMoreCallFwdReq());
-// QTI_END: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_END: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
 // QTI_BEGIN: 2019-03-13: Telephony: Avoid to send 2 PUT requests to network when SS service is activated from UI
                 pref.init(this, mPhone, mReplaceInvalidCFNumbers, mServiceClass, mCallForwardByUssd);
 // QTI_END: 2019-03-13: Telephony: Avoid to send 2 PUT requests to network when SS service is activated from UI
@@ -575,7 +573,7 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
         }
     }
 
-// QTI_BEGIN: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_BEGIN: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
     private void showDataInuseToast() {
         String message = (String)this.getResources()
                 .getText(R.string.mobile_data_alert);
@@ -583,25 +581,25 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
     }
 
     @Override
-// QTI_END: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_END: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
 // QTI_BEGIN: 2024-11-06: Telephony: Fix the issues related to UT service in airplane mode am: e74f539a23 am: e74f539a23
     public void onDestroy() {
         super.onDestroy();
 // QTI_END: 2024-11-06: Telephony: Fix the issues related to UT service in airplane mode am: e74f539a23 am: e74f539a23
-// QTI_BEGIN: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_BEGIN: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
         if (mCheckData && mReceiver != null) {
             unregisterReceiver(mReceiver);
         }
-// QTI_END: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_END: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
 // QTI_BEGIN: 2019-02-01: Telephony: IMS: decouple ims-ext-common from boot jars
         for (CallForwardEditPreference pref : mPreferences) {
             pref.deInit();
         }
 // QTI_END: 2019-02-01: Telephony: IMS: decouple ims-ext-common from boot jars
-// QTI_BEGIN: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_BEGIN: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
     }
 
-// QTI_END: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_END: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -668,12 +666,12 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
 // QTI_END: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."
     }
 
-// QTI_BEGIN: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_BEGIN: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
     private boolean canExpectMoreCallFwdReq() {
         return (mInitIndex < mPreferences.size()-1);
     }
 
-// QTI_END: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_END: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.d(LOG_TAG, "onActivityResult: done");
@@ -736,7 +734,7 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
         }
         return super.onOptionsItemSelected(item);
     }
-// QTI_BEGIN: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_BEGIN: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
 
     private void showAlertDialog(String title, String message) {
         Dialog dialog = new AlertDialog.Builder(this)
@@ -749,5 +747,5 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
                 .create();
         dialog.show();
     }
-// QTI_END: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+// QTI_END: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
 }
