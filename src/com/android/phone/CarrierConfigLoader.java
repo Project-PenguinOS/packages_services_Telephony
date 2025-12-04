@@ -799,8 +799,6 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
         mConfigFromDefaultApp[phoneId] = null;
         mConfigFromCarrierApp[phoneId] = null;
         mServiceConnection[phoneId] = null;
-        mPersistentOverrideConfigs[phoneId] = null;
-        mOverrideConfigs[phoneId] = null;
         mHasSentConfigChange[phoneId] = false;
 
         if (fetchNoSimConfig) {
