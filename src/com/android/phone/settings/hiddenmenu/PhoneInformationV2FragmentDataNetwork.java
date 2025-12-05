@@ -114,8 +114,10 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
     private Switch mImsVolteProvisionedSwitch;
     private Switch mImsVtProvisionedSwitch;
     private Switch mImsWfcProvisionedSwitch;
+// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
     private Switch mEnableVoLteSwitch;
     private Switch mEnableVoNrSwitch;
+// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
     private Switch mEabProvisionedSwitch;
     private TelephonyManager mTelephonyManager;
     private ImsManager mImsManager = null;
@@ -303,16 +305,20 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
         mImsVtProvisionedSwitch = (Switch) view.findViewById(R.id.vt_provisioned_switch);
         mImsWfcProvisionedSwitch = (Switch) view.findViewById(R.id.wfc_provisioned_switch);
         mEabProvisionedSwitch = (Switch) view.findViewById(R.id.eab_provisioned_switch);
+// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
         mEnableVoLteSwitch = (Switch) view.findViewById(R.id.enable_volte_switch);
         mEnableVoNrSwitch = (Switch) view.findViewById(R.id.enable_vonr_switch);
+// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
 
         if (!isImsSupportedOnDevice()) {
             mImsVolteProvisionedSwitch.setVisibility(View.GONE);
             mImsVtProvisionedSwitch.setVisibility(View.GONE);
             mImsWfcProvisionedSwitch.setVisibility(View.GONE);
             mEabProvisionedSwitch.setVisibility(View.GONE);
+// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
             mEnableVoLteSwitch.setVisibility(View.GONE);
             mEnableVoNrSwitch.setVisibility(View.GONE);
+// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
         }
 
         // hide 5G stats on devices that don't support 5G
@@ -711,6 +717,7 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
                 !IS_USER_BUILD && isEnabledByPlatform && isEabProvisioningRequired());
     }
 
+// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
     private void updateVoLteState() {
         ImsMmTelManager imsMmTelManager = mImsManager.getImsMmTelManager(mSubId);
         mEnableVoLteSwitch.setChecked(PhoneInformationUtil.isVolteEnabled(imsMmTelManager));
@@ -734,6 +741,7 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
         mEnableVoNrSwitch.setOnCheckedChangeListener(mVoNrOnChangeListener);
     }
 
+// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
     private void updateImsProvisionedState() {
         if (!isImsSupportedOnDevice()) {
             return;
@@ -779,9 +787,11 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
         updateNetworkType();
         updateNrStats();
 
+// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
         updateVoLteState();
         updateVoNrState();
 
+// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
         updateCellInfo(mCellInfoResult);
         mCellInfoRefreshRateSpinner.setOnItemSelectedListener(mCellInfoRefreshRateHandler);
         // set selection after registering listener to force update
@@ -1209,6 +1219,7 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
                 mPhone.getTelephonyTester().setServiceStateTestIntent(intent);
             };
 
+// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
     OnCheckedChangeListener mVoLteOnChangeListener = new OnCheckedChangeListener() {
         @Override
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -1283,6 +1294,7 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
         });
     }
 
+// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
     private void updateSelectionVisuals() {
         LinearLayout selectedButton, unSelectedButton;
         if (mPhoneId == 0) {

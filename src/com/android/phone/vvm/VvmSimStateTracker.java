@@ -278,12 +278,12 @@ public class VvmSimStateTracker extends BroadcastReceiver {
     }
 
     private void listenToAccount(Context context, PhoneAccountHandle phoneAccountHandle) {
-// QTI_BEGIN: 2021-03-24: Telephony: Fix VVM registers phone state listener repeatedly
+// QTI_BEGIN: 2021-03-23: Telephony: Fix VVM registers phone state listener repeatedly
         if (sListeners.get(phoneAccountHandle) != null) {
             VvmLog.i(TAG, "Listener is registered for " + phoneAccountHandle);
             return;
         }
-// QTI_END: 2021-03-24: Telephony: Fix VVM registers phone state listener repeatedly
+// QTI_END: 2021-03-23: Telephony: Fix VVM registers phone state listener repeatedly
         ServiceStateListener listener = new ServiceStateListener(context, phoneAccountHandle);
         listener.listen();
         VvmLog.i(TAG, "listenToAccount: " + phoneAccountHandle);

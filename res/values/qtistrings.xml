@@ -489,17 +489,17 @@ ul.</string>
 <!-- QTI_BEGIN: 2024-03-18: Telephony: Allow to query CF from UI when Wi-Fi is on-->
 <!-- QTI_END: 2024-03-18: Telephony: Allow to query CF from UI when Wi-Fi is on-->
     <string name="cf_setting_mobile_data_off_alert">Please turn on mobile data</string>
-<!-- QTI_BEGIN: 2024-03-18: Telephony: Allow to query CF from UI when Wi-Fi is on-->
-<!-- QTI_END: 2024-03-18: Telephony: Allow to query CF from UI when Wi-Fi is on-->
+<!-- QTI_BEGIN: 2025-06-24: Telephony: Optimize alert message for UT when WI-FI is on am: 4caf3cb73e-->
+<!-- QTI_END: 2025-06-24: Telephony: Optimize alert message for UT when WI-FI is on am: 4caf3cb73e-->
     <string name="cf_setting_wifi_on_alert">This operation may incur some data charges. Please understand this situation and try again after turning off Wi-Fi</string>
-<!-- QTI_BEGIN: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding-->
-<!-- QTI_END: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding-->
+<!-- QTI_BEGIN: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding-->
+<!-- QTI_END: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding-->
     <string name="cf_setting_mobile_data_roaming_alert">Please turn on data roaming</string>
 <!-- QTI_BEGIN: 2024-03-18: Telephony: Allow to query CF from UI when Wi-Fi is on-->
 <!-- QTI_END: 2024-03-18: Telephony: Allow to query CF from UI when Wi-Fi is on-->
     <string name="cf_setting_network_alert">Please make sure network is available</string>
-<!-- QTI_BEGIN: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding-->
-<!-- QTI_END: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding-->
+<!-- QTI_BEGIN: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding-->
+<!-- QTI_END: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding-->
     <string name="no_mobile_data">Mobile data is not available</string>
 <!-- QTI_BEGIN: 2024-03-18: Telephony: Allow to query CF from UI when Wi-Fi is on-->
 <!-- QTI_END: 2024-03-18: Telephony: Allow to query CF from UI when Wi-Fi is on-->
@@ -507,19 +507,23 @@ ul.</string>
 <!-- QTI_BEGIN: 2024-03-18: Telephony: Allow to query CF from UI when Wi-Fi is on-->
 <!-- QTI_END: 2024-03-18: Telephony: Allow to query CF from UI when Wi-Fi is on-->
     <string name="no_network_available">Network is not available</string>
-<!-- QTI_BEGIN: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding-->
-<!-- QTI_END: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding-->
+<!-- QTI_BEGIN: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding-->
+<!-- QTI_END: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding-->
     <string name="mobile_data">Mobile data</string>
-<!-- QTI_BEGIN: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding-->
-<!-- QTI_END: 2018-04-10: Telephony: IMS: Add data check for UT supplementary service of CallForwarding-->
+<!-- QTI_BEGIN: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding-->
+<!-- QTI_END: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding-->
     <string name="no_mobile_data_roaming">Data roaming is not available</string>
 
     <string name="mobile_data_alert">Data traffic may be generated on secondary card</string>
-<!-- QTI_BEGIN: 2018-05-14: Telephony: Check SIM status before query CF or hotswap SIM card in query CF UI-->
-<!-- QTI_END: 2018-05-14: Telephony: Check SIM status before query CF or hotswap SIM card in query CF UI-->
+<!-- QTI_BEGIN: 2018-05-13: Telephony: Check SIM status before query CF or hotswap SIM card in query CF UI-->
+<!-- QTI_END: 2018-05-13: Telephony: Check SIM status before query CF or hotswap SIM card in query CF UI-->
     <string name="sim_is_not_ready">SIM card is not ready</string>
+<!-- QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo-->
+<!-- QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo-->
+    <string name="enable_volte">Enable VoLTE</string>
+<!-- QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo-->
+<!-- QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo-->
+    <string name="enable_vonr">Enable VoNR</string>
 <!-- QTI_BEGIN: 2018-02-26: Telephony: * Telephony: SIM De-personalization-->
 <!-- QTI_END: 2018-02-26: Telephony: * Telephony: SIM De-personalization-->
-    <string name="enable_volte">Enable VoLTE</string>
-    <string name="enable_vonr">Enable VoNR</string>
 </resources>

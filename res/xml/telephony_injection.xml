@@ -21,8 +21,6 @@
      "/system/framework/" should be the target directory.
         e.g. "/system/framework/eg-telephony-common.jar"
 -->
-<!-- QTI_BEGIN: 2024-09-24: Telephony: Skip telephony injection mechanism-->
-<!-- QTI_END: 2024-09-24: Telephony: Skip telephony injection mechanism-->
 <injection package=""
            jar="">
     <components>

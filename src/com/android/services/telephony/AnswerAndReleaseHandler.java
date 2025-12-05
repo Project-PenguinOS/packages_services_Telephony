@@ -1,4 +1,4 @@
-// QTI_BEGIN: 2020-07-29: Telephony: IMS: Add logic for Pseudo DSDA support
+// QTI_BEGIN: 2020-07-28: Telephony: IMS: Add logic for Pseudo DSDA support
 /*
  * Copyright (c) 2020, The Linux Foundation. All rights reserved.
 
@@ -51,11 +51,11 @@ public class AnswerAndReleaseHandler extends TelephonyConnection.TelephonyConnec
     private Connection mIncomingConnection = null;
     private List<Listener> mListeners = new CopyOnWriteArrayList<>();
 
-// QTI_END: 2020-07-29: Telephony: IMS: Add logic for Pseudo DSDA support
-// QTI_BEGIN: 2025-01-30: Telephony: Revert "IMS: Answer incoming call after disconnect dialing call completes"
+// QTI_END: 2020-07-28: Telephony: IMS: Add logic for Pseudo DSDA support
+// QTI_BEGIN: 2025-01-29: Telephony: Revert "IMS: Answer incoming call after disconnect dialing call completes"
     public AnswerAndReleaseHandler(Connection incomingConnection, int answerWithVideoState) {
-// QTI_END: 2025-01-30: Telephony: Revert "IMS: Answer incoming call after disconnect dialing call completes"
-// QTI_BEGIN: 2020-07-29: Telephony: IMS: Add logic for Pseudo DSDA support
+// QTI_END: 2025-01-29: Telephony: Revert "IMS: Answer incoming call after disconnect dialing call completes"
+// QTI_BEGIN: 2020-07-28: Telephony: IMS: Add logic for Pseudo DSDA support
         mVideoState = answerWithVideoState;
         mIncomingConnection = incomingConnection;
     }
@@ -101,7 +101,7 @@ public class AnswerAndReleaseHandler extends TelephonyConnection.TelephonyConnec
     public void checkAndAnswer(Collection<Connection> allConnections,
             Collection<Conference> allConferences) {
         for (Connection current : allConnections) {
-// QTI_END: 2020-07-29: Telephony: IMS: Add logic for Pseudo DSDA support
+// QTI_END: 2020-07-28: Telephony: IMS: Add logic for Pseudo DSDA support
 // QTI_BEGIN: 2020-11-11: Telephony: IMS: Fix exception while answering psuedo DSDA VoWIFI call
             // Connection list could contain other types like conference
             // participant connections which need to be ignored
@@ -109,23 +109,23 @@ public class AnswerAndReleaseHandler extends TelephonyConnection.TelephonyConnec
                 continue;
             }
 // QTI_END: 2020-11-11: Telephony: IMS: Fix exception while answering psuedo DSDA VoWIFI call
-// QTI_BEGIN: 2025-01-30: Telephony: Revert "IMS: Answer incoming call after disconnect dialing call completes"
+// QTI_BEGIN: 2025-01-29: Telephony: Revert "IMS: Answer incoming call after disconnect dialing call completes"
             int state = current.getState();
             if (state == Connection.STATE_RINGING ||
                     state == Connection.STATE_DISCONNECTED) {
                 continue;
-// QTI_END: 2025-01-30: Telephony: Revert "IMS: Answer incoming call after disconnect dialing call completes"
-// QTI_BEGIN: 2020-07-29: Telephony: IMS: Add logic for Pseudo DSDA support
+// QTI_END: 2025-01-29: Telephony: Revert "IMS: Answer incoming call after disconnect dialing call completes"
+// QTI_BEGIN: 2020-07-28: Telephony: IMS: Add logic for Pseudo DSDA support
             }
             boolean containsConnection = false;
             synchronized(mConnectionList) {
                 containsConnection = mConnectionList.contains(current);
             }
-// QTI_END: 2020-07-29: Telephony: IMS: Add logic for Pseudo DSDA support
-// QTI_BEGIN: 2025-01-30: Telephony: Revert "Compare connection(s) PhoneAccountHandle"
+// QTI_END: 2020-07-28: Telephony: IMS: Add logic for Pseudo DSDA support
+// QTI_BEGIN: 2025-01-29: Telephony: Revert "Compare connection(s) PhoneAccountHandle"
             if (!containsConnection) {
-// QTI_END: 2025-01-30: Telephony: Revert "Compare connection(s) PhoneAccountHandle"
-// QTI_BEGIN: 2020-07-29: Telephony: IMS: Add logic for Pseudo DSDA support
+// QTI_END: 2025-01-29: Telephony: Revert "Compare connection(s) PhoneAccountHandle"
+// QTI_BEGIN: 2020-07-28: Telephony: IMS: Add logic for Pseudo DSDA support
                 addConnection(current);
                 TelephonyConnection conn = (TelephonyConnection) current;
                 conn.addTelephonyConnectionListener(this);
@@ -133,27 +133,27 @@ public class AnswerAndReleaseHandler extends TelephonyConnection.TelephonyConnec
             }
         }
         for (Conference current : allConferences) {
-// QTI_END: 2020-07-29: Telephony: IMS: Add logic for Pseudo DSDA support
+// QTI_END: 2020-07-28: Telephony: IMS: Add logic for Pseudo DSDA support
 // QTI_BEGIN: 2020-11-11: Telephony: IMS: Fix exception while answering psuedo DSDA VoWIFI call
             if (!(current instanceof TelephonyConferenceBase)) {
                 continue;
             }
 // QTI_END: 2020-11-11: Telephony: IMS: Fix exception while answering psuedo DSDA VoWIFI call
-// QTI_BEGIN: 2025-01-30: Telephony: Revert "IMS: Answer incoming call after disconnect dialing call completes"
+// QTI_BEGIN: 2025-01-29: Telephony: Revert "IMS: Answer incoming call after disconnect dialing call completes"
             if (current.getState() == Connection.STATE_DISCONNECTED) {
                 continue;
-// QTI_END: 2025-01-30: Telephony: Revert "IMS: Answer incoming call after disconnect dialing call completes"
-// QTI_BEGIN: 2020-07-29: Telephony: IMS: Add logic for Pseudo DSDA support
+// QTI_END: 2025-01-29: Telephony: Revert "IMS: Answer incoming call after disconnect dialing call completes"
+// QTI_BEGIN: 2020-07-28: Telephony: IMS: Add logic for Pseudo DSDA support
             }
             boolean containsConference = false;
             synchronized(mConferenceList) {
                 containsConference = mConferenceList.contains(current);
             }
-// QTI_END: 2020-07-29: Telephony: IMS: Add logic for Pseudo DSDA support
-// QTI_BEGIN: 2025-01-30: Telephony: Revert "Compare connection(s) PhoneAccountHandle"
+// QTI_END: 2020-07-28: Telephony: IMS: Add logic for Pseudo DSDA support
+// QTI_BEGIN: 2025-01-29: Telephony: Revert "Compare connection(s) PhoneAccountHandle"
             if (!containsConference) {
-// QTI_END: 2025-01-30: Telephony: Revert "Compare connection(s) PhoneAccountHandle"
-// QTI_BEGIN: 2020-07-29: Telephony: IMS: Add logic for Pseudo DSDA support
+// QTI_END: 2025-01-29: Telephony: Revert "Compare connection(s) PhoneAccountHandle"
+// QTI_BEGIN: 2020-07-28: Telephony: IMS: Add logic for Pseudo DSDA support
                 addConference(current);
                 TelephonyConferenceBase conf = (TelephonyConferenceBase) current;
                 conf.addTelephonyConferenceListener(mTelephonyConferenceListener);
@@ -261,4 +261,4 @@ public class AnswerAndReleaseHandler extends TelephonyConnection.TelephonyConnec
     @Override
     public void onRingbackRequested(Connection c, boolean ringback) {}
 }
-// QTI_END: 2020-07-29: Telephony: IMS: Add logic for Pseudo DSDA support
+// QTI_END: 2020-07-28: Telephony: IMS: Add logic for Pseudo DSDA support

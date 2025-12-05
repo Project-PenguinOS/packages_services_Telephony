@@ -2,9 +2,9 @@
 /**
 * Changes from Qualcomm Innovation Center, Inc. are provided under the following license:
 // QTI_END: 2024-06-17: Telephony: Unregister to ExtPhoneCallback
-// QTI_BEGIN: 2025-01-11: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
+// QTI_BEGIN: 2025-01-10: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
 * Copyright (c) 2024-2025 Qualcomm Innovation Center, Inc. All rights reserved.
-// QTI_END: 2025-01-11: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
+// QTI_END: 2025-01-10: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
 // QTI_BEGIN: 2024-06-17: Telephony: Unregister to ExtPhoneCallback
 * SPDX-License-Identifier: BSD-3-Clause-Clear
 */
@@ -31,22 +31,22 @@ import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PersistableBundle;
-// QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer
+// QTI_BEGIN: 2018-03-26: Telephony: IMS: Call forward unconditional timer
 import android.os.SystemProperties;
-// QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer
+// QTI_END: 2018-03-26: Telephony: IMS: Call forward unconditional timer
 import android.telephony.CarrierConfigManager;
-// QTI_BEGIN: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_BEGIN: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
 import android.telephony.ims.ImsCallForwardInfo;
 import android.telephony.ims.ImsException;
-// QTI_END: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_END: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
 // QTI_BEGIN: 2019-04-19: Telephony: IMS: Add error code support for CFUT failure
 import android.telephony.ims.ImsReasonInfo;
 // QTI_END: 2019-04-19: Telephony: IMS: Add error code support for CFUT failure
 import android.telephony.TelephonyManager;
-// QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer
+// QTI_BEGIN: 2018-03-26: Telephony: IMS: Call forward unconditional timer
 import android.telephony.PhoneNumberUtils;
 import android.telephony.ServiceState;
-// QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer
+// QTI_END: 2018-03-26: Telephony: IMS: Call forward unconditional timer
 import android.text.BidiFormatter;
 import android.text.SpannableString;
 import android.text.TextDirectionHeuristics;
@@ -58,17 +58,17 @@ import android.view.View;
 import android.widget.Toast;
 // QTI_END: 2019-05-31: Telephony: IMS: Pop-up message for user after set video CF if UT is unavailable
 
-// QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer
+// QTI_BEGIN: 2018-03-26: Telephony: IMS: Call forward unconditional timer
 import org.codeaurora.ims.QtiImsException;
 import org.codeaurora.ims.QtiImsExtListenerBaseImpl;
-// QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer
+// QTI_END: 2018-03-26: Telephony: IMS: Call forward unconditional timer
 // QTI_BEGIN: 2019-02-01: Telephony: IMS: decouple ims-ext-common from boot jars
 import org.codeaurora.ims.QtiImsExtConnector;
 // QTI_END: 2019-02-01: Telephony: IMS: decouple ims-ext-common from boot jars
-// QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer
+// QTI_BEGIN: 2018-03-26: Telephony: IMS: Call forward unconditional timer
 import org.codeaurora.ims.QtiImsExtManager;
 import org.codeaurora.ims.utils.QtiImsExtUtils;
-// QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer
+// QTI_END: 2018-03-26: Telephony: IMS: Call forward unconditional timer
 // QTI_BEGIN: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."
 import org.codeaurora.ims.QtiCallConstants;
 // QTI_END: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."
@@ -82,30 +82,30 @@ import com.android.internal.telephony.gsm.SsData;
 // QTI_END: 2023-03-16: Telephony: Enable telephony FDN check for side car SS requests.
 import com.android.internal.telephony.Phone;
 
-// QTI_BEGIN: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_BEGIN: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
 import com.qti.extphone.Client;
-// QTI_END: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_END: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
 // QTI_BEGIN: 2023-01-09: Telephony: FR84002: Re-design ExtTelephonyManager interface
 import com.qti.extphone.ExtPhoneCallbackListener;
 // QTI_END: 2023-01-09: Telephony: FR84002: Re-design ExtTelephonyManager interface
-// QTI_BEGIN: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_BEGIN: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
 import com.qti.extphone.ExtTelephonyManager;
 import com.qti.extphone.IExtPhoneCallback;
 import com.qti.extphone.QtiCallForwardInfo;
 import com.qti.extphone.Status;
 
-// QTI_END: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
-// QTI_BEGIN: 2025-01-11: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
+// QTI_END: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_BEGIN: 2025-01-10: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
 import java.util.concurrent.Executor;
-// QTI_END: 2025-01-11: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
+// QTI_END: 2025-01-10: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
 import java.util.HashMap;
 import java.util.Locale;
 
 public class CallForwardEditPreference extends EditPhoneNumberPreference {
     private static final String LOG_TAG = "CallForwardEditPreference";
-// QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer
+// QTI_BEGIN: 2018-03-26: Telephony: IMS: Call forward unconditional timer
     private static final boolean DBG = (PhoneGlobals.DBG_LEVEL >= 2);
-// QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer
+// QTI_END: 2018-03-26: Telephony: IMS: Call forward unconditional timer
 
     private static final String SRC_TAGS[]       = {"{0}"};
 
@@ -138,13 +138,13 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
     private HashMap<String, String> mCfInfo;
     private long mDelayMillisAfterUssdSet = 1000;
 
-// QTI_BEGIN: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_BEGIN: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
     private boolean mExpectMore;
-// QTI_END: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_END: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
 // QTI_BEGIN: 2024-04-23: Telephony: IMS-UT: Save/restore InstanceState during language changed for CFUT
     private boolean mIsCfutEnabled;
 // QTI_END: 2024-04-23: Telephony: IMS-UT: Save/restore InstanceState during language changed for CFUT
-// QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer
+// QTI_BEGIN: 2018-03-26: Telephony: IMS: Call forward unconditional timer
     private boolean mAllowSetCallFwding = false;
     /*Variables which holds CFUT response data*/
     private int mStartHour;
@@ -153,35 +153,35 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
     private int mEndMinute;
     private int mStatus;
     private String mNumber;
-// QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer
+// QTI_END: 2018-03-26: Telephony: IMS: Call forward unconditional timer
 // QTI_BEGIN: 2019-02-01: Telephony: IMS: decouple ims-ext-common from boot jars
     private QtiImsExtConnector mQtiImsExtConnector;
 // QTI_END: 2019-02-01: Telephony: IMS: decouple ims-ext-common from boot jars
-// QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer
+// QTI_BEGIN: 2018-03-26: Telephony: IMS: Call forward unconditional timer
     private QtiImsExtManager mQtiImsExtManager;
-// QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer
-// QTI_BEGIN: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_END: 2018-03-26: Telephony: IMS: Call forward unconditional timer
+// QTI_BEGIN: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
     private ExtTelephonyManager mExtTelephonyManager;
     private Client mClient;
-// QTI_END: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
-// QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer
+// QTI_END: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_BEGIN: 2018-03-26: Telephony: IMS: Call forward unconditional timer
     private Context mContext;
-// QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer
-// QTI_BEGIN: 2025-01-11: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
+// QTI_END: 2018-03-26: Telephony: IMS: Call forward unconditional timer
+// QTI_BEGIN: 2025-01-10: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
     private Executor mExecutor;
     private QtiImsExtListenerBaseImpl mImsInterfaceListener;
-// QTI_END: 2025-01-11: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
+// QTI_END: 2025-01-10: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
 
     public CallForwardEditPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
 
         mSummaryOnTemplate = this.getSummaryOn();
-// QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer
+// QTI_BEGIN: 2018-03-26: Telephony: IMS: Call forward unconditional timer
         mContext = context;
-// QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer
-// QTI_BEGIN: 2025-01-11: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
+// QTI_END: 2018-03-26: Telephony: IMS: Call forward unconditional timer
+// QTI_BEGIN: 2025-01-10: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
         mExecutor = mContext.getMainExecutor();
-// QTI_END: 2025-01-11: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
+// QTI_END: 2025-01-10: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
         TypedArray a = context.obtainStyledAttributes(attrs,
                 R.styleable.CallForwardEditPreference, 0, R.style.EditPhoneNumberPreference);
         reason = a.getInt(R.styleable.CallForwardEditPreference_reason,
@@ -191,7 +191,7 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
 // QTI_BEGIN: 2024-06-17: Telephony: Unregister to ExtPhoneCallback
         mExtTelephonyManager = ExtTelephonyManager.getInstance(getContext());
 // QTI_END: 2024-06-17: Telephony: Unregister to ExtPhoneCallback
-// QTI_BEGIN: 2025-01-11: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
+// QTI_BEGIN: 2025-01-10: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
         mImsInterfaceListener = new QtiImsExtListenerBaseImpl(mExecutor) {
             @Override
             public void onSetCallForwardUncondTimer(int phoneId, int status) {
@@ -222,8 +222,12 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
                 mNumber = number;
 
                 mHandler.sendMessage(mHandler.obtainMessage(mHandler.MESSAGE_GET_CFUT));
+// QTI_END: 2025-01-10: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
 
+// QTI_BEGIN: 2025-08-26: Telephony: Fix call forwarding icon showing issue am: 4cdf9e8923 am: 4cdf9e8923
                 updateCallForwardingPreferenceForCfut(mStatus == 1, number);
+// QTI_END: 2025-08-26: Telephony: Fix call forwarding icon showing issue am: 4cdf9e8923 am: 4cdf9e8923
+// QTI_BEGIN: 2025-01-10: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
             }
 
             @Override
@@ -296,7 +300,7 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
 
             }
         };
-// QTI_END: 2025-01-11: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
+// QTI_END: 2025-01-10: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
 
         Log.d(LOG_TAG, "mServiceClass=" + mServiceClass + ", reason=" + reason);
     }
@@ -338,9 +342,9 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
                             Log.i(LOG_TAG, "QtiImsExtConnector onConnectionAvailable");
                             mQtiImsExtManager = qtiImsExtManager;
 // QTI_END: 2019-02-01: Telephony: IMS: decouple ims-ext-common from boot jars
-// QTI_BEGIN: 2021-12-16: Telephony: Query call forward status properly
+// QTI_BEGIN: 2021-12-15: Telephony: Query call forward status properly
                             queryImsCallForwardStatus();
-// QTI_END: 2021-12-16: Telephony: Query call forward status properly
+// QTI_END: 2021-12-15: Telephony: Query call forward status properly
 // QTI_BEGIN: 2019-02-01: Telephony: IMS: decouple ims-ext-common from boot jars
                         }
                         @Override
@@ -397,13 +401,13 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
     }
 
 // QTI_END: 2019-05-31: Telephony: IMS: Pop-up message for user after set video CF if UT is unavailable
-// QTI_BEGIN: 2021-06-23: Telephony: IMS: Move deInit CallForwardEditPreference to onDestroy.
+// QTI_BEGIN: 2021-06-22: Telephony: IMS: Move deInit CallForwardEditPreference to onDestroy.
     //Used to check if CFUT(CFU with timer) is supported
-// QTI_END: 2021-06-23: Telephony: IMS: Move deInit CallForwardEditPreference to onDestroy.
+// QTI_END: 2021-06-22: Telephony: IMS: Move deInit CallForwardEditPreference to onDestroy.
 // QTI_BEGIN: 2024-04-23: Telephony: IMS-UT: Save/restore InstanceState during language changed for CFUT
     private boolean shouldCfutEnabled() {
 // QTI_END: 2024-04-23: Telephony: IMS-UT: Save/restore InstanceState during language changed for CFUT
-// QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer
+// QTI_BEGIN: 2018-03-26: Telephony: IMS: Call forward unconditional timer
         //Timer is enabled only when UT services are enabled
         CarrierConfigManager cfgManager = (CarrierConfigManager)
                 mContext.getSystemService(Context.CARRIER_CONFIG_SERVICE);
@@ -414,7 +418,7 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
                 && mPhone.isUtEnabled();
     }
 
-// QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer
+// QTI_END: 2018-03-26: Telephony: IMS: Call forward unconditional timer
 // QTI_BEGIN: 2024-04-23: Telephony: IMS-UT: Save/restore InstanceState during language changed for CFUT
     int getStartHour() {
         return mStartHour;
@@ -470,12 +474,12 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
         updateSummaryText();
     }
 
-// QTI_BEGIN: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_BEGIN: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
     void setExpectMore(boolean expectMore) {
         mExpectMore = expectMore;
     }
 
-// QTI_END: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_END: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
     @Override
     protected void onBindDialogView(View view) {
         // default the button clicked to be the cancel button.
@@ -542,21 +546,21 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
             final String number = getPhoneNumber();
 
             Log.d(LOG_TAG, "callForwardInfo=" + callForwardInfo);
-// QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer
+// QTI_BEGIN: 2018-03-26: Telephony: IMS: Call forward unconditional timer
             final int editStartHour = isAllDayChecked()? 0 : getStartTimeHour();
             final int editStartMinute = isAllDayChecked()? 0 : getStartTimeMinute();
             final int editEndHour = isAllDayChecked()? 0 : getEndTimeHour();
             final int editEndMinute = isAllDayChecked()? 0 : getEndTimeMinute();
-// QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer
+// QTI_END: 2018-03-26: Telephony: IMS: Call forward unconditional timer
 
-// QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer
+// QTI_BEGIN: 2018-03-26: Telephony: IMS: Call forward unconditional timer
             boolean isCFSettingChanged = true;
-// QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer
+// QTI_END: 2018-03-26: Telephony: IMS: Call forward unconditional timer
             if (action == CommandsInterface.CF_ACTION_REGISTRATION
                     && callForwardInfo != null
                     && callForwardInfo.status == 1
                     && number.equals(callForwardInfo.number)) {
-// QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer
+// QTI_BEGIN: 2018-03-26: Telephony: IMS: Call forward unconditional timer
                 if (reason == CommandsInterface.CF_REASON_UNCONDITIONAL){
                     // need to check if the time period for CFUT is changed
                     if (isAllDayChecked()){
@@ -575,7 +579,7 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
             }
             if (DBG) Log.d(LOG_TAG, "isCFSettingChanged = " + isCFSettingChanged);
             if (isCFSettingChanged) {
-// QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer
+// QTI_END: 2018-03-26: Telephony: IMS: Call forward unconditional timer
                 // set to network
                 Log.d(LOG_TAG, "reason=" + reason + ", action=" + action
                         + ", number=" + number);
@@ -586,13 +590,13 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
 
                 // the interface of Phone.setCallForwardingOption has error:
                 // should be action, reason...
-// QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer
+// QTI_BEGIN: 2018-03-26: Telephony: IMS: Call forward unconditional timer
                 if (reason == CommandsInterface.CF_REASON_UNCONDITIONAL
-// QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer
+// QTI_END: 2018-03-26: Telephony: IMS: Call forward unconditional timer
 // QTI_BEGIN: 2024-04-23: Telephony: IMS-UT: Save/restore InstanceState during language changed for CFUT
                         && !isAllDayChecked() && mIsCfutEnabled
 // QTI_END: 2024-04-23: Telephony: IMS-UT: Save/restore InstanceState during language changed for CFUT
-// QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer
+// QTI_BEGIN: 2018-03-26: Telephony: IMS: Call forward unconditional timer
                         && (action != CommandsInterface.CF_ACTION_DISABLE)) {
 
                     Log.d(LOG_TAG, "setCallForwardingUncondTimerOption,"
@@ -610,15 +614,15 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
                                 reason,
                                 mServiceClass,
                                 number,
-// QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer
-// QTI_BEGIN: 2025-01-11: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
+// QTI_END: 2018-03-26: Telephony: IMS: Call forward unconditional timer
+// QTI_BEGIN: 2025-01-10: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
                                 mImsInterfaceListener);
-// QTI_END: 2025-01-11: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
-// QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer
+// QTI_END: 2025-01-10: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
+// QTI_BEGIN: 2018-03-26: Telephony: IMS: Call forward unconditional timer
                     } catch (QtiImsException e) {
                         Log.d(LOG_TAG, "setCallForwardUncondTimer exception!" +e);
                     }
-// QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer
+// QTI_END: 2018-03-26: Telephony: IMS: Call forward unconditional timer
 // QTI_BEGIN: 2018-08-01: Telephony: IMS: Dismiss dialog for BUSY_SAVING_DIALOG after set CFUT failed
                     mAllowSetCallFwding = true;
 // QTI_END: 2018-08-01: Telephony: IMS: Dismiss dialog for BUSY_SAVING_DIALOG after set CFUT failed
@@ -627,9 +631,9 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
                     // the interface of Phone.setCallForwardingOption has error:
                     // should be action, reason...
 // QTI_END: 2019-04-12: Telephony: Fix conflict after AOSP update
-// QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer
+// QTI_BEGIN: 2018-03-26: Telephony: IMS: Call forward unconditional timer
                     mPhone.setCallForwardingOption(action,
-// QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer
+// QTI_END: 2018-03-26: Telephony: IMS: Call forward unconditional timer
                             reason,
                             number,
                             mServiceClass,
@@ -646,9 +650,9 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
                     }
                     mHandler.sendMessage(mHandler.obtainMessage(mHandler.MESSAGE_SET_CF_USSD,
                             action, MyHandler.MESSAGE_SET_CF));
-// QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer
+// QTI_BEGIN: 2018-03-26: Telephony: IMS: Call forward unconditional timer
                 }
-// QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer
+// QTI_END: 2018-03-26: Telephony: IMS: Call forward unconditional timer
                 if (mTcpListener != null) {
                     mTcpListener.onStarted(this, false);
                 }
@@ -656,7 +660,7 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
         }
     }
 
-// QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer
+// QTI_BEGIN: 2018-03-26: Telephony: IMS: Call forward unconditional timer
     void handleCallForwardTimerResult() {
         setToggled(mStatus == 1);
         setPhoneNumber(mNumber);
@@ -668,7 +672,7 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
         }
     }
 
-// QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer
+// QTI_END: 2018-03-26: Telephony: IMS: Call forward unconditional timer
     void handleCallForwardResult(CallForwardInfo cf) {
         callForwardInfo = cf;
         Log.d(LOG_TAG, "handleGetCFResponse done, callForwardInfo=" + callForwardInfo);
@@ -683,7 +687,7 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
             Log.i(LOG_TAG, "handleGetCFResponse: Overridding CF number");
         }
 
-// QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer
+// QTI_BEGIN: 2018-03-26: Telephony: IMS: Call forward unconditional timer
         if (DBG) Log.d(LOG_TAG, "handleGetCFResponse done, callForwardInfo=" + callForwardInfo);
         if (reason == CommandsInterface.CF_REASON_UNCONDITIONAL) {
             mStartHour = 0;
@@ -691,7 +695,7 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
             mEndHour = 0;
             mEndMinute = 0;
         }
-// QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer
+// QTI_END: 2018-03-26: Telephony: IMS: Call forward unconditional timer
         setUnknownStatus(callForwardInfo.status == CommandsInterface.SS_STATUS_UNKNOWN);
         setToggled(callForwardInfo.status == 1);
         boolean displayVoicemailNumber = false;
@@ -726,7 +730,7 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
             mIsCfutEnabled = shouldCfutEnabled();
             Log.d(LOG_TAG, "shouldCfutEnabled=" + mIsCfutEnabled);
 // QTI_END: 2024-04-23: Telephony: IMS-UT: Save/restore InstanceState during language changed for CFUT
-// QTI_BEGIN: 2021-12-16: Telephony: Query call forward status properly
+// QTI_BEGIN: 2021-12-15: Telephony: Query call forward status properly
             if (mPhone != null &&  mPhone.isUtEnabled()) {
                 if (mQtiImsExtConnector == null) {
                     createQtiImsExtConnector(mContext);
@@ -735,11 +739,11 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
                 } else {
                     queryImsCallForwardStatus();
                 }
-// QTI_END: 2021-12-16: Telephony: Query call forward status properly
+// QTI_END: 2021-12-15: Telephony: Query call forward status properly
 // QTI_BEGIN: 2019-03-13: Telephony: Avoid to send 2 PUT requests to network when SS service is activated from UI
             } else {
 // QTI_END: 2019-03-13: Telephony: Avoid to send 2 PUT requests to network when SS service is activated from UI
-// QTI_BEGIN: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_BEGIN: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
                 if (mPhone.getPhoneType() == TelephonyManager.PHONE_TYPE_GSM &&
                         PhoneUtils.isBacktoBackSSFeatureSupported()) {
                     queryCallForwardStatus();
@@ -750,7 +754,7 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
                             CommandsInterface.CF_ACTION_DISABLE,
                             MyHandler.MESSAGE_GET_CF, null));
                 }
-// QTI_END: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_END: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
 // QTI_BEGIN: 2019-03-13: Telephony: Avoid to send 2 PUT requests to network when SS service is activated from UI
             }
 // QTI_END: 2019-03-13: Telephony: Avoid to send 2 PUT requests to network when SS service is activated from UI
@@ -775,9 +779,9 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
     }
 
 // QTI_END: 2023-03-16: Telephony: Enable telephony FDN check for side car SS requests.
-// QTI_BEGIN: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_BEGIN: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
     private void queryCallForwardStatus() {
-// QTI_END: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_END: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
 // QTI_BEGIN: 2023-03-16: Telephony: Enable telephony FDN check for side car SS requests.
         if (isCfQueryBlockedByFdn()) {
             Log.d(LOG_TAG, "queryCallForwardStatus blocked by FDN check");
@@ -786,20 +790,20 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
         }
 
 // QTI_END: 2023-03-16: Telephony: Enable telephony FDN check for side car SS requests.
-// QTI_BEGIN: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_BEGIN: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
         if (!mExtTelephonyManager.isServiceConnected()) {
             sendErrorResponse();
             return;
         }
 
         try {
-// QTI_END: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_END: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
 // QTI_BEGIN: 2023-01-09: Telephony: FR84002: Re-design ExtTelephonyManager interface
             int[] events = new int[] {};
             mClient = mExtTelephonyManager.registerCallbackWithEvents(
                     mContext.getPackageName(), mExtPhoneCallbackListener, events);
 // QTI_END: 2023-01-09: Telephony: FR84002: Re-design ExtTelephonyManager interface
-// QTI_BEGIN: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_BEGIN: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
             mExtTelephonyManager.queryCallForwardStatus(mPhone.getPhoneId(), reason,
                     mServiceClass, null /*number*/, mExpectMore,
                     mClient);
@@ -810,30 +814,30 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
     }
 
     private void sendErrorResponse() {
-// QTI_END: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_END: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
 // QTI_BEGIN: 2023-03-16: Telephony: Enable telephony FDN check for side car SS requests.
         sendErrorResponse(CommandException.Error.GENERIC_FAILURE);
     }
 
     private void sendErrorResponse(CommandException.Error err) {
 // QTI_END: 2023-03-16: Telephony: Enable telephony FDN check for side car SS requests.
-// QTI_BEGIN: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_BEGIN: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
         Message msg = mHandler.obtainMessage(MyHandler.MESSAGE_GET_CF,
                 // unused in this case
                 CommandsInterface.CF_ACTION_DISABLE, MyHandler.MESSAGE_GET_CF, null);
-// QTI_END: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_END: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
 // QTI_BEGIN: 2023-03-16: Telephony: Enable telephony FDN check for side car SS requests.
         AsyncResult.forMessage(msg, null, new CommandException(err));
 // QTI_END: 2023-03-16: Telephony: Enable telephony FDN check for side car SS requests.
-// QTI_BEGIN: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_BEGIN: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
         msg.sendToTarget();
     }
 
-// QTI_END: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_END: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
 // QTI_BEGIN: 2023-01-09: Telephony: FR84002: Re-design ExtTelephonyManager interface
     private ExtPhoneCallbackListener mExtPhoneCallbackListener = new ExtPhoneCallbackListener() {
 // QTI_END: 2023-01-09: Telephony: FR84002: Re-design ExtTelephonyManager interface
-// QTI_BEGIN: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_BEGIN: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
         @Override
         public void queryCallForwardStatusResponse(Status status, QtiCallForwardInfo[] infos) {
             Message msg = mHandler.obtainMessage(MyHandler.MESSAGE_GET_CF,
@@ -849,12 +853,12 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
                     cfInfo[i].toa = infos[i].toa;
                     cfInfo[i].number = infos[i].number;
                     cfInfo[i].timeSeconds = infos[i].timeSeconds;
-// QTI_END: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_END: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
 // QTI_BEGIN: 2022-01-17: Telephony: Update call forward preference
 
                     updateCallForwardingPreference(cfInfo[i]);
 // QTI_END: 2022-01-17: Telephony: Update call forward preference
-// QTI_BEGIN: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_BEGIN: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
                 }
                 AsyncResult.forMessage(msg, cfInfo, null);
             } else {
@@ -866,7 +870,7 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
     };
 
     private void queryImsCallForwardStatus() {
-// QTI_END: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_END: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
 // QTI_BEGIN: 2023-03-16: Telephony: Enable telephony FDN check for side car SS requests.
         if (isCfQueryBlockedByFdn()) {
             Log.d(LOG_TAG, "queryImsCallForwardStatus blocked by FDN check");
@@ -874,57 +878,57 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
             return;
         }
 // QTI_END: 2023-03-16: Telephony: Enable telephony FDN check for side car SS requests.
-// QTI_BEGIN: 2021-12-16: Telephony: Query call forward status properly
+// QTI_BEGIN: 2021-12-15: Telephony: Query call forward status properly
         if (mQtiImsExtManager != null) {
             try {
                 if (reason == CommandsInterface.CF_REASON_UNCONDITIONAL &&
-// QTI_END: 2021-12-16: Telephony: Query call forward status properly
+// QTI_END: 2021-12-15: Telephony: Query call forward status properly
 // QTI_BEGIN: 2024-04-23: Telephony: IMS-UT: Save/restore InstanceState during language changed for CFUT
                         mIsCfutEnabled) {
 // QTI_END: 2024-04-23: Telephony: IMS-UT: Save/restore InstanceState during language changed for CFUT
-// QTI_BEGIN: 2021-12-16: Telephony: Query call forward status properly
+// QTI_BEGIN: 2021-12-15: Telephony: Query call forward status properly
                     setTimeSettingVisibility(true);
                     mQtiImsExtManager.getCallForwardUncondTimer(mPhone.getPhoneId(),
-// QTI_END: 2021-12-16: Telephony: Query call forward status properly
-// QTI_BEGIN: 2025-01-11: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
+// QTI_END: 2021-12-15: Telephony: Query call forward status properly
+// QTI_BEGIN: 2025-01-10: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
                             reason, mServiceClass, mImsInterfaceListener);
-// QTI_END: 2025-01-11: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
-// QTI_BEGIN: 2021-12-16: Telephony: Query call forward status properly
+// QTI_END: 2025-01-10: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
+// QTI_BEGIN: 2021-12-15: Telephony: Query call forward status properly
                 } else {
                     mQtiImsExtManager.queryCallForwardStatus(mPhone.getPhoneId(),
-// QTI_END: 2021-12-16: Telephony: Query call forward status properly
-// QTI_BEGIN: 2025-01-11: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
+// QTI_END: 2021-12-15: Telephony: Query call forward status properly
+// QTI_BEGIN: 2025-01-10: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
                             reason, mServiceClass, mExpectMore, mImsInterfaceListener);
-// QTI_END: 2025-01-11: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
-// QTI_BEGIN: 2021-12-16: Telephony: Query call forward status properly
+// QTI_END: 2025-01-10: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
+// QTI_BEGIN: 2021-12-15: Telephony: Query call forward status properly
                 }
             } catch (QtiImsException e){
                 Log.d(LOG_TAG, "queryCallForwardStatus failed. " +
                         "Exception = " + e);
                 sendErrorResponse();
             }
-// QTI_END: 2021-12-16: Telephony: Query call forward status properly
-// QTI_BEGIN: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_END: 2021-12-15: Telephony: Query call forward status properly
+// QTI_BEGIN: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
         }
     }
 
-// QTI_END: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_END: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
     private void updateSummaryText() {
-// QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer
+// QTI_BEGIN: 2018-03-26: Telephony: IMS: Call forward unconditional timer
         if (DBG) Log.d(LOG_TAG, "updateSummaryText, complete fetching for reason " + reason);
-// QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer
+// QTI_END: 2018-03-26: Telephony: IMS: Call forward unconditional timer
         if (isToggled()) {
-// QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer
+// QTI_BEGIN: 2018-03-26: Telephony: IMS: Call forward unconditional timer
             String number = getRawPhoneNumber();
             if (reason == CommandsInterface.CF_REASON_UNCONDITIONAL
-// QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer
+// QTI_END: 2018-03-26: Telephony: IMS: Call forward unconditional timer
 // QTI_BEGIN: 2024-04-23: Telephony: IMS-UT: Save/restore InstanceState during language changed for CFUT
                     && mIsCfutEnabled && isTimerValid()){
 // QTI_END: 2024-04-23: Telephony: IMS-UT: Save/restore InstanceState during language changed for CFUT
-// QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer
+// QTI_BEGIN: 2018-03-26: Telephony: IMS: Call forward unconditional timer
                 number = getRawPhoneNumberWithTime();
             }
-// QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer
+// QTI_END: 2018-03-26: Telephony: IMS: Call forward unconditional timer
             if (number != null && number.length() > 0) {
                 // Wrap the number to preserve presentation in RTL languages.
                 String wrappedNumber = BidiFormatter.getInstance().unicodeWrap(
@@ -960,15 +964,17 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
         }
     }
 
+// QTI_END: 2022-01-17: Telephony: Update call forward preference
+// QTI_BEGIN: 2025-08-26: Telephony: Fix call forwarding icon showing issue am: 4cdf9e8923 am: 4cdf9e8923
     private void updateCallForwardingPreferenceForCfut(boolean enable, String number) {
         // The expected behavior by design is
         // 1. if CFUT is enabled (isTimerValid == true), shall not show CF icon.
         // 2. if CFUT is not enabled ((isTimerValid == false)), CF icon showing depends on
         // the actual CF status queried from network.
         mPhone.setVoiceCallForwardingFlag(1, isTimerValid() ? false : enable, number);
+// QTI_END: 2025-08-26: Telephony: Fix call forwarding icon showing issue am: 4cdf9e8923 am: 4cdf9e8923
     }
 
-// QTI_END: 2022-01-17: Telephony: Update call forward preference
     /**
      * @return The ISO 3166-1 two letters country code of the country the user is in based on the
      *      network location.
@@ -1008,7 +1014,7 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
     }
 
 // QTI_END: 2020-07-13: Telephony: IMS: Use handler to update UI thread when UT failed
-// QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer
+// QTI_BEGIN: 2018-03-26: Telephony: IMS: Call forward unconditional timer
     private void handleGetCFTimerResponse() {
         if (mAllowSetCallFwding) {
             mTcpListener.onFinished(CallForwardEditPreference.this, false);
@@ -1025,7 +1031,7 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
         return mStartHour != 0 || mStartMinute != 0 || mEndHour != 0 || mEndMinute != 0;
     }
 
-// QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer
+// QTI_END: 2018-03-26: Telephony: IMS: Call forward unconditional timer
     // Message protocol:
     // what: get vs. set
     // arg1: action -- register vs. disable
@@ -1124,10 +1130,8 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
             if (ar.exception != null) {
                 Log.d(LOG_TAG, "handleGetCFResponse: ar.exception=" + ar.exception);
                 if (ar.exception instanceof CommandException) {
-// QTI_BEGIN: 2024-10-15: RIL: Revert "IMS: Auto Retry CFU after CSFB"
                     mTcpListener.onException(CallForwardEditPreference.this,
                             (CommandException) ar.exception);
-// QTI_END: 2024-10-15: RIL: Revert "IMS: Auto Retry CFU after CSFB"
 // QTI_BEGIN: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."
                 } else if (ar.exception instanceof QtiImsException) {
                     mTcpListener.onError(CallForwardEditPreference.this,

@@ -27,10 +27,8 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 // QTI_END: 2018-02-26: Telephony: * Telephony: SIM De-personalization
 import android.telephony.CarrierConfigManager;
-// QTI_BEGIN: 2020-07-09: Telephony: Displaying SIM info on de-perso Lock UI
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
-// QTI_END: 2020-07-09: Telephony: Displaying SIM info on de-perso Lock UI
 // QTI_BEGIN: 2018-03-16: Telephony: P PPR1.180311.001 merge a927ba8f56c95ca3e2f3dc9ca700ed1542737bc6 - conflicts
 import android.telephony.TelephonyManager;
 // QTI_END: 2018-03-16: Telephony: P PPR1.180311.001 merge a927ba8f56c95ca3e2f3dc9ca700ed1542737bc6 - conflicts
@@ -48,9 +46,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.internal.telephony.Phone;
-// QTI_BEGIN: 2020-05-05: Telephony: 1.5 HAL version check support for sim-deperso
+// QTI_BEGIN: 2020-05-04: Telephony: 1.5 HAL version check support for sim-deperso
 import com.android.internal.telephony.RIL;
-// QTI_END: 2020-05-05: Telephony: 1.5 HAL version check support for sim-deperso
+// QTI_END: 2020-05-04: Telephony: 1.5 HAL version check support for sim-deperso
 // QTI_BEGIN: 2018-02-26: Telephony: * Telephony: SIM De-personalization
 import com.android.internal.telephony.uicc.IccCardApplicationStatus.PersoSubState;
 // QTI_END: 2018-02-26: Telephony: * Telephony: SIM De-personalization
@@ -72,9 +70,7 @@ public class IccNetworkDepersonalizationPanel extends IccPanel {
      * Tracks whether there is an instance of the network depersonalization dialog showing or not.
      * Ensures only a single instance of the dialog is visible.
      */
-// QTI_BEGIN: 2020-04-01: Telephony: Add SIM Depersonalisation interface
     private static boolean [] sShowingDialog =
-// QTI_END: 2020-04-01: Telephony: Add SIM Depersonalisation interface
             new boolean[TelephonyManager.getDefault().getSupportedModemCount()];
 
     //debug constants
@@ -106,9 +102,7 @@ public class IccNetworkDepersonalizationPanel extends IccPanel {
     private TextView     mPersoSubtypeText;
     private PersoSubState mPersoSubState;
 // QTI_END: 2018-02-26: Telephony: * Telephony: SIM De-personalization
-// QTI_BEGIN: 2020-07-09: Telephony: Displaying SIM info on de-perso Lock UI
     private TextView     mPhoneIdText;
-// QTI_END: 2020-07-09: Telephony: Displaying SIM info on de-perso Lock UI
     private TextView     mStatusText;
 
     private Button       mUnlockButton;
@@ -129,23 +123,17 @@ public class IccNetworkDepersonalizationPanel extends IccPanel {
 // QTI_BEGIN: 2018-03-16: Telephony: P PPR1.180311.001 merge a927ba8f56c95ca3e2f3dc9ca700ed1542737bc6 - conflicts
     public static void showDialog(Phone phone, int subType) {
 // QTI_END: 2018-03-16: Telephony: P PPR1.180311.001 merge a927ba8f56c95ca3e2f3dc9ca700ed1542737bc6 - conflicts
-// QTI_BEGIN: 2020-04-01: Telephony: Add SIM Depersonalisation interface
         int phoneId = phone == null ? 0: phone.getPhoneId();
-// QTI_END: 2020-04-01: Telephony: Add SIM Depersonalisation interface
         if (phoneId >= sShowingDialog.length) {
             Log.e(TAG, "[IccNetworkDepersonalizationPanel] showDialog; invalid phoneId" + phoneId);
             return;
         }
-// QTI_BEGIN: 2020-04-01: Telephony: Add SIM Depersonalisation interface
         if (sShowingDialog[phoneId]) {
-// QTI_END: 2020-04-01: Telephony: Add SIM Depersonalisation interface
             Log.i(TAG, "[IccNetworkDepersonalizationPanel] - showDialog; skipped already shown.");
             return;
         }
         Log.i(TAG, "[IccNetworkDepersonalizationPanel] - showDialog; showing dialog.");
-// QTI_BEGIN: 2020-04-01: Telephony: Add SIM Depersonalisation interface
         sShowingDialog[phoneId] = true;
-// QTI_END: 2020-04-01: Telephony: Add SIM Depersonalisation interface
 // QTI_BEGIN: 2018-03-16: Telephony: P PPR1.180311.001 merge a927ba8f56c95ca3e2f3dc9ca700ed1542737bc6 - conflicts
         sNdpPanel[phoneId] = new IccNetworkDepersonalizationPanel(PhoneGlobals.getInstance(),
                 phone, subType);
@@ -162,9 +150,7 @@ public class IccNetworkDepersonalizationPanel extends IccPanel {
             Log.e(TAG, "[IccNetworkDepersonalizationPanel] - dismiss; invalid phoneId " + phoneId);
             return;
         }
-// QTI_BEGIN: 2020-04-01: Telephony: Add SIM Depersonalisation interface
         if (sNdpPanel[phoneId] != null && sShowingDialog[phoneId]) {
-// QTI_END: 2020-04-01: Telephony: Add SIM Depersonalisation interface
 // QTI_BEGIN: 2018-03-16: Telephony: P PPR1.180311.001 merge a927ba8f56c95ca3e2f3dc9ca700ed1542737bc6 - conflicts
             sNdpPanel[phoneId].dismiss();
 // QTI_END: 2018-03-16: Telephony: P PPR1.180311.001 merge a927ba8f56c95ca3e2f3dc9ca700ed1542737bc6 - conflicts
@@ -219,7 +205,7 @@ public class IccNetworkDepersonalizationPanel extends IccPanel {
                     //DepersoResult received ERROR/SUCCESS from vendor side
                     if (msg.arg1 == ERROR) {
 // QTI_END: 2020-05-29: Telephony: Add HAL version check in Handler
-// QTI_BEGIN: 2020-05-05: Telephony: 1.5 HAL version check support for sim-deperso
+// QTI_BEGIN: 2020-05-04: Telephony: 1.5 HAL version check support for sim-deperso
                         if (DBG) log("network depersonalization request failure.");
                         displayStatus(statusType.ERROR.name());
                         postDelayed(new Runnable() {
@@ -238,7 +224,7 @@ public class IccNetworkDepersonalizationPanel extends IccPanel {
                             }
                         }, 3000);
                     }
-// QTI_END: 2020-05-05: Telephony: 1.5 HAL version check support for sim-deperso
+// QTI_END: 2020-05-04: Telephony: 1.5 HAL version check support for sim-deperso
                 }
             }
 // QTI_BEGIN: 2020-05-29: Telephony: Add HAL version check in Handler
@@ -265,9 +251,7 @@ public class IccNetworkDepersonalizationPanel extends IccPanel {
         mPersoSubtype = PersoSubState.PERSOSUBSTATE_SIM_NETWORK.ordinal();
 // QTI_END: 2018-02-26: Telephony: * Telephony: SIM De-personalization
         mSir = SubscriptionManager.from(context)
-// QTI_BEGIN: 2020-07-09: Telephony: Displaying SIM info on de-perso Lock UI
                 .getActiveSubscriptionInfoForSimSlotIndex(mPhone.getPhoneId());
-// QTI_END: 2020-07-09: Telephony: Displaying SIM info on de-perso Lock UI
 // QTI_BEGIN: 2018-02-26: Telephony: * Telephony: SIM De-personalization
     }
 
@@ -285,9 +269,7 @@ public class IccNetworkDepersonalizationPanel extends IccPanel {
         mPersoSubtype = subtype;
 // QTI_END: 2018-02-26: Telephony: * Telephony: SIM De-personalization
         mSir = SubscriptionManager.from(context)
-// QTI_BEGIN: 2020-07-09: Telephony: Displaying SIM info on de-perso Lock UI
                 .getActiveSubscriptionInfoForSimSlotIndex(mPhone.getPhoneId());
-// QTI_END: 2020-07-09: Telephony: Displaying SIM info on de-perso Lock UI
     }
 
     @Override
@@ -309,9 +291,7 @@ public class IccNetworkDepersonalizationPanel extends IccPanel {
 // QTI_BEGIN: 2018-02-26: Telephony: * Telephony: SIM De-personalization
         mPersoSubtypeText = (TextView) findViewById(R.id.perso_subtype_text);
 // QTI_END: 2018-02-26: Telephony: * Telephony: SIM De-personalization
-// QTI_BEGIN: 2020-07-09: Telephony: Displaying SIM info on de-perso Lock UI
         mPhoneIdText = (TextView) findViewById(R.id.perso_phoneid_text);
-// QTI_END: 2020-07-09: Telephony: Displaying SIM info on de-perso Lock UI
 // QTI_BEGIN: 2018-02-26: Telephony: * Telephony: SIM De-personalization
         displayStatus(statusType.ENTRY.name());
 // QTI_END: 2018-02-26: Telephony: * Telephony: SIM De-personalization
@@ -347,16 +327,12 @@ public class IccNetworkDepersonalizationPanel extends IccPanel {
     public void onStop() {
         super.onStop();
         Log.i(TAG, "[IccNetworkDepersonalizationPanel] - showDialog; hiding dialog.");
-// QTI_BEGIN: 2020-04-01: Telephony: Add SIM Depersonalisation interface
         int phoneId = mPhone == null ? 0 : mPhone.getPhoneId();
-// QTI_END: 2020-04-01: Telephony: Add SIM Depersonalisation interface
         if (phoneId >= sShowingDialog.length) {
             Log.e(TAG, "[IccNetworkDepersonalizationPanel] - onStop; invalid phoneId " + phoneId);
             return;
         }
-// QTI_BEGIN: 2020-04-01: Telephony: Add SIM Depersonalisation interface
         sShowingDialog[phoneId] = false;
-// QTI_END: 2020-04-01: Telephony: Add SIM Depersonalisation interface
     }
 
     //Mirrors IccPinUnlockPanel.onKeyDown().
@@ -376,17 +352,13 @@ public class IccNetworkDepersonalizationPanel extends IccPanel {
                 return;
             }
 
-// QTI_BEGIN: 2025-02-07: Telephony: Remove legacy code changes
             log("Requesting De-Personalization for subtype " + mPersoSubtype);
-// QTI_END: 2025-02-07: Telephony: Remove legacy code changes
 // QTI_BEGIN: 2018-02-26: Telephony: * Telephony: SIM De-personalization
 
             try {
 // QTI_END: 2018-02-26: Telephony: * Telephony: SIM De-personalization
-// QTI_BEGIN: 2025-02-07: Telephony: Remove legacy code changes
                 mPhone.getIccCard().supplySimDepersonalization(mPersoSubState,pin,
                        Message.obtain(mHandler, EVENT_ICC_NTWRK_DEPERSONALIZATION_RESULT));
-// QTI_END: 2025-02-07: Telephony: Remove legacy code changes
 // QTI_BEGIN: 2018-02-26: Telephony: * Telephony: SIM De-personalization
             } catch (NullPointerException ex) {
                 log("NullPointerException @supplyIccDepersonalization" + ex);
@@ -407,9 +379,7 @@ public class IccNetworkDepersonalizationPanel extends IccPanel {
 
         label = getContext().getResources().getIdentifier(mPersoSubState.name()
 // QTI_END: 2018-02-26: Telephony: * Telephony: SIM De-personalization
-// QTI_BEGIN: 2020-04-01: Telephony: Add SIM Depersonalisation interface
                 + "_" + type, "string", "android");
-// QTI_END: 2020-04-01: Telephony: Add SIM Depersonalisation interface
 // QTI_BEGIN: 2018-02-26: Telephony: * Telephony: SIM De-personalization
         if (label == 0) {
             log ("Unable to get the PersoSubType string");
@@ -417,9 +387,7 @@ public class IccNetworkDepersonalizationPanel extends IccPanel {
         }
 
 // QTI_END: 2018-02-26: Telephony: * Telephony: SIM De-personalization
-// QTI_BEGIN: 2020-04-01: Telephony: Add SIM Depersonalisation interface
         if(!PersoSubState.isPersoLocked(mPersoSubState)) {
-// QTI_END: 2020-04-01: Telephony: Add SIM Depersonalisation interface
 // QTI_BEGIN: 2018-02-26: Telephony: * Telephony: SIM De-personalization
             log ("Unsupported Perso Subtype :" + mPersoSubState.name());
             return;
@@ -438,7 +406,6 @@ public class IccNetworkDepersonalizationPanel extends IccPanel {
         }
 
        CharSequence displayName = mSir.getDisplayName();
-// QTI_BEGIN: 2020-07-09: Telephony: Displaying SIM info on de-perso Lock UI
        log("Operator displayName is: " + displayName + "phoneId: " + mPhone.getPhoneId());
 
         // Displaying Operator displayName  on UI
@@ -446,14 +413,11 @@ public class IccNetworkDepersonalizationPanel extends IccPanel {
                 + ": " + displayName;
         mPhoneIdText.setText(phoneIdText);
 
-// QTI_END: 2020-07-09: Telephony: Displaying SIM info on de-perso Lock UI
 // QTI_BEGIN: 2018-02-26: Telephony: * Telephony: SIM De-personalization
         if (type == statusType.ENTRY.name()) {
 // QTI_END: 2018-02-26: Telephony: * Telephony: SIM De-personalization
-// QTI_BEGIN: 2020-04-01: Telephony: Add SIM Depersonalisation interface
             String displayText = getContext().getString(label);
             mPersoSubtypeText.setText(displayText);
-// QTI_END: 2020-04-01: Telephony: Add SIM Depersonalisation interface
 // QTI_BEGIN: 2018-02-26: Telephony: * Telephony: SIM De-personalization
         } else {
             mStatusText.setText(label);
@@ -469,13 +433,11 @@ public class IccNetworkDepersonalizationPanel extends IccPanel {
     }
 
     View.OnClickListener mDismissListener = new View.OnClickListener() {
-// QTI_BEGIN: 2020-04-01: Telephony: Add SIM Depersonalisation interface
         public void onClick(View v) {
             if (DBG) log("mDismissListener: skipping depersonalization...");
             dismiss();
         }
     };
-// QTI_END: 2020-04-01: Telephony: Add SIM Depersonalisation interface
 
     private void log(String msg) {
 // QTI_BEGIN: 2018-02-26: Telephony: * Telephony: SIM De-personalization

@@ -44,9 +44,9 @@ import android.telephony.TelephonyManager;
 import android.telephony.TelephonyRegistryManager;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.ims.ImsException;
-// QTI_BEGIN: 2022-12-28: Telephony: Add option to toggle C_IWLAN from ADB
+// QTI_BEGIN: 2022-12-27: Telephony: Add option to toggle C_IWLAN from ADB
 import android.telephony.ims.ImsMmTelManager;
-// QTI_END: 2022-12-28: Telephony: Add option to toggle C_IWLAN from ADB
+// QTI_END: 2022-12-27: Telephony: Add option to toggle C_IWLAN from ADB
 import android.telephony.ims.RcsContactUceCapability;
 import android.telephony.ims.feature.ImsFeature;
 import android.text.TextUtils;
@@ -105,9 +105,9 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
     private static final String UNATTENDED_REBOOT = "unattended-reboot";
     private static final String CARRIER_CONFIG_SUBCOMMAND = "cc";
     private static final String DATA_TEST_MODE = "data";
-// QTI_BEGIN: 2022-12-28: Telephony: Add option to toggle C_IWLAN from ADB
+// QTI_BEGIN: 2022-12-27: Telephony: Add option to toggle C_IWLAN from ADB
     private static final String BACKUP_CALLING = "ciwlan";
-// QTI_END: 2022-12-28: Telephony: Add option to toggle C_IWLAN from ADB
+// QTI_END: 2022-12-27: Telephony: Add option to toggle C_IWLAN from ADB
     private static final String ENABLE = "enable";
     private static final String DISABLE = "disable";
     private static final String QUERY = "query";
@@ -397,10 +397,10 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
             }
             case DATA_TEST_MODE:
                 return handleDataTestModeCommand();
-// QTI_BEGIN: 2022-12-28: Telephony: Add option to toggle C_IWLAN from ADB
+// QTI_BEGIN: 2022-12-27: Telephony: Add option to toggle C_IWLAN from ADB
             case BACKUP_CALLING:
                 return handleBackupCallingCommand();
-// QTI_END: 2022-12-28: Telephony: Add option to toggle C_IWLAN from ADB
+// QTI_END: 2022-12-27: Telephony: Add option to toggle C_IWLAN from ADB
             case END_BLOCK_SUPPRESSION:
                 return handleEndBlockSuppressionCommand();
             case GBA_SUBCOMMAND:
@@ -723,7 +723,7 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
         pw.println("  data disable: disable mobile data connectivity");
     }
 
-// QTI_BEGIN: 2022-12-28: Telephony: Add option to toggle C_IWLAN from ADB
+// QTI_BEGIN: 2022-12-27: Telephony: Add option to toggle C_IWLAN from ADB
     private void onHelpBackupCalling() {
         PrintWriter pw = getOutPrintWriter();
         pw.println("Backup calling commands:");
@@ -732,7 +732,7 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
                 + " DDS will be used.");
     }
 
-// QTI_END: 2022-12-28: Telephony: Add option to toggle C_IWLAN from ADB
+// QTI_END: 2022-12-27: Telephony: Add option to toggle C_IWLAN from ADB
     private void onHelpEmergencyNumber() {
         PrintWriter pw = getOutPrintWriter();
         pw.println("Emergency Number Test Mode Commands:");
@@ -1063,7 +1063,7 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
         return 0;
     }
 
-// QTI_BEGIN: 2022-12-28: Telephony: Add option to toggle C_IWLAN from ADB
+// QTI_BEGIN: 2022-12-27: Telephony: Add option to toggle C_IWLAN from ADB
     private int handleBackupCallingCommand() {
         PrintWriter errPw = getErrPrintWriter();
         String actionArg = getNextArgRequired();
@@ -1082,11 +1082,11 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
     }
 
     private int toggleBackupCalling(boolean enable) {
-// QTI_END: 2022-12-28: Telephony: Add option to toggle C_IWLAN from ADB
-// QTI_BEGIN: 2023-04-22: Telephony: Fix DDS not chosen for C_IWLAN terminal command
+// QTI_END: 2022-12-27: Telephony: Add option to toggle C_IWLAN from ADB
+// QTI_BEGIN: 2023-04-21: Telephony: Fix DDS not chosen for C_IWLAN terminal command
         int subId = getDataSubscriptionOrDefault(BACKUP_CALLING);
-// QTI_END: 2023-04-22: Telephony: Fix DDS not chosen for C_IWLAN terminal command
-// QTI_BEGIN: 2022-12-28: Telephony: Add option to toggle C_IWLAN from ADB
+// QTI_END: 2023-04-21: Telephony: Fix DDS not chosen for C_IWLAN terminal command
+// QTI_BEGIN: 2022-12-27: Telephony: Add option to toggle C_IWLAN from ADB
         ImsMmTelManager imsMmTelMgr = getImsMmTelManager(subId);
         if (imsMmTelMgr == null) {
             return -1;
@@ -1104,7 +1104,7 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
         return ImsMmTelManager.createForSubscriptionId(subId);
     }
 
-// QTI_END: 2022-12-28: Telephony: Add option to toggle C_IWLAN from ADB
+// QTI_END: 2022-12-27: Telephony: Add option to toggle C_IWLAN from ADB
     private int handleEmergencyCallbackModeCommand() {
         PrintWriter errPw = getErrPrintWriter();
         try {
@@ -1799,7 +1799,7 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
         return slotId;
     }
 
-// QTI_BEGIN: 2023-04-22: Telephony: Fix DDS not chosen for C_IWLAN terminal command
+// QTI_BEGIN: 2023-04-21: Telephony: Fix DDS not chosen for C_IWLAN terminal command
     private int getDataSubscriptionOrDefault(String cmd) {
         int dds = SubscriptionManager.getDefaultDataSubscriptionId();
         String opt = getNextOption();
@@ -1816,7 +1816,7 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
         }
     }
 
-// QTI_END: 2023-04-22: Telephony: Fix DDS not chosen for C_IWLAN terminal command
+// QTI_END: 2023-04-21: Telephony: Fix DDS not chosen for C_IWLAN terminal command
     // Parse options related to Carrier Config Commands.
     private CcOptionParseResult parseCcOptions(String tag, boolean allowOptionPersistent) {
         PrintWriter errPw = getErrPrintWriter();

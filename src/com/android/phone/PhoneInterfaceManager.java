@@ -1077,11 +1077,9 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
                     if (ar.exception == null && ar.result != null) {
                         request.result = ar.result;     // Integer
                     } else {
-// QTI_BEGIN: 2020-07-31: Telephony: Fix error response handling for RIL request
                         // request.result must be set to something non-null
                         // for the calling thread to unblock
                         request.result = new int[]{-1};
-// QTI_END: 2020-07-31: Telephony: Fix error response handling for RIL request
                         if (ar.result == null) {
                             loge("getAllowedNetworkTypesBitmask: Empty response");
                         } else if (ar.exception instanceof CommandException) {
