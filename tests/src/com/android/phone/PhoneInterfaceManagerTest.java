@@ -120,6 +120,8 @@ public class PhoneInterfaceManagerTest extends TelephonyTestBase {
 
     @Mock
     private AppOpsManager mAppOps;
+    @Mock
+    private SatelliteController mSatelliteController;
 
     @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
@@ -132,8 +134,7 @@ public class PhoneInterfaceManagerTest extends TelephonyTestBase {
         replaceInstance(SatelliteAccessController.class, "sInstance", null,
                 Mockito.mock(SatelliteAccessController.class));
 
-        replaceInstance(SatelliteController.class, "sInstance", null,
-                Mockito.mock(SatelliteController.class));
+        replaceInstance(SatelliteController.class, "sInstance", null, mSatelliteController);
 
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(
                 InstrumentationRegistry.getInstrumentation().getTargetContext());
@@ -861,5 +862,17 @@ public class PhoneInterfaceManagerTest extends TelephonyTestBase {
         // Action & Assert: Expect an UnsupportedOperationException
         assertThrows(UnsupportedOperationException.class,
                 () -> mPhoneInterfaceManager.getCurrentTtyMode());
+    }
+
+    @Test
+    public void uncapMaxAllowedSatelliteDataMode_noShellPermission_throwsSecurityException() {
+        // This method is protected by TelephonyPermissions.enforceShellOnly.
+        // The test runner does not have shell UID, so this should throw a SecurityException.
+        // This test verifies that the permission check is in place.
+        assertThrows(SecurityException.class,
+                () -> mPhoneInterfaceManager.uncapMaxAllowedSatelliteDataMode());
+
+        // Verify that the underlying controller method is not called due to permission failure.
+        verify(mSatelliteController, never()).uncapMaxAllowedDataMode();
     }
 }

@@ -44,7 +44,7 @@ import com.android.phone.SubscriptionInfoHelper;
  * Base activity for FDN contact screen.
  */
 public abstract class BaseFdnContactScreen extends Activity
-        implements Pin2LockedDialogFragment.Listener {
+        implements FdnErrorDialogFragment.Listener {
     protected static final String LOG_TAG = PhoneGlobals.LOG_TAG;
     protected static final boolean DBG = false;
 
@@ -190,15 +190,15 @@ public abstract class BaseFdnContactScreen extends Activity
 
     private void showPin2LockedDialog() {
         final FragmentManager fragmentManager = getFragmentManager();
-        Pin2LockedDialogFragment dialogFragment = (Pin2LockedDialogFragment) fragmentManager
-                .findFragmentByTag(Pin2LockedDialogFragment.TAG_PIN2_LOCKED_DIALOG);
+        FdnErrorDialogFragment dialogFragment = (FdnErrorDialogFragment) fragmentManager
+                .findFragmentByTag(FdnErrorDialogFragment.TAG_PIN2_LOCKED_DIALOG);
         if (dialogFragment == null) {
-            dialogFragment = new Pin2LockedDialogFragment();
+            dialogFragment = new FdnErrorDialogFragment();
             Bundle args = new Bundle();
-            args.putInt(Pin2LockedDialogFragment.KEY_DIALOG_ID,
-                    Pin2LockedDialogFragment.DIALOG_ID_PUK2_REQUESTED_ON_PIN_ENTRY);
+            args.putInt(FdnErrorDialogFragment.KEY_DIALOG_ID,
+                    FdnErrorDialogFragment.DIALOG_ID_PUK2_REQUESTED_ON_PIN_ENTRY);
             dialogFragment.setArguments(args);
-            dialogFragment.show(fragmentManager, Pin2LockedDialogFragment.TAG_PIN2_LOCKED_DIALOG);
+            dialogFragment.show(fragmentManager, FdnErrorDialogFragment.TAG_PIN2_LOCKED_DIALOG);
         } else {
             FragmentTransaction transaction = fragmentManager.beginTransaction();
             transaction.show(dialogFragment);
