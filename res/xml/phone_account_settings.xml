@@ -67,4 +67,7 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory
+        android:key="voip_call_log_integration_category_key"
+        android:title="@string/voip_call_log_integration_label" />
 </PreferenceScreen>

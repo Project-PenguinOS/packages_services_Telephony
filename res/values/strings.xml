@@ -169,6 +169,10 @@
     <!-- Summary for all-calling-account setting indicating that is where the user goes to enable
          and disable phone accounts. -->
     <string name="phone_accounts_all_calling_accounts_summary">Select which accounts can make calls</string>
+    <!-- Label for heading of the call log preferences for supported 3P apps. -->
+    <string name="voip_call_log_integration_label">Third party apps</string>
+    <!-- Summary providing an explanation to the user what happens when enabling/disabling call log preferences. -->
+    <string name="voip_call_log_integration_summary">Control which apps can integrate their calls into the system call log. Disabling this option will prevent the app\'s logs from being displayed in the main phone app.</string>
 
     <!-- Title for setting to select Wi-Fi call manager account -->
     <string name="wifi_calling">Wi-Fi calling</string>
