@@ -1794,11 +1794,6 @@ abstract class TelephonyConnection extends Connection implements Holdable,
 // QTI_BEGIN: 2020-05-29: Telephony: IMS: Remove ORIENTATION mode extra key in IMS call after SRVCC
             extrasToRemove.add(QtiCallConstants.ORIENTATION_MODE_EXTRA_KEY);
 // QTI_END: 2020-05-29: Telephony: IMS: Remove ORIENTATION mode extra key in IMS call after SRVCC
-// QTI_BEGIN: 2021-01-05: Telephony: IMS: Remove call progress info extras in IMS call after SRVCC
-            extrasToRemove.add(QtiCallConstants.EXTRAS_CALL_PROGRESS_INFO_TYPE);
-            extrasToRemove.add(QtiCallConstants.EXTRAS_CALL_PROGRESS_REASON_CODE);
-            extrasToRemove.add(QtiCallConstants.EXTRAS_CALL_PROGRESS_REASON_TEXT);
-// QTI_END: 2021-01-05: Telephony: IMS: Remove call progress info extras in IMS call after SRVCC
 // QTI_BEGIN: 2021-06-06: Telephony: IMS: Remove CRS info extras in IMS call after SRVCC
             extrasToRemove.add(QtiCallConstants.EXTRA_CRS_TYPE);
             extrasToRemove.add(QtiCallConstants.EXTRA_ORIGINAL_CALL_TYPE);
@@ -1820,6 +1815,13 @@ abstract class TelephonyConnection extends Connection implements Holdable,
 // QTI_BEGIN: 2025-01-02: Telephony: IMS: Support glasses free 3d video
             extrasToRemove.add(QtiCallConstants.GLASSES_FREE_3D_VIDEO_TYPE_EXTRA_KEY);
 // QTI_END: 2025-01-02: Telephony: IMS: Support glasses free 3d video
+            extrasToRemove.add(QtiCallConstants.EXTRAS_CALL_PROGRESS_WFA_TYPE);
+            extrasToRemove.add(QtiCallConstants.EXTRAS_CALL_PROGRESS_REJECT_Q850_CODE);
+            extrasToRemove.add(QtiCallConstants.EXTRAS_CALL_PROGRESS_REJECT_Q850_TEXT);
+            extrasToRemove.add(QtiCallConstants.EXTRAS_CALL_PROGRESS_REJECT_SIP_CODE);
+            extrasToRemove.add(QtiCallConstants.EXTRAS_CALL_PROGRESS_REJECT_SIP_TEXT);
+            extrasToRemove.add(QtiCallConstants.EXTRAS_CALL_PROGRESS_WARNING_CODE);
+            extrasToRemove.add(QtiCallConstants.EXTRAS_CALL_PROGRESS_WARNING_TEXT);
         }
         if (originalConnection instanceof ImsPhoneConnection) {
             maybeConfigureDeviceToDeviceCommunication();
