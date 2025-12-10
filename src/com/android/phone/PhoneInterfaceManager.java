@@ -2137,18 +2137,9 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
                 case CMD_PREPARE_UNATTENDED_REBOOT:
                     request = (MainThreadRequest) msg.obj;
                     PinStorage pinStorage = UiccController.getInstance().getPinStorage();
-                    if (!mFeatureFlags.useWorkerThreadForPinstorageKeystoreApis()) {
-                        MainThreadRequest finalRequest = request;
-                        pinStorage.post(() -> {
-                            finalRequest.result =
-                                    pinStorage.prepareUnattendedReboot(finalRequest.workSource);
-                            notifyRequester(finalRequest);
-                        });
-                    } else {
-                        request.result =
-                                pinStorage.prepareUnattendedReboot(request.workSource);
-                        notifyRequester(request);
-                    }
+                    request.result =
+                            pinStorage.prepareUnattendedReboot(request.workSource);
+                    notifyRequester(request);
                     break;
 
                 default:
