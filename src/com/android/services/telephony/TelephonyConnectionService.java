@@ -3034,27 +3034,23 @@ public class TelephonyConnectionService extends ConnectionService {
                 }
                 // Hang up the active calls if the domain of currently active call is different
                 // from the domain selected by domain selector.
-                if (Flags.hangupActiveCallBasedOnEmergencyCallDomain()) {
-                    CompletableFuture<Void> disconnectCall = maybeDisconnectCallsOnOtherDomain(
-                            phone, resultConnection, result,
-                            getAllConnections(), getAllConferences(), (ret) -> {
-                                if (!ret) {
-                                    Log.i(this, "createEmergencyConnection: "
-                                            + "disconnecting call on other domain failed");
-                                }
-                            });
+                CompletableFuture<Void> disconnectCall = maybeDisconnectCallsOnOtherDomain(
+                        phone, resultConnection, result,
+                        getAllConnections(), getAllConferences(), (ret) -> {
+                            if (!ret) {
+                                Log.i(this, "createEmergencyConnection: "
+                                        + "disconnecting call on other domain failed");
+                            }
+                        });
 
-                    CompletableFuture<Void> unused = disconnectCall.thenRun(() -> {
-                        if (resultConnection.getState() == Connection.STATE_DISCONNECTED) {
-                            Log.i(this, "createEmergencyConnection: "
-                                    + "disconnect call on other domain, dialing canceled");
-                            return;
-                        }
-                        placeEmergencyConnectionOnSelectedDomain(request, resultConnection, phone);
-                    });
-                } else {
+                CompletableFuture<Void> unused = disconnectCall.thenRun(() -> {
+                    if (resultConnection.getState() == Connection.STATE_DISCONNECTED) {
+                        Log.i(this, "createEmergencyConnection: "
+                                + "disconnect call on other domain, dialing canceled");
+                        return;
+                    }
                     placeEmergencyConnectionOnSelectedDomain(request, resultConnection, phone);
-                }
+                });
             });
         }, mDomainSelectionMainExecutor);
     }

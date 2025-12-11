@@ -357,7 +357,6 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
         mTestConnectionService.setTelephonyManagerProxy(mTelephonyManagerProxy);
 
         mBinderStub = (IConnectionService.Stub) mTestConnectionService.onBind(null);
-        mSetFlagsRule.disableFlags(Flags.FLAG_HANGUP_ACTIVE_CALL_BASED_ON_EMERGENCY_CALL_DOMAIN);
         mSetFlagsRule.disableFlags(Flags.FLAG_IGNORE_STATE_DETAILS_UPDATE_FOR_DOMAIN_RESELECTION);
         mSetFlagsRule.disableFlags(Flags.FLAG_USE_EMERGENCY_ROUTING_CAUSE);
     }
@@ -3942,8 +3941,6 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
 
     @Test
     public void testDomainSelectionAddCsEmergencyCallWhenImsCallActive() throws Exception {
-        mSetFlagsRule.enableFlags(Flags.FLAG_HANGUP_ACTIVE_CALL_BASED_ON_EMERGENCY_CALL_DOMAIN);
-
         setupForCallTest();
         doReturn(1).when(mPhone0).getSubId();
         doReturn(1).when(mImsPhone).getSubId();
@@ -4007,8 +4004,6 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
 
     @Test
     public void testDomainSelectionAddImsEmergencyCallWhenCsCallActive() throws Exception {
-        mSetFlagsRule.enableFlags(Flags.FLAG_HANGUP_ACTIVE_CALL_BASED_ON_EMERGENCY_CALL_DOMAIN);
-
         setupForCallTest();
 
         // PROPERTY_IS_EXTERNAL_CALL: to avoid extra processing that is not related to this test.
@@ -4065,8 +4060,6 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
 
     @Test
     public void testDomainSelectionAddVoWifiEmergencyCallWhenImsCallActive() throws Exception {
-        mSetFlagsRule.enableFlags(Flags.FLAG_HANGUP_ACTIVE_CALL_BASED_ON_EMERGENCY_CALL_DOMAIN);
-
         setupForCallTest();
         doReturn(1).when(mPhone0).getSubId();
         doReturn(1).when(mImsPhone).getSubId();
