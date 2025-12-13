@@ -62,9 +62,7 @@ import android.widget.Toast;
 import org.codeaurora.ims.QtiImsException;
 import org.codeaurora.ims.QtiImsExtListenerBaseImpl;
 // QTI_END: 2018-03-26: Telephony: IMS: Call forward unconditional timer
-// QTI_BEGIN: 2019-02-01: Telephony: IMS: decouple ims-ext-common from boot jars
 import org.codeaurora.ims.QtiImsExtConnector;
-// QTI_END: 2019-02-01: Telephony: IMS: decouple ims-ext-common from boot jars
 // QTI_BEGIN: 2018-03-26: Telephony: IMS: Call forward unconditional timer
 import org.codeaurora.ims.QtiImsExtManager;
 import org.codeaurora.ims.utils.QtiImsExtUtils;
@@ -154,9 +152,7 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
     private int mStatus;
     private String mNumber;
 // QTI_END: 2018-03-26: Telephony: IMS: Call forward unconditional timer
-// QTI_BEGIN: 2019-02-01: Telephony: IMS: decouple ims-ext-common from boot jars
     private QtiImsExtConnector mQtiImsExtConnector;
-// QTI_END: 2019-02-01: Telephony: IMS: decouple ims-ext-common from boot jars
 // QTI_BEGIN: 2018-03-26: Telephony: IMS: Call forward unconditional timer
     private QtiImsExtManager mQtiImsExtManager;
 // QTI_END: 2018-03-26: Telephony: IMS: Call forward unconditional timer
@@ -332,7 +328,6 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
         }
     }
 
-// QTI_BEGIN: 2019-02-01: Telephony: IMS: decouple ims-ext-common from boot jars
     private void createQtiImsExtConnector(Context context) {
         try {
             mQtiImsExtConnector = new QtiImsExtConnector(context,
@@ -341,32 +336,24 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
                         public void onConnectionAvailable(QtiImsExtManager qtiImsExtManager) {
                             Log.i(LOG_TAG, "QtiImsExtConnector onConnectionAvailable");
                             mQtiImsExtManager = qtiImsExtManager;
-// QTI_END: 2019-02-01: Telephony: IMS: decouple ims-ext-common from boot jars
 // QTI_BEGIN: 2021-12-15: Telephony: Query call forward status properly
                             queryImsCallForwardStatus();
 // QTI_END: 2021-12-15: Telephony: Query call forward status properly
-// QTI_BEGIN: 2019-02-01: Telephony: IMS: decouple ims-ext-common from boot jars
                         }
                         @Override
                         public void onConnectionUnavailable() {
-// QTI_END: 2019-02-01: Telephony: IMS: decouple ims-ext-common from boot jars
 // QTI_BEGIN: 2024-04-23: Telephony: IMS-UT: Save/restore InstanceState during language changed for CFUT
                             Log.i(LOG_TAG, "QtiImsExtConnector onConnectionUnavailable");
 // QTI_END: 2024-04-23: Telephony: IMS-UT: Save/restore InstanceState during language changed for CFUT
-// QTI_BEGIN: 2019-02-01: Telephony: IMS: decouple ims-ext-common from boot jars
                             mQtiImsExtManager = null;
                             //QtiImsExtManager is not available so set
-// QTI_END: 2019-02-01: Telephony: IMS: decouple ims-ext-common from boot jars
 // QTI_BEGIN: 2024-04-23: Telephony: IMS-UT: Save/restore InstanceState during language changed for CFUT
                             //mIsCfutEnabled to false so that no Timer related operations will hit
 // QTI_END: 2024-04-23: Telephony: IMS-UT: Save/restore InstanceState during language changed for CFUT
-// QTI_BEGIN: 2019-02-01: Telephony: IMS: decouple ims-ext-common from boot jars
                             //and remove spinner.
-// QTI_END: 2019-02-01: Telephony: IMS: decouple ims-ext-common from boot jars
 // QTI_BEGIN: 2024-04-23: Telephony: IMS-UT: Save/restore InstanceState during language changed for CFUT
                             mIsCfutEnabled = false;
 // QTI_END: 2024-04-23: Telephony: IMS-UT: Save/restore InstanceState during language changed for CFUT
-// QTI_BEGIN: 2019-02-01: Telephony: IMS: decouple ims-ext-common from boot jars
                             mTcpListener.onFinished(CallForwardEditPreference.this, false);
                         }
                     });
@@ -380,20 +367,15 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
             mQtiImsExtConnector.disconnect();
             mQtiImsExtConnector = null;
             mQtiImsExtManager = null;
-// QTI_END: 2019-02-01: Telephony: IMS: decouple ims-ext-common from boot jars
 // QTI_BEGIN: 2024-04-23: Telephony: IMS-UT: Save/restore InstanceState during language changed for CFUT
             mIsCfutEnabled = false;
 // QTI_END: 2024-04-23: Telephony: IMS-UT: Save/restore InstanceState during language changed for CFUT
-// QTI_BEGIN: 2019-02-01: Telephony: IMS: decouple ims-ext-common from boot jars
         }
-// QTI_END: 2019-02-01: Telephony: IMS: decouple ims-ext-common from boot jars
 // QTI_BEGIN: 2024-06-17: Telephony: Unregister to ExtPhoneCallback
         mExtTelephonyManager.unregisterCallback(mExtPhoneCallbackListener);
 // QTI_END: 2024-06-17: Telephony: Unregister to ExtPhoneCallback
-// QTI_BEGIN: 2019-02-01: Telephony: IMS: decouple ims-ext-common from boot jars
     }
 
-// QTI_END: 2019-02-01: Telephony: IMS: decouple ims-ext-common from boot jars
 // QTI_BEGIN: 2019-05-31: Telephony: IMS: Pop-up message for user after set video CF if UT is unavailable
     private boolean isUtUnavailableForVideoCallForward() {
         return !mPhone.isUtEnabled() && (mServiceClass == CommandsInterface.SERVICE_CLASS_DATA_SYNC
