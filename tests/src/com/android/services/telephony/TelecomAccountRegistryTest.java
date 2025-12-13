@@ -49,7 +49,6 @@ import android.testing.TestableLooper;
 import com.android.TelephonyTestBase;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneConstants;
-import com.android.internal.telephony.ServiceStateTracker;
 import com.android.internal.telephony.SimultaneousCallingTracker;
 import com.android.phone.PhoneInterfaceManager;
 import com.android.phone.R;
@@ -100,10 +99,6 @@ public class TelecomAccountRegistryTest extends TelephonyTestBase {
         when(mPhone.getPhoneType()).thenReturn(PhoneConstants.PHONE_TYPE_GSM);
         when(mPhone.getContext()).thenReturn(mMockedContext);
         when(mPhone.getSubId()).thenReturn(TEST_SUB_ID);
-
-        ServiceStateTracker serviceStateTracker = Mockito.mock(ServiceStateTracker.class);
-        when(mPhone.getServiceStateTracker()).thenReturn(serviceStateTracker);
-        serviceStateTracker.mSS = Mockito.mock(ServiceState.class);
         when(mPhoneInterfaceManager.isRttEnabled(anyInt())).thenReturn(false);
 
         when(mMockedContext.getResources()).thenReturn(mResources);

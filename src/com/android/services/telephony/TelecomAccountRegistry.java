@@ -37,6 +37,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.HandlerThread;
+import android.os.Looper;
 import android.os.PersistableBundle;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -1226,7 +1227,44 @@ public class TelecomAccountRegistry {
         }
     }
 
-    private OnSubscriptionsChangedListener mOnSubscriptionsChangedListener;
+    private OnSubscriptionsChangedListener mOnSubscriptionsChangedListener =
+            new OnSubscriptionsChangedListener() {
+        @Override
+        public void onSubscriptionsChanged() {
+            if (mSubscriptionListenerState != LISTENER_STATE_REGISTERED) {
+                mRegisterSubscriptionListenerBackoff.stop();
+                mHandlerThread.quitSafely();
+            }
+            mSubscriptionListenerState = LISTENER_STATE_REGISTERED;
+
+            // Any time the SubscriptionInfo changes rerun the setup
+            Log.i(this, "TelecomAccountRegistry: onSubscriptionsChanged - update accounts");
+            tearDownAccounts();
+            setupAccounts();
+        }
+
+        @Override
+        public void onAddListenerFailed() {
+            // Woe!  Failed to add the listener!
+            Log.w(this, "TelecomAccountRegistry: onAddListenerFailed - failed to register "
+                    + "OnSubscriptionsChangedListener");
+
+            // Even though registering the listener failed, we will still try to setup the phone
+            // accounts now; the phone instances should already be present and ready, so even if
+            // telephony registry is poking along we can still try to setup the phone account.
+            tearDownAccounts();
+            setupAccounts();
+
+            if (mSubscriptionListenerState == LISTENER_STATE_UNREGISTERED) {
+                // Initial registration attempt failed; start exponential backoff.
+                mSubscriptionListenerState = LISTENER_STATE_PERFORMING_BACKOFF;
+                mRegisterSubscriptionListenerBackoff.start();
+            } else {
+                // We're already doing exponential backoff and a registration failed.
+                mRegisterSubscriptionListenerBackoff.notifyFailed();
+            }
+        }
+    };
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
@@ -1416,49 +1454,6 @@ public class TelecomAccountRegistry {
         }
     }
 
-    private void initializeOnSubscriptionsChangedListener() {
-        mOnSubscriptionsChangedListener =
-                new OnSubscriptionsChangedListener() {
-                    @Override
-                    public void onSubscriptionsChanged() {
-                        if (mSubscriptionListenerState != LISTENER_STATE_REGISTERED) {
-                            mRegisterSubscriptionListenerBackoff.stop();
-                            mHandlerThread.quitSafely();
-                        }
-                        mSubscriptionListenerState = LISTENER_STATE_REGISTERED;
-
-                        // Any time the SubscriptionInfo changes rerun the setup
-                        Log.i(this, "TelecomAccountRegistry: onSubscriptionsChanged - update "
-                                + "accounts");
-                        tearDownAccounts();
-                        setupAccounts();
-                    }
-
-                    @Override
-                    public void onAddListenerFailed() {
-                        // Woe!  Failed to add the listener!
-                        Log.w(this, "TelecomAccountRegistry: onAddListenerFailed - failed to "
-                                + "register OnSubscriptionsChangedListener");
-
-                        // Even though registering the listener failed, we will still try to setup
-                        // the phone accounts now; the phone instances should already be present
-                        // and ready, so even if telephony registry is poking along we can still
-                        // try to setup the phone account.
-                        tearDownAccounts();
-                        setupAccounts();
-
-                        if (mSubscriptionListenerState == LISTENER_STATE_UNREGISTERED) {
-                            // Initial registration attempt failed; start exponential backoff.
-                            mSubscriptionListenerState = LISTENER_STATE_PERFORMING_BACKOFF;
-                            mRegisterSubscriptionListenerBackoff.start();
-                        } else {
-                            // We're already doing exponential backoff and a registration failed.
-                            mRegisterSubscriptionListenerBackoff.notifyFailed();
-                        }
-                    }
-                };
-    }
-
     TelecomAccountRegistry(Context context) {
         mContext = context;
         mTelecomManager = context.getSystemService(TelecomManager.class);
@@ -1466,12 +1461,7 @@ public class TelecomAccountRegistry {
         mTelephonyManager = TelephonyManager.from(context);
         mSubscriptionManager = SubscriptionManager.from(context);
         mHandlerThread.start();
-        mHandler = new Handler(mHandlerThread.getLooper());
-        if (Flags.initializeTelecomAccountRegistryAsync()) {
-            mHandler.post(this::initializeOnSubscriptionsChangedListener);
-        } else {
-            initializeOnSubscriptionsChangedListener();
-        }
+        mHandler = new Handler(Looper.getMainLooper());
         mRegisterSubscriptionListenerBackoff = new ExponentialBackoff(
                 REGISTER_START_DELAY_MS,
                 REGISTER_MAXIMUM_DELAY_MS,
@@ -1766,6 +1756,7 @@ public class TelecomAccountRegistry {
             } else {
                 setupOnBootInternal();
             }
+
         }
     }
 
