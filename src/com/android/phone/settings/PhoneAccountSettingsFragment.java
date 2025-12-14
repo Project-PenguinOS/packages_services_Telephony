@@ -623,14 +623,10 @@ public class PhoneAccountSettingsFragment extends PreferenceFragment
 // QTI_BEGIN: 2022-04-06: Telephony: Fix for duplicate Vibrating button in single sim
         if (mButtonVibratingForMoCallAccepted != null) {
 // QTI_END: 2022-04-06: Telephony: Fix for duplicate Vibrating button in single sim
-// QTI_BEGIN: 2025-11-20: Telephony: Revert "Enable vibration preference of call connected indicator"
             if (mTelephonyManager.isMultiSimEnabled() && getResources().getBoolean(
                     R.bool.show_call_connected_indicator_preference)) {
-// QTI_END: 2025-11-20: Telephony: Revert "Enable vibration preference of call connected indicator"
                 mButtonVibratingForMoCallAccepted.setChecked((mCallConnectedIndicator
-// QTI_BEGIN: 2025-11-20: Telephony: Revert "Enable vibration preference of call connected indicator"
                         & TelecomManager.CALL_CONNECTED_INDICATOR_VIBRATION) > 0);
-// QTI_END: 2025-11-20: Telephony: Revert "Enable vibration preference of call connected indicator"
                 mButtonVibratingForMoCallAccepted.setOnPreferenceClickListener(this);
 // QTI_BEGIN: 2022-04-06: Telephony: Fix for duplicate Vibrating button in single sim
                 mMakeAndReceiveCallsCategoryPresent = true;
