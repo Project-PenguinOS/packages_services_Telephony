@@ -272,7 +272,8 @@ public class ImsConferenceController {
 
             // If this connection is a member of a conference hosted on another device, it is not
             // conferenceable with any other connections.
-            if (isMemberOfPeerConference(connection)) {
+            if (isMemberOfPeerConference(connection) &&
+                    !android.telecom.flags.Flags.multiPartyAnchorConf()) {
                 if (Log.VERBOSE) {
                     Log.v(this, "Skipping connection in peer conference: %s", connection);
                 }
@@ -304,7 +305,12 @@ public class ImsConferenceController {
                 Log.d(this, "recalc - %s %s", conference.getState(), conference);
             }
 
-            if (!conference.isConferenceHost()) {
+            boolean multiPartyAnchorConfSupported =
+                    android.telecom.flags.Flags.multiPartyAnchorConf() &&
+                    conference.getCarrierConfig() != null &&
+                    conference.getCarrierConfig().isMultiPartyAnchorConfSupported();
+
+            if (!conference.isConferenceHost() && !multiPartyAnchorConfSupported) {
                 if (Log.VERBOSE) {
                     Log.v(this, "skipping conference (not hosted on this device): %s", conference);
                 }
