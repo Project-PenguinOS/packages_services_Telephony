@@ -41,7 +41,6 @@ import android.os.Looper;
 // QTI_BEGIN: 2022-05-10: Telephony: Fix incoming call issue after SS to DSDS transition
 import android.os.Message;
 // QTI_END: 2022-05-10: Telephony: Fix incoming call issue after SS to DSDS transition
-
 import android.os.PersistableBundle;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -1394,7 +1393,80 @@ public class TelecomAccountRegistry {
 // QTI_END: 2021-10-29: Telephony: Fix phone account isn't associated
     }
 
-    private OnSubscriptionsChangedListener mOnSubscriptionsChangedListener;
+    private OnSubscriptionsChangedListener mOnSubscriptionsChangedListener =
+            new OnSubscriptionsChangedListener() {
+        @Override
+        public void onSubscriptionsChanged() {
+            if (mSubscriptionListenerState != LISTENER_STATE_REGISTERED) {
+                mRegisterSubscriptionListenerBackoff.stop();
+                mHandlerThread.quitSafely();
+            }
+            mSubscriptionListenerState = LISTENER_STATE_REGISTERED;
+
+// QTI_BEGIN: 2021-10-29: Telephony: Fix phone account isn't associated
+            List<SubscriptionInfo> subList =
+                    mSubscriptionManager.getActiveSubscriptionInfoList();
+
+            boolean isTearingDownNeeded = subList == null;
+// QTI_END: 2021-10-29: Telephony: Fix phone account isn't associated
+// QTI_BEGIN: 2023-07-20: Telephony: Replace SIM PhoneAccounts when the associated UserHandle changes
+
+            isTearingDownNeeded |= hasAnyUserHandleChanged();
+
+// QTI_END: 2023-07-20: Telephony: Replace SIM PhoneAccounts when the associated UserHandle changes
+// QTI_BEGIN: 2021-10-29: Telephony: Fix phone account isn't associated
+            if (!isTearingDownNeeded) {
+                int subAccountCnt = subList.size();
+                synchronized (mAccountsLock) {
+                    subAccountCnt = mAccounts.stream()
+                            .filter(entry -> entry.isSubAccount())
+                            .collect(java.util.stream.Collectors.toList()).size();
+                }
+                isTearingDownNeeded |= subAccountCnt != subList.size();
+                if (!isTearingDownNeeded) {
+                    // Check if it is needed to be torn down for SUB refresh.
+                    for (SubscriptionInfo subInfo : subList) {
+                        isTearingDownNeeded |= !isAccountMatched(subInfo);
+                    }
+                }
+            }
+            if (isTearingDownNeeded) {
+                Log.i(this, "TelecomAccountRegistry: onSubscriptionsChanged - update accounts");
+                tearDownAccounts();
+                setupAccounts();
+            } else {
+                Log.i(this, "TelecomAccountRegistry: onSubscriptionsChanged - reregister accounts");
+                synchronized (mAccountsLock) {
+                    for (AccountEntry entry : mAccounts) {
+                        entry.reRegisterPstnPhoneAccount();
+                    }
+                }
+            }
+// QTI_END: 2021-10-29: Telephony: Fix phone account isn't associated
+        }
+
+        @Override
+        public void onAddListenerFailed() {
+            // Woe!  Failed to add the listener!
+            Log.w(this, "TelecomAccountRegistry: onAddListenerFailed - failed to register "
+                    + "OnSubscriptionsChangedListener");
+
+            // Even though registering the listener failed, we will still try to setup the phone
+            // accounts now; the phone instances should already be present and ready, so even if
+            // telephony registry is poking along we can still try to setup the phone account.
+            tearDownAccounts();
+            setupAccounts();
+
+            if (mSubscriptionListenerState == LISTENER_STATE_UNREGISTERED) {
+                // Initial registration attempt failed; start exponential backoff.
+                mSubscriptionListenerState = LISTENER_STATE_PERFORMING_BACKOFF;
+                mRegisterSubscriptionListenerBackoff.start();
+            } else {
+                // We're already doing exponential backoff and a registration failed.
+                mRegisterSubscriptionListenerBackoff.notifyFailed();
+            }
+        }
+    };
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
@@ -1585,48 +1657,6 @@ public class TelecomAccountRegistry {
         }
     }
 
-    private void initializeOnSubscriptionsChangedListener() {
-        mOnSubscriptionsChangedListener =
-                new OnSubscriptionsChangedListener() {
-                    @Override
-                    public void onSubscriptionsChanged() {
-                        if (mSubscriptionListenerState != LISTENER_STATE_REGISTERED) {
-                            mRegisterSubscriptionListenerBackoff.stop();
-                            mHandlerThread.quitSafely();
-                        }
-                        mSubscriptionListenerState = LISTENER_STATE_REGISTERED;
-
-                        // Any time the SubscriptionInfo changes rerun the setup
-                        Log.i(this, "TelecomAccountRegistry: onSubscriptionsChanged - update "
-                                + "accounts");
-                        tearDownAccounts();
-                        setupAccounts();
-                    }
-
-                    @Override
-                    public void onAddListenerFailed() {
-                        // Woe!  Failed to add the listener!
-                        Log.w(this, "TelecomAccountRegistry: onAddListenerFailed - failed to "
-                                + "register OnSubscriptionsChangedListener");
-
-                        // Even though registering the listener failed, we will still try to setup
-                        // the phone accounts now; the phone instances should already be present
-                        // and ready, so even if telephony registry is poking along we can still
-                        // try to setup the phone account.
-                        tearDownAccounts();
-                        setupAccounts();
-
-                        if (mSubscriptionListenerState == LISTENER_STATE_UNREGISTERED) {
-                            // Initial registration attempt failed; start exponential backoff.
-                            mSubscriptionListenerState = LISTENER_STATE_PERFORMING_BACKOFF;
-                            mRegisterSubscriptionListenerBackoff.start();
-                        } else {
-                            // We're already doing exponential backoff and a registration failed.
-                            mRegisterSubscriptionListenerBackoff.notifyFailed();
-                        }
-                    }
-                };
-    }
 // QTI_BEGIN: 2022-05-10: Telephony: Fix incoming call issue after SS to DSDS transition
     private int mSimCount;
 // QTI_END: 2022-05-10: Telephony: Fix incoming call issue after SS to DSDS transition
@@ -1662,13 +1692,8 @@ public class TelecomAccountRegistry {
         mSubscriptionManager = SubscriptionManager.from(context);
         mHandlerThread.start();
 // QTI_BEGIN: 2022-05-10: Telephony: Fix incoming call issue after SS to DSDS transition
-        mHandler = new EventHandler(mHandlerThread.getLooper());
+        mHandler = new EventHandler(Looper.getMainLooper());
 // QTI_END: 2022-05-10: Telephony: Fix incoming call issue after SS to DSDS transition
-        if (Flags.initializeTelecomAccountRegistryAsync()) {
-            mHandler.post(this::initializeOnSubscriptionsChangedListener);
-        } else {
-            initializeOnSubscriptionsChangedListener();
-        }
         mRegisterSubscriptionListenerBackoff = new ExponentialBackoff(
                 REGISTER_START_DELAY_MS,
                 REGISTER_MAXIMUM_DELAY_MS,
@@ -1972,6 +1997,7 @@ public class TelecomAccountRegistry {
             } else {
                 setupOnBootInternal();
             }
+
         }
     }
 
