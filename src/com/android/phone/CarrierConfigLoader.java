@@ -52,6 +52,7 @@ import android.preference.PreferenceManager;
 import android.service.carrier.CarrierIdentifier;
 import android.service.carrier.CarrierService;
 import android.service.carrier.ICarrierService;
+import android.telecom.TelecomManager;
 import android.telephony.AnomalyReporter;
 import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
@@ -1366,8 +1367,10 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
     @NonNull
     public PersistableBundle getConfigForSubIdWithFeature(int subscriptionId,
             @NonNull String callingPackage, @Nullable String callingFeatureId) {
-        if (!TelephonyPermissions.checkCallingOrSelfReadPhoneState(mContext, subscriptionId,
-                callingPackage, callingFeatureId, "getCarrierConfig")) {
+        boolean hasUiAccess = mContext.checkCallingOrSelfPermission(
+                TelecomManager.PERMISSION_TELECOM_UI_ACCESS) == PackageManager.PERMISSION_GRANTED;
+        if (!hasUiAccess && !TelephonyPermissions.checkCallingOrSelfReadPhoneState(mContext,
+                subscriptionId, callingPackage, callingFeatureId, "getCarrierConfig")) {
             return new PersistableBundle();
         }
 
