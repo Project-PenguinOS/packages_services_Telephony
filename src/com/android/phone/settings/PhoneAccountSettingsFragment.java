@@ -494,6 +494,7 @@ public class PhoneAccountSettingsFragment extends PreferenceFragment
         Preference summaryPref = new Preference(getActivity());
         summaryPref.setKey(VOIP_CALL_LOG_PREF_SUMMARY_KEY);
         summaryPref.setSummary(R.string.voip_call_log_integration_summary);
+        summaryPref.setSelectable(false);
         mVoipCallLogIntegrationCategory.addPreference(summaryPref);
 
         PackageManager pm = getActivity().getPackageManager();
