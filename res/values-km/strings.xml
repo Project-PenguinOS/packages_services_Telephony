@@ -75,10 +75,8 @@
     <string name="phone_accounts_configure_account_settings" msgid="6622119715253196586">"កំណត់ការកំណត់គណនី"</string>
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"គណនីហៅទូរស័ព្ទទាំងអស់"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"ជ្រើសគណនីណាមួយដែលអាចធ្វើការហៅទូរស័ព្ទ"</string>
-    <!-- no translation found for voip_call_log_integration_label (2349275524959944815) -->
-    <skip />
-    <!-- no translation found for voip_call_log_integration_summary (3834075007862607039) -->
-    <skip />
+    <string name="voip_call_log_integration_label" msgid="2349275524959944815">"កម្មវិធី​ភាគីទីបី"</string>
+    <string name="voip_call_log_integration_summary" msgid="3834075007862607039">"គ្រប់គ្រង​កម្មវិធី​ដែលអាច​រួមបញ្ចូល​ការហៅទូរសព្ទ​របស់កម្មវិធី​ទាំងនោះ​ទៅក្នុង​កំណត់ហេតុហៅទូរសព្ទ​របស់​ប្រព័ន្ធ។ ការបិទ​ជម្រើសនេះ​នឹង​ទប់ស្កាត់​មិនឱ្យ​បង្ហាញ​កំណត់ហេតុ​របស់​កម្មវិធី​នៅក្នុង​កម្មវិធី​ទូរសព្ទ​ចម្បង។"</string>
     <string name="wifi_calling" msgid="3650509202851355742">"ការហៅតាម Wi-Fi"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"សេវាកម្ម​ភ្ជាប់​ដែល​ជាប់​ជា​មួយ"</string>
     <string name="voicemail" msgid="7697769412804195032">"សារ​ជា​សំឡេង"</string>
