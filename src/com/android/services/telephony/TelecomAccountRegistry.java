@@ -1403,18 +1403,13 @@ public class TelecomAccountRegistry {
             }
             mSubscriptionListenerState = LISTENER_STATE_REGISTERED;
 
-// QTI_BEGIN: 2021-10-29: Telephony: Fix phone account isn't associated
             List<SubscriptionInfo> subList =
                     mSubscriptionManager.getActiveSubscriptionInfoList();
 
             boolean isTearingDownNeeded = subList == null;
-// QTI_END: 2021-10-29: Telephony: Fix phone account isn't associated
-// QTI_BEGIN: 2023-07-20: Telephony: Replace SIM PhoneAccounts when the associated UserHandle changes
 
             isTearingDownNeeded |= hasAnyUserHandleChanged();
 
-// QTI_END: 2023-07-20: Telephony: Replace SIM PhoneAccounts when the associated UserHandle changes
-// QTI_BEGIN: 2021-10-29: Telephony: Fix phone account isn't associated
             if (!isTearingDownNeeded) {
                 int subAccountCnt = subList.size();
                 synchronized (mAccountsLock) {
@@ -1442,7 +1437,6 @@ public class TelecomAccountRegistry {
                     }
                 }
             }
-// QTI_END: 2021-10-29: Telephony: Fix phone account isn't associated
         }
 
         @Override
@@ -1691,9 +1685,7 @@ public class TelecomAccountRegistry {
         mTelephonyManager = TelephonyManager.from(context);
         mSubscriptionManager = SubscriptionManager.from(context);
         mHandlerThread.start();
-// QTI_BEGIN: 2022-05-10: Telephony: Fix incoming call issue after SS to DSDS transition
         mHandler = new EventHandler(Looper.getMainLooper());
-// QTI_END: 2022-05-10: Telephony: Fix incoming call issue after SS to DSDS transition
         mRegisterSubscriptionListenerBackoff = new ExponentialBackoff(
                 REGISTER_START_DELAY_MS,
                 REGISTER_MAXIMUM_DELAY_MS,
