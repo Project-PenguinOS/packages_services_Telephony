@@ -75,10 +75,8 @@
     <string name="phone_accounts_configure_account_settings" msgid="6622119715253196586">"Stel rekeninginstellings op"</string>
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"Alle oproeprekeninge"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"Kies watter rekeninge oproepe kan maak"</string>
-    <!-- no translation found for voip_call_log_integration_label (2349275524959944815) -->
-    <skip />
-    <!-- no translation found for voip_call_log_integration_summary (3834075007862607039) -->
-    <skip />
+    <string name="voip_call_log_integration_label" msgid="2349275524959944815">"Derdepartyapps"</string>
+    <string name="voip_call_log_integration_summary" msgid="3834075007862607039">"Beheer watter apps hul oproepe met die stelseloproeprekord kan integreer. As jy hierdie opsie deaktiveer, sal dit verhoed dat die app se loglêers in die hooffoonapp gewys word."</string>
     <string name="wifi_calling" msgid="3650509202851355742">"Wi-fi-oproepe"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"Ingeboude verbindingsdiens"</string>
     <string name="voicemail" msgid="7697769412804195032">"Stemboodskap"</string>
