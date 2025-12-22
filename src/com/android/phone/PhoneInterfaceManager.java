@@ -13154,6 +13154,32 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     }
 
     /**
+     * Request to refresh the satellite entitlement status.
+     *
+     * <p>This API allows applications to trigger a refresh of the satellite entitlement status
+     * with the entitlement server. This is typically used when the user has updated their
+     * satellite plan or subscription, and the device needs to fetch the latest entitlement
+     * information immediately.
+     *
+     * @param subId The subscription ID for which to refresh the entitlement status.
+     * @throws SecurityException if the caller does not have the required permission.
+     * @throws IllegalStateException if the Telephony service is not available.
+     *
+     * @hide
+     */
+    @Override
+    public void requestEntitlementRefresh(int subId, @NonNull IIntegerConsumer callback) {
+        enforceSatelliteCommunicationPermission("requestEntitlementRefresh");
+        Log.d(LOG_TAG, "requestEntitlementRefresh: subId = " + subId);
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            mSatelliteEntitlementController.requestEntitlementRefresh(subId, callback);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    /**
      * Request to get whether satellite communication is allowed for the current location.
      *
      * @param subId The subId of the subscription to check whether satellite communication is
