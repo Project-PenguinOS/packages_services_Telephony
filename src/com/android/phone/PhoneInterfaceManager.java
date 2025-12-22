@@ -258,6 +258,7 @@ import com.android.internal.telephony.util.LocaleUtils;
 import com.android.internal.telephony.util.TelephonyUtils;
 import com.android.internal.telephony.util.VoicemailNotificationSettingsUtil;
 import com.android.internal.util.FunctionalUtils;
+import com.android.libraries.entitlement.utils.Ts43Constants;
 import com.android.phone.callcomposer.CallComposerPictureManager;
 import com.android.phone.callcomposer.CallComposerPictureTransfer;
 import com.android.phone.callcomposer.ImageData;
@@ -14751,6 +14752,39 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         final long identity = Binder.clearCallingIdentity();
         try {
             return mSatelliteController.getPlmnSatelliteConfig(subId, plmn);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    /**
+     * This API is used by FCM client app to notify telephony module about the FCM tickle
+     * received from server.
+     *
+     * <p> Requires permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     *
+     * @param subId subscription id
+     * @param appIds list of application IDs for which the entitlement status has changed
+     * @param timeInMillis time when entitlement status changed
+     * @hide
+     */
+    @Override
+    public void notifyEntitlementStatusChanged(int subId,
+            @NonNull @Ts43Constants.AppId List<String> appIds, long timeInMillis) {
+        enforceModifyPermission();
+
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            if (appIds.contains(Ts43Constants.APP_SATELLITE_ENTITLEMENT)) {
+                IIntegerConsumer callback = new IIntegerConsumer.Stub() {
+                    @Override
+                    public void accept(int result) {
+                        Log.d(LOG_TAG, "Entitlement refresh result: " + result);
+                    }
+                };
+                mSatelliteEntitlementController.requestEntitlementRefresh(subId, callback);
+            }
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
