@@ -75,6 +75,8 @@
     <string name="phone_accounts_configure_account_settings" msgid="6622119715253196586">"એકાઉન્ટ સેટિંગ ગોઠવો"</string>
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"બધા કૉલિંગ એકાઉન્ટ્સ"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"કયા એકાઉન્ટ્સ કૉલ કરી શકે તે પસંદ કરો"</string>
+    <string name="voip_call_log_integration_label" msgid="2349275524959944815">"ત્રીજા પક્ષની ઍપ"</string>
+    <string name="voip_call_log_integration_summary" msgid="3834075007862607039">"કઈ ઍપ તેમના કૉલને સિસ્ટમ કૉલ લૉગમાં એકીકૃત કરી શકે છે તે નિયંત્રિત કરો. આ વિકલ્પ બંધ કરવાથી, ઍપના લૉગને ફોનની મુખ્ય ઍપમાં ડિસ્પ્લે કરવાથી અટકાવવામાં આવશે."</string>
     <string name="wifi_calling" msgid="3650509202851355742">"Wi-Fi કૉલિંગ"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"બિલ્ટ-ઇન કનેક્શન સેવા"</string>
     <string name="voicemail" msgid="7697769412804195032">"વૉઇસમેઇલ"</string>

@@ -75,6 +75,8 @@
     <string name="phone_accounts_configure_account_settings" msgid="6622119715253196586">"ఖాతా సెట్టింగ్‌లను కాన్ఫిగర్ చేయి"</string>
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"అన్ని కాలింగ్ ఖాతాలు"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"ఏ ఖాతాల నుండి కాల్స్‌ చేయవచ్చనే దాన్ని ఎంచుకోండి"</string>
+    <string name="voip_call_log_integration_label" msgid="2349275524959944815">"థర్డ్-పార్టీ యాప్‌లు"</string>
+    <string name="voip_call_log_integration_summary" msgid="3834075007862607039">"ఏ యాప్‌లు తమ కాల్స్‌ను సిస్టమ్ కాల్ లాగ్‌లోకి ఇంటిగ్రేట్ చేయవచ్చో కంట్రోల్ చేయండి. ఈ ఆప్షన్‌ను డిజేబుల్ చేస్తే, ప్రధాన ఫోన్ యాప్‌లో యాప్ లాగ్‌లు డిస్‌ప్లే కావు."</string>
     <string name="wifi_calling" msgid="3650509202851355742">"Wi-Fi కాలింగ్"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"అంతర్నిర్మిత కనెక్షన్ సేవ"</string>
     <string name="voicemail" msgid="7697769412804195032">"వాయిస్ మెయిల్"</string>
