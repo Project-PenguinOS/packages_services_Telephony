@@ -76,6 +76,7 @@ import com.android.internal.telephony.PhoneFactory;
 import com.android.internal.telephony.configupdate.TelephonyConfigUpdateInstallReceiver;
 import com.android.internal.telephony.satellite.SatelliteConfig;
 import com.android.internal.telephony.satellite.SatelliteConfigParser;
+import com.android.phone.R;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1063,5 +1064,52 @@ public class PhoneInformationUtil {
         } catch (Exception e) {
             Log.e(logTag, "Error restoring APNs: " + e);
         }
+    }
+
+    /**
+     * Returns the Subscriber ID (IMSI).
+     *
+     * @param subIdTelephonyManager The TelephonyManager instance.
+     * @param r The Resources object to fetch strings.
+     * @return The Subscriber ID string or "Unknown".
+     */
+    public static String getSubscriberId(TelephonyManager subIdTelephonyManager, Resources r) {
+        String subscriberId = subIdTelephonyManager.getSubscriberId();
+        return subscriberId != null ? subscriberId : r.getString(R.string.radioInfo_unknown);
+    }
+
+    /**
+     * Returns the Group Identifier Level 1 (GID1).
+     *
+     * @param subIdTelephonyManager The TelephonyManager instance.
+     * @param r The Resources object to fetch strings.
+     * @return The GID1 string or "Unknown".
+     */
+    public static String getGid1(TelephonyManager subIdTelephonyManager, Resources r) {
+        String gid1 = subIdTelephonyManager.getGroupIdLevel1();
+        return gid1 != null ? gid1 : r.getString(R.string.radioInfo_unknown);
+    }
+
+    /**
+     * Returns the Carrier ID and Name.
+     *
+     * @param subIdTelephonyManager The TelephonyManager instance.
+     * @param r The Resources object to fetch strings.
+     * @return The formatted Carrier ID string or "Unknown".
+     */
+    public static String getCarrierIdString(
+            TelephonyManager subIdTelephonyManager, Resources r) {
+        int carrierId = subIdTelephonyManager.getSimCarrierId();
+        CharSequence carrierIdName = subIdTelephonyManager.getSimCarrierIdName();
+
+        if (carrierId == TelephonyManager.UNKNOWN_CARRIER_ID) {
+            return r.getString(R.string.radioInfo_unknown);
+        }
+
+        if (TextUtils.isEmpty(carrierIdName)) {
+            return String.valueOf(carrierId);
+        }
+
+        return carrierId + " (" + carrierIdName + ")";
     }
 }
