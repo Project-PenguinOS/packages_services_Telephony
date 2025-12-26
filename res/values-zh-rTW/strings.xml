@@ -66,7 +66,7 @@
     <string name="phone_accounts" msgid="1216879437523774604">"通話帳戶"</string>
     <string name="phone_accounts_make_calls_with" msgid="16747814788918145">"選擇通話帳戶"</string>
     <string name="phone_accounts_make_sip_calls_with" msgid="4691221006731847255">"選擇 SIP 通話帳戶"</string>
-    <string name="phone_accounts_ask_every_time" msgid="6192347582666047168">"先詢問我"</string>
+    <string name="phone_accounts_ask_every_time" msgid="6192347582666047168">"先詢問"</string>
     <string name="phone_accounts_default_account_label" msgid="5107598881335931101">"無法連上網路"</string>
     <string name="phone_accounts_settings_header" msgid="6296501692964706536">"設定"</string>
     <string name="phone_accounts_choose_accounts" msgid="4748805293314824974">"選擇帳戶"</string>
