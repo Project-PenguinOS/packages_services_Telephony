@@ -481,7 +481,7 @@
     <string name="delete_fdn_contact" msgid="7027405651994507077">"Eliminar número de marcación fixa"</string>
     <string name="deleting_fdn_contact" msgid="6872320570844460428">"Eliminando número de marcación fixa..."</string>
     <string name="fdn_contact_deleted" msgid="1680714996763848838">"Eliminouse o número de marcación fixa."</string>
-    <string name="pin2_invalid" msgid="2313954262684494442">"Non se actualizaron os NMF porque escribiches un PIN incorrecto."</string>
+    <string name="pin2_invalid" msgid="7366835930615792402">"PIN2 incorrecto. Non se actualizou o NMF."</string>
     <string name="fdn_invalid_number" msgid="9067189814657840439">"Non se puido actualizar o NMF porque o número supera os <xliff:g id="FDN_NUMBER_LIMIT_LENGTH">%d</xliff:g> díxitos."</string>
     <string name="pin2_or_fdn_invalid" msgid="7542639487955868181">"Non se actualizaron os NMF. O PIN2 era incorrecto ou rexeitouse o número de teléfono."</string>
     <string name="fdn_failed" msgid="216592346853420250">"Produciuse un fallo no funcionamento dos NMF."</string>

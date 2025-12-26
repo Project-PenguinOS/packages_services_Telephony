@@ -481,7 +481,7 @@
     <string name="delete_fdn_contact" msgid="7027405651994507077">"Supprimer un numéro autorisé"</string>
     <string name="deleting_fdn_contact" msgid="6872320570844460428">"Suppression du numéro autorisé…"</string>
     <string name="fdn_contact_deleted" msgid="1680714996763848838">"Numéro autorisé supprimé"</string>
-    <string name="pin2_invalid" msgid="2313954262684494442">"Le numéro autorisé n\'a pas été mis à jour, car vous avez saisi un NIP incorrect."</string>
+    <string name="pin2_invalid" msgid="7366835930615792402">"NIP2 incorrect. Le NAF n\'a pas été mis à jour."</string>
     <string name="fdn_invalid_number" msgid="9067189814657840439">"Le NAF n\'a pas été mis à jour, car le numéro comporte plus de <xliff:g id="FDN_NUMBER_LIMIT_LENGTH">%d</xliff:g> chiffres."</string>
     <string name="pin2_or_fdn_invalid" msgid="7542639487955868181">"Le numéro autorisé n\'a pas été mis à jour. Soit le NIP2 est incorrect, soit le numéro de téléphone a été rejeté."</string>
     <string name="fdn_failed" msgid="216592346853420250">"Échec de l\'opération FDN."</string>

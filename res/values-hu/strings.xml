@@ -481,7 +481,7 @@
     <string name="delete_fdn_contact" msgid="7027405651994507077">"Fix hívószám törlése"</string>
     <string name="deleting_fdn_contact" msgid="6872320570844460428">"Fix hívószám törlése..."</string>
     <string name="fdn_contact_deleted" msgid="1680714996763848838">"A fix hívószám törölve."</string>
-    <string name="pin2_invalid" msgid="2313954262684494442">"A fix hívószám nincs frissítve, mert hibás PIN kódot írt be."</string>
+    <string name="pin2_invalid" msgid="7366835930615792402">"Helytelen PIN2. A rögzített hívószám nem frissült."</string>
     <string name="fdn_invalid_number" msgid="9067189814657840439">"Az FDN nem frissült, mert az érték több mint <xliff:g id="FDN_NUMBER_LIMIT_LENGTH">%d</xliff:g> számjegyből áll."</string>
     <string name="pin2_or_fdn_invalid" msgid="7542639487955868181">"A fix hívószám nem lett frissítve. Hibás a PIN2 kód, vagy a telefonszámot elutasították."</string>
     <string name="fdn_failed" msgid="216592346853420250">"Sikertelen a fix hívószámmal végzett művelet."</string>

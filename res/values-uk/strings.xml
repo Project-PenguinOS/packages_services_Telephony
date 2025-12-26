@@ -481,7 +481,7 @@
     <string name="delete_fdn_contact" msgid="7027405651994507077">"Видалити номер фікс. набору"</string>
     <string name="deleting_fdn_contact" msgid="6872320570844460428">"Видалення номеру фікс. набору…"</string>
     <string name="fdn_contact_deleted" msgid="1680714996763848838">"Номер фікс. набору видалено."</string>
-    <string name="pin2_invalid" msgid="2313954262684494442">"Фіксований номер (FDN) не оновлено, оскільки введено неправильний PIN-код."</string>
+    <string name="pin2_invalid" msgid="7366835930615792402">"Неправильний код PIN2. FDN не оновлено."</string>
     <string name="fdn_invalid_number" msgid="9067189814657840439">"Номер FDN не оновлено, оскільки кількість цифр не може перевищувати <xliff:g id="FDN_NUMBER_LIMIT_LENGTH">%d</xliff:g>."</string>
     <string name="pin2_or_fdn_invalid" msgid="7542639487955868181">"Фіксований номер (FDN) не оновлено. PIN2-код неправильний або номер телефону відхилено."</string>
     <string name="fdn_failed" msgid="216592346853420250">"Помилка набору фіксованого номера."</string>

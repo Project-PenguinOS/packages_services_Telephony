@@ -227,11 +227,9 @@ public class TelecomAccountRegistry {
             mIsEmergency = isEmergency;
             mIsTestAccount = isTest;
             mIsAdhocConfCapable = mPhone.isImsRegistered();
-            if (Flags.simultaneousCallingIndications()) {
-                mSCT = SimultaneousCallingTracker.getInstance();
-                mSimultaneousCallSupportedSubIds =
-                        mSCT.getSubIdsSupportingSimultaneousCalling(mPhone.getSubId());
-            }
+            mSCT = SimultaneousCallingTracker.getInstance();
+            mSimultaneousCallSupportedSubIds =
+                    mSCT.getSubIdsSupportingSimultaneousCalling(mPhone.getSubId());
             mAccount = registerPstnPhoneAccount(isEmergency, isTest);
 // QTI_BEGIN: 2023-07-20: Telephony: Fix subid matching for PhoneAccounts
             mSubId = getSubId();
@@ -303,20 +301,18 @@ public class TelecomAccountRegistry {
             mImsManagerConnector.connect();
 // QTI_END: 2020-08-10: Telephony: IMS: Fix 4g conference call option not seen at times.
 
-            if (Flags.simultaneousCallingIndications()) {
-                //Register SimultaneousCallingTracker listener:
-                mSimultaneousCallingTrackerListener = new SimultaneousCallingTracker.Listener() {
-                    @Override
-                    public void onSimultaneousCallingSupportChanged(Map<Integer,
-                            Set<Integer>> simultaneousCallSubSupportMap) {
-                        updateSimultaneousCallSubSupportMap(simultaneousCallSubSupportMap);
-                    }
-                };
-                SimultaneousCallingTracker.getInstance()
-                        .addListener(mSimultaneousCallingTrackerListener);
-                Log.d(LOG_TAG, "Finished registering mSimultaneousCallingTrackerListener for "
-                        + "phoneId = " + mPhone.getPhoneId() + "; subId = " + mPhone.getSubId());
-            }
+            //Register SimultaneousCallingTracker listener:
+            mSimultaneousCallingTrackerListener = new SimultaneousCallingTracker.Listener() {
+                @Override
+                public void onSimultaneousCallingSupportChanged(Map<Integer,
+                        Set<Integer>> simultaneousCallSubSupportMap) {
+                    updateSimultaneousCallSubSupportMap(simultaneousCallSubSupportMap);
+                }
+            };
+            SimultaneousCallingTracker.getInstance()
+                    .addListener(mSimultaneousCallingTrackerListener);
+            Log.d(LOG_TAG, "Finished registering mSimultaneousCallingTrackerListener for "
+                    + "phoneId = " + mPhone.getPhoneId() + "; subId = " + mPhone.getSubId());
         }
 
         void teardown() {
@@ -326,10 +322,8 @@ public class TelecomAccountRegistry {
                 mMmTelManager.unregisterMmTelCapabilityCallback(mMmtelCapabilityCallback);
 // QTI_END: 2020-08-10: Telephony: IMS: Fix 4g conference call option not seen at times.
             }
-            if (Flags.simultaneousCallingIndications()) {
-                SimultaneousCallingTracker.getInstance()
-                        .removeListener(mSimultaneousCallingTrackerListener);
-            }
+            SimultaneousCallingTracker.getInstance()
+                    .removeListener(mSimultaneousCallingTrackerListener);
 // QTI_BEGIN: 2020-08-10: Telephony: IMS: Fix 4g conference call option not seen at times.
             mImsManagerConnector.disconnect();
 // QTI_END: 2020-08-10: Telephony: IMS: Fix 4g conference call option not seen at times.
@@ -700,14 +694,12 @@ public class TelecomAccountRegistry {
                     .setExtras(extras)
                     .setGroupId(groupId);
 
-            if (Flags.simultaneousCallingIndications()) {
-                Set <PhoneAccountHandle> simultaneousCallingHandles =
-                        mSimultaneousCallSupportedSubIds.stream()
-                                .map(subscriptionId -> PhoneUtils.makePstnPhoneAccountHandleWithId(
-                                        String.valueOf(subscriptionId), userToRegister))
-                                .collect(Collectors.toSet());
-                accountBuilder.setSimultaneousCallingRestriction(simultaneousCallingHandles);
-            }
+            Set <PhoneAccountHandle> simultaneousCallingHandles =
+                    mSimultaneousCallSupportedSubIds.stream()
+                            .map(subscriptionId -> PhoneUtils.makePstnPhoneAccountHandleWithId(
+                                    String.valueOf(subscriptionId), userToRegister))
+                            .collect(Collectors.toSet());
+            accountBuilder.setSimultaneousCallingRestriction(simultaneousCallingHandles);
 
 
             return accountBuilder.build();
@@ -1074,7 +1066,6 @@ public class TelecomAccountRegistry {
 
         public void updateSimultaneousCallSubSupportMap(Map<Integer,
                 Set<Integer>> simultaneousCallSubSupportMap) {
-            if (!Flags.simultaneousCallingIndications()) { return; }
             //Check if the simultaneous call support subIds for this account have changed:
             Set<Integer> updatedSimultaneousCallSupportSubIds = new HashSet<>(3);
             updatedSimultaneousCallSupportSubIds.addAll(
@@ -1494,36 +1485,75 @@ public class TelecomAccountRegistry {
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (Intent.ACTION_USER_SWITCHED.equals(intent.getAction())) {
-                Log.i(this, "TelecomAccountRegistry: User changed, re-registering phone accounts.");
+            // Perform the operations via a handler so that we don't perform expensive operations
+            // on the main thread while holding up the broadcast. Instead post it on the handler
+            // instantiated on the main looper and using goAsync, allow this to be processed
+            // with an extended timeout (60s for bg broadcast) as a short term fix.
+            // Todo: b/455592276 to investigate a long term solution to move these ops onto a
+            // separate thread instead of the main thread. Doing so has caused several issues
+            // so we need to investigate the current dependencies in order to make a safe
+            // transition.
+            final PendingResult result = goAsync();
+            mHandler.post(() -> {
+                try {
+                    if (Intent.ACTION_USER_SWITCHED.equals(intent.getAction())) {
+                        Log.i(this, "TelecomAccountRegistry: User changed, re-registering phone "
+                                + "accounts.");
 
-                UserHandle currentUser = intent.getParcelableExtra(Intent.EXTRA_USER);
-                mDoesUserSupportVideoCalling = currentUser == null ? true : currentUser.isSystem();
+                        UserHandle currentUser = intent.getParcelableExtra(Intent.EXTRA_USER);
+                        mDoesUserSupportVideoCalling = currentUser == null
+                                ? true : currentUser.isSystem();
 
-                // Any time the user changes, re-register the accounts.
-                tearDownAccounts();
-                setupAccounts();
-            } else if (CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED.equals(
+                        // Any time the user changes, re-register the accounts.
+                        tearDownAccounts();
+                        setupAccounts();
+                    } else if (CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED.equals(
 // QTI_BEGIN: 2022-12-16: Telephony: IMS: Broadcast essential records loaded
-                    intent.getAction()) || CarrierConfigManager.ACTION_ESSENTIAL_RECORDS_LOADED.
-                    equals(intent.getAction())) {
+                            intent.getAction()) || CarrierConfigManager.ACTION_ESSENTIAL_RECORDS_LOADED.
+                            equals(intent.getAction())) {
 // QTI_END: 2022-12-16: Telephony: IMS: Broadcast essential records loaded
-                Log.i(this, "TelecomAccountRegistry: Carrier-config changed, "
-                        + "checking for phone account updates.");
-                int subId = intent.getIntExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX,
-                        SubscriptionManager.INVALID_SUBSCRIPTION_ID);
-                handleCarrierConfigChange(subId);
-            }
+                        Log.i(this, "TelecomAccountRegistry: Carrier-config changed, "
+                                + "checking for phone account updates.");
+                        int subId = intent.getIntExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX,
+                                SubscriptionManager.INVALID_SUBSCRIPTION_ID);
+                        handleCarrierConfigChange(subId);
+                    }
+                } finally {
+                    // Ensure that we finish the pending result to notify that we're done processing
+                    // the broadcast.
+                    if (result != null) {
+                        result.finish();
+                    }
+                }
+            });
         }
     };
 
     private BroadcastReceiver mLocaleChangeReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.i(this, "TelecomAccountRegistry: Locale change; re-registering "
-                    + "phone accounts.");
-            tearDownAccounts();
-            setupAccounts();
+            // Perform the operations via a handler so that we don't perform expensive operations
+            // on the main thread and potentially cause an ANR.
+            // Todo: b/455592276 to investigate a long term solution to move these ops onto a
+            // separate thread instead of the main thread. Doing so has caused several issues
+            // so we need to investigate the current dependencies in order to make a safe
+            // transition. Currently, we'll only extend the timer by 2x but that doesn't
+            // necessarily prevent future ANRs and can hold up other broadcasts in the process.
+            final PendingResult result = goAsync();
+            mHandler.post(() -> {
+                try {
+                    Log.i(this, "TelecomAccountRegistry: Locale change; re-registering "
+                            + "phone accounts.");
+                    tearDownAccounts();
+                    setupAccounts();
+                } finally {
+                    // Ensure that we finish the pending result to notify that we're done processing
+                    // the broadcast.
+                    if (result != null) {
+                        result.finish();
+                    }
+                }
+            });
         }
     };
 
@@ -1977,7 +2007,13 @@ public class TelecomAccountRegistry {
             Log.i(this, "setupOnBoot: delaying start for Telecom...");
             mTelecomReadyBackoff.start();
         } else {
-            setupOnBootInternal();
+            if (Flags.initializeTelecomAccountRegistryAsync()) {
+                Log.i(this, "setupOnBoot: Posting to handler...");
+                mHandler.post(() -> setupOnBootInternal());
+            } else {
+                setupOnBootInternal();
+            }
+
         }
     }
 
@@ -2502,5 +2538,9 @@ public class TelecomAccountRegistry {
                 }
             }
         }
+    }
+
+    public Handler getHandler() {
+        return mHandler;
     }
 }

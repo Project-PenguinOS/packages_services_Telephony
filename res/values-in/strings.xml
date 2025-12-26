@@ -481,7 +481,7 @@
     <string name="delete_fdn_contact" msgid="7027405651994507077">"Hapus nomor panggilan tetap"</string>
     <string name="deleting_fdn_contact" msgid="6872320570844460428">"Menghapus nomor panggilan tetap..."</string>
     <string name="fdn_contact_deleted" msgid="1680714996763848838">"Nomor panggilan tetap dihapus."</string>
-    <string name="pin2_invalid" msgid="2313954262684494442">"FDN tidak diperbarui karena Anda memasukkan PIN yang salah."</string>
+    <string name="pin2_invalid" msgid="7366835930615792402">"PIN2 salah. FDN tidak diperbarui."</string>
     <string name="fdn_invalid_number" msgid="9067189814657840439">"FDN tidak diupdate karena nomor melebihi <xliff:g id="FDN_NUMBER_LIMIT_LENGTH">%d</xliff:g> digit."</string>
     <string name="pin2_or_fdn_invalid" msgid="7542639487955868181">"FDN tidak diperbarui. PIN2 salah, atau nomor telepon ditolak."</string>
     <string name="fdn_failed" msgid="216592346853420250">"Operasi FDN gagal."</string>

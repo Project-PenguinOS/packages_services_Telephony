@@ -279,7 +279,7 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
     private FakeRil mFakeRil;
 
     private enum CcType {
-        BOOLEAN, DOUBLE, DOUBLE_ARRAY, INT, INT_ARRAY, LONG, LONG_ARRAY, STRING,
+        BOOLEAN, BOOLEAN_ARRAY, DOUBLE, DOUBLE_ARRAY, INT, INT_ARRAY, LONG, LONG_ARRAY, STRING,
                 STRING_ARRAY, PERSISTABLE_BUNDLE, UNKNOWN
     }
 
@@ -2130,6 +2130,9 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
             if (value instanceof Boolean) {
                 return CcType.BOOLEAN;
             }
+            if (value instanceof boolean[]) {
+                return CcType.BOOLEAN_ARRAY;
+            }
             if (value instanceof Double) {
                 return CcType.DOUBLE;
             }
@@ -2161,6 +2164,9 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
             // Current value was null and can therefore not be used in order to find the type.
             // Check the name of the key to infer the type. This check is not needed for primitive
             // data types (boolean, double, int and long), since they can not be null.
+            if (key.endsWith("bool_array")) {
+                return CcType.BOOLEAN_ARRAY;
+            }
             if (key.endsWith("double_array")) {
                 return CcType.DOUBLE_ARRAY;
             }
@@ -2197,6 +2203,17 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
             valueString.append("null");
         } else {
             switch (type) {
+                case BOOLEAN_ARRAY: {
+                    // Format the string representation of the boolean array as value1 value2......
+                    boolean[] valueArray = (boolean[]) value;
+                    for (int i = 0; i < valueArray.length; i++) {
+                        if (i != 0) {
+                            valueString.append(" ");
+                        }
+                        valueString.append(valueArray[i]);
+                    }
+                    break;
+                }
                 case DOUBLE_ARRAY: {
                     // Format the string representation of the int array as value1 value2......
                     double[] valueArray = (double[]) value;
@@ -2287,6 +2304,25 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
 
         // Parse the value according to type and add it to the Bundle.
         switch (type) {
+            case BOOLEAN_ARRAY: {
+                boolean[] valueBooleanArray = null;
+                if (valueList.size() > 0) {
+                    valueBooleanArray = new boolean[valueList.size()];
+                    for (int i = 0; i < valueList.size(); i++) {
+                        if ("true".equalsIgnoreCase(valueList.get(i))) {
+                            valueBooleanArray[i] = true;
+                        } else if ("false".equalsIgnoreCase(valueList.get(i))) {
+                            valueBooleanArray[i] = false;
+                        } else {
+                            errPw.println(tag + "Unable to parse " + valueList.get(i)
+                                    + " as a boolean.");
+                            return null;
+                        }
+                    }
+                }
+                bundle.putBooleanArray(key, valueBooleanArray);
+                break;
+            }
             case BOOLEAN: {
                 if ("true".equalsIgnoreCase(valueList.get(0))) {
                     bundle.putBoolean(key, true);

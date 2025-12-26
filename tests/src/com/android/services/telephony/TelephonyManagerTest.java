@@ -143,7 +143,6 @@ public class TelephonyManagerTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_SUPPORT_ISIM_RECORD)
     public void testGetImsPcscfAddresses() throws Exception {
         assumeTrue(hasFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION, true));
         List<String> pcscfs = Arrays.asList(new String[] { "1.1.1.1 ", " 2.2.2.2"});
@@ -156,7 +155,6 @@ public class TelephonyManagerTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_SUPPORT_ISIM_RECORD)
     public void testGetImsPcscfAddresses_ReturnEmptyListWhenNotAvailable() throws Exception {
         assumeTrue(hasFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION, true));
         List<String> pcscfs = new ArrayList<>();
@@ -169,7 +167,6 @@ public class TelephonyManagerTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_SUPPORT_ISIM_RECORD)
     public void testGetImsPcscfAddresses_ReturnEmptyListForInvalidSubId() throws Exception {
         assumeTrue(hasFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION, true));
         List<String> pcscfs = new ArrayList<>();
@@ -182,7 +179,6 @@ public class TelephonyManagerTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_SUPPORT_ISIM_RECORD)
     public void testGetImsPcscfAddresses_ThrowRuntimeException() throws Exception {
         assumeTrue(hasFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION, true));
         when(mMockIPhoneSubInfo.getImsPcscfAddresses(anyInt(), anyString()))
@@ -384,7 +380,6 @@ public class TelephonyManagerTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_SUPPORT_ISIM_RECORD)
     public void testGetSimServiceTableFromIsimAsByteArrayType() throws Exception {
         assumeTrue(hasFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION, true));
         String simServiceTable = "34FA754E8390BD02";
@@ -400,7 +395,6 @@ public class TelephonyManagerTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_SUPPORT_ISIM_RECORD)
     public void testGetSimServiceTableFromUsimAsByteArrayType() throws Exception {
         assumeTrue(hasFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION, true));
         String simServiceTable = "34FA754E8390BD02";
@@ -417,7 +411,6 @@ public class TelephonyManagerTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_SUPPORT_ISIM_RECORD)
     public void testGetSimServiceTable_ReturnEmptyArrayWhenNotAvailable() throws Exception {
         assumeTrue(hasFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION, true));
         Executor executor = Executors.newSingleThreadExecutor();
@@ -432,7 +425,6 @@ public class TelephonyManagerTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_SUPPORT_ISIM_RECORD)
     public void testGetSimServiceTable_CallbackErrorIfExceptionIsThrown() throws Exception {
         assumeTrue(hasFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION, true));
         Executor executor = Executors.newSingleThreadExecutor();

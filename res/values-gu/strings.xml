@@ -481,7 +481,7 @@
     <string name="delete_fdn_contact" msgid="7027405651994507077">"ફિક્સ્ડ ડાયલિંગ નંબર કાઢી નાખો"</string>
     <string name="deleting_fdn_contact" msgid="6872320570844460428">"ફિક્સ્ડ ડાયલિંગ નંબર કાઢી રહ્યાં છે..."</string>
     <string name="fdn_contact_deleted" msgid="1680714996763848838">"ફિક્સ્ડ ડાયલિંગ નંબર કાઢી નાખ્યો."</string>
-    <string name="pin2_invalid" msgid="2313954262684494442">"FDN અપડેટ થયો ન હતો કારણ કે તમે ખોટો PIN લખ્યો છે."</string>
+    <string name="pin2_invalid" msgid="7366835930615792402">"PIN2 ખોટો છો. FDN અપડેટ થયો નથી."</string>
     <string name="fdn_invalid_number" msgid="9067189814657840439">"FDNમાં <xliff:g id="FDN_NUMBER_LIMIT_LENGTH">%d</xliff:g> કરતા વધુ અંક હોવાથી તેને અપડેટ કરી શકાયો ન હતો."</string>
     <string name="pin2_or_fdn_invalid" msgid="7542639487955868181">"FDN અપડેટ થયો ન હતો. PIN2 ખોટો હતો અથવા ફોન નંબર નકારેલ હતો."</string>
     <string name="fdn_failed" msgid="216592346853420250">"FDN ઓપરેશન નિષ્ફળ થયું."</string>
