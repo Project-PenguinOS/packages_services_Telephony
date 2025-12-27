@@ -305,13 +305,13 @@ public class ImsConferenceController {
                 Log.d(this, "recalc - %s %s", conference.getState(), conference);
             }
 
-// QTI_BEGIN: 2020-02-07: Telephony: IMS: Do not skip adding conference to conferenceable set
             boolean multiPartyAnchorConfSupported =
                     android.telecom.flags.Flags.multiPartyAnchorConf() &&
                     conference.getCarrierConfig() != null &&
                     conference.getCarrierConfig().isMultiPartyAnchorConfSupported();
 
             if (!conference.isConferenceHost() && !multiPartyAnchorConfSupported &&
+// QTI_BEGIN: 2020-02-07: Telephony: IMS: Do not skip adding conference to conferenceable set
                     (!conference.isMultiAnchorConferenceSupported())) {
 // QTI_END: 2020-02-07: Telephony: IMS: Do not skip adding conference to conferenceable set
                 if (Log.VERBOSE) {
