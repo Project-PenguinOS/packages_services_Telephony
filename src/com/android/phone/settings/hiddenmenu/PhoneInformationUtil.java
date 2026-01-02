@@ -73,6 +73,7 @@ import android.widget.TextView;
 
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneFactory;
+import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.configupdate.TelephonyConfigUpdateInstallReceiver;
 import com.android.internal.telephony.satellite.SatelliteConfig;
 import com.android.internal.telephony.satellite.SatelliteConfigParser;
@@ -456,6 +457,60 @@ public class PhoneInformationUtil {
             "NR/LTE/TDSCDMA/CDMA/EvDo/GSM/WCDMA",
             "Unknown"
     };
+
+    public static final String[] PREFERRED_NETWORK_LABELS_RF = {
+            "GSM/WCDMA preferred",
+            "GSM only",
+            "WCDMA only",
+            "GSM/WCDMA auto (PRL)",
+            "GSM/WCDMA/LTE (PRL)",
+            "LTE only",
+            "LTE/WCDMA",
+            "TDSCDMA only",
+            "TDSCDMA/WCDMA",
+            "LTE/TDSCDMA",
+            "TDSCDMA/GSM",
+            "LTE/TDSCDMA/GSM",
+            "TDSCDMA/GSM/WCDMA",
+            "LTE/TDSCDMA/WCDMA",
+            "LTE/TDSCDMA/GSM/WCDMA",
+            "NR only",
+            "NR/LTE",
+            "NR/LTE/GSM/WCDMA",
+            "NR/LTE/WCDMA",
+            "NR/LTE/TDSCDMA",
+            "NR/LTE/TDSCDMA/GSM",
+            "NR/LTE/TDSCDMA/WCDMA",
+            "NR/LTE/TDSCDMA/GSM/WCDMA",
+            "Unknown"
+    };
+
+    public static final List<Integer> PREFERRED_NETWORK_MODES_RF = Arrays.asList(
+            RILConstants.NETWORK_MODE_WCDMA_PREF,
+            RILConstants.NETWORK_MODE_GSM_ONLY,
+            RILConstants.NETWORK_MODE_WCDMA_ONLY,
+            RILConstants.NETWORK_MODE_GSM_UMTS,
+            RILConstants.NETWORK_MODE_LTE_GSM_WCDMA,
+            RILConstants.NETWORK_MODE_LTE_ONLY,
+            RILConstants.NETWORK_MODE_LTE_WCDMA,
+            RILConstants.NETWORK_MODE_TDSCDMA_ONLY,
+            RILConstants.NETWORK_MODE_TDSCDMA_WCDMA,
+            RILConstants.NETWORK_MODE_LTE_TDSCDMA,
+            RILConstants.NETWORK_MODE_TDSCDMA_GSM,
+            RILConstants.NETWORK_MODE_LTE_TDSCDMA_GSM,
+            RILConstants.NETWORK_MODE_TDSCDMA_GSM_WCDMA,
+            RILConstants.NETWORK_MODE_LTE_TDSCDMA_WCDMA,
+            RILConstants.NETWORK_MODE_LTE_TDSCDMA_GSM_WCDMA,
+            RILConstants.NETWORK_MODE_NR_ONLY,
+            RILConstants.NETWORK_MODE_NR_LTE,
+            RILConstants.NETWORK_MODE_NR_LTE_GSM_WCDMA,
+            RILConstants.NETWORK_MODE_NR_LTE_WCDMA,
+            RILConstants.NETWORK_MODE_NR_LTE_TDSCDMA,
+            RILConstants.NETWORK_MODE_NR_LTE_TDSCDMA_GSM,
+            RILConstants.NETWORK_MODE_NR_LTE_TDSCDMA_WCDMA,
+            RILConstants.NETWORK_MODE_NR_LTE_TDSCDMA_GSM_WCDMA,
+            -1  // Unknown
+    );
 
     public static final Integer[]SIGNAL_STRENGTH_LEVEL =
             new Integer[] {
