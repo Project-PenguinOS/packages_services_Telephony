@@ -318,6 +318,9 @@ final class PstnIncomingCallNotifier {
         extras.putLong(EXTRA_CALL_CREATED_TIME_MILLIS, SystemClock.elapsedRealtime());
 
         if (connection.getPhoneType() == PhoneConstants.PHONE_TYPE_IMS) {
+            // Ensure starting video state is reported on the call.
+            extras.putInt(TelecomManager.EXTRA_INCOMING_VIDEO_STATE,
+                    ((ImsPhoneConnection) connection).getVideoState());
             if (((ImsPhoneConnection) connection).isRttEnabledForCall()) {
                 extras.putBoolean(TelecomManager.EXTRA_START_CALL_WITH_RTT, true);
             }
