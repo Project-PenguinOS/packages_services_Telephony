@@ -13,6 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+ /*
+ * ​​​​​Changes from Qualcomm Technologies, Inc. are provided under the following license:
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+ * SPDX-License-Identifier: BSD-3-Clause-Clear
+ */
 package com.android.phone.settings.hiddenmenu;
 
 import static android.telephony.CarrierConfigManager.KEY_CARRIER_ROAMING_SATELLITE_DEFAULT_SERVICES_INT_ARRAY;
@@ -77,10 +83,15 @@ import com.android.internal.telephony.configupdate.TelephonyConfigUpdateInstallR
 import com.android.internal.telephony.satellite.SatelliteConfig;
 import com.android.internal.telephony.satellite.SatelliteConfigParser;
 import com.android.phone.R;
+import com.qti.extphone.ExtTelephonyManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.IntStream;
 
 public class PhoneInformationUtil {
     private static final String DSDS_MODE_PROPERTY = "ro.boot.hardware.dsds";
@@ -1158,5 +1169,51 @@ public class PhoneInformationUtil {
         }
 
         return carrierId + " (" + carrierIdName + ")";
+    }
+
+    public static boolean isTdscdmaSupported(Context context) {
+        return ExtTelephonyManager.getInstance(context).isFeatureSupported(
+                ExtTelephonyManager.FEATURE_TDSCDMA_SUPPORT);
+    }
+
+    public static boolean isCdmaSupported(Context context) {
+        PackageManager pm = context.getPackageManager();
+        return pm != null ? pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY_CDMA) : false;
+    }
+
+    public static String[] getUpdatedPrefNwLabels(Context context) {
+        final ArrayList<String> updatedPrefdNwLabels = new ArrayList<>();
+        final boolean tdscdmaSupported = isTdscdmaSupported(context);
+        final boolean cdmaSupported = isCdmaSupported(context);
+        log("tdscdmaSupported " + tdscdmaSupported + ", cdmaSupported " + cdmaSupported);
+        // Exclude CDMA/TDSCDMA RATs if unsupported
+        final Pattern pattern = Pattern.compile("(?<!W|TDS)CDMA|EvDo");
+        for (int i = 0; i < PREFERRED_NETWORK_LABELS.length; i++) {
+            String entry = PREFERRED_NETWORK_LABELS[i];
+            Matcher matcher = pattern.matcher(entry);
+            if (cdmaSupported || !matcher.find()) {
+                updatedPrefdNwLabels.add(entry);
+            }
+            if (!tdscdmaSupported && entry.contains("TDSCDMA")) {
+                updatedPrefdNwLabels.remove(entry);
+            }
+        }
+        return updatedPrefdNwLabels.toArray(new String[updatedPrefdNwLabels.size()]);
+    }
+
+    public static HashMap<String, Integer> createPrefNwLabelsToValueFullMapping() {
+        final HashMap<String, Integer> prefNwLabelToIntMap = new HashMap<>();
+        for (int i = 0; i < PREFERRED_NETWORK_LABELS.length; i++) {
+            String entry = PREFERRED_NETWORK_LABELS[i];
+            prefNwLabelToIntMap.put(entry, i);
+        }
+        return prefNwLabelToIntMap;
+    }
+
+    public static int getPrefNwTypeIndexFromUpdatedArray(int type, String[] updatedPrefNwLabels) {
+        return IntStream.range(0, updatedPrefNwLabels.length)
+                .filter(i -> updatedPrefNwLabels[i].equals(PREFERRED_NETWORK_LABELS[type]))
+                .findFirst()
+                .orElse(-1);
     }
 }

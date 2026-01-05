@@ -78,6 +78,7 @@ import com.android.internal.telephony.PhoneFactory;
 import com.android.phone.R;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -152,6 +153,9 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
     private static final String[] CELL_INFO_REFRESH_RATE_LABELS = {
         "Disabled", "Immediate", "Min 5s", "Min 10s", "Min 60s"
     };
+
+    private String[] mUpdatedPrefNwLabels;
+    private HashMap<String, Integer> mPrefNwLabelToIntMap = new HashMap<>();
 
     // Values in seconds, must match CELL_INFO_REFRESH_RATE_LABELS
     private static final int[] CELL_INFO_REFRESH_RATES = {
@@ -254,16 +258,17 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
         mCellInfo = (TextView) view.findViewById(R.id.cellinfo);
         mCellInfo.setTypeface(Typeface.MONOSPACE);
         mPreferredNetworkType = (Spinner) view.findViewById(R.id.preferredNetworkType);
+        mPrefNwLabelToIntMap = PhoneInformationUtil.createPrefNwLabelsToValueFullMapping();
+        mUpdatedPrefNwLabels = PhoneInformationUtil.getUpdatedPrefNwLabels(mContext);
         ArrayAdapter<String> mPreferredNetworkTypeAdapter =
                 new ArrayAdapter<String>(
                         mContext,
                         android.R.layout.simple_spinner_item,
-                        PhoneInformationUtil.PREFERRED_NETWORK_LABELS);
+                        mUpdatedPrefNwLabels);
         mPreferredNetworkTypeAdapter.setDropDownViewResource(
                 android.R.layout.simple_spinner_dropdown_item);
         mPreferredNetworkType.setAdapter(mPreferredNetworkTypeAdapter);
-        mPreferredNetworkTypeResult =
-                PhoneInformationUtil.PREFERRED_NETWORK_LABELS.length - 1; // Unknown
+        mPreferredNetworkTypeResult = mUpdatedPrefNwLabels.length - 1; // Unknown
 
         mMockSignalStrength = (Spinner) view.findViewById(R.id.signalStrength);
         if (!Build.isDebuggable() || !mSystemUser) {
@@ -446,7 +451,7 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
         mPreferredNetworkTypeResult =
                 b.getInt(
                         "mPreferredNetworkTypeResult",
-                        PhoneInformationUtil.PREFERRED_NETWORK_LABELS.length - 1);
+                        mUpdatedPrefNwLabels.length - 1);
 
         mPhoneId = b.getInt("mSelectedPhoneIndex", 0);
         mSubId = SubscriptionManager.getSubscriptionId(mPhoneId);
@@ -852,10 +857,12 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
     private void updatePreferredNetworkType(int type) {
         if (type >= PhoneInformationUtil.PREFERRED_NETWORK_LABELS.length || type < 0) {
             log("Network type: unknown type value=" + type);
-            type = PhoneInformationUtil.PREFERRED_NETWORK_LABELS.length - 1; // set to Unknown
+            mPreferredNetworkTypeResult = mUpdatedPrefNwLabels.length - 1; //set to Unknown
+        } else {
+            int index = PhoneInformationUtil.
+                    getPrefNwTypeIndexFromUpdatedArray(type, mUpdatedPrefNwLabels);
+            mPreferredNetworkTypeResult = (index != -1) ? index : mUpdatedPrefNwLabels.length - 1;
         }
-        mPreferredNetworkTypeResult = type;
-
         mPreferredNetworkType.setSelection(mPreferredNetworkTypeResult, true);
     }
 
@@ -1136,8 +1143,9 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
                 public void onItemSelected(AdapterView parent, View v, int pos, long id) {
                     if (mPreferredNetworkTypeResult != pos
                             && pos >= 0
-                            && pos <= PhoneInformationUtil.PREFERRED_NETWORK_LABELS.length - 2) {
-                        mPreferredNetworkTypeResult = pos;
+                            && pos <= mUpdatedPrefNwLabels.length - 2) {
+                        final String prefNwLabel = mUpdatedPrefNwLabels[pos];
+                        mPreferredNetworkTypeResult = mPrefNwLabelToIntMap.get(prefNwLabel);
                         new Thread(
                                         () -> {
                                             mTelephonyManager.setAllowedNetworkTypesForReason(
