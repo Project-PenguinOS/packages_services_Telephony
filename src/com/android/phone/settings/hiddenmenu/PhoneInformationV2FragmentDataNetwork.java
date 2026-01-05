@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+/*
+ * Changes from Qualcomm Technologies, Inc. are provided under the following license:
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+ * SPDX-License-Identifier: BSD-3-Clause-Clear
+ */
 package com.android.phone.settings.hiddenmenu;
 
 import static android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VIDEO;
@@ -719,22 +724,35 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
 
 // QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
     private void updateVoLteState() {
+        if (!SubscriptionManager.isValidSubscriptionId(mSubId)) {
+            mEnableVoLteSwitch.setEnabled(false);
+            mEnableVoLteSwitch.setChecked(false);
+            return;
+        }
         ImsMmTelManager imsMmTelManager = mImsManager.getImsMmTelManager(mSubId);
         mEnableVoLteSwitch.setChecked(PhoneInformationUtil.isVolteEnabled(imsMmTelManager));
+        mEnableVoLteSwitch.setEnabled(true);
         mEnableVoLteSwitch.setOnCheckedChangeListener(mVoLteOnChangeListener);
     }
 
     private void updateVoNrState() {
+        if (!SubscriptionManager.isValidSubscriptionId(mSubId)) {
+            mEnableVoNrSwitch.setEnabled(false);
+            mEnableVoNrSwitch.setChecked(false);
+            return;
+        }
+        final int subId = mSubId;
         mQueuedWork.execute(new Runnable() {
             public void run() {
-                ImsMmTelManager imsMmTelManager = mImsManager.getImsMmTelManager(mSubId);
+                if (subId != mSubId) {
+                    return;
+                }
+                ImsMmTelManager imsMmTelManager = mImsManager.getImsMmTelManager(subId);
                 boolean voNrEnabled = PhoneInformationUtil.isVoNrEnabled(mTelephonyManager);
                 boolean voLteEnabled = PhoneInformationUtil.isVolteEnabled(imsMmTelManager);
                 mHandler.post(() -> {
                     mEnableVoNrSwitch.setChecked(voNrEnabled);
-
-                    // Disable VoNr option if VoLte is disabled
-                    if (!voLteEnabled) mEnableVoNrSwitch.setEnabled(false);
+                    mEnableVoNrSwitch.setEnabled(voLteEnabled);
                 });
             }
         });
@@ -1241,19 +1259,24 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
             return;
         }
 
+        final int subId = mSubId;
+        final int phoneId = mPhoneId;
         mQueuedWork.execute(new Runnable() {
             public void run() {
-                ImsMmTelManager imsMmTelManager = mImsManager.getImsMmTelManager(mSubId);
+                if (subId != mSubId) {
+                    return;
+                }
+                ImsMmTelManager imsMmTelManager = mImsManager.getImsMmTelManager(subId);
                 try {
                     if (isChecked != PhoneInformationUtil.isVolteEnabled(imsMmTelManager)) {
                         if (isChecked) {
-                            mTelephonyManager.enableIms(mPhoneId);
+                            mTelephonyManager.enableIms(phoneId);
                         } else {
-                            mTelephonyManager.disableIms(mPhoneId);
+                            mTelephonyManager.disableIms(phoneId);
                         }
                     }
                 } catch (Exception e) {
-                    Log.e(TAG, "fail to set VoLTE=" + isChecked + ". subId=" + mSubId, e);
+                    Log.e(TAG, "fail to set VoLTE=" + isChecked + ". subId=" + subId, e);
                 }
 
                 mHandler.post(() -> {
@@ -1277,18 +1300,21 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
                 || (mTelephonyManager == null)) {
             return;
         }
-
+        final int subId = mSubId;
         mQueuedWork.execute(new Runnable() {
             public void run() {
+                if (subId != mSubId) {
+                    return;
+                }
                 try {
                     boolean isVoNrEnabled =
                             PhoneInformationUtil.isVoNrEnabled(mTelephonyManager);
                     if (isVoNrEnabled != isChecked) {
                         mTelephonyManager.setVoNrEnabled(isChecked);
-                        Log.d(TAG, "set VoNR state to " + isChecked + " on subId=" + mSubId);
+                        Log.d(TAG, "set VoNR state to " + isChecked + " on subId=" + subId);
                     }
                 } catch (Exception e) {
-                    Log.e(TAG, "fail to set VoNr=" + isChecked + ". subId=" + mSubId, e);
+                    Log.e(TAG, "fail to set VoNr=" + isChecked + ". subId=" + subId, e);
                 }
             }
         });
