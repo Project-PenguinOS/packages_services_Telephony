@@ -12,16 +12,20 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Changes from Qualcomm Technologies, Inc. are provided under the following license:
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+ * SPDX-License-Identifier: BSD-3-Clause-Clear
  */
 
 package com.android.phone;
 
 import android.app.ActionBar;
-// QTI_BEGIN: 2018-05-08: Telephony: IMS: Call barring enhancement for UT
+// QTI_BEGIN: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
 import android.app.AlertDialog;
-// QTI_END: 2018-05-08: Telephony: IMS: Call barring enhancement for UT
+// QTI_END: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
 import android.app.Dialog;
-// QTI_BEGIN: 2018-05-08: Telephony: IMS: Call barring enhancement for UT
+// QTI_BEGIN: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -29,13 +33,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-// QTI_END: 2018-05-08: Telephony: IMS: Call barring enhancement for UT
+// QTI_END: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
 import android.os.AsyncResult;
 import android.os.Bundle;
-// QTI_BEGIN: 2018-05-08: Telephony: IMS: Call barring enhancement for UT
+// QTI_BEGIN: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
 import android.os.PersistableBundle;
 import android.os.SystemProperties;
-// QTI_END: 2018-05-08: Telephony: IMS: Call barring enhancement for UT
+// QTI_END: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
 import android.os.Handler;
 import android.os.Message;
 import android.os.PersistableBundle;
@@ -44,9 +48,9 @@ import android.preference.PreferenceScreen;
 // QTI_BEGIN: 2020-04-28: Telephony: Redirect to AOSP ACTION_NETWORK_OPERATOR_SETTINGS
 import android.provider.Settings;
 // QTI_END: 2020-04-28: Telephony: Redirect to AOSP ACTION_NETWORK_OPERATOR_SETTINGS
-// QTI_BEGIN: 2018-05-08: Telephony: IMS: Call barring enhancement for UT
+// QTI_BEGIN: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
 import android.telephony.CarrierConfigManager;
-// QTI_END: 2018-05-08: Telephony: IMS: Call barring enhancement for UT
+// QTI_END: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -58,10 +62,10 @@ import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.GsmCdmaPhone;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.imsphone.ImsPhone;
-// QTI_BEGIN: 2018-05-08: Telephony: IMS: Call barring enhancement for UT
+// QTI_BEGIN: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
-// QTI_END: 2018-05-08: Telephony: IMS: Call barring enhancement for UT
+// QTI_END: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
 import com.android.phone.settings.fdn.EditPinPreference;
 
 import java.util.ArrayList;
@@ -71,10 +75,10 @@ import java.util.ArrayList;
  * the dialogs to change the passward.
  */
 public class GsmUmtsCallBarringOptions extends TimeConsumingPreferenceActivity
-// QTI_BEGIN: 2018-05-08: Telephony: IMS: Call barring enhancement for UT
+// QTI_BEGIN: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
         implements EditPinPreference.OnPinEnteredListener,
         DialogInterface.OnClickListener, DialogInterface.OnCancelListener {
-// QTI_END: 2018-05-08: Telephony: IMS: Call barring enhancement for UT
+// QTI_END: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
     private static final String LOG_TAG = "GsmUmtsCallBarringOptions";
     private static final boolean DBG = (PhoneGlobals.DBG_LEVEL >= 2);
 
@@ -101,9 +105,9 @@ public class GsmUmtsCallBarringOptions extends TimeConsumingPreferenceActivity
     private static final String DIALOG_MESSAGE_KEY = "dialog_message_key";
     private static final String DIALOG_PW_ENTRY_KEY = "dialog_pw_enter_key";
     private static final String KEY_STATUS = "toggle";
-// QTI_BEGIN: 2022-12-14: Telephony: IMS: Display call barring password UI conditionally
+// QTI_BEGIN: 2022-12-13: Telephony: IMS: Display call barring password UI conditionally
     private static final String KEY_PASSWORD_ENABLED = "password_enabled";
-// QTI_END: 2022-12-14: Telephony: IMS: Display call barring password UI conditionally
+// QTI_END: 2022-12-13: Telephony: IMS: Display call barring password UI conditionally
     private static final String PREFERENCE_ENABLED_KEY = "PREFERENCE_ENABLED";
     private static final String SAVED_BEFORE_LOAD_COMPLETED_KEY = "PROGRESS_SHOWING";
 
@@ -120,14 +124,14 @@ public class GsmUmtsCallBarringOptions extends TimeConsumingPreferenceActivity
     private String mOldPassword;
     private String mNewPassword;
     private int mPwChangeDialogStrId;
-// QTI_BEGIN: 2022-12-14: Telephony: IMS: Display call barring password UI conditionally
+// QTI_BEGIN: 2022-12-13: Telephony: IMS: Display call barring password UI conditionally
     // Holds Carrier config value - config_disable_change_password_over_ims
     private boolean mConfigDisableChangePwOverIms = false;
 
     // Determines whether network requires password to be sent with setCallBarring request.
     // Value comes from getCallBarring response for IMS
     private boolean mPasswordRequiredOverIms = true;
-// QTI_END: 2022-12-14: Telephony: IMS: Display call barring password UI conditionally
+// QTI_END: 2022-12-13: Telephony: IMS: Display call barring password UI conditionally
 
     private static final int PW_CHANGE_OLD = 0;
     private static final int PW_CHANGE_NEW = 1;
@@ -150,18 +154,18 @@ public class GsmUmtsCallBarringOptions extends TimeConsumingPreferenceActivity
     private boolean mFirstResume;
     private Bundle mIcicle;
 
-// QTI_BEGIN: 2018-05-08: Telephony: IMS: Call barring enhancement for UT
+// QTI_BEGIN: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
     private BroadcastReceiver mReceiver = null;
     private boolean mCheckData = false;
-// QTI_END: 2018-05-08: Telephony: IMS: Call barring enhancement for UT
+// QTI_END: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
     private SubscriptionInfoHelper mSubscriptionInfoHelper;
-// QTI_BEGIN: 2018-05-08: Telephony: IMS: Call barring enhancement for UT
+// QTI_BEGIN: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
     private SubscriptionManager mSubscriptionManager;
-// QTI_END: 2018-05-08: Telephony: IMS: Call barring enhancement for UT
+// QTI_END: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
     private Dialog mProgressDialog;
-// QTI_BEGIN: 2018-05-08: Telephony: IMS: Call barring enhancement for UT
+// QTI_BEGIN: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
     AlertDialog.Builder mBuilder = null;
-// QTI_END: 2018-05-08: Telephony: IMS: Call barring enhancement for UT
+// QTI_END: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
 
     @Override
     public void onPinEntered(EditPinPreference preference, boolean positiveResult) {
@@ -198,9 +202,14 @@ public class GsmUmtsCallBarringOptions extends TimeConsumingPreferenceActivity
         }
 
         // Submit the disable all request
+        disableAllBarringWithPassword(password);
+    }
+
+    protected void disableAllBarringWithPassword(String password) {
         mButtonDisableAll.setText("");
         Message onComplete = mHandler.obtainMessage(EVENT_DISABLE_ALL_COMPLETE);
-        mPhone.setCallBarring(CommandsInterface.CB_FACILITY_BA_ALL, false, password, onComplete, 0);
+        mPhone.setCallBarring(CommandsInterface.CB_FACILITY_BA_ALL, false, password, onComplete,
+            CallBarringEditPreference.getServiceClassForCallBarring(mPhone));
         this.onStarted(mButtonDisableAll, false);
     }
 
@@ -397,14 +406,14 @@ public class GsmUmtsCallBarringOptions extends TimeConsumingPreferenceActivity
         return password != null && password.length() == PW_LENGTH;
     }
 
-// QTI_BEGIN: 2022-12-14: Telephony: IMS: Display call barring password UI conditionally
+// QTI_BEGIN: 2022-12-13: Telephony: IMS: Display call barring password UI conditionally
     private boolean canExpectMoreCallBarringReq() {
-// QTI_END: 2022-12-14: Telephony: IMS: Display call barring password UI conditionally
-// QTI_BEGIN: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_END: 2022-12-13: Telephony: IMS: Display call barring password UI conditionally
+// QTI_BEGIN: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
         return (mInitIndex < mPreferences.size()-1);
     }
 
-// QTI_END: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_END: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
     @Override
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
@@ -480,21 +489,21 @@ public class GsmUmtsCallBarringOptions extends TimeConsumingPreferenceActivity
         mPreferences.add(mButtonBAICr);
 
         boolean useDisableaAll = true;
-// QTI_BEGIN: 2018-05-08: Telephony: IMS: Call barring enhancement for UT
+// QTI_BEGIN: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
         boolean disableOutCallBarringOverIms = false;
-// QTI_END: 2018-05-08: Telephony: IMS: Call barring enhancement for UT
+// QTI_END: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
 
         ImsPhone imsPhone = mPhone != null ? (ImsPhone) mPhone.getImsPhone() : null;
 // QTI_BEGIN: 2019-04-26: Telephony: IMS: Disable password if ims UT is enabled.
         if (imsPhone != null && imsPhone.isUtEnabled()) {
 // QTI_END: 2019-04-26: Telephony: IMS: Disable password if ims UT is enabled.
             useDisableaAll = false;
-// QTI_BEGIN: 2020-04-02: Telephony: IMS: Grey out change password option for Call Barring
+// QTI_BEGIN: 2020-04-01: Telephony: IMS: Grey out change password option for Call Barring
             disableOutCallBarringOverIms = isDisableOutCallBarringOverIms();
-// QTI_END: 2020-04-02: Telephony: IMS: Grey out change password option for Call Barring
-// QTI_BEGIN: 2022-12-14: Telephony: IMS: Display call barring password UI conditionally
+// QTI_END: 2020-04-01: Telephony: IMS: Grey out change password option for Call Barring
+// QTI_BEGIN: 2022-12-13: Telephony: IMS: Display call barring password UI conditionally
             mConfigDisableChangePwOverIms = isDisableChangePasswordOverIms();
-// QTI_END: 2022-12-14: Telephony: IMS: Display call barring password UI conditionally
+// QTI_END: 2022-12-13: Telephony: IMS: Display call barring password UI conditionally
         }
 
         // Find out if the sim card is ready.
@@ -502,7 +511,7 @@ public class GsmUmtsCallBarringOptions extends TimeConsumingPreferenceActivity
                 SubscriptionManager.getSlotIndex(mPhone.getSubId()))
                         == TelephonyManager.SIM_STATE_READY;
 
-// QTI_BEGIN: 2018-05-08: Telephony: IMS: Call barring enhancement for UT
+// QTI_BEGIN: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
         // Change outgoing CB options are unavailable when sim card is not reay or when the carrier
         // config is true.
         if (isSimReady && !disableOutCallBarringOverIms) {
@@ -515,19 +524,24 @@ public class GsmUmtsCallBarringOptions extends TimeConsumingPreferenceActivity
             mButtonBAOICxH.setEnabled(false);
         }
 
-// QTI_END: 2018-05-08: Telephony: IMS: Call barring enhancement for UT
-        // Deactivate all option is unavailable when sim card is not ready or Ut is enabled.
-        if (isSimReady && useDisableaAll) {
-            mButtonDisableAll.setEnabled(true);
+// QTI_END: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
+        // Deactivate all option is unavailable when sim card is not ready or when the feature
+        // is not supported by Modem
+        if (isSimReady) {
+            if(useDisableaAll) {
+                mButtonDisableAll.setEnabled(true);
+            } else {
+                mButtonDisableAll.init(this,mPhone);
+            }
         } else {
             mButtonDisableAll.setEnabled(false);
         }
 
         // Change password option is unavailable when sim card is not ready or when the password is
         // not used.
-// QTI_BEGIN: 2022-12-14: Telephony: IMS: Display call barring password UI conditionally
+// QTI_BEGIN: 2022-12-13: Telephony: IMS: Display call barring password UI conditionally
         if (isSimReady && !mConfigDisableChangePwOverIms) {
-// QTI_END: 2022-12-14: Telephony: IMS: Display call barring password UI conditionally
+// QTI_END: 2022-12-13: Telephony: IMS: Display call barring password UI conditionally
             mButtonChangePW.setEnabled(true);
         } else {
             mButtonChangePW.setEnabled(false);
@@ -554,10 +568,10 @@ public class GsmUmtsCallBarringOptions extends TimeConsumingPreferenceActivity
             for (CallBarringEditPreference pref : mPreferences) {
                 Bundle bundle = mIcicle.getParcelable(pref.getKey());
                 if (bundle != null) {
-// QTI_BEGIN: 2022-12-14: Telephony: IMS: Display call barring password UI conditionally
+// QTI_BEGIN: 2022-12-13: Telephony: IMS: Display call barring password UI conditionally
                     pref.handleCallBarringResult(bundle.getBoolean(KEY_STATUS),
                                 bundle.getBoolean(KEY_PASSWORD_ENABLED));
-// QTI_END: 2022-12-14: Telephony: IMS: Display call barring password UI conditionally
+// QTI_END: 2022-12-13: Telephony: IMS: Display call barring password UI conditionally
                     pref.init(this, true, mPhone);
                     pref.setEnabled(bundle.getBoolean(PREFERENCE_ENABLED_KEY, pref.isEnabled()));
                 }
@@ -568,17 +582,17 @@ public class GsmUmtsCallBarringOptions extends TimeConsumingPreferenceActivity
             displayPwChangeDialog(mIcicle.getInt(DIALOG_MESSAGE_KEY, mPwChangeDialogStrId), false);
             mButtonChangePW.setText(mIcicle.getString(DIALOG_PW_ENTRY_KEY));
         }
-// QTI_BEGIN: 2018-05-08: Telephony: IMS: Call barring enhancement for UT
+// QTI_BEGIN: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
 
         PersistableBundle pb = configManager.getConfigForSubId(mPhone.getSubId());
         mCheckData = pb.getBoolean("check_mobile_data_for_cf");
-// QTI_END: 2018-05-08: Telephony: IMS: Call barring enhancement for UT
+// QTI_END: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
     }
 
     @Override
     public void onResume() {
         super.onResume();
-// QTI_BEGIN: 2018-05-08: Telephony: IMS: Call barring enhancement for UT
+// QTI_BEGIN: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
         if (mCheckData) {
             IntentFilter intentFilter = new IntentFilter();
             intentFilter.addAction(TelephonyIntents.ACTION_ANY_DATA_CONNECTION_STATE_CHANGED);
@@ -591,8 +605,8 @@ public class GsmUmtsCallBarringOptions extends TimeConsumingPreferenceActivity
         }
     }
 
-// QTI_END: 2018-05-08: Telephony: IMS: Call barring enhancement for UT
-// QTI_BEGIN: 2019-06-04: Telephony: Fix IntentReceiver leaked error
+// QTI_END: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
+// QTI_BEGIN: 2019-06-03: Telephony: Fix IntentReceiver leaked error
     @Override
     public void onPause() {
         super.onPause();
@@ -601,36 +615,39 @@ public class GsmUmtsCallBarringOptions extends TimeConsumingPreferenceActivity
         }
     }
 
-// QTI_END: 2019-06-04: Telephony: Fix IntentReceiver leaked error
-// QTI_BEGIN: 2023-04-26: Telephony: IMS: Fix serviceConnection leaked issue
+// QTI_END: 2019-06-03: Telephony: Fix IntentReceiver leaked error
+// QTI_BEGIN: 2023-04-25: Telephony: IMS: Fix serviceConnection leaked issue
     @Override
     public void onDestroy() {
         super.onDestroy();
         for (CallBarringEditPreference pref : mPreferences) {
             pref.deInit();
         }
+// QTI_END: 2023-04-25: Telephony: IMS: Fix serviceConnection leaked issue
+        mButtonDisableAll.deInit();
+// QTI_BEGIN: 2023-04-25: Telephony: IMS: Fix serviceConnection leaked issue
     }
 
-// QTI_END: 2023-04-26: Telephony: IMS: Fix serviceConnection leaked issue
-// QTI_BEGIN: 2018-05-08: Telephony: IMS: Call barring enhancement for UT
+// QTI_END: 2023-04-25: Telephony: IMS: Fix serviceConnection leaked issue
+// QTI_BEGIN: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
     private void initCallBarring () {
-// QTI_END: 2018-05-08: Telephony: IMS: Call barring enhancement for UT
+// QTI_END: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
         if (mFirstResume) {
             if (mIcicle == null || mIcicle.getBoolean(SAVED_BEFORE_LOAD_COMPLETED_KEY)) {
                 if (DBG) {
                     Log.d(LOG_TAG, "onResume: start to init ");
                 }
                 resetPwChangeState();
-// QTI_BEGIN: 2018-05-08: Telephony: IMS: Call barring enhancement for UT
+// QTI_BEGIN: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
                 if (isDisableOutCallBarringOverIms() && mPhone.isUtEnabled()) {
                     //if disable outgoing call barring over ims, ignore all outgoing query
                     // and start query from incoming barring
                     mInitIndex = 3;
                 }
-// QTI_END: 2018-05-08: Telephony: IMS: Call barring enhancement for UT
-// QTI_BEGIN: 2022-12-14: Telephony: IMS: Display call barring password UI conditionally
+// QTI_END: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
+// QTI_BEGIN: 2022-12-13: Telephony: IMS: Display call barring password UI conditionally
                 mPreferences.get(mInitIndex).setExpectMore(canExpectMoreCallBarringReq());
-// QTI_END: 2022-12-14: Telephony: IMS: Display call barring password UI conditionally
+// QTI_END: 2022-12-13: Telephony: IMS: Display call barring password UI conditionally
                 mPreferences.get(mInitIndex).init(this, false, mPhone);
 
                 // Request removing BUSY_SAVING_DIALOG because reading is restarted.
@@ -649,9 +666,9 @@ public class GsmUmtsCallBarringOptions extends TimeConsumingPreferenceActivity
         for (CallBarringEditPreference pref : mPreferences) {
             Bundle bundle = new Bundle();
             bundle.putBoolean(KEY_STATUS, pref.mIsActivated);
-// QTI_BEGIN: 2022-12-14: Telephony: IMS: Display call barring password UI conditionally
+// QTI_BEGIN: 2022-12-13: Telephony: IMS: Display call barring password UI conditionally
             bundle.putBoolean(KEY_PASSWORD_ENABLED, pref.isPasswordEnabled());
-// QTI_END: 2022-12-14: Telephony: IMS: Display call barring password UI conditionally
+// QTI_END: 2022-12-13: Telephony: IMS: Display call barring password UI conditionally
             bundle.putBoolean(PREFERENCE_ENABLED_KEY, pref.isEnabled());
             outState.putParcelable(pref.getKey(), bundle);
         }
@@ -675,9 +692,9 @@ public class GsmUmtsCallBarringOptions extends TimeConsumingPreferenceActivity
     public void onFinished(Preference preference, boolean reading) {
         if (mInitIndex < mPreferences.size() - 1 && !isFinishing()) {
             mInitIndex++;
-// QTI_BEGIN: 2022-12-14: Telephony: IMS: Display call barring password UI conditionally
+// QTI_BEGIN: 2022-12-13: Telephony: IMS: Display call barring password UI conditionally
             mPreferences.get(mInitIndex).setExpectMore(canExpectMoreCallBarringReq());
-// QTI_END: 2022-12-14: Telephony: IMS: Display call barring password UI conditionally
+// QTI_END: 2022-12-13: Telephony: IMS: Display call barring password UI conditionally
             mPreferences.get(mInitIndex).init(this, false, mPhone);
         }
         super.onFinished(preference, reading);
@@ -703,22 +720,22 @@ public class GsmUmtsCallBarringOptions extends TimeConsumingPreferenceActivity
             mProgressDialog = dialog;
         }
     }
-// QTI_BEGIN: 2018-05-08: Telephony: IMS: Call barring enhancement for UT
+// QTI_BEGIN: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
 
     private boolean isDisableOutCallBarringOverIms() {
         CarrierConfigManager configManager = (CarrierConfigManager)getSystemService(
                  Context.CARRIER_CONFIG_SERVICE);
         PersistableBundle pb = configManager.getConfigForSubId(mPhone.getSubId());
 
-// QTI_END: 2018-05-08: Telephony: IMS: Call barring enhancement for UT
-// QTI_BEGIN: 2020-04-02: Telephony: IMS: Grey out change password option for Call Barring
+// QTI_END: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
+// QTI_BEGIN: 2020-04-01: Telephony: IMS: Grey out change password option for Call Barring
         return pb != null ? pb.getBoolean("config_disable_outgoing_callbarring_over_ims") : false;
-// QTI_END: 2020-04-02: Telephony: IMS: Grey out change password option for Call Barring
-// QTI_BEGIN: 2018-05-08: Telephony: IMS: Call barring enhancement for UT
+// QTI_END: 2020-04-01: Telephony: IMS: Grey out change password option for Call Barring
+// QTI_BEGIN: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
     }
 
-// QTI_END: 2018-05-08: Telephony: IMS: Call barring enhancement for UT
-// QTI_BEGIN: 2020-04-02: Telephony: IMS: Grey out change password option for Call Barring
+// QTI_END: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
+// QTI_BEGIN: 2020-04-01: Telephony: IMS: Grey out change password option for Call Barring
     private boolean isDisableChangePasswordOverIms() {
         CarrierConfigManager configManager = (CarrierConfigManager)getSystemService(
                  Context.CARRIER_CONFIG_SERVICE);
@@ -726,8 +743,8 @@ public class GsmUmtsCallBarringOptions extends TimeConsumingPreferenceActivity
 
         return pb != null ? pb.getBoolean("config_disable_change_password_over_ims") : false;
     }
-// QTI_END: 2020-04-02: Telephony: IMS: Grey out change password option for Call Barring
-// QTI_BEGIN: 2018-05-08: Telephony: IMS: Call barring enhancement for UT
+// QTI_END: 2020-04-01: Telephony: IMS: Grey out change password option for Call Barring
+// QTI_BEGIN: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
     /**
      * Receiver for intent broadcasts the Phone app cares about.
      */
@@ -769,15 +786,15 @@ public class GsmUmtsCallBarringOptions extends TimeConsumingPreferenceActivity
                 ", checkMobileDataForCb = " + mCheckData + " defaultDataSub is : " +
                 defaultDataSub + " current sub is : " + sub);
 
-// QTI_END: 2018-05-08: Telephony: IMS: Call barring enhancement for UT
-// QTI_BEGIN: 2023-03-29: Telephony: Remove switch DDS dialog
+// QTI_END: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
+// QTI_BEGIN: 2023-03-28: Telephony: Remove switch DDS dialog
         if (sub != defaultDataSub && mPhone.isUtEnabled()) {
             Log.d(LOG_TAG, "Show data in use indication if data sub is not on current sub");
             showDataInuseToast();
             initCallBarring();
             return;
-// QTI_END: 2023-03-29: Telephony: Remove switch DDS dialog
-// QTI_BEGIN: 2018-05-08: Telephony: IMS: Call barring enhancement for UT
+// QTI_END: 2023-03-28: Telephony: Remove switch DDS dialog
+// QTI_BEGIN: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
         }
 
         if (mPhone.isUtEnabled() && mCheckData) {
@@ -841,8 +858,8 @@ public class GsmUmtsCallBarringOptions extends TimeConsumingPreferenceActivity
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 
-// QTI_END: 2018-05-08: Telephony: IMS: Call barring enhancement for UT
-// QTI_BEGIN: 2022-12-14: Telephony: IMS: Display call barring password UI conditionally
+// QTI_END: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
+// QTI_BEGIN: 2022-12-13: Telephony: IMS: Display call barring password UI conditionally
     // Since this method will be called once per get_call_barring response, compare with current
     // enable value to avoid multiple calls to UI framework APIs
     void setChangePasswordPreference(boolean passwordRequired) {
@@ -855,5 +872,9 @@ public class GsmUmtsCallBarringOptions extends TimeConsumingPreferenceActivity
             }
         }
     }
-// QTI_END: 2022-12-14: Telephony: IMS: Display call barring password UI conditionally
+// QTI_END: 2022-12-13: Telephony: IMS: Display call barring password UI conditionally
+
+    boolean getIsPasswordRequiredOverIms(){
+        return mPasswordRequiredOverIms;
+    }
 }

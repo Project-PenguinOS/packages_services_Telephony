@@ -18,9 +18,6 @@ import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.SwitchPreference;
-// QTI_BEGIN: 2020-02-11: Telephony: Add vibrating for outgoing call accepted support
-import android.provider.Settings;
-// QTI_END: 2020-02-11: Telephony: Add vibrating for outgoing call accepted support
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
 import android.telecom.TelecomManager;
@@ -229,20 +226,6 @@ public class PhoneAccountSettingsFragment extends PreferenceFragment
         return false;
     }
 
-    // Temporary changes for backforward compatibility as aconfig isn't enabled
-    public static void enableVibratingIndicator(Context context, boolean enabled) {
-        Settings.Global.putInt(context.getContentResolver(),
-                android.provider.Settings.Global.VIBRATING_FOR_OUTGOING_CALL_ACCEPTED,
-                enabled ? 1 : 0);
-    }
-
-    public static boolean getVibratingIndicatorPreference(Context context) {
-        final int pref = Settings.Global.getInt(
-                context.getContentResolver(),
-                Settings.Global.VIBRATING_FOR_OUTGOING_CALL_ACCEPTED, 1);
-        return pref != 0;
-    }
-
     @Override
     public boolean onPreferenceClick(Preference preference) {
         if (preference == mButtonVibratingForMoCallAccepted) {
@@ -250,7 +233,6 @@ public class PhoneAccountSettingsFragment extends PreferenceFragment
                     ? mCallConnectedIndicator | TelecomManager.CALL_CONNECTED_INDICATOR_VIBRATION
                     : mCallConnectedIndicator & ~TelecomManager.CALL_CONNECTED_INDICATOR_VIBRATION;
             mTelecomManager.setCallConnectedIndicatorPreference(mCallConnectedIndicator);
-            enableVibratingIndicator(getActivity(), mButtonVibratingForMoCallAccepted.isChecked());
             return true;
         } else if (preference == mButtonPlayingToneForMoCallAccepted) {
             mCallConnectedIndicator = mButtonPlayingToneForMoCallAccepted.isChecked()
@@ -571,16 +553,22 @@ public class PhoneAccountSettingsFragment extends PreferenceFragment
                     getPreferenceScreen().findPreference(SMART_FORWARDING_CONFIGURATION_PREF_KEY));
         }
 
+// QTI_BEGIN: 2022-04-06: Telephony: Fix for duplicate Vibrating button in single sim
         if (mButtonVibratingForMoCallAccepted != null) {
-            if (mTelephonyManager.isMultiSimEnabled() /*&& getResources().getBoolean(
-                    R.bool.show_call_connected_indicator_preference)*/) {
-                final boolean isVibratingEnabled = getVibratingIndicatorPreference(getActivity());
+// QTI_END: 2022-04-06: Telephony: Fix for duplicate Vibrating button in single sim
+// QTI_BEGIN: 2025-11-20: Telephony: Revert "Enable vibration preference of call connected indicator"
+            if (mTelephonyManager.isMultiSimEnabled() && getResources().getBoolean(
+                    R.bool.show_call_connected_indicator_preference)) {
+// QTI_END: 2025-11-20: Telephony: Revert "Enable vibration preference of call connected indicator"
                 mButtonVibratingForMoCallAccepted.setChecked((mCallConnectedIndicator
-                        & TelecomManager.CALL_CONNECTED_INDICATOR_VIBRATION) > 0
-                        || isVibratingEnabled);
+// QTI_BEGIN: 2025-11-20: Telephony: Revert "Enable vibration preference of call connected indicator"
+                        & TelecomManager.CALL_CONNECTED_INDICATOR_VIBRATION) > 0);
+// QTI_END: 2025-11-20: Telephony: Revert "Enable vibration preference of call connected indicator"
                 mButtonVibratingForMoCallAccepted.setOnPreferenceClickListener(this);
+// QTI_BEGIN: 2022-04-06: Telephony: Fix for duplicate Vibrating button in single sim
                 mMakeAndReceiveCallsCategoryPresent = true;
             } else {
+// QTI_END: 2022-04-06: Telephony: Fix for duplicate Vibrating button in single sim
                 mMakeAndReceiveCallsCategory.removePreference(
                         mButtonVibratingForMoCallAccepted);
             }
@@ -596,7 +584,9 @@ public class PhoneAccountSettingsFragment extends PreferenceFragment
             } else {
                 mMakeAndReceiveCallsCategory.removePreference(
                         mButtonPlayingToneForMoCallAccepted);
+// QTI_BEGIN: 2022-04-06: Telephony: Fix for duplicate Vibrating button in single sim
             }
+// QTI_END: 2022-04-06: Telephony: Fix for duplicate Vibrating button in single sim
         }
 
         if (!mMakeAndReceiveCallsCategoryPresent) {

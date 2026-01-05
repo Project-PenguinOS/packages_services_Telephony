@@ -28,8 +28,6 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true">
 
-<!-- QTI_BEGIN: 2018-02-26: Telephony: * Telephony: SIM De-personalization-->
-<!-- QTI_END: 2018-02-26: Telephony: * Telephony: SIM De-personalization-->
         <TextView
                 android:id="@+id/perso_subtype_text"
                 android:textAppearance="?android:attr/textAppearanceMedium"
@@ -37,8 +35,6 @@
                 android:layout_height="wrap_content"
                 android:text="@string/label_ndp"/>
 
-<!-- QTI_BEGIN: 2020-07-09: Telephony: Displaying SIM info on de-perso Lock UI-->
-<!-- QTI_END: 2020-07-09: Telephony: Displaying SIM info on de-perso Lock UI-->
         <TextView
                 android:id="@+id/perso_phoneid_text"
                 android:textAppearance="?android:attr/textAppearanceMedium"

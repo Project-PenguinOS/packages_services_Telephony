@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
+// QTI_BEGIN: 2025-04-02: Telephony: Radio Info: Set up the edge-to-edge display
 /*
  * Changes from Qualcomm Technologies, Inc. are provided under the following license:
  * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  * SPDX-License-Identifier: BSD-3-Clause-Clear
+// QTI_END: 2025-04-02: Telephony: Radio Info: Set up the edge-to-edge display
+// QTI_BEGIN: 2023-07-11: Telephony: Gray out the "Enable DSDS" button upon switch
  */
 
+// QTI_END: 2023-07-11: Telephony: Gray out the "Enable DSDS" button upon switch
 package com.android.phone.settings;
 
 import static android.net.ConnectivityManager.NetworkCallback;
@@ -39,18 +43,18 @@ import static com.qti.extphone.ExtTelephonyManager.FEATURE_TDSCDMA_SUPPORT;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 import android.annotation.NonNull;
-// QTI_BEGIN: 2023-07-12: Telephony: Gray out the "Enable DSDS" button upon switch
+// QTI_BEGIN: 2023-07-11: Telephony: Gray out the "Enable DSDS" button upon switch
 import android.content.BroadcastReceiver;
-// QTI_END: 2023-07-12: Telephony: Gray out the "Enable DSDS" button upon switch
+// QTI_END: 2023-07-11: Telephony: Gray out the "Enable DSDS" button upon switch
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-// QTI_BEGIN: 2023-07-12: Telephony: Gray out the "Enable DSDS" button upon switch
+// QTI_BEGIN: 2023-07-11: Telephony: Gray out the "Enable DSDS" button upon switch
 import android.content.IntentFilter;
-// QTI_END: 2023-07-12: Telephony: Gray out the "Enable DSDS" button upon switch
+// QTI_END: 2023-07-11: Telephony: Gray out the "Enable DSDS" button upon switch
 import android.content.pm.ComponentInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -67,9 +71,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerExecutor;
-// QTI_BEGIN: 2023-07-12: Telephony: Gray out the "Enable DSDS" button upon switch
+// QTI_BEGIN: 2023-07-11: Telephony: Gray out the "Enable DSDS" button upon switch
 import android.os.HandlerThread;
-// QTI_END: 2023-07-12: Telephony: Gray out the "Enable DSDS" button upon switch
+// QTI_END: 2023-07-11: Telephony: Gray out the "Enable DSDS" button upon switch
 import android.os.Message;
 import android.os.PersistableBundle;
 import android.os.UserHandle;
@@ -123,6 +127,7 @@ import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneFactory;
 import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.euicc.EuiccConnector;
+import com.android.internal.telephony.flags.Flags;
 import com.android.internal.telephony.satellite.SatelliteConfig;
 import com.android.internal.telephony.satellite.SatelliteConfigParser;
 import com.android.internal.telephony.satellite.SatelliteController;
@@ -135,9 +140,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-// QTI_BEGIN: 2023-07-12: Telephony: Gray out the "Enable DSDS" button upon switch
+// QTI_BEGIN: 2023-07-11: Telephony: Gray out the "Enable DSDS" button upon switch
 import java.util.HashMap;
-// QTI_END: 2023-07-12: Telephony: Gray out the "Enable DSDS" button upon switch
+// QTI_END: 2023-07-11: Telephony: Gray out the "Enable DSDS" button upon switch
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
@@ -204,12 +209,12 @@ public class RadioInfo extends AppCompatActivity {
         Log.d(TAG, s);
     }
 
-// QTI_BEGIN: 2023-07-12: Telephony: Gray out the "Enable DSDS" button upon switch
+// QTI_BEGIN: 2023-07-11: Telephony: Gray out the "Enable DSDS" button upon switch
     private static void loge(String s) {
         Log.e(TAG, s);
     }
 
-// QTI_END: 2023-07-12: Telephony: Gray out the "Enable DSDS" button upon switch
+// QTI_END: 2023-07-11: Telephony: Gray out the "Enable DSDS" button upon switch
     private static final int EVENT_QUERY_SMSC_DONE = 1005;
     private static final int EVENT_UPDATE_SMSC_DONE = 1006;
     private static final int EVENT_UPDATE_NR_STATS = 1008;
@@ -292,8 +297,10 @@ public class RadioInfo extends AppCompatActivity {
     private Switch mCbrsDataSwitch;
     private Switch mDsdsSwitch;
     private Switch mRemovableEsimSwitch;
+// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
     private Switch mEnableVoLteSwitch;
     private Switch mEnableVoNrSwitch;
+// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
     private Spinner mPreferredNetworkType;
     private Spinner mMockSignalStrength;
     private Spinner mMockDataNetworkType;
@@ -369,7 +376,7 @@ public class RadioInfo extends AppCompatActivity {
                 }
             };
 
-// QTI_BEGIN: 2023-07-12: Telephony: Gray out the "Enable DSDS" button upon switch
+// QTI_BEGIN: 2023-07-11: Telephony: Gray out the "Enable DSDS" button upon switch
     private static final String ACTION_RADIO_POWER_STATE_CHANGED =
             "org.codeaurora.intent.action.RADIO_POWER_STATE";
     private static final String RADIO_POWER_STATE = "state";
@@ -395,7 +402,7 @@ public class RadioInfo extends AppCompatActivity {
         }
     };
 
-// QTI_END: 2023-07-12: Telephony: Gray out the "Enable DSDS" button upon switch
+// QTI_END: 2023-07-11: Telephony: Gray out the "Enable DSDS" button upon switch
     private static final int DEFAULT_TIMEOUT_MS = 1000;
 
     // not final because we need to recreate this object to register on a new subId (b/117555407)
@@ -515,7 +522,9 @@ public class RadioInfo extends AppCompatActivity {
 // QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
     private int getPrefNwTypeIndexFromUpdatedArray(int type) {
         return IntStream.range(0, mUpdatedPrefNwLabels.length)
+// QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
                 .filter(i -> mUpdatedPrefNwLabels[i].equals(PhoneInformationUtil.PREFERRED_NETWORK_LABELS[type]))
+// QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
                 .findFirst()
                 .orElse(-1);
     }
@@ -624,13 +633,13 @@ public class RadioInfo extends AppCompatActivity {
             mPhoneId = DEFAULT_PHONE_ID;
         }
 
-// QTI_BEGIN: 2023-07-12: Telephony: Gray out the "Enable DSDS" button upon switch
+// QTI_BEGIN: 2023-07-11: Telephony: Gray out the "Enable DSDS" button upon switch
         mBroadcastReceiverThread.start();
         Handler scheduler = new Handler(mBroadcastReceiverThread.getLooper());
         IntentFilter filter = new IntentFilter(ACTION_RADIO_POWER_STATE_CHANGED);
         mPhone.getContext().registerReceiver(mBroadcastReceiver, filter, null, scheduler);
 
-// QTI_END: 2023-07-12: Telephony: Gray out the "Enable DSDS" button upon switch
+// QTI_END: 2023-07-11: Telephony: Gray out the "Enable DSDS" button upon switch
         mImsManager = new ImsManager(this);
         try {
             mProvisioningManager = ProvisioningManager.createForSubscriptionId(mSubId);
@@ -684,9 +693,9 @@ public class RadioInfo extends AppCompatActivity {
         mExtTelephonyManager = ExtTelephonyManager.getInstance(this);
         mExtTelephonyManager.connectService(mServiceCallback);
 
+// QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
         sPhoneIndexLabels = PhoneInformationUtil.getPhoneIndexLabels(mTelephonyManager);
 
-// QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
         // hide 5G stats on devices that don't support 5G
         if ((mTelephonyManager.getSupportedRadioAccessFamily()
                 & TelephonyManager.NETWORK_TYPE_BITMASK_NR) == 0) {
@@ -755,16 +764,20 @@ public class RadioInfo extends AppCompatActivity {
         mImsVtProvisionedSwitch = (Switch) findViewById(R.id.vt_provisioned_switch);
         mImsWfcProvisionedSwitch = (Switch) findViewById(R.id.wfc_provisioned_switch);
         mEabProvisionedSwitch = (Switch) findViewById(R.id.eab_provisioned_switch);
+// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
         mEnableVoLteSwitch = (Switch) findViewById(R.id.enable_volte_switch);
         mEnableVoNrSwitch = (Switch) findViewById(R.id.enable_vonr_switch);
+// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
 
         if (!isImsSupportedOnDevice()) {
             mImsVolteProvisionedSwitch.setVisibility(View.GONE);
             mImsVtProvisionedSwitch.setVisibility(View.GONE);
             mImsWfcProvisionedSwitch.setVisibility(View.GONE);
             mEabProvisionedSwitch.setVisibility(View.GONE);
+// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
             mEnableVoLteSwitch.setVisibility(View.GONE);
             mEnableVoNrSwitch.setVisibility(View.GONE);
+// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
         }
 
         mCbrsDataSwitch = (Switch) findViewById(R.id.cbrs_data_switch);
@@ -780,9 +793,9 @@ public class RadioInfo extends AppCompatActivity {
                     showDsdsChangeDialog();
                 } else {
                     performDsdsSwitch();
-// QTI_BEGIN: 2023-07-12: Telephony: Gray out the "Enable DSDS" button upon switch
+// QTI_BEGIN: 2023-07-11: Telephony: Gray out the "Enable DSDS" button upon switch
                     mDsdsSwitch.setEnabled(false);
-// QTI_END: 2023-07-12: Telephony: Gray out the "Enable DSDS" button upon switch
+// QTI_END: 2023-07-11: Telephony: Gray out the "Enable DSDS" button upon switch
                 }
             });
             mDsdsSwitch.setChecked(PhoneInformationUtil.isDsdsEnabled());
@@ -944,8 +957,10 @@ public class RadioInfo extends AppCompatActivity {
         log("tdscdmaSupported " + tdscdmaSupported + ", cdmaSupported " + cdmaSupported);
         // Exclude CDMA/TDSCDMA RATs if unsupported
         final Pattern pattern = Pattern.compile("(?<!W|TDS)CDMA|EvDo");
+// QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
         for (int i = 0; i < PhoneInformationUtil.PREFERRED_NETWORK_LABELS.length; i++) {
             String entry = PhoneInformationUtil.PREFERRED_NETWORK_LABELS[i];
+// QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
             mPrefNwLabelToIntMap.put(entry, i);
             Matcher matcher = pattern.matcher(entry);
             if (cdmaSupported || !matcher.find()) {
@@ -1076,9 +1091,11 @@ public class RadioInfo extends AppCompatActivity {
         updateCellInfo(mCellInfoResult);
         updateSubscriptionIds();
 
+// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
         updateVoLteState();
         updateVoNrState();
 
+// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
         mPingHostnameV4.setText(mPingHostnameResultV4);
         mPingHostnameV6.setText(mPingHostnameResultV6);
         mHttpClientTest.setText(mHttpClientTestResult);
@@ -1246,10 +1263,10 @@ public class RadioInfo extends AppCompatActivity {
         if (mExtTelephonyManager != null && mServiceCallback != null) {
             mExtTelephonyManager.disconnectService(mServiceCallback);
         }
-// QTI_BEGIN: 2023-07-12: Telephony: Gray out the "Enable DSDS" button upon switch
+// QTI_BEGIN: 2023-07-11: Telephony: Gray out the "Enable DSDS" button upon switch
         mPhone.getContext().unregisterReceiver(mBroadcastReceiver);
         mBroadcastReceiverThread.quitSafely();
-// QTI_END: 2023-07-12: Telephony: Gray out the "Enable DSDS" button upon switch
+// QTI_END: 2023-07-11: Telephony: Gray out the "Enable DSDS" button upon switch
     }
 
     private void clearOverride() {
@@ -1574,8 +1591,12 @@ public class RadioInfo extends AppCompatActivity {
                         + ", UICC:"
                         + subMgr.getPhoneNumber(subId, SubscriptionManager.PHONE_NUMBER_SOURCE_UICC)
                         + ", IMS:"
-                        + subMgr.getPhoneNumber(subId, SubscriptionManager.PHONE_NUMBER_SOURCE_IMS)
-                        + " }";
+                        + subMgr.getPhoneNumber(subId, SubscriptionManager.PHONE_NUMBER_SOURCE_IMS);
+        if (Flags.getPhoneNumberTs43Api()) {
+            s += ", TS43:" + subMgr.getPhoneNumber(
+                    subId, SubscriptionManager.PHONE_NUMBER_SOURCE_TS43);
+        }
+        s += " }";
         mLine1Number.setText(s);
     }
 
@@ -1881,6 +1902,7 @@ public class RadioInfo extends AppCompatActivity {
         return mTelephonyManager.getRadioPowerState() == TelephonyManager.RADIO_POWER_ON;
     }
 
+// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
     private void updateVoLteState() {
         ImsMmTelManager imsMmTelManager = mImsManager.getImsMmTelManager(mSubId);
         mEnableVoLteSwitch.setChecked(PhoneInformationUtil.isVolteEnabled(imsMmTelManager));
@@ -1904,6 +1926,7 @@ public class RadioInfo extends AppCompatActivity {
         mEnableVoNrSwitch.setOnCheckedChangeListener(mVoNrOnChangeListener);
     }
 
+// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
     private void updateRadioPowerState() {
         // delightful hack to prevent on-checked-changed calls from
         // actually forcing the radio preference to its transient/current value.
@@ -2046,6 +2069,7 @@ public class RadioInfo extends AppCompatActivity {
                 mPhone.getTelephonyTester().setServiceStateTestIntent(intent);
             };
 
+// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
     OnCheckedChangeListener mVoLteOnChangeListener = new OnCheckedChangeListener() {
         @Override
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -2120,6 +2144,7 @@ public class RadioInfo extends AppCompatActivity {
         });
     }
 
+// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
     // satellite radio group function
     private final RadioGroup.OnCheckedChangeListener
             mForceCampSatelliteSelectionRadioGroupListener =
@@ -2873,11 +2898,9 @@ public class RadioInfo extends AppCompatActivity {
             new AdapterView.OnItemSelectedListener() {
                 public void onItemSelected(AdapterView parent, View v, int pos, long id) {
                     if (mPreferredNetworkTypeResult != pos && pos >= 0
-        // QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
                             && pos <= mUpdatedPrefNwLabels.length - 2) {
                         final String prefNwLabel = mUpdatedPrefNwLabels[pos];
                         mPreferredNetworkTypeResult = mPrefNwLabelToIntMap.get(prefNwLabel);
-        // QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
                         new Thread(() -> {
                             mTelephonyManager.setAllowedNetworkTypesForReason(
                                     TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_USER,
@@ -3108,7 +3131,7 @@ public class RadioInfo extends AppCompatActivity {
         }
     }
 
-// QTI_BEGIN: 2023-07-12: Telephony: Gray out the "Enable DSDS" button upon switch
+// QTI_BEGIN: 2023-07-11: Telephony: Gray out the "Enable DSDS" button upon switch
     private void handleRadioPowerStateChanged(int slotId, int radioState) {
         mRadioStatusMap.put(slotId, radioState != TelephonyManager.RADIO_POWER_UNAVAILABLE);
         int numRadiosAvailable = 0;
@@ -3127,5 +3150,5 @@ public class RadioInfo extends AppCompatActivity {
             log("handleRadioPowerStateChanged: mDsdsSwitch null");
         }
     }
-// QTI_END: 2023-07-12: Telephony: Gray out the "Enable DSDS" button upon switch
+// QTI_END: 2023-07-11: Telephony: Gray out the "Enable DSDS" button upon switch
 }

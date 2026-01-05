@@ -63,9 +63,9 @@ public class CdmaCallOptions extends TimeConsumingPreferenceActivity {
     private static final String CALL_FORWARDING_KEY = "call_forwarding_key";
     private static final String CALL_WAITING_KEY = "call_waiting_key";
 
-// QTI_BEGIN: 2019-04-28: Telephony: FR54939: Common call setting for specific operator
+// QTI_BEGIN: 2019-04-27: Telephony: FR54939: Common call setting for specific operator
     private boolean mCommon = false;
-// QTI_END: 2019-04-28: Telephony: FR54939: Common call setting for specific operator
+// QTI_END: 2019-04-27: Telephony: FR54939: Common call setting for specific operator
 
     private class UtCallback extends ImsMmTelManager.CapabilityCallback {
         @Override
@@ -100,12 +100,12 @@ public class CdmaCallOptions extends TimeConsumingPreferenceActivity {
             subId = SubscriptionManager.getDefaultSubscriptionId();
         }
         carrierConfig = PhoneGlobals.getInstance().getCarrierConfigForSubId(subId);
-// QTI_BEGIN: 2019-04-28: Telephony: FR54939: Common call setting for specific operator
+// QTI_BEGIN: 2019-04-27: Telephony: FR54939: Common call setting for specific operator
         mCommon = carrierConfig.getBoolean("config_common_callsettings_support_bool");
         subInfoHelper.setActionBarTitle(
                 getActionBar(), getResources(),
                 mCommon ? R.string.labelCommonMore_with_label : R.string.labelCdmaMore_with_label);
-// QTI_END: 2019-04-28: Telephony: FR54939: Common call setting for specific operator
+// QTI_END: 2019-04-27: Telephony: FR54939: Common call setting for specific operator
 
 // QTI_BEGIN: 2024-10-15: RIL: Revert "TeleService: Add CDMA call forwarding/waiting function."
         Phone phone = subInfoHelper.getPhone();

@@ -56,11 +56,9 @@ public class RadioOnStateListener {
     @VisibleForTesting
     public static final int MSG_SERVICE_STATE_CHANGED = 2;
     private static final int MSG_RETRY_TIMEOUT = 3;
-// QTI_BEGIN: 2019-12-19: Telephony: Place dial request for Emergency call soon after Radio is on.
     @VisibleForTesting
     public static final int MSG_RADIO_ON = 4;
     public static final int MSG_RADIO_OFF_OR_NOT_AVAILABLE = 5;
-// QTI_END: 2019-12-19: Telephony: Place dial request for Emergency call soon after Radio is on.
 
     private final Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
@@ -83,16 +81,14 @@ public class RadioOnStateListener {
                 case MSG_SERVICE_STATE_CHANGED:
                     onServiceStateChanged((ServiceState) ((AsyncResult) msg.obj).result);
                     break;
-// QTI_BEGIN: 2018-05-29: Telephony: Place dial request for EM call immediately after Radio power on
                 case MSG_RADIO_ON:
                     onRadioOn();
                     break;
-// QTI_END: 2018-05-29: Telephony: Place dial request for EM call immediately after Radio power on
-// QTI_BEGIN: 2018-10-03: Telephony: Listen for RADIO_OFF instead of RADIO_ON to place emergency calls
+// QTI_BEGIN: 2018-10-02: Telephony: Listen for RADIO_OFF instead of RADIO_ON to place emergency calls
                 case MSG_RADIO_OFF_OR_NOT_AVAILABLE:
                     registerForRadioOn();
                     break;
-// QTI_END: 2018-10-03: Telephony: Listen for RADIO_OFF instead of RADIO_ON to place emergency calls
+// QTI_END: 2018-10-02: Telephony: Listen for RADIO_OFF instead of RADIO_ON to place emergency calls
                 case MSG_RETRY_TIMEOUT:
                     onRetryTimeout();
                     break;
@@ -163,11 +159,11 @@ public class RadioOnStateListener {
         mSelectedPhoneForEmergencyCall = isSelectedPhoneForEmergencyCall;
 
         registerForServiceStateChanged();
-// QTI_BEGIN: 2018-10-03: Telephony: Listen for RADIO_OFF instead of RADIO_ON to place emergency calls
+// QTI_BEGIN: 2018-10-02: Telephony: Listen for RADIO_OFF instead of RADIO_ON to place emergency calls
         // Register for RADIO_OFF to handle cases where emergency call is dialed before
         // we receive UNSOL_RESPONSE_RADIO_STATE_CHANGED with RADIO_OFF.
         registerForRadioOff();
-// QTI_END: 2018-10-03: Telephony: Listen for RADIO_OFF instead of RADIO_ON to place emergency calls
+// QTI_END: 2018-10-02: Telephony: Listen for RADIO_OFF instead of RADIO_ON to place emergency calls
         // Next step: when the SERVICE_STATE_CHANGED event comes in, we'll retry the call; see
         // onServiceStateChanged(). But also, just in case, start a timer to make sure we'll retry
         // the call even if the SERVICE_STATE_CHANGED event never comes in for some reason.
@@ -203,11 +199,8 @@ public class RadioOnStateListener {
         }
     }
 
-// QTI_BEGIN: 2018-05-29: Telephony: Place dial request for EM call immediately after Radio power on
     private void onRadioOn() {
-// QTI_END: 2018-05-29: Telephony: Place dial request for EM call immediately after Radio power on
         if (mPhone == null) return;
-// QTI_BEGIN: 2018-05-29: Telephony: Place dial request for EM call immediately after Radio power on
         ServiceState state =  mPhone.getServiceState();
         Log.d(this, "onRadioOn, state = %s, Phone = %s", state,
                 mPhone.getPhoneId());
@@ -218,7 +211,6 @@ public class RadioOnStateListener {
             Log.d(this, "onRadioOn: not ready to call yet, keep waiting.");
         }
     }
-// QTI_END: 2018-05-29: Telephony: Place dial request for EM call immediately after Radio power on
     /**
      * Callback to see if it is okay to call yet, given the current conditions.
      */
@@ -291,12 +283,10 @@ public class RadioOnStateListener {
         onComplete(false);
 
         unregisterForServiceStateChanged();
-// QTI_BEGIN: 2018-10-03: Telephony: Listen for RADIO_OFF instead of RADIO_ON to place emergency calls
+// QTI_BEGIN: 2018-10-02: Telephony: Listen for RADIO_OFF instead of RADIO_ON to place emergency calls
         unregisterForRadioOff();
-// QTI_END: 2018-10-03: Telephony: Listen for RADIO_OFF instead of RADIO_ON to place emergency calls
-// QTI_BEGIN: 2018-05-29: Telephony: Place dial request for EM call immediately after Radio power on
+// QTI_END: 2018-10-02: Telephony: Listen for RADIO_OFF instead of RADIO_ON to place emergency calls
         unregisterForRadioOn();
-// QTI_END: 2018-05-29: Telephony: Place dial request for EM call immediately after Radio power on
         cancelRetryTimer();
 
         // Used for unregisterForServiceStateChanged() so we null it out here instead.
@@ -329,13 +319,11 @@ public class RadioOnStateListener {
         mHandler.removeMessages(MSG_SERVICE_STATE_CHANGED);  // Clean up any pending messages too
     }
 
-// QTI_BEGIN: 2018-10-03: Telephony: Listen for RADIO_OFF instead of RADIO_ON to place emergency calls
+// QTI_BEGIN: 2018-10-02: Telephony: Listen for RADIO_OFF instead of RADIO_ON to place emergency calls
     private void registerForRadioOff() {
-// QTI_END: 2018-10-03: Telephony: Listen for RADIO_OFF instead of RADIO_ON to place emergency calls
-// QTI_BEGIN: 2018-05-29: Telephony: Place dial request for EM call immediately after Radio power on
+// QTI_END: 2018-10-02: Telephony: Listen for RADIO_OFF instead of RADIO_ON to place emergency calls
         unregisterForServiceStateChanged();
-// QTI_END: 2018-05-29: Telephony: Place dial request for EM call immediately after Radio power on
-// QTI_BEGIN: 2018-10-03: Telephony: Listen for RADIO_OFF instead of RADIO_ON to place emergency calls
+// QTI_BEGIN: 2018-10-02: Telephony: Listen for RADIO_OFF instead of RADIO_ON to place emergency calls
         mPhone.mCi.registerForOffOrNotAvailable(mHandler, MSG_RADIO_OFF_OR_NOT_AVAILABLE, null);
     }
 
@@ -349,8 +337,7 @@ public class RadioOnStateListener {
 
     private void registerForRadioOn() {
         unregisterForRadioOff();
-// QTI_END: 2018-10-03: Telephony: Listen for RADIO_OFF instead of RADIO_ON to place emergency calls
-// QTI_BEGIN: 2018-05-29: Telephony: Place dial request for EM call immediately after Radio power on
+// QTI_END: 2018-10-02: Telephony: Listen for RADIO_OFF instead of RADIO_ON to place emergency calls
         mPhone.mCi.registerForOn(mHandler, MSG_RADIO_ON, null);
     }
 
@@ -362,7 +349,6 @@ public class RadioOnStateListener {
         mHandler.removeMessages(MSG_RADIO_ON);  // Clean up any pending messages too
     }
 
-// QTI_END: 2018-05-29: Telephony: Place dial request for EM call immediately after Radio power on
     private void onComplete(boolean isRadioReady) {
         if (mCallback != null) {
             Callback tempCallback = mCallback;

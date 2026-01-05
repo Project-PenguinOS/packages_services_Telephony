@@ -14,34 +14,22 @@
      limitations under the License.
 -->
 
-<!-- QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
-<!-- QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:scrollbars="vertical">
     <!-- Layout used as the dialog's content View for EditPhoneNumberPreference. -->
-<!-- QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
-<!-- QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
-<!-- QTI_BEGIN: 2020-08-20: Telephony: Adjust padding for CFUT layout to display UI properly.-->
-<!-- QTI_END: 2020-08-20: Telephony: Adjust padding for CFUT layout to display UI properly.-->
-<!-- QTI_BEGIN: 2018-05-04: Telephony: Fix the width of number editable box shows too narrow-->
-<!-- QTI_END: 2018-05-04: Telephony: Fix the width of number editable box shows too narrow-->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="5dip">
-<!-- QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
-<!-- QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
         <TextView android:id="@+id/message"
             style="?android:attr/textAppearanceMedium"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="?android:attr/textColorPrimary" />
 
-<!-- QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
-<!-- QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
         <LinearLayout
             android:id="@+id/number_field"
             android:layout_width="match_parent"
@@ -53,15 +41,11 @@
             <!-- The EditText field in the dialog is now created programmatically.
                  We're replacing the field in this layout with a container to
                  attach the EditText field. -->
-<!-- QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
-<!-- QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
             <LinearLayout android:id="@+id/edit_container"
                 android:layout_width="0dip"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"/>
 
-<!-- QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
-<!-- QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
             <ImageButton android:id="@+id/select_contact"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -69,8 +53,6 @@
                 android:src="@drawable/ic_see_contacts_holo_dark"
                 android:contentDescription="@string/selectContact" />
 
-<!-- QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
-<!-- QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
         </LinearLayout>
         <!-- Start Time -->
         <TextView android:id="@+id/time_start"
@@ -82,8 +64,6 @@
             android:textColor="?android:attr/textColorPrimary"
             android:paddingStart="5dip"/>
 
-<!-- QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
-<!-- QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
         <LinearLayout
             android:id="@+id/start_time_setting"
             android:visibility="gone"
@@ -93,8 +73,6 @@
             android:gravity="center_vertical"
             android:baselineAligned="false"
             android:paddingStart="5dip">
-<!-- QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
-<!-- QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
             <Spinner
                 style="@style/cfut_value"
                 android:visibility="gone"
@@ -103,8 +81,6 @@
                 android:id="@+id/time_start_hour_24"
                 android:prompt="@string/time_start_hour"
                 android:entries="@array/hour_24_items"/>
-<!-- QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
-<!-- QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
             <Spinner
                 style="@style/cfut_value"
                 android:visibility="gone"
@@ -113,8 +89,6 @@
                 android:id="@+id/time_start_hour_12"
                 android:prompt="@string/time_start_hour"
                 android:entries="@array/hour_12_items"/>
-<!-- QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
-<!-- QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
             <Spinner
                 style="@style/cfut_value"
                 android:layout_width="wrap_content"
@@ -122,10 +96,6 @@
                 android:id="@+id/time_start_minute"
                 android:prompt="@string/time_start_minute"
                 android:entries="@array/minute_items"/>
-<!-- QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
-<!-- QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
-<!-- QTI_BEGIN: 2020-08-20: Telephony: Adjust padding for CFUT layout to display UI properly.-->
-<!-- QTI_END: 2020-08-20: Telephony: Adjust padding for CFUT layout to display UI properly.-->
             <Spinner
                 style="@style/cfut_value"
                 android:visibility="gone"
@@ -134,13 +104,9 @@
                 android:id="@+id/time_start_formate"
                 android:prompt="@string/time_start_minute"
                 android:entries="@array/time_formate_items"/>
-<!-- QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
-<!-- QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
         </LinearLayout>
 
         <!-- End Time -->
-<!-- QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
-<!-- QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
         <TextView android:id="@+id/time_end"
             style="?android:attr/textAppearanceSmall"
             android:visibility="gone"
@@ -150,8 +116,6 @@
             android:textColor="?android:attr/textColorPrimary"
             android:paddingStart="5dip"/>
 
-<!-- QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
-<!-- QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
         <LinearLayout
             android:id="@+id/end_time_setting"
             android:visibility="gone"
@@ -161,8 +125,6 @@
             android:gravity="center_vertical"
             android:baselineAligned="false"
             android:paddingStart="5dip">
-<!-- QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
-<!-- QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
             <Spinner
                 style="@style/cfut_value"
                 android:visibility="gone"
@@ -171,8 +133,6 @@
                 android:id="@+id/time_end_hour_24"
                 android:prompt="@string/time_end_hour"
                 android:entries="@array/hour_24_items"/>
-<!-- QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
-<!-- QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
             <Spinner
                 style="@style/cfut_value"
                 android:visibility="gone"
@@ -181,8 +141,6 @@
                 android:id="@+id/time_end_hour_12"
                 android:prompt="@string/time_end_hour"
                 android:entries="@array/hour_12_items"/>
-<!-- QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
-<!-- QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
             <Spinner
                 style="@style/cfut_value"
                 android:id="@+id/time_end_minute"
@@ -190,10 +148,6 @@
                 android:layout_height="wrap_content"
                 android:prompt="@string/time_end_minute"
                 android:entries="@array/minute_items"/>
-<!-- QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
-<!-- QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
-<!-- QTI_BEGIN: 2020-08-20: Telephony: Adjust padding for CFUT layout to display UI properly.-->
-<!-- QTI_END: 2020-08-20: Telephony: Adjust padding for CFUT layout to display UI properly.-->
             <Spinner
                 style="@style/cfut_value"
                 android:visibility="gone"
@@ -202,13 +156,9 @@
                 android:id="@+id/time_end_formate"
                 android:prompt="@string/time_end_minute"
                 android:entries="@array/time_formate_items"/>
-<!-- QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
-<!-- QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
         </LinearLayout>
 
         <!-- Check box for all day option -->
-<!-- QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
-<!-- QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
         <LinearLayout
             android:id="@+id/all_day_setting"
             android:layout_width="match_parent"
@@ -218,8 +168,6 @@
             android:baselineAligned="false"
             android:paddingStart="10dip"
             android:paddingEnd="10dip">
-<!-- QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
-<!-- QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
             <CheckBox
                 android:id="@+id/all_day"
                 android:visibility="gone"
@@ -230,10 +178,6 @@
                 android:singleLine="true"
                 android:checked="true"
                 android:text="@string/all_day"/>
-<!-- QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
-<!-- QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
         </LinearLayout>
-<!-- QTI_BEGIN: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
-<!-- QTI_END: 2018-03-27: Telephony: IMS: Call forward unconditional timer-->
     </LinearLayout>
 </ScrollView>

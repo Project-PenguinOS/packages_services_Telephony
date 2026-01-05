@@ -169,6 +169,7 @@ import android.telephony.satellite.ISatelliteTransmissionUpdateCallback;
 import android.telephony.satellite.ISelectedNbIotSatelliteSubscriptionCallback;
 import android.telephony.satellite.NtnSignalStrength;
 import android.telephony.satellite.NtnSignalStrengthCallback;
+import android.telephony.satellite.PlmnSatelliteConfig;
 import android.telephony.satellite.SatelliteCapabilities;
 import android.telephony.satellite.SatelliteDatagram;
 import android.telephony.satellite.SatelliteDatagramCallback;
@@ -239,6 +240,7 @@ import com.android.internal.telephony.imsphone.ImsPhone;
 import com.android.internal.telephony.imsphone.ImsPhoneCallTracker;
 import com.android.internal.telephony.metrics.RcsStats;
 import com.android.internal.telephony.satellite.SatelliteController;
+import com.android.internal.telephony.satellite.SatelliteServiceUtils;
 import com.android.internal.telephony.subscription.SubscriptionInfoInternal;
 import com.android.internal.telephony.subscription.SubscriptionManagerService;
 import com.android.internal.telephony.uicc.IccCardApplicationStatus.AppType;
@@ -411,6 +413,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     private static final int MIN_IDENTIFIER_DISCLOSURE_VERSION = 202;
     // Null cipher notification support was added in IRadioNetwork 2.2
     private static final int MIN_NULL_CIPHER_NOTIFICATION_VERSION = 202;
+    private static final int MIN_NETWORK_ALERT_VERSION = 204;
 
     /** The singleton instance. */
     private static PhoneInterfaceManager sInstance;
@@ -1074,11 +1077,9 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
                     if (ar.exception == null && ar.result != null) {
                         request.result = ar.result;     // Integer
                     } else {
-// QTI_BEGIN: 2020-07-31: Telephony: Fix error response handling for RIL request
                         // request.result must be set to something non-null
                         // for the calling thread to unblock
                         request.result = new int[]{-1};
-// QTI_END: 2020-07-31: Telephony: Fix error response handling for RIL request
                         if (ar.result == null) {
                             loge("getAllowedNetworkTypesBitmask: Empty response");
                         } else if (ar.exception instanceof CommandException) {
@@ -2318,6 +2319,12 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         synchronized (PhoneInterfaceManager.class) {
             if (sInstance == null) {
                 sInstance = new PhoneInterfaceManager(app, featureFlags);
+                if (featureFlags.publishTelephonyServicesAfterConstruction()) {
+                    TelephonyFrameworkInitializer
+                            .getTelephonyServiceManager()
+                            .getTelephonyServiceRegisterer()
+                            .register(sInstance);
+                }
             } else {
                 Log.wtf(LOG_TAG, "init() called multiple times!  sInstance = " + sInstance);
             }
@@ -2348,7 +2355,9 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         mTelephonyShellCommand = new TelephonyShellCommand(this, getDefaultPhone().getContext());
 
         PropertyInvalidatedCache.invalidateCache(TelephonyManager.CACHE_KEY_PHONE_ACCOUNT_TO_SUBID);
-        publish();
+        if (!mFeatureFlags.publishTelephonyServicesAfterConstruction()) {
+            publish();
+        }
         CarrierAllowListInfo.loadInstance(mApp);
 
         // Create the SatelliteEntitlementController singleton, for using the get the
@@ -3160,7 +3169,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     @Override
     public int getCallState() {
         if (CompatChanges.isChangeEnabled(
-                TelecomManager.ENABLE_GET_CALL_STATE_PERMISSION_PROTECTION,
+                TelephonyManager.ENABLE_GET_CALL_STATE_PERMISSION_PROTECTION,
                 Binder.getCallingUid())) {
             // Do not allow this API to be called on API version 31+, it should only be
             // called on old apps using this Binder call directly.
@@ -3179,7 +3188,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     @Override
     public int getCallStateForSubscription(int subId, String callingPackage, String featureId) {
         if (CompatChanges.isChangeEnabled(
-                TelecomManager.ENABLE_GET_CALL_STATE_PERMISSION_PROTECTION,
+                TelephonyManager.ENABLE_GET_CALL_STATE_PERMISSION_PROTECTION,
                 Binder.getCallingUid())) {
             // Check READ_PHONE_STATE for API version 31+
             if (!TelephonyPermissions.checkCallingOrSelfReadPhoneState(mApp, subId, callingPackage,
@@ -10125,10 +10134,24 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
 
     @TelephonyManager.IsMultiSimSupportedResult
     private int isMultiSimSupportedInternal() {
-        // If the device has less than 2 SIM cards, indicate that multisim is restricted.
-        int numPhysicalSlots = UiccController.getInstance().getUiccSlots().length;
-        if (numPhysicalSlots < 2) {
-            loge("isMultiSimSupportedInternal: requires at least 2 cards");
+        UiccSlot[] slots = UiccController.getInstance().getUiccSlots();
+        if (slots == null) {
+            loge("isMultiSimSupportedInternal: slots is null");
+            return TelephonyManager.MULTISIM_NOT_SUPPORTED_BY_HARDWARE;
+        }
+
+        // If the device has less than 2 SIM cards, indicate that multisim is restricted,
+        // unless MEP is supported.
+        boolean isMepSupported = false;
+        for (UiccSlot slot : slots) {
+            if (slot != null && slot.isMultipleEnabledProfileSupported()) {
+                isMepSupported = true;
+                break;
+            }
+        }
+
+        if (slots.length < 2 && !isMepSupported) {
+            loge("isMultiSimSupportedInternal: requires at least 2 cards or MEP support");
             return TelephonyManager.MULTISIM_NOT_SUPPORTED_BY_HARDWARE;
         }
         // Check if the hardware supports multisim functionality. If usage of multisim is not
@@ -10312,8 +10335,13 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
      */
     @Override
     public @Nullable String getCurrentPackageName() {
-        PackageManager pm = mApp.getBaseContext().createContextAsUser(
-                Binder.getCallingUserHandle(), 0).getPackageManager();
+        PackageManager pm;
+        try {
+            pm = mApp.getBaseContext().createContextAsUser(
+                    Binder.getCallingUserHandle(), 0).getPackageManager();
+        } catch (IllegalStateException ex) {
+            return null;
+        }
         if (pm == null) return null;
         String[] callingUids = pm.getPackagesForUid(Binder.getCallingUid());
         return (callingUids == null) ? null : callingUids[0];
@@ -12184,7 +12212,6 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     public String getModemService() {
         String result;
         Log.d(LOG_TAG, "getModemService");
-        TelephonyPermissions.enforceShellOnly(Binder.getCallingUid(), "getModemService");
         TelephonyPermissions
                 .enforceCallingOrSelfReadPrivilegedPhoneStatePermissionOrCarrierPrivilege(
                         mApp, SubscriptionManager.INVALID_SUBSCRIPTION_ID,
@@ -14233,6 +14260,26 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     }
 
     /**
+     * Get list of supported network security alerts from the modem.
+     *
+     * @throws SecurityException if the caller does not have the required privileges
+     */
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public @NonNull int[] getSupportedNetworkAlertCategories() {
+        enforceReadPrivilegedPermission("getSupportedNetworkAlertCategories");
+        if (getHalVersion(HAL_SERVICE_NETWORK) < MIN_NETWORK_ALERT_VERSION) {
+            throw new UnsupportedOperationException(
+                    "Network alert operations require HAL 2.4 or above");
+        }
+        try {
+            return getDefaultPhone().getSupportedNetworkAlertCategories();
+        } catch (UnsupportedOperationException e) {
+            Log.e(LOG_TAG, "getSupportedNetworkAlertCategories: UnsupportedOperationException", e);
+            return new int[0];
+        }
+    }
+
+    /**
      * Enables or disables notifications sent when cellular null cipher or integrity algorithms
      * are in use by the cellular modem.
      *
@@ -14689,6 +14736,54 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         }
 
         return satelliteMode;
+    }
+
+
+    /**
+     * Get the satellite configuration for the given PLMN.
+     *
+     * @param subId current subscription id.
+     * @param plmn PLMN for which the satellite configuration is requested.
+     * @return {@link PlmnSatelliteConfig} object containing the satellite configuration for the
+     * given PLMN.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     */
+    @Override
+    public @NonNull PlmnSatelliteConfig getPlmnSatelliteConfig(int subId, String plmn) {
+        enforceSatelliteCommunicationPermission("getPlmnSatelliteConfig");
+
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return mSatelliteController.getPlmnSatelliteConfig(subId, plmn);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+
+    /**
+     * Get whether device is connected to satellite via carrier, either manually or automatically.
+     *
+     * In case of automatic connection, it checks if the device is connected to satellite within the
+     * {@link CarrierConfigManager#KEY_SATELLITE_CONNECTION_HYSTERESIS_SEC_INT} duration,
+     * {@code false} otherwise.
+     *
+     * @param subId The subscription ID of the carrier.
+     * @return {@code true} if the device is connected to satellite using the phone within the
+     *         {@link CarrierConfigManager#KEY_SATELLITE_CONNECTION_HYSTERESIS_SEC_INT} duration,
+     *         {@code false} otherwise.
+     */
+    @Override
+    public boolean isInCarrierRoamingNtnMode(int subId) {
+        enforceSatelliteCommunicationPermission("isInCarrierRoamingNtnMode");
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return mSatelliteController.isInSatelliteModeForCarrierRoaming(
+                    SatelliteServiceUtils.getPhone(subId));
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     /**

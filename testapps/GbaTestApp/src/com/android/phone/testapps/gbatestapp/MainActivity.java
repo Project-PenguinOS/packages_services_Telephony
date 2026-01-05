@@ -16,16 +16,22 @@
 
 package com.android.phone.testapps.gbatestapp;
 
+// QTI_BEGIN: 2025-08-13: Telephony: Handle Edge-to-Edge UI for GbaTestApp am: a25f20e5f7 am: a25f20e5f7
 import android.app.Activity;
 
+// QTI_END: 2025-08-13: Telephony: Handle Edge-to-Edge UI for GbaTestApp am: a25f20e5f7 am: a25f20e5f7
 import android.os.Bundle;
 
+// QTI_BEGIN: 2025-08-13: Telephony: Handle Edge-to-Edge UI for GbaTestApp am: a25f20e5f7 am: a25f20e5f7
 import androidx.annotation.NonNull;
+// QTI_END: 2025-08-13: Telephony: Handle Edge-to-Edge UI for GbaTestApp am: a25f20e5f7 am: a25f20e5f7
 import androidx.appcompat.app.AppCompatActivity;
+// QTI_BEGIN: 2025-08-13: Telephony: Handle Edge-to-Edge UI for GbaTestApp am: a25f20e5f7 am: a25f20e5f7
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+// QTI_END: 2025-08-13: Telephony: Handle Edge-to-Edge UI for GbaTestApp am: a25f20e5f7 am: a25f20e5f7
 
 import com.android.phone.testapps.gbatestapp.ui.main.MainFragment;
 
@@ -35,7 +41,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+// QTI_BEGIN: 2025-08-13: Telephony: Handle Edge-to-Edge UI for GbaTestApp am: a25f20e5f7 am: a25f20e5f7
         setupEdgeToEdge(this);
+// QTI_END: 2025-08-13: Telephony: Handle Edge-to-Edge UI for GbaTestApp am: a25f20e5f7 am: a25f20e5f7
         setContentView(R.layout.main_activity);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
@@ -43,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
                     .commitNow();
         }
     }
+// QTI_BEGIN: 2025-08-13: Telephony: Handle Edge-to-Edge UI for GbaTestApp am: a25f20e5f7 am: a25f20e5f7
 
     protected void setupEdgeToEdge(@NonNull Activity activity) {
         ViewCompat.setOnApplyWindowInsetsListener(activity.findViewById(android.R.id.content),
@@ -57,4 +66,5 @@ public class MainActivity extends AppCompatActivity {
                     return WindowInsetsCompat.CONSUMED;
                 });
     }
+// QTI_END: 2025-08-13: Telephony: Handle Edge-to-Edge UI for GbaTestApp am: a25f20e5f7 am: a25f20e5f7
 }

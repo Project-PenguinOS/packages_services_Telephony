@@ -18,9 +18,9 @@
 /**
 * Changes from Qualcomm Innovation Center, Inc. are provided under the following license:
 // QTI_END: 2024-06-17: Telephony: Unregister to ExtPhoneCallback
-// QTI_BEGIN: 2025-01-11: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
+// QTI_BEGIN: 2025-01-10: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
 * Copyright (c) 2024-2025 Qualcomm Innovation Center, Inc. All rights reserved.
-// QTI_END: 2025-01-11: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
+// QTI_END: 2025-01-10: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
 // QTI_BEGIN: 2024-06-17: Telephony: Unregister to ExtPhoneCallback
 * SPDX-License-Identifier: BSD-3-Clause-Clear
 */
@@ -40,11 +40,11 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.PersistableBundle;
 import android.telephony.CarrierConfigManager;
-// QTI_BEGIN: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_BEGIN: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
 import android.telephony.TelephonyManager;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.stub.ImsUtImplBase;
-// QTI_END: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_END: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
 import android.text.method.DigitsKeyListener;
 import android.text.method.PasswordTransformationMethod;
 import android.util.AttributeSet;
@@ -54,7 +54,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-// QTI_BEGIN: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_BEGIN: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
 import org.codeaurora.ims.QtiImsException;
 import org.codeaurora.ims.QtiImsExtListenerBaseImpl;
 import org.codeaurora.ims.QtiImsExtConnector;
@@ -70,7 +70,7 @@ import static com.android.internal.telephony.CommandsInterface.CB_FACILITY_BA_MO
 import static com.android.internal.telephony.CommandsInterface.CB_FACILITY_BA_MT;
 import static com.android.internal.telephony.CommandsInterface.CB_FACILITY_BIC_ACR;
 
-// QTI_END: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_END: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
 import com.android.internal.telephony.CommandException;
 // QTI_BEGIN: 2023-03-16: Telephony: Enable telephony FDN check for side car SS requests.
 import com.android.internal.telephony.gsm.GsmMmiCode;
@@ -80,23 +80,23 @@ import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneFactory;
 import com.android.phone.settings.fdn.EditPinPreference;
 
-// QTI_BEGIN: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_BEGIN: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
 import com.qti.extphone.Client;
-// QTI_END: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_END: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
 // QTI_BEGIN: 2023-01-09: Telephony: FR84002: Re-design ExtTelephonyManager interface
 import com.qti.extphone.ExtPhoneCallbackListener;
 // QTI_END: 2023-01-09: Telephony: FR84002: Re-design ExtTelephonyManager interface
-// QTI_BEGIN: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_BEGIN: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
 import com.qti.extphone.ExtTelephonyManager;
 import com.qti.extphone.IExtPhoneCallback;
 import com.qti.extphone.Status;
 
 
-// QTI_END: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_END: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
 import java.lang.ref.WeakReference;
-// QTI_BEGIN: 2025-01-11: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
+// QTI_BEGIN: 2025-01-10: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
 import java.util.concurrent.Executor;
-// QTI_END: 2025-01-11: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
+// QTI_END: 2025-01-10: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
 
 /**
  * This preference represents the status of call barring options, enabling/disabling
@@ -108,15 +108,15 @@ public class CallBarringEditPreference extends EditPinPreference {
 
     private String mFacility;
     boolean mIsActivated = false;
-// QTI_BEGIN: 2022-12-14: Telephony: IMS: Display call barring password UI conditionally
+// QTI_BEGIN: 2022-12-13: Telephony: IMS: Display call barring password UI conditionally
     // On IMS, network will inform as part of get_call_barring response whether
     // pasword is required. On CS, password is always required
     boolean mIsPasswordEnabled = true;
-// QTI_END: 2022-12-14: Telephony: IMS: Display call barring password UI conditionally
-// QTI_BEGIN: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_END: 2022-12-13: Telephony: IMS: Display call barring password UI conditionally
+// QTI_BEGIN: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
     private boolean mExpectMore;
     private ExtTelephonyManager mExtTelephonyManager;
-// QTI_END: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_END: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
     private CharSequence mEnableText;
     private CharSequence mDisableText;
     private CharSequence mSummaryOn;
@@ -125,19 +125,19 @@ public class CallBarringEditPreference extends EditPinPreference {
     private final MyHandler mHandler = new MyHandler(this);
     private Phone mPhone;
     private TimeConsumingPreferenceListener mTcpListener;
-// QTI_BEGIN: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_BEGIN: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
     private Client mClient;
     private QtiImsExtConnector mQtiImsExtConnector;
     private QtiImsExtManager mQtiImsExtManager;
-// QTI_END: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
-// QTI_BEGIN: 2023-06-07: Telephony: Fix set call barring failure does not show Call setting error dialog
+// QTI_END: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_BEGIN: 2023-06-06: Telephony: Fix set call barring failure does not show Call setting error dialog
     private SetCallBarringReqInfo mSetCallBarringReqInfo = new SetCallBarringReqInfo(false, null);
-// QTI_END: 2023-06-07: Telephony: Fix set call barring failure does not show Call setting error dialog
+// QTI_END: 2023-06-06: Telephony: Fix set call barring failure does not show Call setting error dialog
     private static final int PW_LENGTH = 4;
-// QTI_BEGIN: 2025-01-11: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
+// QTI_BEGIN: 2025-01-10: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
     private Executor mExecutor;
     private QtiImsExtListenerBaseImpl mImsInterfaceListener;
-// QTI_END: 2025-01-11: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
+// QTI_END: 2025-01-10: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
 
     /**
      * CallBarringEditPreference constructor.
@@ -167,7 +167,7 @@ public class CallBarringEditPreference extends EditPinPreference {
 
         mExtTelephonyManager = ExtTelephonyManager.getInstance(getContext());
 // QTI_END: 2024-06-17: Telephony: Unregister to ExtPhoneCallback
-// QTI_BEGIN: 2025-01-11: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
+// QTI_BEGIN: 2025-01-10: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
         mExecutor = context.getMainExecutor();
         mImsInterfaceListener = new QtiImsExtListenerBaseImpl(mExecutor) {
             @Override
@@ -190,7 +190,7 @@ public class CallBarringEditPreference extends EditPinPreference {
                 msg.sendToTarget();
             }
         };
-// QTI_END: 2025-01-11: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
+// QTI_END: 2025-01-10: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
     }
 
     /**
@@ -202,7 +202,7 @@ public class CallBarringEditPreference extends EditPinPreference {
         this(context, null);
     }
 
-// QTI_BEGIN: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_BEGIN: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
     private void createQtiImsExtConnector(Context context) {
         try {
             mQtiImsExtConnector = new QtiImsExtConnector(context,
@@ -223,22 +223,22 @@ public class CallBarringEditPreference extends EditPinPreference {
         }
     }
 
-// QTI_END: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
-// QTI_BEGIN: 2023-04-26: Telephony: IMS: Fix serviceConnection leaked issue
+// QTI_END: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_BEGIN: 2023-04-25: Telephony: IMS: Fix serviceConnection leaked issue
     public void deInit() {
         if (mQtiImsExtConnector != null) {
             mQtiImsExtConnector.disconnect();
             mQtiImsExtConnector = null;
             mQtiImsExtManager = null;
         }
-// QTI_END: 2023-04-26: Telephony: IMS: Fix serviceConnection leaked issue
+// QTI_END: 2023-04-25: Telephony: IMS: Fix serviceConnection leaked issue
 // QTI_BEGIN: 2024-06-17: Telephony: Unregister to ExtPhoneCallback
         mExtTelephonyManager.unregisterCallback(mExtPhoneCallbackListener);
 // QTI_END: 2024-06-17: Telephony: Unregister to ExtPhoneCallback
-// QTI_BEGIN: 2023-04-26: Telephony: IMS: Fix serviceConnection leaked issue
+// QTI_BEGIN: 2023-04-25: Telephony: IMS: Fix serviceConnection leaked issue
     }
 
-// QTI_END: 2023-04-26: Telephony: IMS: Fix serviceConnection leaked issue
+// QTI_END: 2023-04-25: Telephony: IMS: Fix serviceConnection leaked issue
     void init(TimeConsumingPreferenceListener listener, boolean skipReading, Phone phone) {
         Log.d(LOG_TAG, "init: phone id = " + phone.getPhoneId());
         mPhone = phone;
@@ -246,7 +246,7 @@ public class CallBarringEditPreference extends EditPinPreference {
         mTcpListener = listener;
         if (!skipReading) {
             // Query call barring status
-// QTI_BEGIN: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_BEGIN: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
             if (!mPhone.isUtEnabled()) {
                 if (mPhone.getPhoneType() == TelephonyManager.PHONE_TYPE_GSM &&
                         PhoneUtils.isBacktoBackSSFeatureSupported()) {
@@ -261,7 +261,7 @@ public class CallBarringEditPreference extends EditPinPreference {
                 //Connect will get the QtiImsExtManager instance.
                 mQtiImsExtConnector.connect();
             }
-// QTI_END: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_END: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
             if (mTcpListener != null) {
                 mTcpListener.onStarted(this, true);
             }
@@ -279,9 +279,9 @@ public class CallBarringEditPreference extends EditPinPreference {
     }
 
 // QTI_END: 2023-03-16: Telephony: Enable telephony FDN check for side car SS requests.
-// QTI_BEGIN: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_BEGIN: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
     private void queryImsCallBarringStatus() {
-// QTI_END: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_END: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
 // QTI_BEGIN: 2023-03-16: Telephony: Enable telephony FDN check for side car SS requests.
         if (isCbQueryBlockedByFdn()) {
             Log.d(LOG_TAG, "queryImsCallBarringStatus blocked by FDN check");
@@ -296,15 +296,15 @@ public class CallBarringEditPreference extends EditPinPreference {
             return;
         }
 // QTI_END: 2023-02-21: Telephony: Ensure all getCallBarring requests on IMS use sidecar API
-// QTI_BEGIN: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_BEGIN: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
         try {
             mQtiImsExtManager.queryCallBarring(mPhone.getPhoneId(),
                     getCBTypeFromFacility(mFacility), "", getServiceClassForCallBarring(mPhone),
-// QTI_END: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
-// QTI_BEGIN: 2025-01-11: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
+// QTI_END: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_BEGIN: 2025-01-10: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
                     mExpectMore, mImsInterfaceListener);
-// QTI_END: 2025-01-11: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
-// QTI_BEGIN: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_END: 2025-01-10: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
+// QTI_BEGIN: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
         } catch (QtiImsException e) {
             Log.d(LOG_TAG, "queryCallForwardStatus failed. " +
                     "Exception = " + e);
@@ -313,20 +313,20 @@ public class CallBarringEditPreference extends EditPinPreference {
     }
 
     private void sendErrorResponse() {
-// QTI_END: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_END: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
 // QTI_BEGIN: 2023-03-16: Telephony: Enable telephony FDN check for side car SS requests.
         sendErrorResponse(CommandException.Error.GENERIC_FAILURE);
     }
 
     private void sendErrorResponse(CommandException.Error err) {
 // QTI_END: 2023-03-16: Telephony: Enable telephony FDN check for side car SS requests.
-// QTI_BEGIN: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_BEGIN: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
         Message msg = mHandler.obtainMessage(MyHandler.MESSAGE_GET_CALL_BARRING);
-// QTI_END: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_END: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
 // QTI_BEGIN: 2023-03-16: Telephony: Enable telephony FDN check for side car SS requests.
         AsyncResult.forMessage(msg, null, new CommandException(err));
 // QTI_END: 2023-03-16: Telephony: Enable telephony FDN check for side car SS requests.
-// QTI_BEGIN: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_BEGIN: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
         msg.sendToTarget();
     }
 
@@ -355,7 +355,7 @@ public class CallBarringEditPreference extends EditPinPreference {
     }
 
     private void getCallBarringWithExpectMore() {
-// QTI_END: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_END: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
 // QTI_BEGIN: 2023-03-16: Telephony: Enable telephony FDN check for side car SS requests.
         if (isCbQueryBlockedByFdn()) {
             Log.d(LOG_TAG, "getCallBarringWithExpectMore blocked by FDN check");
@@ -364,20 +364,20 @@ public class CallBarringEditPreference extends EditPinPreference {
         }
 
 // QTI_END: 2023-03-16: Telephony: Enable telephony FDN check for side car SS requests.
-// QTI_BEGIN: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_BEGIN: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
         if (!mExtTelephonyManager.isServiceConnected()) {
             sendErrorResponse();
             return;
         }
 
         try {
-// QTI_END: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_END: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
 // QTI_BEGIN: 2023-01-09: Telephony: FR84002: Re-design ExtTelephonyManager interface
             int[] events = new int[] {};
             mClient = mExtTelephonyManager.registerCallbackWithEvents(
                     getContext().getPackageName(), mExtPhoneCallbackListener, events);
 // QTI_END: 2023-01-09: Telephony: FR84002: Re-design ExtTelephonyManager interface
-// QTI_BEGIN: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_BEGIN: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
             mExtTelephonyManager.getFacilityLockForApp(mPhone.getPhoneId(), mFacility,
                     "" /*password*/, getServiceClassForCallBarring(mPhone), null /*appId*/,
                     mExpectMore, mClient);
@@ -387,11 +387,11 @@ public class CallBarringEditPreference extends EditPinPreference {
         }
     }
 
-// QTI_END: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_END: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
 // QTI_BEGIN: 2023-01-09: Telephony: FR84002: Re-design ExtTelephonyManager interface
     private ExtPhoneCallbackListener mExtPhoneCallbackListener = new ExtPhoneCallbackListener() {
 // QTI_END: 2023-01-09: Telephony: FR84002: Re-design ExtTelephonyManager interface
-// QTI_BEGIN: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_BEGIN: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
         @Override
         public void getFacilityLockForAppResponse(Status status, int[] response) {
             Message msg = mHandler.obtainMessage(MyHandler.MESSAGE_GET_CALL_BARRING);
@@ -409,8 +409,8 @@ public class CallBarringEditPreference extends EditPinPreference {
         mExpectMore = expectMore;
     }
 
-// QTI_END: 2021-05-28: Telephony: Add CallForwarding and CallBarring expectMore support.
-// QTI_BEGIN: 2022-12-14: Telephony: IMS: Display call barring password UI conditionally
+// QTI_END: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
+// QTI_BEGIN: 2022-12-13: Telephony: IMS: Display call barring password UI conditionally
     private void setCallBarringInternal(String password) {
         // Send set call barring message to RIL layer.
         mPhone.setCallBarring(mFacility, !mIsActivated, password,
@@ -421,7 +421,7 @@ public class CallBarringEditPreference extends EditPinPreference {
         }
     }
 
-// QTI_END: 2022-12-14: Telephony: IMS: Display call barring password UI conditionally
+// QTI_END: 2022-12-13: Telephony: IMS: Display call barring password UI conditionally
     @Override
     public void onClick(DialogInterface dialog, int which) {
         super.onClick(dialog, which);
@@ -430,12 +430,12 @@ public class CallBarringEditPreference extends EditPinPreference {
 
     @Override
     protected void showDialog(Bundle state) {
-// QTI_BEGIN: 2022-12-14: Telephony: IMS: Display call barring password UI conditionally
+// QTI_BEGIN: 2022-12-13: Telephony: IMS: Display call barring password UI conditionally
         if (!isPasswordEnabled()) {
             setCallBarringInternal("");
             return;
         }
-// QTI_END: 2022-12-14: Telephony: IMS: Display call barring password UI conditionally
+// QTI_END: 2022-12-13: Telephony: IMS: Display call barring password UI conditionally
         setDialogMessage(getContext().getString(R.string.messageCallBarring));
         super.showDialog(state);
     }
@@ -510,17 +510,17 @@ public class CallBarringEditPreference extends EditPinPreference {
             }
 
             Log.d(LOG_TAG, "onDialogClosed");
-// QTI_BEGIN: 2022-12-14: Telephony: IMS: Display call barring password UI conditionally
+// QTI_BEGIN: 2022-12-13: Telephony: IMS: Display call barring password UI conditionally
             setCallBarringInternal(password);
-// QTI_END: 2022-12-14: Telephony: IMS: Display call barring password UI conditionally
+// QTI_END: 2022-12-13: Telephony: IMS: Display call barring password UI conditionally
         }
     }
 
-// QTI_BEGIN: 2022-12-14: Telephony: IMS: Display call barring password UI conditionally
+// QTI_BEGIN: 2022-12-13: Telephony: IMS: Display call barring password UI conditionally
     void handleCallBarringResult(boolean status, boolean password) {
-// QTI_END: 2022-12-14: Telephony: IMS: Display call barring password UI conditionally
+// QTI_END: 2022-12-13: Telephony: IMS: Display call barring password UI conditionally
         mIsActivated = status;
-// QTI_BEGIN: 2022-12-14: Telephony: IMS: Display call barring password UI conditionally
+// QTI_BEGIN: 2022-12-13: Telephony: IMS: Display call barring password UI conditionally
         mIsPasswordEnabled = password;
         if (mTcpListener instanceof GsmUmtsCallBarringOptions) {
             ((GsmUmtsCallBarringOptions)mTcpListener).setChangePasswordPreference(password);
@@ -531,10 +531,10 @@ public class CallBarringEditPreference extends EditPinPreference {
 
     boolean isPasswordEnabled() {
         return mIsPasswordEnabled;
-// QTI_END: 2022-12-14: Telephony: IMS: Display call barring password UI conditionally
+// QTI_END: 2022-12-13: Telephony: IMS: Display call barring password UI conditionally
     }
 
-    private static int getServiceClassForCallBarring(Phone phone) {
+    protected static int getServiceClassForCallBarring(Phone phone) {
         int serviceClass = CarrierConfigManager.SERVICE_CLASS_VOICE;
         PersistableBundle carrierConfig = PhoneGlobals.getInstance()
                 .getCarrierConfigForSubId(phone.getSubId());
@@ -596,17 +596,17 @@ public class CallBarringEditPreference extends EditPinPreference {
 
             AsyncResult ar = (AsyncResult) msg.obj;
 
-// QTI_BEGIN: 2023-06-07: Telephony: Fix set call barring failure does not show Call setting error dialog
+// QTI_BEGIN: 2023-06-06: Telephony: Fix set call barring failure does not show Call setting error dialog
             if (msg.arg2 == MESSAGE_SET_CALL_BARRING ||
                     pref.mSetCallBarringReqInfo.mIsRequestOverIms) {
-// QTI_END: 2023-06-07: Telephony: Fix set call barring failure does not show Call setting error dialog
+// QTI_END: 2023-06-06: Telephony: Fix set call barring failure does not show Call setting error dialog
 // QTI_BEGIN: 2023-02-21: Telephony: Ensure all getCallBarring requests on IMS use sidecar API
                 // This block is triggered when GET_CALL_BARRING request that caused this response
                 // is because of the user setting call barring option on UI
 // QTI_END: 2023-02-21: Telephony: Ensure all getCallBarring requests on IMS use sidecar API
-// QTI_BEGIN: 2023-06-07: Telephony: Fix set call barring failure does not show Call setting error dialog
+// QTI_BEGIN: 2023-06-06: Telephony: Fix set call barring failure does not show Call setting error dialog
                 pref.mSetCallBarringReqInfo.mIsRequestOverIms = false;
-// QTI_END: 2023-06-07: Telephony: Fix set call barring failure does not show Call setting error dialog
+// QTI_END: 2023-06-06: Telephony: Fix set call barring failure does not show Call setting error dialog
                 pref.mTcpListener.onFinished(pref, false);
             } else {
                 pref.mTcpListener.onFinished(pref, true);
@@ -617,11 +617,11 @@ public class CallBarringEditPreference extends EditPinPreference {
                 Log.i(LOG_TAG, "handleGetCallBarringResponse: ar.exception=" + ar.exception);
                 pref.mTcpListener.onException(pref, (CommandException) ar.exception);
             } else {
-// QTI_BEGIN: 2023-06-07: Telephony: Fix set call barring failure does not show Call setting error dialog
+// QTI_BEGIN: 2023-06-06: Telephony: Fix set call barring failure does not show Call setting error dialog
                 if (pref.mSetCallBarringReqInfo.mException != null ||
                         ar.userObj instanceof Throwable) {
                     pref.mSetCallBarringReqInfo.mException = null;
-// QTI_END: 2023-06-07: Telephony: Fix set call barring failure does not show Call setting error dialog
+// QTI_END: 2023-06-06: Telephony: Fix set call barring failure does not show Call setting error dialog
                     pref.mTcpListener.onError(pref, RESPONSE_ERROR);
                 }
                 int[] ints = (int[]) ar.result;
@@ -630,7 +630,7 @@ public class CallBarringEditPreference extends EditPinPreference {
                     pref.setEnabled(false);
                     pref.mTcpListener.onError(pref, RESPONSE_ERROR);
                 } else {
-// QTI_BEGIN: 2022-12-14: Telephony: IMS: Display call barring password UI conditionally
+// QTI_BEGIN: 2022-12-13: Telephony: IMS: Display call barring password UI conditionally
                     // The getCallBarring response may be an array of size 1 or 2. ints[0] always
                     // contains the enabled status of the call barring request
                     // [0:deactivated, 1:activated]. If size is 2, the value of ints[1] tells
@@ -638,7 +638,7 @@ public class CallBarringEditPreference extends EditPinPreference {
                     // of setCallBarring requests [0: password not required, 1: password required]
                     pref.handleCallBarringResult(ints[0] != 0,
                             ints.length > 1 ? ints[1] != 0 : true);
-// QTI_END: 2022-12-14: Telephony: IMS: Display call barring password UI conditionally
+// QTI_END: 2022-12-13: Telephony: IMS: Display call barring password UI conditionally
                     Log.i(LOG_TAG,
                             "handleGetCallBarringResponse: CB state successfully queried: "
                                     + ints[0]);
@@ -670,17 +670,17 @@ public class CallBarringEditPreference extends EditPinPreference {
                                 ar.exception), getServiceClassForCallBarring(pref.mPhone));
             } else {
 // QTI_END: 2023-02-21: Telephony: Ensure all getCallBarring requests on IMS use sidecar API
-// QTI_BEGIN: 2023-06-07: Telephony: Fix set call barring failure does not show Call setting error dialog
+// QTI_BEGIN: 2023-06-06: Telephony: Fix set call barring failure does not show Call setting error dialog
                 pref.mSetCallBarringReqInfo.mIsRequestOverIms = true;
                 pref.mSetCallBarringReqInfo.mException = ar.exception;
-// QTI_END: 2023-06-07: Telephony: Fix set call barring failure does not show Call setting error dialog
+// QTI_END: 2023-06-06: Telephony: Fix set call barring failure does not show Call setting error dialog
 // QTI_BEGIN: 2023-02-21: Telephony: Ensure all getCallBarring requests on IMS use sidecar API
                 pref.queryImsCallBarringStatus();
             }
 // QTI_END: 2023-02-21: Telephony: Ensure all getCallBarring requests on IMS use sidecar API
         }
     }
-// QTI_BEGIN: 2023-06-07: Telephony: Fix set call barring failure does not show Call setting error dialog
+// QTI_BEGIN: 2023-06-06: Telephony: Fix set call barring failure does not show Call setting error dialog
 
     private class SetCallBarringReqInfo{
         // Flag determines whether set call barring request was sent over IMS
@@ -693,5 +693,5 @@ public class CallBarringEditPreference extends EditPinPreference {
             mException = exception;
         }
     }
-// QTI_END: 2023-06-07: Telephony: Fix set call barring failure does not show Call setting error dialog
+// QTI_END: 2023-06-06: Telephony: Fix set call barring failure does not show Call setting error dialog
 }

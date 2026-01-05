@@ -49,6 +49,7 @@ import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
+import android.telephony.NetworkSecurityEvent;
 import android.telephony.RadioAccessFamily;
 import android.telephony.Rlog;
 import android.telephony.TelephonyManager;
@@ -119,6 +120,8 @@ public class PhoneInterfaceManagerTest extends TelephonyTestBase {
 
     @Mock
     private AppOpsManager mAppOps;
+    @Mock
+    private SatelliteController mSatelliteController;
 
     @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
@@ -131,8 +134,7 @@ public class PhoneInterfaceManagerTest extends TelephonyTestBase {
         replaceInstance(SatelliteAccessController.class, "sInstance", null,
                 Mockito.mock(SatelliteAccessController.class));
 
-        replaceInstance(SatelliteController.class, "sInstance", null,
-                Mockito.mock(SatelliteController.class));
+        replaceInstance(SatelliteController.class, "sInstance", null, mSatelliteController);
 
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(
                 InstrumentationRegistry.getInstrumentation().getTargetContext());
@@ -450,6 +452,59 @@ public class PhoneInterfaceManagerTest extends TelephonyTestBase {
         doReturn(enable).when(mPhone).isNullCipherNotificationSupported();
         doReturn(mPhone).when(mPhoneInterfaceManager).getDefaultPhone();
     }
+
+    @Test
+    @EnableFlags(Flags.FLAG_NETWORK_SECURITY_EVENT_INDICATIONS)
+    public void getSupportedNetworkAlertCategories_allReqsMet_returnsCategories() {
+        doNothing().when(mPhoneInterfaceManager).enforceReadPrivilegedPermission(anyString());
+        doReturn(mPhone).when(mPhoneInterfaceManager).getDefaultPhone();
+        doReturn(204).when(mPhoneInterfaceManager).getHalVersion(anyInt());
+
+        int[] expectedCategories = new int[]{
+                NetworkSecurityEvent.ALERT_CATEGORY_DOWNGRADE,
+                NetworkSecurityEvent.ALERT_CATEGORY_IMPRISONMENT
+        };
+        doReturn(expectedCategories).when(mPhone).getSupportedNetworkAlertCategories();
+
+        int[] actualCategories = mPhoneInterfaceManager.getSupportedNetworkAlertCategories();
+
+        assertArrayEquals(expectedCategories, actualCategories);
+    }
+
+    @Test
+    public void getSupportedNetworkAlertCategories_lackingHalVersion_throwsException() {
+        doNothing().when(mPhoneInterfaceManager).enforceReadPrivilegedPermission(anyString());
+        doReturn(mPhone).when(mPhoneInterfaceManager).getDefaultPhone();
+        doReturn(203).when(mPhoneInterfaceManager).getHalVersion(anyInt());
+
+        assertThrows(UnsupportedOperationException.class,
+                () -> mPhoneInterfaceManager.getSupportedNetworkAlertCategories());
+    }
+
+    @Test
+    public void getSupportedNetworkAlertCategories_lackingPermissions_throwsException() {
+        doThrow(new SecurityException("Test Exception")).when(mPhoneInterfaceManager)
+                .enforceReadPrivilegedPermission(anyString());
+        doReturn(mPhone).when(mPhoneInterfaceManager).getDefaultPhone();
+        doReturn(204).when(mPhoneInterfaceManager).getHalVersion(anyInt());
+
+        assertThrows(SecurityException.class,
+                () -> mPhoneInterfaceManager.getSupportedNetworkAlertCategories());
+    }
+
+    @Test
+    public void getSupportedNetworkAlertCategories_modemUnsupported_returnsEmptyArray() {
+        doNothing().when(mPhoneInterfaceManager).enforceReadPrivilegedPermission(anyString());
+        doReturn(mPhone).when(mPhoneInterfaceManager).getDefaultPhone();
+        doReturn(204).when(mPhoneInterfaceManager).getHalVersion(anyInt());
+        doThrow(new UnsupportedOperationException()).when(mPhone)
+                .getSupportedNetworkAlertCategories();
+
+        int[] categories = mPhoneInterfaceManager.getSupportedNetworkAlertCategories();
+
+        assertEquals(0, categories.length);
+    }
+
 
     /**
      * Verify getCarrierRestrictionStatus throws exception for invalid caller package name.
@@ -807,5 +862,17 @@ public class PhoneInterfaceManagerTest extends TelephonyTestBase {
         // Action & Assert: Expect an UnsupportedOperationException
         assertThrows(UnsupportedOperationException.class,
                 () -> mPhoneInterfaceManager.getCurrentTtyMode());
+    }
+
+    @Test
+    public void uncapMaxAllowedSatelliteDataMode_noShellPermission_throwsSecurityException() {
+        // This method is protected by TelephonyPermissions.enforceShellOnly.
+        // The test runner does not have shell UID, so this should throw a SecurityException.
+        // This test verifies that the permission check is in place.
+        assertThrows(SecurityException.class,
+                () -> mPhoneInterfaceManager.uncapMaxAllowedSatelliteDataMode());
+
+        // Verify that the underlying controller method is not called due to permission failure.
+        verify(mSatelliteController, never()).uncapMaxAllowedDataMode();
     }
 }

@@ -88,10 +88,10 @@ import com.android.phone.vvm.CarrierVvmPackageInstalledReceiver;
 import com.android.services.telephony.domainselection.DynamicRoutingController;
 import com.android.services.telephony.rcs.TelephonyRcsService;
 
-// QTI_BEGIN: 2023-02-07: Telephony: Use data registration state to show network selection notification
+// QTI_BEGIN: 2023-02-06: Telephony: Use data registration state to show network selection notification
 import com.qti.extphone.ExtTelephonyManager;
 
-// QTI_END: 2023-02-07: Telephony: Use data registration state to show network selection notification
+// QTI_END: 2023-02-06: Telephony: Use data registration state to show network selection notification
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -151,9 +151,9 @@ public class PhoneGlobals extends ContextWrapper {
     public static final int AIRPLANE_ON = 1;
     public static final int AIRPLANE_OFF = 0;
 
-// QTI_BEGIN: 2023-02-07: Telephony: Use data registration state to show network selection notification
+// QTI_BEGIN: 2023-02-06: Telephony: Use data registration state to show network selection notification
     private static final String NETWORK_ACCESS_MODE = "access_mode";
-// QTI_END: 2023-02-07: Telephony: Use data registration state to show network selection notification
+// QTI_END: 2023-02-06: Telephony: Use data registration state to show network selection notification
     private static PhoneGlobals sMe;
 
     CallManager mCM;
@@ -285,7 +285,6 @@ public class PhoneGlobals extends ContextWrapper {
         }
     }
 
-// QTI_BEGIN: 2020-04-01: Telephony: Add SIM Depersonalisation interface
     private static class EventSimStateChangedBag {
         final int mPhoneId;
         final String mIccStatus;
@@ -296,7 +295,6 @@ public class PhoneGlobals extends ContextWrapper {
         }
     }
 
-// QTI_END: 2020-04-01: Telephony: Add SIM Depersonalisation interface
     // Some carrier config settings disable the network lock screen, so we call handleSimLock
     // when either SIM_LOCK or CARRIER_CONFIG changes so that no matter which one happens first,
     // we still do the right thing
@@ -355,9 +353,7 @@ public class PhoneGlobals extends ContextWrapper {
                     int subType = (Integer) ((AsyncResult) msg.obj).result;
                     Phone phone = (Phone) ((AsyncResult) msg.obj).userObj;
                     handleSimLock(subType, phone);
-// QTI_BEGIN: 2018-02-26: Telephony: * Telephony: SIM De-personalization
                     break;
-// QTI_END: 2018-02-26: Telephony: * Telephony: SIM De-personalization
                 case EVENT_DATA_ROAMING_DISCONNECTED:
                     Log.d(LOG_TAG, "EVENT_DATA_ROAMING_DISCONNECTED");
                     if (SubscriptionManagerService.getInstance()
@@ -395,9 +391,7 @@ public class PhoneGlobals extends ContextWrapper {
                     break;
 
                 case EVENT_SIM_STATE_CHANGED:
-// QTI_BEGIN: 2020-04-01: Telephony: Add SIM Depersonalisation interface
                     EventSimStateChangedBag bag = (EventSimStateChangedBag)msg.obj;
-// QTI_END: 2020-04-01: Telephony: Add SIM Depersonalisation interface
                     // Dismiss the "No services" notification if the SIM is removed.
                     if (IccCardConstants.INTENT_VALUE_ICC_ABSENT.equals(bag.mIccStatus)) {
                         notificationMgr.dismissNetworkSelectionNotificationForInactiveSubId();
@@ -406,11 +400,9 @@ public class PhoneGlobals extends ContextWrapper {
                     // Marks the event where the SIM goes into ready state.
                     // Right now, this is only used for the PUK-unlocking process.
                     if (IccCardConstants.INTENT_VALUE_ICC_READY.equals(bag.mIccStatus)
-// QTI_BEGIN: 2020-07-03: Telephony: Dismiss de-perso UI
                             || IccCardConstants.INTENT_VALUE_ICC_LOADED.equals(bag.mIccStatus)
                             || IccCardConstants.INTENT_VALUE_ICC_NOT_READY.equals(bag.mIccStatus)
                             || IccCardConstants.INTENT_VALUE_ICC_ABSENT.equals(bag.mIccStatus)) {
-// QTI_END: 2020-07-03: Telephony: Dismiss de-perso UI
                         // When the right event is triggered and there are UI objects in the
                         // foreground, we close them to display the lock panel.
                         if (mPUKEntryActivity != null) {
@@ -423,12 +415,8 @@ public class PhoneGlobals extends ContextWrapper {
                             mPUKEntryProgressDialog.dismiss();
                             mPUKEntryProgressDialog = null;
                         }
-// QTI_BEGIN: 2020-07-15: Telephony: When SIM card removed, dismiss the de-perso UI
                         Log.i(LOG_TAG, "Dismissing depersonal panel" + (bag.mIccStatus));
-// QTI_END: 2020-07-15: Telephony: When SIM card removed, dismiss the de-perso UI
-// QTI_BEGIN: 2020-04-01: Telephony: Add SIM Depersonalisation interface
                         IccNetworkDepersonalizationPanel.dialogDismiss(bag.mPhoneId);
-// QTI_END: 2020-04-01: Telephony: Add SIM Depersonalisation interface
                     }
                     break;
 
@@ -542,7 +530,13 @@ public class PhoneGlobals extends ContextWrapper {
             DomainSelectionResolver.make(this, dssComponentName);
 
             if (mFeatureFlags.enablePhoneNumberParsingApi()) {
-                TelephonyServicesInitializer.initialize();
+                Log.v(LOG_TAG, "PhoneGlobal enablePhoneNumberParsingApi");
+                if (mFeatureFlags.getPhoneNumberTs43Api()) {
+                    Log.v(LOG_TAG, "PhoneGlobal TelephonyServicesInitializer.initialize(this)");
+                    TelephonyServicesInitializer.initialize(this);
+                } else {
+                    TelephonyServicesInitializer.initialize();
+                }
             }
 
             // Initialize the telephony framework
@@ -662,9 +656,9 @@ public class PhoneGlobals extends ContextWrapper {
                     new IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED);
             intentFilter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
             intentFilter.addAction(TelephonyIntents.ACTION_RADIO_TECHNOLOGY_CHANGED);
-// QTI_BEGIN: 2021-12-29: Telephony: Add exit SCBM support
+// QTI_BEGIN: 2021-12-28: Telephony: Add exit SCBM support
             intentFilter.addAction(SmsCallbackModeService.ACTION_SMS_CALLBACK_MODE_CHANGED);
-// QTI_END: 2021-12-29: Telephony: Add exit SCBM support
+// QTI_END: 2021-12-28: Telephony: Add exit SCBM support
             intentFilter.addAction(TelephonyIntents.ACTION_EMERGENCY_CALLBACK_MODE_CHANGED);
             intentFilter.addAction(TelephonyIntents.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED);
             intentFilter.addAction(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED);
@@ -766,9 +760,9 @@ public class PhoneGlobals extends ContextWrapper {
 
     private void registerSettingsObserver() {
         mSettingsObserver.unobserve();
-// QTI_BEGIN: 2022-04-21: Telephony: Add receiver responsible for showing the C_IWLAN notification
+// QTI_BEGIN: 2022-04-20: Telephony: Add receiver responsible for showing the C_IWLAN notification
         ContentResolver cr = getContentResolver();
-// QTI_END: 2022-04-21: Telephony: Add receiver responsible for showing the C_IWLAN notification
+// QTI_END: 2022-04-20: Telephony: Add receiver responsible for showing the C_IWLAN notification
         String dataRoamingSetting = Settings.Global.DATA_ROAMING;
         String mobileDataSetting = Settings.Global.MOBILE_DATA;
         if (TelephonyManager.getDefault().getSimCount() > 1) {
@@ -954,13 +948,9 @@ public class PhoneGlobals extends ContextWrapper {
                     PhoneUtils.unregisterIccStatus(mHandler, phoneId);
                     PhoneUtils.registerIccStatus(mHandler, EVENT_SIM_NETWORK_LOCKED, phoneId);
                 }
-// QTI_BEGIN: 2020-04-01: Telephony: Add SIM Depersonalisation interface
                 String iccStatus = intent.getStringExtra(IccCardConstants.INTENT_KEY_ICC_STATE);
-// QTI_END: 2020-04-01: Telephony: Add SIM Depersonalisation interface
-// QTI_BEGIN: 2020-05-05: Telephony: 1.5 HAL version check support for sim-deperso
                 mHandler.sendMessage(mHandler.obtainMessage(EVENT_SIM_STATE_CHANGED,
                         new EventSimStateChangedBag(phoneId, iccStatus)));
-// QTI_END: 2020-05-05: Telephony: 1.5 HAL version check support for sim-deperso
 // QTI_BEGIN: 2018-09-17: Telephony: Fix for data roaming notification
                 Phone phone = PhoneFactory.getPhone(phoneId);
                 if (phone != null) {
@@ -1007,9 +997,9 @@ public class PhoneGlobals extends ContextWrapper {
                 } else {
                     Log.w(LOG_TAG, "phoneInEcm is null.");
                 }
-// QTI_BEGIN: 2021-12-29: Telephony: Add exit SCBM support
+// QTI_BEGIN: 2021-12-28: Telephony: Add exit SCBM support
             } else if (action.equals(SmsCallbackModeService.ACTION_SMS_CALLBACK_MODE_CHANGED)) {
-// QTI_END: 2021-12-29: Telephony: Add exit SCBM support
+// QTI_END: 2021-12-28: Telephony: Add exit SCBM support
 // QTI_BEGIN: 2022-01-27: Telephony: Add emergency account in SCBM
                 int phoneId = intent.getIntExtra(PhoneConstants.PHONE_KEY, 0);
                 Log.d(LOG_TAG, "SMS Callback Mode. phoneId:" + phoneId);
@@ -1025,9 +1015,9 @@ public class PhoneGlobals extends ContextWrapper {
                 } else {
                     Log.w(LOG_TAG, "phoneInScbm is null.");
 // QTI_END: 2022-01-27: Telephony: Add emergency account in SCBM
-// QTI_BEGIN: 2021-12-29: Telephony: Add exit SCBM support
+// QTI_BEGIN: 2021-12-28: Telephony: Add exit SCBM support
                 }
-// QTI_END: 2021-12-29: Telephony: Add exit SCBM support
+// QTI_END: 2021-12-28: Telephony: Add exit SCBM support
             } else if (action.equals(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED)) {
                 // Roaming status could be overridden by carrier config, so we need to update it.
                 if (VDBG) Log.v(LOG_TAG, "carrier config changed.");
@@ -1055,9 +1045,9 @@ public class PhoneGlobals extends ContextWrapper {
 
     private void handleServiceStateChanged(ServiceState serviceState, int subId) {
         if (VDBG) Log.v(LOG_TAG, "handleServiceStateChanged");
-// QTI_BEGIN: 2023-02-07: Telephony: Use data registration state to show network selection notification
+// QTI_BEGIN: 2023-02-06: Telephony: Use data registration state to show network selection notification
         int state = getRegistrationState(serviceState, subId);
-// QTI_END: 2023-02-07: Telephony: Use data registration state to show network selection notification
+// QTI_END: 2023-02-06: Telephony: Use data registration state to show network selection notification
         notificationMgr.updateNetworkSelection(state, subId);
 
         if (VDBG) {
@@ -1069,7 +1059,7 @@ public class PhoneGlobals extends ContextWrapper {
         }
     }
 
-// QTI_BEGIN: 2023-02-07: Telephony: Use data registration state to show network selection notification
+// QTI_BEGIN: 2023-02-06: Telephony: Use data registration state to show network selection notification
     private int getRegistrationState(ServiceState serviceState, int subId) {
         int state = serviceState.getState();
         int accessMode = Settings.Global.getInt(getContentResolver(),
@@ -1081,7 +1071,7 @@ public class PhoneGlobals extends ContextWrapper {
         return state;
     }
 
-// QTI_END: 2023-02-07: Telephony: Use data registration state to show network selection notification
+// QTI_END: 2023-02-06: Telephony: Use data registration state to show network selection notification
     /**
      * When roaming, if mobile data cannot be established due to data roaming not enabled, we need
      * to notify the user so they can enable it through settings. Vise versa if the condition
@@ -1362,10 +1352,10 @@ public class PhoneGlobals extends ContextWrapper {
     public void onNetworkSelectionChanged(int subId) {
         Phone phone = getPhone(subId);
         if (phone != null) {
-// QTI_BEGIN: 2023-02-07: Telephony: Use data registration state to show network selection notification
+// QTI_BEGIN: 2023-02-06: Telephony: Use data registration state to show network selection notification
             int state = getRegistrationState(phone.getServiceState(), subId);
             notificationMgr.updateNetworkSelection(state, subId);
-// QTI_END: 2023-02-07: Telephony: Use data registration state to show network selection notification
+// QTI_END: 2023-02-06: Telephony: Use data registration state to show network selection notification
         } else {
             Log.w(LOG_TAG, "onNetworkSelectionChanged on null phone, subId: " + subId);
         }

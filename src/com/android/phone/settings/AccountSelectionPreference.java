@@ -82,26 +82,26 @@ public class AccountSelectionPreference extends ListPreference implements
         int i = 0;
         for ( ; i < mAccounts.length; i++) {
             PhoneAccount account = telecomManager.getPhoneAccount(mAccounts[i]);
-// QTI_BEGIN: 2023-04-10: Telephony: Settings: Add Null condition check before using phone account
+// QTI_BEGIN: 2023-04-09: Telephony: Settings: Add Null condition check before using phone account
             if (account != null) {
                 CharSequence label = account.getLabel();
                 if (label != null) {
                     label = pm.getUserBadgedLabel(label, mAccounts[i].getUserHandle());
                 }
                 boolean isSimAccount =
-// QTI_END: 2023-04-10: Telephony: Settings: Add Null condition check before using phone account
+// QTI_END: 2023-04-09: Telephony: Settings: Add Null condition check before using phone account
                     account.hasCapabilities(PhoneAccount.CAPABILITY_SIM_SUBSCRIPTION);
-// QTI_BEGIN: 2023-04-10: Telephony: Settings: Add Null condition check before using phone account
+// QTI_BEGIN: 2023-04-09: Telephony: Settings: Add Null condition check before using phone account
                 mEntries[i] = (TextUtils.isEmpty(label) && isSimAccount)
-// QTI_END: 2023-04-10: Telephony: Settings: Add Null condition check before using phone account
+// QTI_END: 2023-04-09: Telephony: Settings: Add Null condition check before using phone account
                     ? mContext.getString(R.string.phone_accounts_default_account_label)
                     : String.valueOf(label);
-// QTI_BEGIN: 2023-04-10: Telephony: Settings: Add Null condition check before using phone account
+// QTI_BEGIN: 2023-04-09: Telephony: Settings: Add Null condition check before using phone account
                 mEntryValues[i] = Integer.toString(i);
                 if (Objects.equals(currentSelection, mAccounts[i])) {
                     selectedIndex = i;
                 }
-// QTI_END: 2023-04-10: Telephony: Settings: Add Null condition check before using phone account
+// QTI_END: 2023-04-09: Telephony: Settings: Add Null condition check before using phone account
             }
         }
         mEntryValues[i] = Integer.toString(i);

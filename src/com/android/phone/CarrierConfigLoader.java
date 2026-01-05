@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
+// QTI_BEGIN: 2025-04-29: Telephony: Fix for Incorrect Carrier Config Values Loading am: 13baf59244 am: 13baf59244
 /*
  * Changes from Qualcomm Technologies, Inc. are provided under the following license:
  * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  * SPDX-License-Identifier: BSD-3-Clause-Clear
  */
 
+// QTI_END: 2025-04-29: Telephony: Fix for Incorrect Carrier Config Values Loading am: 13baf59244 am: 13baf59244
 package com.android.phone;
 
 import static android.content.pm.PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION;
@@ -117,6 +119,11 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
 
     private static final SimpleDateFormat TIME_FORMAT =
             new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
+
+    private static final Set<String> OVERRIDE_BLOCKLIST_ON_USER_BUILD = Set.of(
+            CarrierConfigManager.KEY_SATELLITE_ENTITLEMENT_SUPPORTED_BOOL,
+            CarrierConfigManager.KEY_SATELLITE_DATA_SUPPORT_MODE_INT
+    );
 
     // Package name for platform carrier config app, bundled with system image.
     @NonNull private final String mPlatformCarrierConfigPackage;
@@ -801,11 +808,13 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
             }
         }
 
+// QTI_BEGIN: 2025-04-29: Telephony: Fix for Incorrect Carrier Config Values Loading am: 13baf59244 am: 13baf59244
         if (SubscriptionManager.isValidPhoneId(phoneId)) {
             mPersistentOverrideConfigs[phoneId] = null;
             mOverrideConfigs[phoneId] = null;
         }
 
+// QTI_END: 2025-04-29: Telephony: Fix for Incorrect Carrier Config Values Loading am: 13baf59244 am: 13baf59244
         if (mConfigFromDefaultApp.length <= phoneId) {
             Log.wtf(LOG_TAG, "Invalid phone id " + phoneId);
             return;
@@ -870,9 +879,9 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
             // Let the Phone know about this.
             notifyConfigChangedToPhone(phoneId);
 // QTI_END: 2022-03-04: Telephony: Update CarrierConfigs on essential records loaded
-// QTI_BEGIN: 2022-12-16: Telephony: IMS: Broadcast essential records loaded
+// QTI_BEGIN: 2022-12-15: Telephony: IMS: Broadcast essential records loaded
             broadcastEssentialRecordsLoadedIntent(phoneId);
-// QTI_END: 2022-12-16: Telephony: IMS: Broadcast essential records loaded
+// QTI_END: 2022-12-15: Telephony: IMS: Broadcast essential records loaded
 // QTI_BEGIN: 2022-03-04: Telephony: Update CarrierConfigs on essential records loaded
         } else {
             broadcastConfigChangedIntent(phoneId, true);
@@ -880,7 +889,7 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
 // QTI_END: 2022-03-04: Telephony: Update CarrierConfigs on essential records loaded
     }
 
-// QTI_BEGIN: 2022-12-16: Telephony: IMS: Broadcast essential records loaded
+// QTI_BEGIN: 2022-12-15: Telephony: IMS: Broadcast essential records loaded
     private void broadcastEssentialRecordsLoadedIntent(int phoneId) {
         Intent intent = new Intent(CarrierConfigManager.ACTION_ESSENTIAL_RECORDS_LOADED);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT |
@@ -905,7 +914,7 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
         }
     }
 
-// QTI_END: 2022-12-16: Telephony: IMS: Broadcast essential records loaded
+// QTI_END: 2022-12-15: Telephony: IMS: Broadcast essential records loaded
     private void broadcastConfigChangedIntent(int phoneId, boolean addSubIdExtra) {
         int subId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
         int carrierId = TelephonyManager.UNKNOWN_CARRIER_ID;
@@ -914,10 +923,10 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
         Intent intent = new Intent(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT |
                 Intent.FLAG_RECEIVER_FOREGROUND);
-// QTI_BEGIN: 2019-01-30: Telephony: Include sub id extra even when sim is locked.
+// QTI_BEGIN: 2019-01-29: Telephony: Include sub id extra even when sim is locked.
         // Include subId extra only if SIM records are loaded
         if (addSubIdExtra) {
-// QTI_END: 2019-01-30: Telephony: Include sub id extra even when sim is locked.
+// QTI_END: 2019-01-29: Telephony: Include sub id extra even when sim is locked.
             SubscriptionManager.putPhoneIdAndSubIdExtra(intent, phoneId);
             intent.putExtra(TelephonyManager.EXTRA_SPECIFIC_CARRIER_ID,
                     getSpecificCarrierIdForPhoneId(phoneId));
@@ -1020,9 +1029,9 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
         String imsi = "";
         String gid1 = "";
         String gid2 = "";
-// QTI_BEGIN: 2018-05-21: Telephony: Pass ICCID to Carrier Config Service
+// QTI_BEGIN: 2018-05-20: Telephony: Pass ICCID to Carrier Config Service
         String iccid = "";
-// QTI_END: 2018-05-21: Telephony: Pass ICCID to Carrier Config Service
+// QTI_END: 2018-05-20: Telephony: Pass ICCID to Carrier Config Service
         String spn = TelephonyManager.from(mContext).getSimOperatorNameForPhone(phoneId);
         String simOperator = TelephonyManager.from(mContext).getSimOperatorNumericForPhone(phoneId);
         int carrierId = TelephonyManager.UNKNOWN_CARRIER_ID;
@@ -1037,9 +1046,9 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
             imsi = phone.getSubscriberId();
             gid1 = phone.getGroupIdLevel1();
             gid2 = phone.getGroupIdLevel2();
-// QTI_BEGIN: 2018-05-21: Telephony: Pass ICCID to Carrier Config Service
+// QTI_BEGIN: 2018-05-20: Telephony: Pass ICCID to Carrier Config Service
             iccid = phone.getIccSerialNumber();
-// QTI_END: 2018-05-21: Telephony: Pass ICCID to Carrier Config Service
+// QTI_END: 2018-05-20: Telephony: Pass ICCID to Carrier Config Service
             carrierId = phone.getCarrierId();
             specificCarrierId = phone.getSpecificCarrierId();
         }
@@ -1434,9 +1443,9 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
         mFromSystemUnlocked = Arrays.copyOf(mFromSystemUnlocked, mNumPhones);
         mNeedNotifyCallback = Arrays.copyOf(mNeedNotifyCallback, mNumPhones);
         mCarrierServiceChangeCallbacks = Arrays.copyOf(mCarrierServiceChangeCallbacks, mNumPhones);
-// QTI_BEGIN: 2022-10-07: Telephony: Change EssenialRecords array size w.r.t to MSIM config.
+// QTI_BEGIN: 2022-10-06: Telephony: Change EssenialRecords array size w.r.t to MSIM config.
         mIsEssentialSimRecordsLoaded = Arrays.copyOf(mIsEssentialSimRecordsLoaded, mNumPhones);
-// QTI_END: 2022-10-07: Telephony: Change EssenialRecords array size w.r.t to MSIM config.
+// QTI_END: 2022-10-06: Telephony: Change EssenialRecords array size w.r.t to MSIM config.
 
         // Load the config for all the phones and re-register callback AFTER padding the arrays.
         for (int phoneId = 0; phoneId < mNumPhones; phoneId++) {
@@ -1553,17 +1562,47 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
         return configSubset;
     }
 
-    @android.annotation.EnforcePermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-    @Override
-    public void overrideConfig(int subscriptionId, @Nullable PersistableBundle overrides,
-            boolean persistent) {
-        overrideConfig_enforcePermission();
-
+    private void secureOverrideConfig(@Nullable PersistableBundle overrides, boolean persistent) {
         // Do not allow shell UID to override the carrier config. This will not impact
         // the CTS and telephony shell commands as they use different uids
         if (TelephonyPermissions.isShell(getCallingUid())) {
             throw new SecurityException("overrideConfig cannot be invoked by shell");
         }
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            TelephonyManager tm = mContext.getSystemService(TelephonyManager.class);
+            String modemService = tm.getModemService();
+            logd("modemService=" + modemService);
+            boolean isMockModemService =
+                    "android.telephony.mockmodem.MockModemService".equals(modemService);
+
+            // Do not allow blocklisted keys to be overridden when device is connected
+            // to a real modem.
+            if (isUserBuild() && overrides != null && !isMockModemService) {
+                for (String key : OVERRIDE_BLOCKLIST_ON_USER_BUILD) {
+                    if (overrides.containsKey(key)) {
+                        throw new SecurityException("Overriding " + key
+                                + " is not allowed on user builds.");
+                    }
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+
+        if (persistent && isUserBuild() && !isSystemApp()) {
+            throw new SecurityException("overrideConfig with persistent=true only can be "
+                    + "invoked by system app");
+        }
+    }
+
+    @android.annotation.EnforcePermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    @Override
+    public void overrideConfig(int subscriptionId, @Nullable PersistableBundle overrides,
+            boolean persistent) {
+        overrideConfig_enforcePermission();
+        secureOverrideConfig(overrides, persistent);
 
         int phoneId = SubscriptionManager.getPhoneId(subscriptionId);
         if (!SubscriptionManager.isValidPhoneId(phoneId)) {
@@ -1580,11 +1619,6 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
             overrideConfig(mOverrideConfigs, phoneId, overrides);
 
             if (persistent) {
-                if (isUserBuild() && !isSystemApp()) {
-                    throw new SecurityException("overrideConfig with persistent=true only can be "
-                            + "invoked by system app");
-                }
-
                 overrideConfig(mPersistentOverrideConfigs, phoneId, overrides);
 
                 if (overrides != null) {
@@ -1622,7 +1656,8 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
         }
     }
 
-    private boolean isUserBuild() {
+    @VisibleForTesting
+    public boolean isUserBuild() {
         return "user".equals(android.os.Build.TYPE);
     }
 
@@ -1694,19 +1729,17 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
                 mHandler.sendMessage(mHandler.obtainMessage(EVENT_CLEAR_CONFIG, phoneId, -1));
                 break;
             case IccCardConstants.INTENT_VALUE_ICC_LOADED:
-// QTI_BEGIN: 2018-11-01: Telephony: Revert "Fix carrier config issue since null mccmnc for pin locked sub."
             case IccCardConstants.INTENT_VALUE_ICC_LOCKED:
-// QTI_END: 2018-11-01: Telephony: Revert "Fix carrier config issue since null mccmnc for pin locked sub."
                 mNeedNotifyCallback[phoneId] = true;
 // QTI_BEGIN: 2022-03-04: Telephony: Update CarrierConfigs on essential records loaded
                 mIsEssentialSimRecordsLoaded[phoneId] = false;
 // QTI_END: 2022-03-04: Telephony: Update CarrierConfigs on essential records loaded
-// QTI_BEGIN: 2024-06-06: Telephony: Fix race issue as inserting a SIM during bootup
+// QTI_BEGIN: 2024-06-05: Telephony: Fix race issue as inserting a SIM during bootup
                 if (mHasSentConfigChange[phoneId] && mFromSystemUnlocked[phoneId]) {
                     logd("Reset mFromSystemUnlocked on phone " + phoneId);
                     mFromSystemUnlocked[phoneId] = false;
                 }
-// QTI_END: 2024-06-06: Telephony: Fix race issue as inserting a SIM during bootup
+// QTI_END: 2024-06-05: Telephony: Fix race issue as inserting a SIM during bootup
 // QTI_BEGIN: 2022-03-04: Telephony: Update CarrierConfigs on essential records loaded
                 updateConfigForPhoneId(phoneId);
                 break;

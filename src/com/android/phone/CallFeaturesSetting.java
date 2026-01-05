@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
+// QTI_BEGIN: 2025-03-12: Telephony: Remove CDMA call settings
 /*
  * Changes from Qualcomm Innovation Center, Inc. are provided under the following license:
  * Copyright (c) 2025 Qualcomm Innovation Center, Inc. All rights reserved.
  * SPDX-License-Identifier: BSD-3-Clause-Clear
  */
 
+// QTI_END: 2025-03-12: Telephony: Remove CDMA call settings
 package com.android.phone;
 
 import android.app.ActionBar;
@@ -111,12 +113,12 @@ public class CallFeaturesSetting extends PreferenceActivity
     private static final String BUTTON_RETRY_KEY       = "button_auto_retry_key";
     private static final String BUTTON_GSM_UMTS_OPTIONS = "button_gsm_more_expand_key";
     private static final String BUTTON_CDMA_OPTIONS = "button_cdma_more_expand_key";
-// QTI_BEGIN: 2019-04-28: Telephony: FR54939: Common call setting for specific operator
+// QTI_BEGIN: 2019-04-27: Telephony: FR54939: Common call setting for specific operator
     //Hides radio technology, e.g. CDMA or GSM, details from the settings text.
     //For example uses "Call Settings", instead of "Gsm Call Settings".
     //PhoneType is used to display the correct settings when user clicks on the button.
     private static final String BUTTON_COMMON_OPTIONS = "button_common_more_expand_key";
-// QTI_END: 2019-04-28: Telephony: FR54939: Common call setting for specific operator
+// QTI_END: 2019-04-27: Telephony: FR54939: Common call setting for specific operator
 
     private static final String PHONE_ACCOUNT_SETTINGS_KEY =
             "phone_account_settings_preference_screen";
@@ -124,10 +126,8 @@ public class CallFeaturesSetting extends PreferenceActivity
     private static final String ENABLE_VIDEO_CALLING_KEY = "button_enable_video_calling";
     private static final String BUTTON_VP_KEY = "button_voice_privacy_key";
 
-// QTI_BEGIN: 2020-02-11: Telephony: Add vibrating for outgoing call accepted support
     private static final String BUTTON_VIBRATING_KEY =
             "button_vibrating_for_outgoing_call_accepted_key";
-// QTI_END: 2020-02-11: Telephony: Add vibrating for outgoing call accepted support
     private static final String BUTTON_PLAYING_TONE_KEY =
             "button_playing_tone_for_outgoing_call_accepted_key";
 
@@ -145,9 +145,7 @@ public class CallFeaturesSetting extends PreferenceActivity
     private SwitchPreference mButtonPlayingToneForMoCallAccepted;
     private int mCallConnectedIndicator = TelecomManager.CALL_CONNECTED_INDICATOR_NONE;
 
-// QTI_BEGIN: 2020-02-11: Telephony: Add vibrating for outgoing call accepted support
     private SwitchPreference mButtonVibratingForMoCallAccepted;
-// QTI_END: 2020-02-11: Telephony: Add vibrating for outgoing call accepted support
 
     /*
      * Click Listeners, handle click based on objects attached to UI.
@@ -205,17 +203,13 @@ public class CallFeaturesSetting extends PreferenceActivity
                     android.provider.Settings.Global.CALL_AUTO_RETRY,
                     mButtonAutoRetry.isChecked() ? 1 : 0);
             return true;
-// QTI_BEGIN: 2020-02-11: Telephony: Add vibrating for outgoing call accepted support
         } else if (preference == mButtonVibratingForMoCallAccepted) {
             mCallConnectedIndicator = mButtonVibratingForMoCallAccepted.isChecked()
                     ? mCallConnectedIndicator | TelecomManager.CALL_CONNECTED_INDICATOR_VIBRATION
                     : mCallConnectedIndicator & ~TelecomManager.CALL_CONNECTED_INDICATOR_VIBRATION;
             mTelecomManager.setCallConnectedIndicatorPreference(mCallConnectedIndicator);
 
-            PhoneAccountSettingsFragment.enableVibratingIndicator(this,
-                    mButtonVibratingForMoCallAccepted.isChecked());
             return true;
-// QTI_END: 2020-02-11: Telephony: Add vibrating for outgoing call accepted support
         } else if (preference == mButtonPlayingToneForMoCallAccepted) {
             mCallConnectedIndicator = mButtonPlayingToneForMoCallAccepted.isChecked()
                     ? mCallConnectedIndicator | TelecomManager.CALL_CONNECTED_INDICATOR_TONE
@@ -271,9 +265,9 @@ public class CallFeaturesSetting extends PreferenceActivity
 
         if (preference == mEnableVideoCalling) {
             if (mImsMgr.isEnhanced4gLteModeSettingEnabledByUser()) {
-// QTI_BEGIN: 2018-03-09: Telephony: IMS: Support Video calling setting per subscription
+// QTI_BEGIN: 2018-03-08: Telephony: IMS: Support Video calling setting per subscription
                 mImsMgr.setVtSetting((boolean) objValue);
-// QTI_END: 2018-03-09: Telephony: IMS: Support Video calling setting per subscription
+// QTI_END: 2018-03-08: Telephony: IMS: Support Video calling setting per subscription
             } else {
                 AlertDialog.Builder builder = FrameworksUtils.makeAlertDialogBuilder(this);
                 DialogInterface.OnClickListener networkSettingsClickListener =
@@ -281,12 +275,10 @@ public class CallFeaturesSetting extends PreferenceActivity
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 Intent intent = new Intent();
-// QTI_BEGIN: 2020-01-30: Telephony: Remove hooks that lauched vendor network settings
                                 ComponentName mobileNetworkSettingsComponent = new ComponentName(
                                         getString(R.string.mobile_network_settings_package),
                                         getString(R.string.mobile_network_settings_class));
                                 intent.setComponent(mobileNetworkSettingsComponent);
-// QTI_END: 2020-01-30: Telephony: Remove hooks that lauched vendor network settings
                                 if (mPhone != null) {
                                     intent.putExtra(Settings.EXTRA_SUB_ID, mPhone.getSubId());
                                 }
@@ -429,15 +421,13 @@ public class CallFeaturesSetting extends PreferenceActivity
         TelephonyManager telephonyManager = getSystemService(TelephonyManager.class)
                 .createForSubscriptionId(mPhone.getSubId());
 
-// QTI_BEGIN: 2020-02-11: Telephony: Add vibrating for outgoing call accepted support
         mButtonVibratingForMoCallAccepted = (SwitchPreference) findPreference(BUTTON_VIBRATING_KEY);
-// QTI_END: 2020-02-11: Telephony: Add vibrating for outgoing call accepted support
         mButtonPlayingToneForMoCallAccepted = (SwitchPreference) findPreference(
                 BUTTON_PLAYING_TONE_KEY);
         if (!getResources().getBoolean(
                 R.bool.show_call_connected_indicator_preference)) {
             Preference phoneAccountSettingsPreference = findPreference(PHONE_ACCOUNT_SETTINGS_KEY);
-            //getPreferenceScreen().removePreference(mButtonVibratingForMoCallAccepted);
+            getPreferenceScreen().removePreference(mButtonVibratingForMoCallAccepted);
             getPreferenceScreen().removePreference(mButtonPlayingToneForMoCallAccepted);
         }
         mCallConnectedIndicator = mTelecomManager.getCallConnectedIndicatorPreference();
@@ -453,11 +443,8 @@ public class CallFeaturesSetting extends PreferenceActivity
             getPreferenceScreen().removePreference(mButtonVibratingForMoCallAccepted);
             getPreferenceScreen().removePreference(mButtonPlayingToneForMoCallAccepted);
         } else {
-            final boolean isVibratingEnabled =
-                    PhoneAccountSettingsFragment.getVibratingIndicatorPreference(this);
             mButtonVibratingForMoCallAccepted.setChecked((mCallConnectedIndicator
-                    & TelecomManager.CALL_CONNECTED_INDICATOR_VIBRATION) > 0
-                    || isVibratingEnabled);
+                    & TelecomManager.CALL_CONNECTED_INDICATOR_VIBRATION) > 0);
             mButtonVibratingForMoCallAccepted.setOnPreferenceChangeListener(this);
             mButtonPlayingToneForMoCallAccepted.setChecked((mCallConnectedIndicator
                     & TelecomManager.CALL_CONNECTED_INDICATOR_TONE) > 0);
@@ -491,22 +478,22 @@ public class CallFeaturesSetting extends PreferenceActivity
             mButtonAutoRetry = null;
         }
 
-// QTI_BEGIN: 2019-04-28: Telephony: FR54939: Common call setting for specific operator
+// QTI_BEGIN: 2019-04-27: Telephony: FR54939: Common call setting for specific operator
         Preference commonOptions = prefSet.findPreference(BUTTON_COMMON_OPTIONS);
-// QTI_END: 2019-04-28: Telephony: FR54939: Common call setting for specific operator
+// QTI_END: 2019-04-27: Telephony: FR54939: Common call setting for specific operator
         Preference cdmaOptions = prefSet.findPreference(BUTTON_CDMA_OPTIONS);
         Preference gsmOptions = prefSet.findPreference(BUTTON_GSM_UMTS_OPTIONS);
         Preference fdnButton = prefSet.findPreference(BUTTON_FDN_KEY);
         fdnButton.setIntent(mSubscriptionInfoHelper.getIntent(FdnSetting.class));
+// QTI_BEGIN: 2025-03-12: Telephony: Remove CDMA call settings
 
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY_CDMA)) {
             prefSet.removePreference(cdmaOptions);
         }
 
+// QTI_END: 2025-03-12: Telephony: Remove CDMA call settings
         prefSet.removePreference(gsmOptions);
-// QTI_BEGIN: 2019-04-28: Telephony: FR54939: Common call setting for specific operator
         prefSet.removePreference(commonOptions);
-// QTI_END: 2019-04-28: Telephony: FR54939: Common call setting for specific operator
 
 
         int phoneType = mPhone.getPhoneType();
@@ -572,9 +559,9 @@ public class CallFeaturesSetting extends PreferenceActivity
                 || isDataEnabled) && !mDisallowedConfig) {
             boolean currentValue =
                     mImsMgr.isEnhanced4gLteModeSettingEnabledByUser()
-// QTI_BEGIN: 2018-03-09: Telephony: IMS: Support Video calling setting per subscription
+// QTI_BEGIN: 2018-03-08: Telephony: IMS: Support Video calling setting per subscription
                     ? mImsMgr.isVtEnabledByUser() : false;
-// QTI_END: 2018-03-09: Telephony: IMS: Support Video calling setting per subscription
+// QTI_END: 2018-03-08: Telephony: IMS: Support Video calling setting per subscription
             mEnableVideoCalling.setChecked(currentValue);
             mEnableVideoCalling.setOnPreferenceChangeListener(this);
             prefSet.addPreference(mEnableVideoCalling);
@@ -609,9 +596,9 @@ public class CallFeaturesSetting extends PreferenceActivity
 
             int resId = com.android.internal.R.string.wifi_calling_off_summary;
             if (mImsMgr.isWfcEnabledByUser()) {
-// QTI_BEGIN: 2018-03-09: Telephony: IMS: Support Video calling setting per subscription
+// QTI_BEGIN: 2018-03-08: Telephony: IMS: Support Video calling setting per subscription
                 boolean isRoaming = telephonyManager.isNetworkRoaming(mPhone.getSubId());
-// QTI_END: 2018-03-09: Telephony: IMS: Support Video calling setting per subscription
+// QTI_END: 2018-03-08: Telephony: IMS: Support Video calling setting per subscription
                 // Also check carrier config for roaming mode
                 int wfcMode = mImsMgr.getWfcMode(isRoaming && !useWfcHomeModeForRoaming);
                 switch (wfcMode) {
@@ -624,11 +611,11 @@ public class CallFeaturesSetting extends PreferenceActivity
                     case ImsConfig.WfcModeFeatureValueConstants.WIFI_PREFERRED:
                         resId = com.android.internal.R.string.wfc_mode_wifi_preferred_summary;
                         break;
-// QTI_BEGIN: 2019-12-16: Telephony: Ims: Add suppport for "Ims Preferred" WFC Preference
+// QTI_BEGIN: 2019-12-15: Telephony: Ims: Add suppport for "Ims Preferred" WFC Preference
                     case ImsConfig.WfcModeFeatureValueConstants.IMS_PREFERRED:
                         resId = com.android.internal.R.string.wfc_mode_ims_preferred_summary;
                         break;
-// QTI_END: 2019-12-16: Telephony: Ims: Add suppport for "Ims Preferred" WFC Preference
+// QTI_END: 2019-12-15: Telephony: Ims: Add suppport for "Ims Preferred" WFC Preference
                     default:
                         if (DBG) log("Unexpected WFC mode value: " + wfcMode);
                 }

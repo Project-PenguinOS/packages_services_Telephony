@@ -418,6 +418,7 @@ public class PhoneInformationUtil {
         return isAvailable;
     }
 
+// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
     /**
      * Returns whether VoLTE service is available.
      *
@@ -463,6 +464,7 @@ public class PhoneInformationUtil {
         return false;
     }
 
+// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
     public static final String[] PREFERRED_NETWORK_LABELS = {
             "GSM/WCDMA preferred",
             "GSM only",

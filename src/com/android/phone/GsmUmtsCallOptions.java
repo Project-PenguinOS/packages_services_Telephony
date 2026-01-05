@@ -60,9 +60,9 @@ public class GsmUmtsCallOptions extends PreferenceActivity {
     public static final String CALL_BARRING_KEY = "call_barring_key";
     public static final String ADDITIONAL_GSM_SETTINGS_KEY = "additional_gsm_call_settings_key";
 
-// QTI_BEGIN: 2019-04-28: Telephony: FR54939: Common call setting for specific operator
+// QTI_BEGIN: 2019-04-27: Telephony: FR54939: Common call setting for specific operator
     private boolean mCommon = false;
-// QTI_END: 2019-04-28: Telephony: FR54939: Common call setting for specific operator
+// QTI_END: 2019-04-27: Telephony: FR54939: Common call setting for specific operator
 // QTI_BEGIN: 2024-11-06: Telephony: Fix the issues related to UT service in airplane mode am: e74f539a23 am: e74f539a23
 
     private Phone mPhone;
@@ -97,7 +97,7 @@ public class GsmUmtsCallOptions extends PreferenceActivity {
         addPreferencesFromResource(R.xml.gsm_umts_call_options);
 
         SubscriptionInfoHelper subInfoHelper = new SubscriptionInfoHelper(this, getIntent());
-// QTI_BEGIN: 2019-04-28: Telephony: FR54939: Common call setting for specific operator
+// QTI_BEGIN: 2019-04-27: Telephony: FR54939: Common call setting for specific operator
         PersistableBundle pb = null;
         if (subInfoHelper.hasSubId()) {
             pb = PhoneGlobals.getInstance().getCarrierConfigForSubId(subInfoHelper.getSubId());
@@ -105,16 +105,16 @@ public class GsmUmtsCallOptions extends PreferenceActivity {
             pb = PhoneGlobals.getInstance().getCarrierConfig();
         }
         mCommon = pb != null && pb.getBoolean("config_common_callsettings_support_bool");
-// QTI_END: 2019-04-28: Telephony: FR54939: Common call setting for specific operator
+// QTI_END: 2019-04-27: Telephony: FR54939: Common call setting for specific operator
         subInfoHelper.setActionBarTitle(
-// QTI_BEGIN: 2019-04-28: Telephony: FR54939: Common call setting for specific operator
+// QTI_BEGIN: 2019-04-27: Telephony: FR54939: Common call setting for specific operator
                 getActionBar(), getResources(),
                 mCommon ? R.string.labelCommonMore_with_label : R.string.labelGsmMore_with_label);
-// QTI_END: 2019-04-28: Telephony: FR54939: Common call setting for specific operator
+// QTI_END: 2019-04-27: Telephony: FR54939: Common call setting for specific operator
 
-// QTI_BEGIN: 2019-04-28: Telephony: FR54939: Common call setting for specific operator
+// QTI_BEGIN: 2019-04-27: Telephony: FR54939: Common call setting for specific operator
         init(getPreferenceScreen(), subInfoHelper);
-// QTI_END: 2019-04-28: Telephony: FR54939: Common call setting for specific operator
+// QTI_END: 2019-04-27: Telephony: FR54939: Common call setting for specific operator
 // QTI_BEGIN: 2024-11-06: Telephony: Fix the issues related to UT service in airplane mode am: e74f539a23 am: e74f539a23
         mPhone = subInfoHelper.getPhone();
         if (mPhone != null) {

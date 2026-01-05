@@ -157,6 +157,35 @@ public class DisconnectCauseUtilTest extends TelephonyTestBase {
     }
 
     /**
+     * Verifies that a disconnect cause is mapped to BUSY if the carrier config specifies it,
+     * even if it's not normally a BUSY cause.
+     */
+    @Test
+    public void testCarrierOverrideToBusy() {
+        // Use a cause that is normally mapped to REMOTE.
+        int telephonyCause = DisconnectCause.NORMAL;
+
+        // Create a carrier config that maps NORMAL to BUSY.
+        PersistableBundle carrierConfig = new PersistableBundle();
+        carrierConfig.putIntArray(
+                CarrierConfigManager.KEY_DISCONNECT_CAUSE_PLAY_BUSYTONE_INT_ARRAY,
+                new int[]{telephonyCause});
+
+        android.telecom.DisconnectCause tcCause =
+                DisconnectCauseUtil.toTelecomDisconnectCause(telephonyCause,
+                        CallFailCause.NOT_VALID, "reason", PHONE_ID, null, carrierConfig,
+                        mFeatureFlags, false);
+
+        // The code should be BUSY due to carrier override.
+        assertEquals(android.telecom.DisconnectCause.BUSY, tcCause.getCode());
+        // The label should also be the busy label.
+        Resources r = getResourcesForLocale(InstrumentationRegistry.getTargetContext(), Locale.US);
+        assertEquals(r.getString(R.string.callFailed_userBusy), tcCause.getLabel().toString());
+        // The tone should be the busy tone.
+        assertEquals(TONE_SUP_BUSY, tcCause.getTone());
+    }
+
+    /**
      * Ensure the helper doesCarrierClassifyDisconnectCauseAsBusyCause does not hit a NPE if a
      * NULL carrier config is passed in.
      */
@@ -221,6 +250,14 @@ public class DisconnectCauseUtilTest extends TelephonyTestBase {
         assertEquals(TONE_SUP_BUSY, disconnectCause.getTone());
     }
 
+    private void assertDisconnectCauseCode(int telephonyCause, int expectedTelecomCause) {
+        android.telecom.DisconnectCause tcCause =
+                DisconnectCauseUtil.toTelecomDisconnectCause(telephonyCause);
+        assertEquals("For telephony cause "
+                        + android.telephony.DisconnectCause.toString(telephonyCause),
+                expectedTelecomCause, tcCause.getCode());
+    }
+
     private PersistableBundle getBundleWithBusyToneArray() {
         int[] carrierBusyArr = {DisconnectCause.BUSY};
         PersistableBundle config = new PersistableBundle();
@@ -246,7 +283,7 @@ public class DisconnectCauseUtilTest extends TelephonyTestBase {
             return;
         }
         String label = r.getString(resourceId);
-        assertEquals(label, disconnectCause.getLabel());
+        assertEquals(label, disconnectCause.getLabel().toString());
     }
 
     /**
@@ -260,5 +297,59 @@ public class DisconnectCauseUtilTest extends TelephonyTestBase {
         assertEquals(android.telecom.DisconnectCause.ERROR, tcCause.getCode());
         assertNotNull(tcCause.getLabel());
         assertNotNull(tcCause.getDescription());
+    }
+
+    /**
+     * Verifies the mapping of various telephony disconnect causes to the corresponding telecom
+     * disconnect cause codes.
+     */
+    @Test
+    public void testToTelecomDisconnectCauseCodeMapping() {
+        // Test mapping to DisconnectCause.LOCAL
+        assertDisconnectCauseCode(DisconnectCause.LOCAL,
+                android.telecom.DisconnectCause.LOCAL);
+        assertDisconnectCauseCode(DisconnectCause.OUTGOING_EMERGENCY_CALL_PLACED,
+                android.telecom.DisconnectCause.LOCAL);
+
+        // Test mapping to DisconnectCause.REMOTE
+        assertDisconnectCauseCode(DisconnectCause.NORMAL,
+                android.telecom.DisconnectCause.REMOTE);
+        assertDisconnectCauseCode(DisconnectCause.NORMAL_UNSPECIFIED,
+                android.telecom.DisconnectCause.REMOTE);
+
+        // Test mapping to DisconnectCause.CANCELED
+        assertDisconnectCauseCode(DisconnectCause.OUTGOING_CANCELED,
+                android.telecom.DisconnectCause.CANCELED);
+
+        // Test mapping to DisconnectCause.MISSED
+        assertDisconnectCauseCode(DisconnectCause.INCOMING_MISSED,
+                android.telecom.DisconnectCause.MISSED);
+
+        // Test mapping to DisconnectCause.REJECTED
+        assertDisconnectCauseCode(DisconnectCause.INCOMING_REJECTED,
+                android.telecom.DisconnectCause.REJECTED);
+
+        // Test mapping to DisconnectCause.RESTRICTED
+        assertDisconnectCauseCode(DisconnectCause.CALL_BARRED,
+                android.telecom.DisconnectCause.RESTRICTED);
+
+        // Test mapping to DisconnectCause.OTHER
+        assertDisconnectCauseCode(DisconnectCause.DIALED_MMI,
+                android.telecom.DisconnectCause.OTHER);
+
+        // Test mapping to DisconnectCause.UNKNOWN
+        assertDisconnectCauseCode(DisconnectCause.NOT_VALID,
+                android.telecom.DisconnectCause.UNKNOWN);
+        // Test default case for unrecognized cause
+        assertDisconnectCauseCode(0xbeef /* some invalid cause */,
+                android.telecom.DisconnectCause.UNKNOWN);
+
+        // Test mapping to DisconnectCause.CALL_PULLED
+        assertDisconnectCauseCode(DisconnectCause.CALL_PULLED,
+                android.telecom.DisconnectCause.CALL_PULLED);
+
+        // Test mapping to DisconnectCause.ANSWERED_ELSEWHERE
+        assertDisconnectCauseCode(DisconnectCause.ANSWERED_ELSEWHERE,
+                android.telecom.DisconnectCause.ANSWERED_ELSEWHERE);
     }
 }

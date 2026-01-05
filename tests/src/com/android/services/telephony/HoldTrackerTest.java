@@ -32,50 +32,36 @@ public class HoldTrackerTest {
 
     @Before
     public void setUp() throws Exception {
-// QTI_BEGIN: 2025-01-30: Telephony: Revert "DSDA: Handle transition to DSDS"
         mHoldTrackerUT = new HoldTracker();
-// QTI_END: 2025-01-30: Telephony: Revert "DSDA: Handle transition to DSDS"
     }
 
     @Test
     public void oneTopHoldableCanBeHeld() {
         FakeHoldable topHoldable = createHoldable(false);
-// QTI_BEGIN: 2025-01-30: Telephony: Revert "Revert "DSDA: Update hold capability across subscriptions.""
         mHoldTrackerUT.addHoldable(topHoldable);
-// QTI_END: 2025-01-30: Telephony: Revert "Revert "DSDA: Update hold capability across subscriptions.""
 
         assertTrue(topHoldable.canBeHeld());
     }
 
     @Test
-// QTI_BEGIN: 2025-01-30: Telephony: Revert "Revert "DSDA: Update hold capability across subscriptions.""
     public void childHoldableCannotBeHeld() {
-// QTI_END: 2025-01-30: Telephony: Revert "Revert "DSDA: Update hold capability across subscriptions.""
         FakeHoldable topHoldable = createHoldable(false);
         FakeHoldable childHoldable = createHoldable(true);
-// QTI_BEGIN: 2025-01-30: Telephony: Revert "Revert "DSDA: Update hold capability across subscriptions.""
         mHoldTrackerUT.addHoldable(topHoldable);
         mHoldTrackerUT.addHoldable(childHoldable);
-// QTI_END: 2025-01-30: Telephony: Revert "Revert "DSDA: Update hold capability across subscriptions.""
 
         assertTrue(topHoldable.canBeHeld());
         assertFalse(childHoldable.canBeHeld());
     }
 
     @Test
-// QTI_BEGIN: 2025-01-30: Telephony: Revert "Revert "DSDA: Update hold capability across subscriptions.""
     public void twoTopHoldablesCannotBeHeld() {
-// QTI_END: 2025-01-30: Telephony: Revert "Revert "DSDA: Update hold capability across subscriptions.""
         FakeHoldable topHoldable1 = createHoldable(false);
         FakeHoldable topHoldable2 = createHoldable(false);
-// QTI_BEGIN: 2025-01-30: Telephony: Revert "Revert "DSDA: Update hold capability across subscriptions.""
         mHoldTrackerUT.addHoldable(topHoldable1);
         mHoldTrackerUT.addHoldable(topHoldable2);
-// QTI_END: 2025-01-30: Telephony: Revert "Revert "DSDA: Update hold capability across subscriptions.""
 
-// QTI_BEGIN: 2025-01-30: Telephony: Revert "Revert "DSDA: Update hold capability across subscriptions.""
         mHoldTrackerUT.updateHoldCapability();
-// QTI_END: 2025-01-30: Telephony: Revert "Revert "DSDA: Update hold capability across subscriptions.""
         assertFalse(topHoldable1.canBeHeld());
         assertFalse(topHoldable2.canBeHeld());
     }
@@ -84,16 +70,12 @@ public class HoldTrackerTest {
     public void removeOneTopHoldableAndUpdateHoldCapabilityCorrectly() {
         FakeHoldable topHoldable1 = createHoldable(false);
         FakeHoldable topHoldable2 = createHoldable(false);
-// QTI_BEGIN: 2025-01-30: Telephony: Revert "Revert "DSDA: Update hold capability across subscriptions.""
         mHoldTrackerUT.addHoldable(topHoldable1);
         mHoldTrackerUT.addHoldable(topHoldable2);
-// QTI_END: 2025-01-30: Telephony: Revert "Revert "DSDA: Update hold capability across subscriptions.""
         assertFalse(topHoldable1.canBeHeld());
         assertFalse(topHoldable2.canBeHeld());
 
-// QTI_BEGIN: 2025-01-30: Telephony: Revert "Revert "DSDA: Update hold capability across subscriptions.""
         mHoldTrackerUT.removeHoldable(topHoldable1);
-// QTI_END: 2025-01-30: Telephony: Revert "Revert "DSDA: Update hold capability across subscriptions.""
         assertTrue(topHoldable2.canBeHeld());
     }
 

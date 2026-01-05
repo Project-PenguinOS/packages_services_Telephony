@@ -106,6 +106,12 @@ public class ImsRcsController extends IImsRcsController.Stub {
         synchronized (ImsRcsController.class) {
             if (sInstance == null) {
                 sInstance = new ImsRcsController(app, featureFlags);
+                if (featureFlags.publishTelephonyServicesAfterConstruction()) {
+                    TelephonyFrameworkInitializer
+                            .getTelephonyServiceManager()
+                            .getTelephonyImsServiceRegisterer()
+                            .register(sInstance);
+                }
             } else {
                 Log.wtf(TAG, "init() called multiple times!  sInstance = " + sInstance);
             }
@@ -119,8 +125,10 @@ public class ImsRcsController extends IImsRcsController.Stub {
         mApp = app;
         mFeatureFlags = featureFlags;
         mPackageManager = mApp.getPackageManager();
-        TelephonyFrameworkInitializer
-                .getTelephonyServiceManager().getTelephonyImsServiceRegisterer().register(this);
+        if (!mFeatureFlags.publishTelephonyServicesAfterConstruction()) {
+            TelephonyFrameworkInitializer
+                    .getTelephonyServiceManager().getTelephonyImsServiceRegisterer().register(this);
+        }
         mImsResolver = ImsResolver.getInstance();
         mVendorApiLevel = SystemProperties.getInt(
                 "ro.vendor.api_level", Build.VERSION.DEVICE_INITIAL_SDK_INT);
