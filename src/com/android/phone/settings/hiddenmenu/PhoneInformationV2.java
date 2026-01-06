@@ -37,6 +37,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneFactory;
+import com.android.phone.settings.SettingsConstants;
 import com.android.phone.R;
 
 import java.util.ArrayList;
@@ -59,6 +60,7 @@ public class PhoneInformationV2 extends AppCompatActivity
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.phone_information_v2);
+        SettingsConstants.setupEdgeToEdge(this);
         mViewModel = new ViewModelProvider(this).get(PhoneInfoSharedViewModel.class);
         phoneId = DEFAULT_PHONE_ID;
         itemOneContainer = findViewById(R.id.nav_item_one_container);
