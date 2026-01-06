@@ -16,7 +16,7 @@
 
 package com.android.telephony.tools.configdatagenerate;
 
-import com.android.internal.telephony.satellite.SatelliteConfigData;
+import com.android.internal.telephony.TelephonyConfigData;
 
 import com.google.protobuf.ByteString;
 
@@ -45,24 +45,24 @@ public class SatelliteConfigProtoGenerator {
      * telephony_config_update.proto
      */
     public static void generateProto() {
-        SatelliteConfigData.TelephonyConfigProto.Builder telephonyConfigBuilder =
-                SatelliteConfigData.TelephonyConfigProto.newBuilder();
-        SatelliteConfigData.SatelliteConfigProto.Builder satelliteConfigBuilder =
-                SatelliteConfigData.SatelliteConfigProto.newBuilder();
+        TelephonyConfigData.TelephonyConfigProto.Builder telephonyConfigBuilder =
+                TelephonyConfigData.TelephonyConfigProto.newBuilder();
+        TelephonyConfigData.SatelliteConfigProto.Builder satelliteConfigBuilder =
+                TelephonyConfigData.SatelliteConfigProto.newBuilder();
 
         satelliteConfigBuilder.setVersion(sVersion);    // Input version
 
         if (sServiceProtoList != null) {
             // carrierSupportedSatelliteServiceBuilder
-            SatelliteConfigData.CarrierSupportedSatelliteServicesProto.Builder
+            TelephonyConfigData.CarrierSupportedSatelliteServicesProto.Builder
                     carrierSupportedSatelliteServiceBuilder =
-                    SatelliteConfigData.CarrierSupportedSatelliteServicesProto.newBuilder();
+                    TelephonyConfigData.CarrierSupportedSatelliteServicesProto.newBuilder();
             for (int i = 0; i < sServiceProtoList.size(); i++) {
                 ServiceProto proto = sServiceProtoList.get(i);
                 carrierSupportedSatelliteServiceBuilder.setCarrierId(proto.mCarrierId);
-                SatelliteConfigData.SatelliteProviderCapabilityProto.Builder
+                TelephonyConfigData.SatelliteProviderCapabilityProto.Builder
                         satelliteProviderCapabilityBuilder =
-                        SatelliteConfigData.SatelliteProviderCapabilityProto.newBuilder();
+                        TelephonyConfigData.SatelliteProviderCapabilityProto.newBuilder();
                 ProviderCapabilityProto[] capabilityProtoList = proto.mCapabilityProtoList;
                 for (int j = 0; j < capabilityProtoList.length; j++) {
                     ProviderCapabilityProto capabilityProto = capabilityProtoList[j];
@@ -87,8 +87,8 @@ public class SatelliteConfigProtoGenerator {
 
         if (sCarrierRoamingConfig != null) {
             // carrierRoamingConfigBuilder
-            SatelliteConfigData.CarrierRoamingConfigProto.Builder carrierRoamingConfigBuilder =
-                    SatelliteConfigData.CarrierRoamingConfigProto.newBuilder();
+            TelephonyConfigData.CarrierRoamingConfigProto.Builder carrierRoamingConfigBuilder =
+                    TelephonyConfigData.CarrierRoamingConfigProto.newBuilder();
             if (sCarrierRoamingConfig.mMaxAllowedDataMode != null) {
                 carrierRoamingConfigBuilder.setMaxAllowedDataMode(
                         sCarrierRoamingConfig.mMaxAllowedDataMode);
@@ -105,8 +105,8 @@ public class SatelliteConfigProtoGenerator {
         if (sRegionProto != null) {
             System.out.println("sRegionProto");
             // satelliteRegionBuilder
-            SatelliteConfigData.SatelliteRegionProto.Builder satelliteRegionBuilder =
-                    SatelliteConfigData.SatelliteRegionProto.newBuilder();
+            TelephonyConfigData.SatelliteRegionProto.Builder satelliteRegionBuilder =
+                    TelephonyConfigData.SatelliteRegionProto.newBuilder();
 
             // mS2CellFileName
             if (sRegionProto.mS2CellFileName != null
@@ -162,7 +162,7 @@ public class SatelliteConfigProtoGenerator {
         writeToResultFile(telephonyConfigBuilder);
     }
 
-    private static void writeToResultFile(SatelliteConfigData
+    private static void writeToResultFile(TelephonyConfigData
             .TelephonyConfigProto.Builder telephonyConfigBuilder) {
         try {
             File file = new File(sProtoResultFile);
@@ -170,7 +170,7 @@ public class SatelliteConfigProtoGenerator {
                 file.delete();
             }
             FileOutputStream fos = new FileOutputStream(file);
-            SatelliteConfigData.TelephonyConfigProto telephonyConfigData =
+            TelephonyConfigData.TelephonyConfigProto telephonyConfigData =
                     telephonyConfigBuilder.build();
             telephonyConfigData.writeTo(fos);
 
