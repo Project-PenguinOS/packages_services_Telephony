@@ -29,12 +29,12 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.android.internal.telephony.satellite.SatelliteConfigData.CarrierRoamingConfigProto;
-import com.android.internal.telephony.satellite.SatelliteConfigData.CarrierSupportedSatelliteServicesProto;
-import com.android.internal.telephony.satellite.SatelliteConfigData.SatelliteConfigProto;
-import com.android.internal.telephony.satellite.SatelliteConfigData.SatelliteProviderCapabilityProto;
-import com.android.internal.telephony.satellite.SatelliteConfigData.SatelliteRegionProto;
-import com.android.internal.telephony.satellite.SatelliteConfigData.TelephonyConfigProto;
+import com.android.internal.telephony.TelephonyConfigData.CarrierRoamingConfigProto;
+import com.android.internal.telephony.TelephonyConfigData.CarrierSupportedSatelliteServicesProto;
+import com.android.internal.telephony.TelephonyConfigData.SatelliteConfigProto;
+import com.android.internal.telephony.TelephonyConfigData.SatelliteProviderCapabilityProto;
+import com.android.internal.telephony.TelephonyConfigData.SatelliteRegionProto;
+import com.android.internal.telephony.TelephonyConfigData.TelephonyConfigProto;
 
 import com.google.protobuf.ByteString;
 
