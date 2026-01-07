@@ -75,10 +75,8 @@
     <string name="phone_accounts_configure_account_settings" msgid="6622119715253196586">"खाता सेटिङ कन्फिगर गर्नुहोस्"</string>
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"सबै कलिङ खाताहरू"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"कुन खाताहरूले कल गर्न सक्छन् चयन गर्नुहोस्"</string>
-    <!-- no translation found for voip_call_log_integration_label (2349275524959944815) -->
-    <skip />
-    <!-- no translation found for voip_call_log_integration_summary (3834075007862607039) -->
-    <skip />
+    <string name="voip_call_log_integration_label" msgid="2349275524959944815">"तेस्रा पक्षीय एपहरू"</string>
+    <string name="voip_call_log_integration_summary" msgid="3834075007862607039">"कुन कुन एपलाई सिस्टमको कल लगमा आफ्ना कलहरू इन्टिग्रेट गर्न दिने भन्ने कुरा नियन्त्रण गर्नुहोस्। तपाईंले यो विकल्प अफ गर्नुभयो भने एपका लगहरू मुख्य फोन एपमा देखिने छैनन्।"</string>
     <string name="wifi_calling" msgid="3650509202851355742">"Wi-Fi कलिङ"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"निर्मित जडान सेवा"</string>
     <string name="voicemail" msgid="7697769412804195032">"भ्वाइसमेल"</string>
@@ -475,7 +473,7 @@
     <string name="get_pin2" msgid="4221654606863196332">"PIN2 प्रकार"</string>
     <string name="name" msgid="1347432469852527784">"नाम"</string>
     <string name="number" msgid="1564053487748491000">"नम्बर"</string>
-    <string name="save" msgid="983805790346099749">"बचत गर्नुहोस्"</string>
+    <string name="save" msgid="983805790346099749">"सेभ गर्नुहोस्"</string>
     <string name="add_fdn_contact" msgid="1169713422306640887">"स्थिर डायलिङ नम्बर थप्नुहोस्"</string>
     <string name="adding_fdn_contact" msgid="3112531600824361259">"स्थिर डायलिङ सम्पर्क थप्दै..."</string>
     <string name="fdn_contact_added" msgid="2840016151693394596">"स्थिर डायल गर्ने नम्बर थपियो।"</string>
@@ -691,7 +689,7 @@
     <string name="message_decode_error" msgid="1061856591500290887">"सन्देश डिकोड गर्दा एउटा समस्या भयो।"</string>
     <string name="callFailed_cdma_activation" msgid="5392057031552253550">"SIM कार्डले तपाईँको सेवा सक्रिय गर्नुका तथा फोनको रोमिङ क्षमताहरू पनि अद्यावधिक गरिदिएको छ।"</string>
     <string name="callFailed_cdma_call_limit" msgid="1074219746093031412">"धेरै सक्रिय कलहरू छन्। कृपया कुनै नयाँ राख्नु अघि विद्यमान कलहरूलाई अन्त्य वा मर्ज गर्नुहोस्।"</string>
-    <string name="callFailed_imei_not_accepted" msgid="7257903653685147251">"जडान गर्न सकिएन, कृपया मान्य SIM कार्ड सम्मिलित गर्नुहोस्।"</string>
+    <string name="callFailed_imei_not_accepted" msgid="7257903653685147251">"जडान गर्न सकिएन, कृपया मान्य SIM कार्ड इन्सर्ट गर्नुहोस्।"</string>
     <string name="callFailed_wifi_lost" msgid="1788036730589163141">"Wi-Fi जडान विच्छेद भयो। कल समाप्त भयो।"</string>
     <string name="dialFailed_low_battery" msgid="6857904237423407056">"ब्याट्रीको चार्ज स्तर कम हुनाले तपाईं भिडियो कल गर्न सक्नुहुन्न।"</string>
     <string name="callFailed_low_battery" msgid="4056828320214416182">"ब्याट्रीको चार्ज स्तर कम हुनाले भिडियो कल बन्द भयो।"</string>

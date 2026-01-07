@@ -75,10 +75,8 @@
     <string name="phone_accounts_configure_account_settings" msgid="6622119715253196586">"Định cấu hình cài đặt tài khoản"</string>
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"Tất cả các tài khoản gọi"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"Chọn tài khoản có thể thực hiện cuộc gọi"</string>
-    <!-- no translation found for voip_call_log_integration_label (2349275524959944815) -->
-    <skip />
-    <!-- no translation found for voip_call_log_integration_summary (3834075007862607039) -->
-    <skip />
+    <string name="voip_call_log_integration_label" msgid="2349275524959944815">"Ứng dụng của bên thứ ba"</string>
+    <string name="voip_call_log_integration_summary" msgid="3834075007862607039">"Kiểm soát những ứng dụng có thể tích hợp cuộc gọi của mình vào nhật ký cuộc gọi của hệ thống. Nếu bạn tắt chế độ này, nhật ký của ứng dụng sẽ không xuất hiện trong ứng dụng điện thoại chính."</string>
     <string name="wifi_calling" msgid="3650509202851355742">"Gọi qua Wi-Fi"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"Dịch vụ kết nối được tích hợp"</string>
     <string name="voicemail" msgid="7697769412804195032">"Thư thoại"</string>

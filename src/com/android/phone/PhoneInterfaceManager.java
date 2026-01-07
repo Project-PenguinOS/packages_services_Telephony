@@ -12472,13 +12472,9 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         }
         TelephonyManager.EmergencyCallDiagnosticData ecdData = ecdDataBuilder.build();
         Log.d(LOG_TAG, "persisting with Params " + ecdData.toString());
-        DiagnosticDataCollector ddc = new DiagnosticDataCollector(
-                Runtime.getRuntime(),
+        DiagnosticDataCollector ddc = new DiagnosticDataCollector(Runtime.getRuntime(),
                 Executors.newCachedThreadPool(), db,
-                mApp.getSystemService(ActivityManager.class).isLowRamDevice(),
-                mApp.getSystemService(ActivityManager.class),
-                mApp.getResources().getStringArray(R.array.ecc_log_sources_process_names),
-                mApp.getResources().getStringArray(R.array.ecc_log_sources_tags));
+                mApp.getSystemService(ActivityManager.class).isLowRamDevice());
         ddc.persistEmergencyDianosticData(new DataCollectorConfig.Adapter(), ecdData, dropboxTag);
     }
 
