@@ -79,6 +79,7 @@ import com.android.internal.telephony.LocaleTracker;
 import com.android.internal.telephony.ServiceStateTracker;
 import com.android.internal.telephony.domainselection.DomainSelectionResolver;
 import com.android.internal.telephony.flags.FeatureFlags;
+import com.android.internal.telephony.satellite.SatelliteConstants;
 import com.android.internal.telephony.satellite.SatelliteController;
 import com.android.internal.telephony.subscription.SubscriptionManagerService;
 import com.android.libraries.entitlement.ServiceEntitlementException;
@@ -257,7 +258,8 @@ public class SatelliteEntitlementControllerTest extends TelephonyTestBase {
         // 1. Verify don't start query when Not Supported
         mCarrierConfigBundle.putBoolean(
                 CarrierConfigManager.KEY_SATELLITE_ENTITLEMENT_SUPPORTED_BOOL, false);
-        mSatelliteEntitlementController.handleCmdStartQueryEntitlement();
+        mSatelliteEntitlementController.handleCmdStartQueryEntitlement(
+                SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_UNKNOWN);
         verify(mSatelliteEntitlementApi, never()).checkEntitlementStatus();
 
         // Reset Support to TRUE
@@ -266,7 +268,8 @@ public class SatelliteEntitlementControllerTest extends TelephonyTestBase {
 
         // 2. Verify don't start query when No Internet
         setInternetConnected(false);
-        mSatelliteEntitlementController.handleCmdStartQueryEntitlement();
+        mSatelliteEntitlementController.handleCmdStartQueryEntitlement(
+                SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_UNKNOWN);
         verify(mSatelliteEntitlementApi, never()).checkEntitlementStatus();
 
         // Reset Internet to TRUE
@@ -274,7 +277,8 @@ public class SatelliteEntitlementControllerTest extends TelephonyTestBase {
 
         // 3. Verify don't start query when Throttled (Time not expired)
         setLastQueryTime(System.currentTimeMillis());
-        mSatelliteEntitlementController.handleCmdStartQueryEntitlement();
+        mSatelliteEntitlementController.handleCmdStartQueryEntitlement(
+                SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_UNKNOWN);
         verify(mSatelliteEntitlementApi, never()).checkEntitlementStatus();
 
         // 4. Verify don't start query when In Progress
@@ -282,7 +286,8 @@ public class SatelliteEntitlementControllerTest extends TelephonyTestBase {
         inProgressMap.put(SUB_ID, true);
         replaceInstance(SatelliteEntitlementController.class, "mIsEntitlementInProgressPerSub",
                 mSatelliteEntitlementController, inProgressMap);
-        mSatelliteEntitlementController.handleCmdStartQueryEntitlement();
+        mSatelliteEntitlementController.handleCmdStartQueryEntitlement(
+                SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_UNKNOWN);
         verify(mSatelliteEntitlementApi, never()).checkEntitlementStatus();
 
         // Clear In Progress Flag
@@ -301,7 +306,8 @@ public class SatelliteEntitlementControllerTest extends TelephonyTestBase {
                 PLMN_BARRED_LIST, PLMN_DATA_PLAN_LIST, PLMN_ALLOWED_SERVICES_LIST,
                 PLMN_DATA_SERVICE_POLICY_LIST, PLMN_VOICE_SERVICE_POLICY_LIST);
 
-        mSatelliteEntitlementController.handleCmdStartQueryEntitlement();
+        mSatelliteEntitlementController.handleCmdStartQueryEntitlement(
+                SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_UNKNOWN);
 
         verify(mSatelliteEntitlementApi).checkEntitlementStatus();
         verify(mSatelliteController).onSatelliteEntitlementStatusUpdated(anyInt(),
@@ -521,7 +527,8 @@ public class SatelliteEntitlementControllerTest extends TelephonyTestBase {
         // --- Step 2: Attempt Legacy Query ---
 
         // [Execution] The system attempts a background check immediately after.
-        sendMessage(CMD_START_QUERY_ENTITLEMENT, SUB_ID);
+        sendMessage(CMD_START_QUERY_ENTITLEMENT, SUB_ID,
+                SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_FCM_TICKLE);
         mTestableLooper.processAllMessages();
 
         // [Verification] The background check should respect the manual refresh timestamp.
@@ -546,7 +553,8 @@ public class SatelliteEntitlementControllerTest extends TelephonyTestBase {
         }).when(mSatelliteEntitlementApi).checkEntitlementStatus();
 
         // [Execution] Trigger initial background query.
-        sendMessage(CMD_START_QUERY_ENTITLEMENT, SUB_ID);
+        sendMessage(CMD_START_QUERY_ENTITLEMENT, SUB_ID,
+                SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_UNKNOWN);
         mTestableLooper.processAllMessages();
 
         // [Verification] API was called and failed.
@@ -674,7 +682,8 @@ public class SatelliteEntitlementControllerTest extends TelephonyTestBase {
         setIsQueryAvailableTrue();
         // Verify don't call the checkSatelliteEntitlementStatus when getActiveSubIdList is empty.
         doReturn(new int[]{}).when(mMockSubscriptionManagerService).getActiveSubIdList(true);
-        mSatelliteEntitlementController.handleCmdStartQueryEntitlement();
+        mSatelliteEntitlementController.handleCmdStartQueryEntitlement(
+                SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_UNKNOWN);
 
         verify(mSatelliteEntitlementApi, never()).checkEntitlementStatus();
         // Verify don't call the updateSatelliteEntitlementStatus.
@@ -688,7 +697,8 @@ public class SatelliteEntitlementControllerTest extends TelephonyTestBase {
         replaceInstance(SatelliteEntitlementController.class,
                 "mSatelliteEntitlementResultPerSub", mSatelliteEntitlementController,
                 new ConcurrentHashMap<>());
-        mSatelliteEntitlementController.handleCmdStartQueryEntitlement();
+        mSatelliteEntitlementController.handleCmdStartQueryEntitlement(
+                SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_UNKNOWN);
 
         verify(mSatelliteEntitlementApi).checkEntitlementStatus();
         // Verify call the updateSatelliteEntitlementStatus with satellite service is disabled
@@ -707,7 +717,8 @@ public class SatelliteEntitlementControllerTest extends TelephonyTestBase {
         setSatelliteEntitlementResult(SATELLITE_ENTITLEMENT_STATUS_ENABLED, PLMN_ALLOWED_LIST,
                 PLMN_BARRED_LIST, PLMN_DATA_PLAN_LIST, PLMN_ALLOWED_SERVICES_LIST,
                 PLMN_DATA_SERVICE_POLICY_LIST, PLMN_VOICE_SERVICE_POLICY_LIST);
-        mSatelliteEntitlementController.handleCmdStartQueryEntitlement();
+        mSatelliteEntitlementController.handleCmdStartQueryEntitlement(
+                SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_UNKNOWN);
 
         verify(mSatelliteEntitlementApi).checkEntitlementStatus();
         // Verify call the updateSatelliteEntitlementStatus with satellite service is enable,
@@ -722,7 +733,8 @@ public class SatelliteEntitlementControllerTest extends TelephonyTestBase {
         clearInvocationsForMock();
         doReturn(new int[]{SUB_ID_2}).when(mMockSubscriptionManagerService).getActiveSubIdList(
                 true);
-        mSatelliteEntitlementController.handleCmdStartQueryEntitlement();
+        mSatelliteEntitlementController.handleCmdStartQueryEntitlement(
+                SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_UNKNOWN);
 
         verify(mSatelliteEntitlementApi).checkEntitlementStatus();
         verify(mSatelliteController).onSatelliteEntitlementStatusUpdated(eq(SUB_ID_2), eq(true),
@@ -737,7 +749,8 @@ public class SatelliteEntitlementControllerTest extends TelephonyTestBase {
         setSatelliteEntitlementResult(SATELLITE_ENTITLEMENT_STATUS_ENABLED, PLMN_ALLOWED_LIST,
                 new ArrayList<>(), new HashMap<>(), new HashMap<>(), new HashMap<>(),
                 new HashMap<>());
-        mSatelliteEntitlementController.handleCmdStartQueryEntitlement();
+        mSatelliteEntitlementController.handleCmdStartQueryEntitlement(
+                SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_UNKNOWN);
 
         verify(mSatelliteEntitlementApi).checkEntitlementStatus();
         verify(mSatelliteController).onSatelliteEntitlementStatusUpdated(eq(SUB_ID), eq(true),
@@ -752,7 +765,8 @@ public class SatelliteEntitlementControllerTest extends TelephonyTestBase {
         setSatelliteEntitlementResult(SATELLITE_ENTITLEMENT_STATUS_ENABLED, new ArrayList<>(),
                 new ArrayList<>(), new HashMap<>(), new HashMap<>(), new HashMap<>(),
                 new HashMap<>());
-        mSatelliteEntitlementController.handleCmdStartQueryEntitlement();
+        mSatelliteEntitlementController.handleCmdStartQueryEntitlement(
+                SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_UNKNOWN);
 
         verify(mSatelliteEntitlementApi).checkEntitlementStatus();
         verify(mSatelliteController).onSatelliteEntitlementStatusUpdated(eq(SUB_ID), eq(true),
@@ -767,7 +781,8 @@ public class SatelliteEntitlementControllerTest extends TelephonyTestBase {
         setSatelliteEntitlementResult(SATELLITE_ENTITLEMENT_STATUS_ENABLED, new ArrayList<>(),
                 PLMN_BARRED_LIST, PLMN_DATA_PLAN_LIST, PLMN_ALLOWED_SERVICES_LIST,
                 PLMN_DATA_SERVICE_POLICY_LIST, PLMN_VOICE_SERVICE_POLICY_LIST);
-        mSatelliteEntitlementController.handleCmdStartQueryEntitlement();
+        mSatelliteEntitlementController.handleCmdStartQueryEntitlement(
+                SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_UNKNOWN);
 
         verify(mSatelliteEntitlementApi).checkEntitlementStatus();
         verify(mSatelliteController).onSatelliteEntitlementStatusUpdated(eq(SUB_ID), eq(true),
@@ -829,7 +844,8 @@ public class SatelliteEntitlementControllerTest extends TelephonyTestBase {
                 (ConcurrentHashMap<Integer, Integer>) getValue("mRetryCountPerSub");
 
         // 1. First Query
-        sendMessage(CMD_START_QUERY_ENTITLEMENT, SUB_ID);
+        sendMessage(CMD_START_QUERY_ENTITLEMENT, SUB_ID,
+                SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_UNKNOWN);
         mTestableLooper.processAllMessages();
         verify(mSatelliteEntitlementApi, times(1)).checkEntitlementStatus();
         assertEquals(0, retryCountPerSub.getOrDefault(SUB_ID, 0).intValue());
@@ -847,7 +863,8 @@ public class SatelliteEntitlementControllerTest extends TelephonyTestBase {
         assertEquals(2, retryCountPerSub.get(SUB_ID).longValue());
 
         // 4. Start CMD Received -> Should RESET retry count but abort due to "In Progress"
-        sendMessage(CMD_START_QUERY_ENTITLEMENT, SUB_ID);
+        sendMessage(CMD_START_QUERY_ENTITLEMENT, SUB_ID,
+                SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_UNKNOWN);
         mTestableLooper.processAllMessages();
 
         // VERIFICATION: No new query (still 3), but retry count cleared to 0.
@@ -874,7 +891,8 @@ public class SatelliteEntitlementControllerTest extends TelephonyTestBase {
                 (ConcurrentHashMap<Integer, Integer>) getValue("mRetryCountPerSub");
 
         // Verify that the first query.
-        sendMessage(CMD_START_QUERY_ENTITLEMENT, SUB_ID);
+        sendMessage(CMD_START_QUERY_ENTITLEMENT, SUB_ID,
+                SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_UNKNOWN);
         mTestableLooper.processAllMessages();
         verify(mSatelliteEntitlementApi, times(1)).checkEntitlementStatus();
         // Verify that the retry count is 0 after receiving a 503 with retry-after header in
@@ -900,7 +918,8 @@ public class SatelliteEntitlementControllerTest extends TelephonyTestBase {
         // retry count does not increase.
         setInternetConnected(true);
         Log.d(TAG, "internet connected again");
-        sendMessage(CMD_START_QUERY_ENTITLEMENT, SUB_ID);
+        sendMessage(CMD_START_QUERY_ENTITLEMENT, SUB_ID,
+                SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_INTERNET_CONNECTED);
         mTestableLooper.processAllMessages();
         verify(mSatelliteEntitlementApi, times(3)).checkEntitlementStatus();
         assertEquals(0, retryCountPerSub.getOrDefault(SUB_ID, 0).intValue());
@@ -934,14 +953,16 @@ public class SatelliteEntitlementControllerTest extends TelephonyTestBase {
 
         // Verify that the query is not restarted after reaching the maximum retry count even if
         // a start cmd is received.
-        sendMessage(CMD_START_QUERY_ENTITLEMENT, SUB_ID);
+        sendMessage(CMD_START_QUERY_ENTITLEMENT, SUB_ID,
+                SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_UNKNOWN);
         mTestableLooper.processAllMessages();
         verify(mSatelliteEntitlementApi, times(8)).checkEntitlementStatus();
         assertNull(retryCountPerSub.get(SUB_ID));
 
         // Verify that the query is not restarted after reaching the maximum retry count even if
         // a retry cmd is received.
-        sendMessage(CMD_START_QUERY_ENTITLEMENT, SUB_ID);
+        sendMessage(CMD_START_QUERY_ENTITLEMENT, SUB_ID,
+                SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_UNKNOWN);
         mTestableLooper.processAllMessages();
         verify(mSatelliteEntitlementApi, times(8)).checkEntitlementStatus();
         assertNull(retryCountPerSub.get(SUB_ID));
@@ -961,7 +982,8 @@ public class SatelliteEntitlementControllerTest extends TelephonyTestBase {
                 (ConcurrentHashMap<Integer, Integer>) getValue("mRetryCountPerSub");
         setErrorResponse(500);
 
-        sendMessage(CMD_START_QUERY_ENTITLEMENT, SUB_ID);
+        sendMessage(CMD_START_QUERY_ENTITLEMENT, SUB_ID,
+                SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_UNKNOWN);
         mTestableLooper.processAllMessages();
         verify(mSatelliteEntitlementApi, times(1)).checkEntitlementStatus();
         assertNull(retryCountPerSub.get(SUB_ID));
@@ -980,7 +1002,8 @@ public class SatelliteEntitlementControllerTest extends TelephonyTestBase {
                 (ConcurrentHashMap<Integer, Integer>) getValue("mRetryCountPerSub");
 
         // Verify that the first query.
-        sendMessage(CMD_START_QUERY_ENTITLEMENT, SUB_ID);
+        sendMessage(CMD_START_QUERY_ENTITLEMENT, SUB_ID,
+                SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_UNKNOWN);
         mTestableLooper.processAllMessages();
         verify(mSatelliteEntitlementApi, times(1)).checkEntitlementStatus();
         assertNull(retryCountPerSub.get(SUB_ID));
@@ -1015,7 +1038,8 @@ public class SatelliteEntitlementControllerTest extends TelephonyTestBase {
         setErrorResponse(400);
 
         // Verify start the exponentialBackoff.
-        sendMessage(CMD_START_QUERY_ENTITLEMENT, SUB_ID);
+        sendMessage(CMD_START_QUERY_ENTITLEMENT, SUB_ID,
+                SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_UNKNOWN);
         mTestableLooper.processAllMessages();
         verify(mSatelliteEntitlementApi, times(1)).checkEntitlementStatus();
         assertNull(retryCountPerSub.get(SUB_ID));
@@ -1026,7 +1050,8 @@ public class SatelliteEntitlementControllerTest extends TelephonyTestBase {
                 anyBoolean(), anyList(), anyList(), anyMap(), anyMap(), anyMap(), anyMap(), any());
 
         // Verify the retry in progress.
-        sendMessage(CMD_RETRY_QUERY_ENTITLEMENT, SUB_ID);
+        sendMessage(CMD_RETRY_QUERY_ENTITLEMENT, SUB_ID,
+                SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_UNKNOWN);
         mTestableLooper.processAllMessages();
         verify(mSatelliteEntitlementApi, times(2)).checkEntitlementStatus();
         assertEquals(1, retryCountPerSub.getOrDefault(SUB_ID, 0).intValue());
@@ -1042,7 +1067,8 @@ public class SatelliteEntitlementControllerTest extends TelephonyTestBase {
                 PLMN_BARRED_LIST, PLMN_DATA_PLAN_LIST, PLMN_ALLOWED_SERVICES_LIST,
                 PLMN_DATA_SERVICE_POLICY_LIST, PLMN_VOICE_SERVICE_POLICY_LIST);
 
-        sendMessage(CMD_RETRY_QUERY_ENTITLEMENT, SUB_ID);
+        sendMessage(CMD_RETRY_QUERY_ENTITLEMENT, SUB_ID,
+                SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_UNKNOWN);
         mTestableLooper.processAllMessages();
         verify(mSatelliteEntitlementApi, times(3)).checkEntitlementStatus();
         assertEquals(1, retryCountPerSub.getOrDefault(SUB_ID, 0).intValue());
@@ -1063,7 +1089,8 @@ public class SatelliteEntitlementControllerTest extends TelephonyTestBase {
         setSatelliteEntitlementResult(SATELLITE_ENTITLEMENT_STATUS_DISABLED, EMPTY_PLMN_LIST,
                 EMPTY_PLMN_LIST, EMPTY_PLMN_DATA_PLAN_LIST, EMPTY_PLMN_ALLOWED_SERVICES_LIST,
                 EMPTY_PLMN_DATA_SERVICE_POLICY_LIST, EMPTY_PLMN_VOICE_SERVICE_POLICY_LIST);
-        sendMessage(CMD_START_QUERY_ENTITLEMENT, SUB_ID);
+        sendMessage(CMD_START_QUERY_ENTITLEMENT, SUB_ID,
+                SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_UNKNOWN);
         mTestableLooper.processAllMessages();
 
         // Verify call the onSatelliteEntitlementStatusUpdated - entitlement status false
@@ -1077,7 +1104,8 @@ public class SatelliteEntitlementControllerTest extends TelephonyTestBase {
         // Verify call the onSatelliteEntitlementStatusUpdated - entitlement status true
         mCarrierConfigBundle.putBoolean(
                 CarrierConfigManager.KEY_SATELLITE_ENTITLEMENT_SUPPORTED_BOOL, false);
-        sendMessage(CMD_START_QUERY_ENTITLEMENT, SUB_ID);
+        sendMessage(CMD_START_QUERY_ENTITLEMENT, SUB_ID,
+                SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_UNKNOWN);
         mTestableLooper.processAllMessages();
 
         verify(mSatelliteController).onSatelliteEntitlementStatusUpdated(anyInt(),
@@ -1095,7 +1123,8 @@ public class SatelliteEntitlementControllerTest extends TelephonyTestBase {
         setSatelliteEntitlementResult(SATELLITE_ENTITLEMENT_STATUS_ENABLED, PLMN_ALLOWED_LIST,
                 PLMN_BARRED_LIST, PLMN_DATA_PLAN_LIST, PLMN_ALLOWED_SERVICES_LIST,
                 PLMN_DATA_SERVICE_POLICY_LIST, PLMN_VOICE_SERVICE_POLICY_LIST);
-        sendMessage(CMD_START_QUERY_ENTITLEMENT, SUB_ID);
+        sendMessage(CMD_START_QUERY_ENTITLEMENT, SUB_ID,
+                SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_CARRIER_CONFIG_CHANGED);
         mTestableLooper.processAllMessages();
 
         // Verify call the onSatelliteEntitlementStatusUpdated - entitlement status true.
@@ -1109,7 +1138,8 @@ public class SatelliteEntitlementControllerTest extends TelephonyTestBase {
         clearInvocationsForMock();
         mCarrierConfigBundle.putBoolean(
                 CarrierConfigManager.KEY_SATELLITE_ENTITLEMENT_SUPPORTED_BOOL, false);
-        sendMessage(CMD_START_QUERY_ENTITLEMENT, SUB_ID);
+        sendMessage(CMD_START_QUERY_ENTITLEMENT, SUB_ID,
+                SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_UNKNOWN);
         mTestableLooper.processAllMessages();
 
         verify(mSatelliteController, never()).onSatelliteEntitlementStatusUpdated(anyInt(),
@@ -1130,7 +1160,8 @@ public class SatelliteEntitlementControllerTest extends TelephonyTestBase {
         setSatelliteEntitlementResult(SATELLITE_ENTITLEMENT_STATUS_ENABLED, PLMN_ALLOWED_LIST,
                 PLMN_BARRED_LIST, PLMN_DATA_PLAN_LIST, PLMN_ALLOWED_SERVICES_LIST,
                 PLMN_DATA_SERVICE_POLICY_LIST, PLMN_VOICE_SERVICE_POLICY_LIST);
-        sendMessage(CMD_START_QUERY_ENTITLEMENT, SUB_ID);
+        sendMessage(CMD_START_QUERY_ENTITLEMENT, SUB_ID,
+                SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_UNKNOWN);
         mTestableLooper.processAllMessages();
 
         verify(mSatelliteEntitlementApi).checkEntitlementStatus();
@@ -1154,7 +1185,8 @@ public class SatelliteEntitlementControllerTest extends TelephonyTestBase {
 
         // Verify the query does not start if there is no internet connection.
         setInternetConnected(false);
-        sendMessage(CMD_START_QUERY_ENTITLEMENT, SUB_ID);
+        sendMessage(CMD_START_QUERY_ENTITLEMENT, SUB_ID,
+                SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_UNKNOWN);
         mTestableLooper.processAllMessages();
 
         verify(mSatelliteEntitlementApi, never()).checkEntitlementStatus();
@@ -1168,7 +1200,8 @@ public class SatelliteEntitlementControllerTest extends TelephonyTestBase {
         setSatelliteEntitlementResult(SATELLITE_ENTITLEMENT_STATUS_ENABLED, PLMN_ALLOWED_LIST,
                 PLMN_BARRED_LIST, PLMN_DATA_PLAN_LIST, PLMN_ALLOWED_SERVICES_LIST,
                 PLMN_DATA_SERVICE_POLICY_LIST, PLMN_VOICE_SERVICE_POLICY_LIST);
-        sendMessage(CMD_START_QUERY_ENTITLEMENT, SUB_ID);
+        sendMessage(CMD_START_QUERY_ENTITLEMENT, SUB_ID,
+                SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_INTERNET_CONNECTED);
         mTestableLooper.processAllMessages();
 
         verify(mSatelliteEntitlementApi).checkEntitlementStatus();
@@ -1185,7 +1218,8 @@ public class SatelliteEntitlementControllerTest extends TelephonyTestBase {
 
         // Verify that the first query was triggered and that onSatelliteEntitlementStatusUpdated
         // was not called after received a 503 error.
-        sendMessage(CMD_START_QUERY_ENTITLEMENT, SUB_ID);
+        sendMessage(CMD_START_QUERY_ENTITLEMENT, SUB_ID,
+                SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_UNKNOWN);
         mTestableLooper.processAllMessages();
         verify(mSatelliteEntitlementApi).checkEntitlementStatus();
         verify(mSatelliteController, never()).onSatelliteEntitlementStatusUpdated(anyInt(),
@@ -1212,7 +1246,8 @@ public class SatelliteEntitlementControllerTest extends TelephonyTestBase {
 
         // Verify that the first query was triggered and that onSatelliteEntitlementStatusUpdated
         // was not called after received a 503 error.
-        sendMessage(CMD_START_QUERY_ENTITLEMENT, SUB_ID);
+        sendMessage(CMD_START_QUERY_ENTITLEMENT, SUB_ID,
+                SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_UNKNOWN);
         mTestableLooper.processAllMessages();
         verify(mSatelliteEntitlementApi).checkEntitlementStatus();
         verify(mSatelliteController, never()).onSatelliteEntitlementStatusUpdated(anyInt(),
@@ -1255,7 +1290,8 @@ public class SatelliteEntitlementControllerTest extends TelephonyTestBase {
         setSatelliteEntitlementResult(SATELLITE_ENTITLEMENT_STATUS_ENABLED, PLMN_ALLOWED_LIST,
                 PLMN_BARRED_LIST, PLMN_DATA_PLAN_LIST, PLMN_ALLOWED_SERVICES_LIST,
                 PLMN_DATA_SERVICE_POLICY_LIST, PLMN_VOICE_SERVICE_POLICY_LIST);
-        mSatelliteEntitlementController.handleCmdStartQueryEntitlement();
+        mSatelliteEntitlementController.handleCmdStartQueryEntitlement(
+                SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_UNKNOWN);
 
         verify(mSatelliteEntitlementApi).checkEntitlementStatus();
         verify(mSatelliteController).onSatelliteEntitlementStatusUpdated(anyInt(),
@@ -1263,7 +1299,8 @@ public class SatelliteEntitlementControllerTest extends TelephonyTestBase {
 
         // SIM_REFRESH event occurred before expired the query refresh timer, verify the start
         // the query.
-        sendMessage(CMD_SIM_REFRESH, SUB_ID);
+        sendMessage(CMD_SIM_REFRESH, SUB_ID,
+                SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_SIM_REFRESH);
         mTestableLooper.moveTimeForward(TimeUnit.MINUTES.toMillis(10));
         mTestableLooper.processAllMessages();
 
@@ -1387,8 +1424,9 @@ public class SatelliteEntitlementControllerTest extends TelephonyTestBase {
         );
     }
 
-    private void sendMessage(int what, int subId) {
-        mSatelliteEntitlementController.handleMessage(mHandler.obtainMessage(what, subId, 0));
+    private void sendMessage(int what, int subId, int triggerEvent) {
+        mSatelliteEntitlementController.handleMessage(
+                mHandler.obtainMessage(what, subId, triggerEvent));
     }
 
     private Object getValue(String originalObjectName) throws Exception {
@@ -1413,15 +1451,16 @@ public class SatelliteEntitlementControllerTest extends TelephonyTestBase {
         }
 
         @Override
-        protected void handleCmdStartQueryEntitlement() {
-            super.handleCmdStartQueryEntitlement();
+        protected void handleCmdStartQueryEntitlement(int triggerEvent) {
+            super.handleCmdStartQueryEntitlement(triggerEvent);
         }
 
         @Override
         protected void handleCmdStartQueryEntitlementForSubId(int subId,
-                boolean shouldEnforceTimeout, @Nullable IIntegerConsumer callback) {
+                boolean shouldEnforceTimeout, @Nullable IIntegerConsumer callback,
+                int triggerEvent) {
             super.handleCmdStartQueryEntitlementForSubId(subId, shouldEnforceTimeout,
-                    callback);
+                    callback, triggerEvent);
         }
     }
 }
