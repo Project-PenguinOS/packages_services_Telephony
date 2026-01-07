@@ -3906,11 +3906,17 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
                 PackageManager.FEATURE_TELEPHONY_CALLING, "getVisualVoicemailPackageName");
 
         final long identity = Binder.clearCallingIdentity();
+        String packageName = null;
         try {
-            return RemoteVvmTaskManager.getRemotePackage(mApp, subId).getPackageName();
+            ComponentName componentName =
+                    RemoteVvmTaskManager.getRemotePackage(mApp, subId);
+            if (componentName != null) {
+                packageName = componentName.getPackageName();
+            }
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
+        return packageName;
     }
 
     @Override
