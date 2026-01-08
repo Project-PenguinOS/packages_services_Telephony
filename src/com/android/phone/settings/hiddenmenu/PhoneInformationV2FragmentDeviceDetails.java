@@ -42,7 +42,6 @@ import androidx.fragment.app.Fragment;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneFactory;
 import com.android.internal.telephony.euicc.EuiccConnector;
-import com.android.internal.telephony.flags.Flags;
 import com.android.phone.R;
 
 import java.util.Locale;
@@ -344,10 +343,6 @@ public class PhoneInformationV2FragmentDeviceDetails extends Fragment {
                         + subMgr.getPhoneNumber(subId, SubscriptionManager.PHONE_NUMBER_SOURCE_UICC)
                         + ", IMS:"
                         + subMgr.getPhoneNumber(subId, SubscriptionManager.PHONE_NUMBER_SOURCE_IMS);
-        if (Flags.getPhoneNumberTs43Api()) {
-            number += ", TS43:" + subMgr.getPhoneNumber(
-                    subId, SubscriptionManager.PHONE_NUMBER_SOURCE_TS43);
-        }
         number += " }";
         mLine1Number.setText(number);
     }
