@@ -75,10 +75,8 @@
     <string name="phone_accounts_configure_account_settings" msgid="6622119715253196586">"پیکربندی تنظیمات حساب"</string>
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"همه حساب‌های تماس"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"انتخاب حساب‌هایی که می‌توانند تماس بگیرند"</string>
-    <!-- no translation found for voip_call_log_integration_label (2349275524959944815) -->
-    <skip />
-    <!-- no translation found for voip_call_log_integration_summary (3834075007862607039) -->
-    <skip />
+    <string name="voip_call_log_integration_label" msgid="2349275524959944815">"برنامه‌های کاربردی شخص ثالث"</string>
+    <string name="voip_call_log_integration_summary" msgid="3834075007862607039">"کنترل کنید کدام برنامه‌ها می‌توانند تماس‌هایشان را در گزارش تماس سیستم ادغام کنند. غیرفعال کردن این گزینه باعث می‌شود گزارش‌های برنامه در برنامه اصلی تلفن نمایش داده نشود."</string>
     <string name="wifi_calling" msgid="3650509202851355742">"‏تماس از طریق Wi-Fi"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"سرویس اتصال داخلی"</string>
     <string name="voicemail" msgid="7697769412804195032">"پست صوتی"</string>
@@ -706,7 +704,7 @@
     <string name="change_pin_enter_new_pin_header" msgid="4739465616733486118">"تنظیم پین جدید"</string>
     <string name="change_pin_enter_new_pin_hint" msgid="2326038476516364210">"پین باید <xliff:g id="MIN">%1$d</xliff:g> تا <xliff:g id="MAX">%2$d</xliff:g> رقم باشد."</string>
     <string name="change_pin_confirm_pin_header" msgid="2606303906320705726">"تأیید پین"</string>
-    <string name="change_pin_confirm_pins_dont_match" msgid="305164501222587215">"پین‌ها با یکدیگر مطابقت ندارند"</string>
+    <string name="change_pin_confirm_pins_dont_match" msgid="305164501222587215">"پین‌ها مطابقت ندارند"</string>
     <string name="change_pin_succeeded" msgid="2504705600693014403">"پین پست صوتی به‌روزرسانی شد"</string>
     <string name="change_pin_system_error" msgid="7772788809875146873">"پین تنظیم نشد"</string>
     <string name="mobile_data_status_roaming_turned_off_subtext" msgid="6840673347416227054">"فراگردی داده خاموش است"</string>

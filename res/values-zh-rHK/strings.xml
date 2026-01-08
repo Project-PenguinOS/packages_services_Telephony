@@ -75,10 +75,8 @@
     <string name="phone_accounts_configure_account_settings" msgid="6622119715253196586">"設定帳戶設定"</string>
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"所有通話帳戶"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"選擇可以撥號的帳戶"</string>
-    <!-- no translation found for voip_call_log_integration_label (2349275524959944815) -->
-    <skip />
-    <!-- no translation found for voip_call_log_integration_summary (3834075007862607039) -->
-    <skip />
+    <string name="voip_call_log_integration_label" msgid="2349275524959944815">"第三方應用程式"</string>
+    <string name="voip_call_log_integration_summary" msgid="3834075007862607039">"控制哪些應用程式可將通話整合至系統通話記錄。停用此選項將禁止在主要電話應用程式中顯示應用程式記錄。"</string>
     <string name="wifi_calling" msgid="3650509202851355742">"Wi-Fi 通話"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"內置連線服務"</string>
     <string name="voicemail" msgid="7697769412804195032">"留言信箱"</string>

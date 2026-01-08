@@ -3906,11 +3906,17 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
                 PackageManager.FEATURE_TELEPHONY_CALLING, "getVisualVoicemailPackageName");
 
         final long identity = Binder.clearCallingIdentity();
+        String packageName = null;
         try {
-            return RemoteVvmTaskManager.getRemotePackage(mApp, subId).getPackageName();
+            ComponentName componentName =
+                    RemoteVvmTaskManager.getRemotePackage(mApp, subId);
+            if (componentName != null) {
+                packageName = componentName.getPackageName();
+            }
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
+        return packageName;
     }
 
     @Override
@@ -12472,13 +12478,9 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         }
         TelephonyManager.EmergencyCallDiagnosticData ecdData = ecdDataBuilder.build();
         Log.d(LOG_TAG, "persisting with Params " + ecdData.toString());
-        DiagnosticDataCollector ddc = new DiagnosticDataCollector(
-                Runtime.getRuntime(),
+        DiagnosticDataCollector ddc = new DiagnosticDataCollector(Runtime.getRuntime(),
                 Executors.newCachedThreadPool(), db,
-                mApp.getSystemService(ActivityManager.class).isLowRamDevice(),
-                mApp.getSystemService(ActivityManager.class),
-                mApp.getResources().getStringArray(R.array.ecc_log_sources_process_names),
-                mApp.getResources().getStringArray(R.array.ecc_log_sources_tags));
+                mApp.getSystemService(ActivityManager.class).isLowRamDevice());
         ddc.persistEmergencyDianosticData(new DataCollectorConfig.Adapter(), ecdData, dropboxTag);
     }
 
@@ -13170,6 +13172,32 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         final long identity = Binder.clearCallingIdentity();
         try {
             mSatelliteAccessController.unregisterForSatelliteDisallowedReasonsChanged(callback);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    /**
+     * Request to refresh the satellite entitlement status.
+     *
+     * <p>This API allows applications to trigger a refresh of the satellite entitlement status
+     * with the entitlement server. This is typically used when the user has updated their
+     * satellite plan or subscription, and the device needs to fetch the latest entitlement
+     * information immediately.
+     *
+     * @param subId The subscription ID for which to refresh the entitlement status.
+     * @throws SecurityException if the caller does not have the required permission.
+     * @throws IllegalStateException if the Telephony service is not available.
+     *
+     * @hide
+     */
+    @Override
+    public void requestEntitlementRefresh(int subId, @NonNull IIntegerConsumer callback) {
+        enforceSatelliteCommunicationPermission("requestEntitlementRefresh");
+        Log.d(LOG_TAG, "requestEntitlementRefresh: subId = " + subId);
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            mSatelliteEntitlementController.requestEntitlementRefresh(subId, callback);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

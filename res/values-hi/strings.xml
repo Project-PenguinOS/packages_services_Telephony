@@ -75,10 +75,8 @@
     <string name="phone_accounts_configure_account_settings" msgid="6622119715253196586">"खाता सेटिंग कॉन्‍फ़िगर करें"</string>
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"सभी कॉलिंग खाते"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"चुनें कि कौन से खाते कॉल कर सकते हैं"</string>
-    <!-- no translation found for voip_call_log_integration_label (2349275524959944815) -->
-    <skip />
-    <!-- no translation found for voip_call_log_integration_summary (3834075007862607039) -->
-    <skip />
+    <string name="voip_call_log_integration_label" msgid="2349275524959944815">"तीसरे पक्ष के ऐप्लिकेशन"</string>
+    <string name="voip_call_log_integration_summary" msgid="3834075007862607039">"यह कंट्रोल करें कि कौनसे ऐप्लिकेशन, अपने कॉल लॉग को सिस्टम कॉल लॉग में इंटिग्रेट कर सकते हैं. इस विकल्प को बंद करने पर ऐप्लिकेशन के लॉग, मुख्य फ़ोन ऐप्लिकेशन में नहीं दिखेंगे."</string>
     <string name="wifi_calling" msgid="3650509202851355742">"वाई-फ़ाई कॉलिंग"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"अंतर्निहित कनेक्शन सेवा"</string>
     <string name="voicemail" msgid="7697769412804195032">"वॉयस मेल"</string>
@@ -501,7 +499,7 @@
     <string name="newPinLabel" msgid="3585899083055354732">"नया पिन"</string>
     <string name="confirmPinLabel" msgid="7783531218662473778">"नए पिन की पुष्टि करें"</string>
     <string name="badPin" msgid="4549286285015892321">"लिखा गया पुराना पिन सही नहीं है. फिर से प्रयास करें."</string>
-    <string name="mismatchPin" msgid="1467254768290323845">"  लिखे गए पिन का मिलान नहीं होता. फिर से प्रयास करें."</string>
+    <string name="mismatchPin" msgid="1467254768290323845">"लिखे गए पिन का मिलान नहीं होता. फिर से प्रयास करें."</string>
     <string name="invalidPin" msgid="7363723429414001979">"कोई ऐसा पिन लिखें, जिसमें 4 से 8 अंक हों."</string>
     <string name="disable_sim_pin" msgid="3112303905548613752">"सिम पिन साफ़ करें"</string>
     <string name="enable_sim_pin" msgid="445461050748318980">"सिम पिन सेट करें"</string>
