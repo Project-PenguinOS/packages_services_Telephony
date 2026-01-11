@@ -231,6 +231,9 @@
     <!-- Used to query which apps can read SMS messages that contain OTPs -->
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"/>
 
+    <!-- Used by PinStorage to gate access to SIM PINs based on device authentication status. -->
+    <uses-permission android:name="android.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE"/>
+
     <application android:name="PhoneApp"
             android:persistent="true"
             android:label="@string/phoneAppLabel"

@@ -60,6 +60,8 @@ public class PhoneInformationV2FragmentDeviceDetails extends Fragment {
     private TextView mSubscriptionId;
     private TextView mDds;
     private TextView mSubscriberId;
+    private TextView mGid1;
+    private TextView mCarrierId;
     private Switch mDsdsSwitch;
     private static final String ACTION_REMOVABLE_ESIM_AS_DEFAULT =
             "android.telephony.euicc.action.REMOVABLE_ESIM_AS_DEFAULT";
@@ -168,6 +170,8 @@ public class PhoneInformationV2FragmentDeviceDetails extends Fragment {
         mSubscriptionId = (TextView) view.findViewById(R.id.subid);
         mDds = (TextView) view.findViewById(R.id.dds);
         mSubscriberId = (TextView) view.findViewById(R.id.imsi);
+        mGid1 = (TextView) view.findViewById(R.id.gid1);
+        mCarrierId = (TextView) view.findViewById(R.id.carrier_id);
         mRemovableEsimSwitch = (Switch) view.findViewById(R.id.removable_esim_switch);
         if (!IS_USER_BUILD) {
             mRemovableEsimSwitch.setEnabled(true);
@@ -313,15 +317,21 @@ public class PhoneInformationV2FragmentDeviceDetails extends Fragment {
     private void updateProperties() {
         Resources r = getResources();
 
+        TelephonyManager subIdTelephonyManager = mTelephonyManager.createForSubscriptionId(mSubId);
+
         String deviceId = mTelephonyManager.getImei(mPhoneId);
         mDeviceId.setText(deviceId);
 
-        String subscriberId = mTelephonyManager.getSubscriberId();
-        if (subscriberId == null || !SubscriptionManager.isValidSubscriptionId(mSubId)) {
-            subscriberId = r.getString(R.string.radioInfo_unknown);
-        }
+        String subscriberId = PhoneInformationUtil.getSubscriberId(subIdTelephonyManager, r);
 
         mSubscriberId.setText(subscriberId);
+
+        String gid1 = PhoneInformationUtil.getGid1(subIdTelephonyManager, r);
+        mGid1.setText(gid1);
+
+        String carrierIdString =
+                PhoneInformationUtil.getCarrierIdString(subIdTelephonyManager, r);
+        mCarrierId.setText(carrierIdString);
 
         SubscriptionManager subMgr = mContext.getSystemService(SubscriptionManager.class);
         int subId = mSubId;
