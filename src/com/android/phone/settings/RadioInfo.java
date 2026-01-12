@@ -36,10 +36,7 @@ import static android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.CAPAB
 import static android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE;
 import static android.telephony.ims.stub.ImsRegistrationImplBase.REGISTRATION_TECH_IWLAN;
 import static android.telephony.ims.stub.ImsRegistrationImplBase.REGISTRATION_TECH_LTE;
-// QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
-import static com.qti.extphone.ExtTelephonyManager.FEATURE_TDSCDMA_SUPPORT;
 
-// QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 import android.annotation.NonNull;
@@ -153,11 +150,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
-// QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.IntStream;
-// QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
 
 import com.qti.extphone.ExtTelephonyManager;
 import com.qti.extphone.QtiImeiInfo;
@@ -174,7 +166,7 @@ public class RadioInfo extends AppCompatActivity {
 
 // QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
     private String[] mUpdatedPrefNwLabels;
-    private final HashMap<String, Integer> mPrefNwLabelToIntMap = new HashMap<>();
+    private HashMap<String, Integer> mPrefNwLabelToIntMap = new HashMap<>();
 // QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
 
     private static String[] sPhoneIndexLabels = new String[0];
@@ -513,20 +505,12 @@ public class RadioInfo extends AppCompatActivity {
 // QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
             mPreferredNetworkTypeResult = mUpdatedPrefNwLabels.length - 1; //set to Unknown
         } else {
-            mPreferredNetworkTypeResult = getPrefNwTypeIndexFromUpdatedArray(type);
+            int index = PhoneInformationUtil.
+                    getPrefNwTypeIndexFromUpdatedArray(type, mUpdatedPrefNwLabels);
+            mPreferredNetworkTypeResult = (index != -1) ? index : mUpdatedPrefNwLabels.length - 1;
 // QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
         }
         mPreferredNetworkType.setSelection(mPreferredNetworkTypeResult, true);
-    }
-
-// QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
-    private int getPrefNwTypeIndexFromUpdatedArray(int type) {
-        return IntStream.range(0, mUpdatedPrefNwLabels.length)
-// QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
-                .filter(i -> mUpdatedPrefNwLabels[i].equals(PhoneInformationUtil.PREFERRED_NETWORK_LABELS[type]))
-// QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
-                .findFirst()
-                .orElse(-1);
     }
 
 // QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
@@ -703,7 +687,8 @@ public class RadioInfo extends AppCompatActivity {
         }
 
 // QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
-        mUpdatedPrefNwLabels = getUpdatedPrefNwLabels();
+        mPrefNwLabelToIntMap = PhoneInformationUtil.createPrefNwLabelsToValueFullMapping();
+        mUpdatedPrefNwLabels = PhoneInformationUtil.getUpdatedPrefNwLabels(mContext);
 // QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
         mPreferredNetworkType = (Spinner) findViewById(R.id.preferredNetworkType);
         ArrayAdapter<String> mPreferredNetworkTypeAdapter = new ArrayAdapter<String>(this,
@@ -948,42 +933,6 @@ public class RadioInfo extends AppCompatActivity {
 // QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
     }
 // QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
-
-// QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
-    private String[] getUpdatedPrefNwLabels() {
-        final ArrayList<String> updatedPrefdNwLabels = new ArrayList<>();
-        final boolean tdscdmaSupported = isTdscdmaSupported();
-        final boolean cdmaSupported = isCdmaSupported();
-        log("tdscdmaSupported " + tdscdmaSupported + ", cdmaSupported " + cdmaSupported);
-        // Exclude CDMA/TDSCDMA RATs if unsupported
-        final Pattern pattern = Pattern.compile("(?<!W|TDS)CDMA|EvDo");
-// QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
-        for (int i = 0; i < PhoneInformationUtil.PREFERRED_NETWORK_LABELS.length; i++) {
-            String entry = PhoneInformationUtil.PREFERRED_NETWORK_LABELS[i];
-// QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
-            mPrefNwLabelToIntMap.put(entry, i);
-            Matcher matcher = pattern.matcher(entry);
-            if (cdmaSupported || !matcher.find()) {
-                updatedPrefdNwLabels.add(entry);
-            }
-            if (!tdscdmaSupported && entry.contains("TDSCDMA")) {
-                updatedPrefdNwLabels.remove(entry);
-            }
-        }
-        return updatedPrefdNwLabels.toArray(new String[updatedPrefdNwLabels.size()]);
-    }
-
-    private boolean isTdscdmaSupported() {
-        return mExtTelephonyManager.isFeatureSupported(FEATURE_TDSCDMA_SUPPORT);
-    }
-// QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
-
-// QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
-    private boolean isCdmaSupported() {
-        final PackageManager pm = getPackageManager();
-        return pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY_CDMA);
-// QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
-    }
 
     boolean shouldHideButton(String action) {
         if (!Build.isDebuggable()) {

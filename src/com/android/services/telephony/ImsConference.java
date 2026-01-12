@@ -1403,7 +1403,13 @@ public class ImsConference extends TelephonyConferenceBase implements Holdable {
         connection.setConnectionProperties(applyHostPropertiesToChild(
                 connection.getConnectionProperties(), parent.getConnectionProperties()));
         connection.setStatusHints(parent.getStatusHints());
-        connection.setExtras(getChildExtrasFromHostBundle(parent.getExtras()));
+        Bundle newExtras = getChildExtrasFromHostBundle(parent.getExtras());
+        if (isParticipantHost(mConferenceHostAddress, participant.getHandle())) {
+            Log.i(this,
+                    "createCallForExistingConnection: Adding TelecomManager.EXTRA_DO_NOT_LOG_CALL");
+            newExtras.putBoolean(TelecomManager.EXTRA_DO_NOT_LOG_CALL, true);
+        }
+        connection.setExtras(newExtras);
 
         Log.i(this, "createConferenceParticipantConnection: participant=%s, connection=%s",
                 participant, connection);
