@@ -14845,6 +14845,23 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     }
 
     /**
+     * Get the list of available services for carrier roaming NTN.
+     *
+     * @param subId The subscription ID of the carrier.
+     * @return List of available services for carrier roaming NTN.
+     */
+    @Override
+    public int[] getCarrierRoamingNtnAvailableServices(int subId) {
+        enforceSatelliteCommunicationPermission("getCarrierRoamingNtnAvailableServices");
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return mSatelliteController.getSupportedServicesOnCarrierRoamingNtn(subId);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    /**
      * This API can be used by only CTS to update CTS mode testing.
      *
      * @param ctsMode Whether to enable CTS mode for testing.
