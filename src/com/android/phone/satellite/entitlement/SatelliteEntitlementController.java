@@ -216,10 +216,10 @@ public class SatelliteEntitlementController extends Handler {
     public void handleMessage(@NonNull Message msg) {
         switch (msg.what) {
             case CMD_START_QUERY_ENTITLEMENT:
-                handleCmdStartQueryEntitlement();
+                handleCmdStartQueryEntitlement(msg.arg2);
                 break;
             case CMD_RETRY_QUERY_ENTITLEMENT:
-                handleCmdRetryQueryEntitlement(msg.arg1);
+                handleCmdRetryQueryEntitlement(msg.arg1, msg.arg2);
                 break;
             case CMD_SIM_REFRESH:
                 handleSimRefresh();
@@ -238,8 +238,10 @@ public class SatelliteEntitlementController extends Handler {
                     final int subId = (int) args.arg1;
                     final boolean ignoreApiThrottle = (boolean) args.arg2;
                     final IIntegerConsumer callback = (IIntegerConsumer) args.arg3;
+                    final int triggerEvent = (int) args.arg4;
                     logd("handleMessage: subId = " + subId);
-                    handleCmdStartQueryEntitlementForSubId(subId, ignoreApiThrottle, callback);
+                    handleCmdStartQueryEntitlementForSubId(subId, ignoreApiThrottle,
+                            callback, triggerEvent);
                 } finally {
                     args.recycle();
                 }
@@ -314,7 +316,14 @@ public class SatelliteEntitlementController extends Handler {
             return;
         }
 
-        sendEmptyMessage(CMD_START_QUERY_ENTITLEMENT);
+
+        Message message = obtainMessage();
+        message.what = CMD_START_QUERY_ENTITLEMENT;
+        message.arg1 = subId;
+        message.arg2 = SatelliteConstants
+                .SATELLITE_ENTITLEMENT_QUERY_TRIGGER_CARRIER_CONFIG_CHANGED;
+
+        sendMessage(message);
         mSubIdPerSlot.put(slotIndex, subId);
     }
 
@@ -355,8 +364,11 @@ public class SatelliteEntitlementController extends Handler {
 
     private void handleSimRefresh() {
         resetEntitlementQueryCounts(cmdToString(CMD_SIM_REFRESH));
-        sendMessageDelayed(
-                obtainMessage(CMD_START_QUERY_ENTITLEMENT), TimeUnit.SECONDS.toMillis(10));
+
+        Message message = obtainMessage();
+        message.what = CMD_START_QUERY_ENTITLEMENT;
+        message.arg2 = SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_SIM_REFRESH;
+        sendMessageDelayed(message, TimeUnit.SECONDS.toMillis(10));
     }
 
     private boolean isInternetConnected() {
@@ -373,7 +385,10 @@ public class SatelliteEntitlementController extends Handler {
     }
 
     private void handleInternetConnected() {
-        sendEmptyMessage(CMD_START_QUERY_ENTITLEMENT);
+        Message message = obtainMessage();
+        message.what = CMD_START_QUERY_ENTITLEMENT;
+        message.arg2 = SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_INTERNET_CONNECTED;
+        sendMessage(message);
     }
 
     /**
@@ -391,6 +406,7 @@ public class SatelliteEntitlementController extends Handler {
         args.arg1 = subId;
         args.arg2 = true;
         args.arg3 = callback;
+        args.arg4 = SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_FCM_TICKLE;
         Message msg = obtainMessage(CMD_START_QUERY_ENTITLEMENT_FOR_SUB_ID, args);
         sendMessage(msg);
     }
@@ -421,7 +437,7 @@ public class SatelliteEntitlementController extends Handler {
     }
 
     private void reportSuccessForEntitlement(
-            int subId, SatelliteEntitlementResult entitlementResult) {
+            int subId, SatelliteEntitlementResult entitlementResult, int triggerEvent) {
         // allowed service info entitlement status
         boolean isAllowedServiceInfo =
                 !entitlementResult.getAvailableServiceTypeInfoForPlmnList().isEmpty();
@@ -445,7 +461,7 @@ public class SatelliteEntitlementController extends Handler {
                 true,
                 isAllowedServiceInfo,
                 serviceType,
-                dataPolicy);
+                dataPolicy, triggerEvent);
     }
 
     /**
@@ -454,9 +470,9 @@ public class SatelliteEntitlementController extends Handler {
      * SatelliteController if the response is received.
      */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
-    protected void handleCmdStartQueryEntitlement() {
+    protected void handleCmdStartQueryEntitlement(int triggerEvent) {
         for (int subId : mSubscriptionManagerService.getActiveSubIdList(true)) {
-            handleCmdStartQueryEntitlementForSubId(subId, false, null);
+            handleCmdStartQueryEntitlementForSubId(subId, false, null, triggerEvent);
         }
     }
 
@@ -495,7 +511,8 @@ public class SatelliteEntitlementController extends Handler {
     protected void handleCmdStartQueryEntitlementForSubId(
             int subId,
             boolean ignoreApiThrottle,
-            @Nullable IIntegerConsumer callback
+            @Nullable IIntegerConsumer callback,
+            int triggerEvent
     ) {
         // Clear retry count for the sub id
         clearRetryCountForSubId(subId);
@@ -516,7 +533,7 @@ public class SatelliteEntitlementController extends Handler {
 
             // Success: Update cache and notify
             mSatelliteEntitlementResultPerSub.put(subId, entitlementResult);
-            reportSuccessForEntitlement(subId, entitlementResult);
+            reportSuccessForEntitlement(subId, entitlementResult, triggerEvent);
             sendResult(subId, callback, SATELLITE_RESULT_SUCCESS);
         } catch (ServiceEntitlementException e) {
             // Error Handling Phase
@@ -524,7 +541,7 @@ public class SatelliteEntitlementController extends Handler {
 
             // Report the raw HTTP/API error to metrics
             mEntitlementMetricsStats.reportError(subId, e.getErrorCode(), false,
-                    e.getHttpStatus());
+                    e.getHttpStatus(), triggerEvent);
 
             if (!isInternetConnected()) {
                 // Scenario A: Connection lost during the API call
@@ -547,9 +564,11 @@ public class SatelliteEntitlementController extends Handler {
                         + " sec");
 
                 // Schedule a specific retry message based on the server's instruction
-                sendMessageDelayed(
-                        obtainMessage(CMD_RETRY_QUERY_ENTITLEMENT, subId, 0),
-                        TimeUnit.SECONDS.toMillis(retryAfterSeconds));
+                Message message = obtainMessage();
+                message.what = CMD_RETRY_QUERY_ENTITLEMENT;
+                message.arg1 = subId;
+                message.arg2 = SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_RETRY;
+                sendMessageDelayed(message, TimeUnit.SECONDS.toMillis(retryAfterSeconds));
 
                 // Important: Stop the generic exponential backoff because the server gave us
                 // explicit instructions on when to come back.
@@ -607,7 +626,7 @@ public class SatelliteEntitlementController extends Handler {
      * MAX_RETRY_COUNT. 3. If other response or exception is occurred, then the query is retried
      * until MAX_RETRY_COUNT is reached using the ExponentialBackoff.
      */
-    private void handleCmdRetryQueryEntitlement(int subId) {
+    private void handleCmdRetryQueryEntitlement(int subId, int triggerEvent) {
         if (!shouldQueryEntitlementForSubId(subId, false, true, null)) {
             return;
         }
@@ -618,10 +637,11 @@ public class SatelliteEntitlementController extends Handler {
             logd("handleCmdRetryQueryEntitlement: checkEntitlementStatus");
             SatelliteEntitlementResult entitlementResult = checkEntitlementStatus(subId);
             mSatelliteEntitlementResultPerSub.put(subId, entitlementResult);
-            reportSuccessForEntitlement(subId, entitlementResult);
+            reportSuccessForEntitlement(subId, entitlementResult, triggerEvent);
         } catch (ServiceEntitlementException e) {
             loge(e.toString());
-            mEntitlementMetricsStats.reportError(subId, e.getErrorCode(), true, e.getHttpStatus());
+            mEntitlementMetricsStats.reportError(subId, e.getErrorCode(), true,
+                    e.getHttpStatus(), triggerEvent);
             if (!isRetryAvailable(subId)) {
                 logd("retryQuery: unavailable.");
                 queryCompleted(subId);
@@ -643,9 +663,12 @@ public class SatelliteEntitlementController extends Handler {
                         "retryQuery: next retry will be in "
                                 + TimeUnit.SECONDS.toMillis(retryAfterSeconds)
                                 + " sec");
-                sendMessageDelayed(
-                        obtainMessage(CMD_RETRY_QUERY_ENTITLEMENT, subId, 0),
-                        TimeUnit.SECONDS.toMillis(retryAfterSeconds));
+
+                Message message = obtainMessage();
+                message.what = CMD_RETRY_QUERY_ENTITLEMENT;
+                message.arg1 = subId;
+                message.arg2 = SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_RETRY;
+                sendMessageDelayed(message, TimeUnit.SECONDS.toMillis(retryAfterSeconds));
                 stopExponentialBackoff(subId);
                 return;
             } else {
@@ -716,7 +739,12 @@ public class SatelliteEntitlementController extends Handler {
                         MULTIPLIER,
                         this.getLooper(),
                         () -> {
-                            sendMessage(obtainMessage(CMD_RETRY_QUERY_ENTITLEMENT, subId, 0));
+                            Message message = obtainMessage();
+                            message.what = CMD_RETRY_QUERY_ENTITLEMENT;
+                            message.arg1 = subId;
+                            message.arg2 = SatelliteConstants
+                                    .SATELLITE_ENTITLEMENT_QUERY_TRIGGER_RETRY;
+                            sendMessage(message);
                         }));
 
         ExponentialBackoff exponentialBackoff = mExponentialBackoffPerSub.get(subId);
@@ -776,6 +804,7 @@ public class SatelliteEntitlementController extends Handler {
         Message message = obtainMessage();
         message.what = CMD_START_QUERY_ENTITLEMENT;
         message.arg1 = subId;
+        message.arg2 = SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_REFRESH_TIMER;
 
         // Schedule the next query after the configured refresh period (in days).
         sendMessageDelayed(
@@ -923,8 +952,12 @@ public class SatelliteEntitlementController extends Handler {
         mLastQueryTimePerSub.remove(subId);
         mRetryCountPerSub.remove(subId);
         mIsEntitlementInProgressPerSub.remove(subId);
-        removeMessages(
-                CMD_RETRY_QUERY_ENTITLEMENT, obtainMessage(CMD_RETRY_QUERY_ENTITLEMENT, subId, 0));
+
+        Message message = obtainMessage();
+        message.what = CMD_RETRY_QUERY_ENTITLEMENT;
+        message.arg1 = subId;
+        message.arg2 = SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_RETRY;
+        removeMessages(CMD_RETRY_QUERY_ENTITLEMENT, message);
     }
 
     /**

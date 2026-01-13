@@ -17,8 +17,7 @@
 package com.android.telephony.tools.configdatagenerate;
 
 import com.android.internal.telephony.TelephonyConfigData;
-
-import com.google.protobuf.ByteString;
+import com.android.internal.telephony.protobuf.ByteString;
 
 import java.io.File;
 import java.io.FileInputStream;

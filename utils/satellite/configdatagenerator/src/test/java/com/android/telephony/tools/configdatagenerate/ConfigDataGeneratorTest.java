@@ -35,8 +35,7 @@ import com.android.internal.telephony.TelephonyConfigData.SatelliteConfigProto;
 import com.android.internal.telephony.TelephonyConfigData.SatelliteProviderCapabilityProto;
 import com.android.internal.telephony.TelephonyConfigData.SatelliteRegionProto;
 import com.android.internal.telephony.TelephonyConfigData.TelephonyConfigProto;
-
-import com.google.protobuf.ByteString;
+import com.android.internal.telephony.protobuf.ByteString;
 
 import org.junit.After;
 import org.junit.Before;
