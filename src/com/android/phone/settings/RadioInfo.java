@@ -1853,37 +1853,57 @@ public class RadioInfo extends AppCompatActivity {
 
 // QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
     private void updateVoLteState() {
+// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
+// QTI_BEGIN: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
         if (!SubscriptionManager.isValidSubscriptionId(mSubId)) {
             mEnableVoLteSwitch.setEnabled(false);
             mEnableVoLteSwitch.setChecked(false);
             return;
         }
+// QTI_END: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
+// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
         ImsMmTelManager imsMmTelManager = mImsManager.getImsMmTelManager(mSubId);
         mEnableVoLteSwitch.setChecked(PhoneInformationUtil.isVolteEnabled(imsMmTelManager));
+// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
+// QTI_BEGIN: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
         mEnableVoLteSwitch.setEnabled(true);
+// QTI_END: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
+// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
         mEnableVoLteSwitch.setOnCheckedChangeListener(mVoLteOnChangeListener);
     }
 
     private void updateVoNrState() {
+// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
+// QTI_BEGIN: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
         if (!SubscriptionManager.isValidSubscriptionId(mSubId)) {
             mEnableVoNrSwitch.setEnabled(false);
             mEnableVoNrSwitch.setChecked(false);
             return;
         }
         final int subId = mSubId;
+// QTI_END: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
+// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
         mQueuedWork.execute(new Runnable() {
             public void run() {
+// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
+// QTI_BEGIN: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
                 if (subId != mSubId) {
                     return;
                 }
                 ImsMmTelManager imsMmTelManager = mImsManager.getImsMmTelManager(subId);
+// QTI_END: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
+// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
                 boolean voNrEnabled = PhoneInformationUtil.isVoNrEnabled(mTelephonyManager);
                 boolean voLteEnabled = PhoneInformationUtil.isVolteEnabled(imsMmTelManager);
                 mHandler.post(() -> {
                     mEnableVoNrSwitch.setChecked(voNrEnabled);
 
                     // Disable VoNr option if VoLte is disabled
+// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
+// QTI_BEGIN: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
                     mEnableVoNrSwitch.setEnabled(voLteEnabled);
+// QTI_END: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
+// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
                 });
             }
         });
@@ -2055,24 +2075,44 @@ public class RadioInfo extends AppCompatActivity {
             return;
         }
 
+// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
+// QTI_BEGIN: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
         final int subId = mSubId;
         final int phoneId = mPhoneId;
+// QTI_END: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
+// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
         mQueuedWork.execute(new Runnable() {
             public void run() {
+// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
+// QTI_BEGIN: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
                 if (subId != mSubId) {
                     return;
                 }
                 ImsMmTelManager imsMmTelManager = mImsManager.getImsMmTelManager(subId);
+// QTI_END: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
+// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
                 try {
                     if (isChecked != PhoneInformationUtil.isVolteEnabled(imsMmTelManager)) {
                         if (isChecked) {
+// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
+// QTI_BEGIN: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
                             mTelephonyManager.enableIms(phoneId);
+// QTI_END: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
+// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
                         } else {
+// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
+// QTI_BEGIN: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
                             mTelephonyManager.disableIms(phoneId);
+// QTI_END: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
+// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
                         }
                     }
                 } catch (Exception e) {
+// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
+// QTI_BEGIN: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
                     Log.e(TAG, "fail to set VoLTE=" + isChecked + ". subId=" + subId, e);
+// QTI_END: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
+// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
                 }
 
                 mHandler.post(() -> {
@@ -2096,7 +2136,11 @@ public class RadioInfo extends AppCompatActivity {
                 || (mTelephonyManager == null)) {
             return;
         }
+// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
+// QTI_BEGIN: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
         final int subId = mSubId;
+// QTI_END: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
+// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
         mQueuedWork.execute(new Runnable() {
             public void run() {
                 try {
@@ -2104,10 +2148,18 @@ public class RadioInfo extends AppCompatActivity {
                             PhoneInformationUtil.isVoNrEnabled(mTelephonyManager);
                     if (isVoNrEnabled != isChecked) {
                         mTelephonyManager.setVoNrEnabled(isChecked);
+// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
+// QTI_BEGIN: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
                         Log.d(TAG, "set VoNR state to " + isChecked + " on subId=" + subId);
+// QTI_END: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
+// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
                     }
                 } catch (Exception e) {
+// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
+// QTI_BEGIN: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
                     Log.e(TAG, "fail to set VoNr=" + isChecked + ". subId=" + subId, e);
+// QTI_END: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
+// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
                 }
             }
         });
