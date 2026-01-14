@@ -105,6 +105,7 @@ import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneFactory;
 import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.euicc.EuiccConnector;
+import com.android.internal.telephony.flags.Flags;
 import com.android.internal.telephony.satellite.SatelliteConfig;
 import com.android.internal.telephony.satellite.SatelliteConfigParser;
 import com.android.internal.telephony.satellite.SatelliteController;
@@ -1372,6 +1373,10 @@ public class RadioInfo extends AppCompatActivity {
                         + subMgr.getPhoneNumber(subId, SubscriptionManager.PHONE_NUMBER_SOURCE_UICC)
                         + ", IMS:"
                         + subMgr.getPhoneNumber(subId, SubscriptionManager.PHONE_NUMBER_SOURCE_IMS);
+        if (Flags.getPhoneNumberTs43Api()) {
+            s += ", TS43:" + subMgr.getPhoneNumber(
+                    subId, SubscriptionManager.PHONE_NUMBER_SOURCE_TS43);
+        }
         s += " }";
         mLine1Number.setText(s);
     }
