@@ -166,8 +166,8 @@ public class RadioInfo extends AppCompatActivity {
 
 // QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
     private String[] mUpdatedPrefNwLabels;
-    private HashMap<String, Integer> mPrefNwLabelToIntMap = new HashMap<>();
 // QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
+    private HashMap<String, Integer> mPrefNwLabelToIntMap = new HashMap<>();
 
     private static String[] sPhoneIndexLabels = new String[0];
 
@@ -505,15 +505,14 @@ public class RadioInfo extends AppCompatActivity {
 // QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
             mPreferredNetworkTypeResult = mUpdatedPrefNwLabels.length - 1; //set to Unknown
         } else {
+// QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
             int index = PhoneInformationUtil.
                     getPrefNwTypeIndexFromUpdatedArray(type, mUpdatedPrefNwLabels);
             mPreferredNetworkTypeResult = (index != -1) ? index : mUpdatedPrefNwLabels.length - 1;
-// QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
         }
         mPreferredNetworkType.setSelection(mPreferredNetworkTypeResult, true);
     }
 
-// QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
     private void updatePhoneIndex() {
         // unregister listeners on the old subId
         unregisterPhoneStateListener();
@@ -686,10 +685,8 @@ public class RadioInfo extends AppCompatActivity {
             setNrStatsVisibility(View.GONE);
         }
 
-// QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
         mPrefNwLabelToIntMap = PhoneInformationUtil.createPrefNwLabelsToValueFullMapping();
         mUpdatedPrefNwLabels = PhoneInformationUtil.getUpdatedPrefNwLabels(mContext);
-// QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
         mPreferredNetworkType = (Spinner) findViewById(R.id.preferredNetworkType);
         ArrayAdapter<String> mPreferredNetworkTypeAdapter = new ArrayAdapter<String>(this,
 // QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
