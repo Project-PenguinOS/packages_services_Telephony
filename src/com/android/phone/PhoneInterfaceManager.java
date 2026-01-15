@@ -7645,7 +7645,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
 
     @Override
     public boolean setOperatorBrandOverride(int subId, String brand) {
-        TelephonyPermissions.enforceCallingOrSelfCarrierPrivilege(mApp,
+        TelephonyPermissions.enforceCallingOrSelfModifyPermissionOrCarrierPrivilege(mApp,
                 subId, "setOperatorBrandOverride");
 
         enforceTelephonyFeatureWithException(getCurrentPackageName(),
