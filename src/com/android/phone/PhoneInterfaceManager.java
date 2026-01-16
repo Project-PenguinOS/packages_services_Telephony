@@ -516,6 +516,16 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     public static final long ICC_CLOSE_CHANNEL_EXCEPTION_ON_FAILURE = 208739934L;
 
     /**
+     * Enable expressive exceptions on calls to rebootModem() for clients targeting
+     * Android 26Q2 and later.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.CINNAMON_BUN)
+    public static final long REBOOT_MODEM_THROW_EXCEPTIONS = 476225321L;
+
+    /**
      * A request object to use for transmitting data to an ICC.
      */
     private static final class IccAPDUArgument {
@@ -1718,7 +1728,27 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
                     defaultPhone.rebootModem(onCompleted);
                     break;
                 case EVENT_CMD_MODEM_REBOOT_DONE:
-                    handleNullReturnEvent(msg, "rebootModem");
+                    ar = (AsyncResult) msg.obj;
+                    request = (MainThreadRequest) ar.userObj;
+
+                    request.result = switch (ar.exception) {
+                        case null -> new Success() {};
+                        case CommandException c -> {
+                            yield switch (c.getCommandError()) {
+                                    case CommandException.Error.REQUEST_NOT_SUPPORTED -> {
+                                        yield new UnsupportedOperationException(
+                                                "Reboot Radio not Supported");
+                                    }
+                                    case CommandException.Error.RADIO_NOT_AVAILABLE -> {
+                                        yield new IllegalStateException(
+                                                "Modem currently unavailable");
+                                    }
+                                    default -> new RuntimeException(c);
+                                };
+                        }
+                        default -> new RuntimeException(ar.exception);
+                    };
+                    notifyRequester(request);
                     break;
                 case CMD_REQUEST_ENABLE_MODEM: {
                     request = (MainThreadRequest) msg.obj;
@@ -2196,6 +2226,11 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     }
 
     /**
+     * Marker Interface to allow sendRequest() to return Success or Throwable.
+     */
+    private interface Success {}
+
+    /**
      * Posts the specified command to be executed on the main thread,
      * waits for the request to complete, and returns the result.
      * @see #sendRequestAsync
@@ -2444,8 +2479,8 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
 
     private void sendEraseModemConfig() {
         int cmd = CMD_MODEM_REBOOT;
-        Boolean success = (Boolean) sendRequest(cmd, null);
-        if (DBG) log("eraseModemConfig:" + ' ' + (success ? "ok" : "fail"));
+        Throwable error = (Throwable) sendRequest(cmd, null);
+        if (DBG) log("eraseModemConfig:" + ' ' + (error == null ? "ok" : "fail"));
     }
 
     private void sendEraseDataInSharedPreferences() {
@@ -6006,23 +6041,46 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     @Override
     public boolean rebootModem(int slotIndex) {
         Phone phone = PhoneFactory.getPhone(slotIndex);
-        if (phone != null) {
-            TelephonyPermissions.enforceCallingOrSelfModifyPermissionOrCarrierPrivilege(
-                    mApp, phone.getSubId(), "rebootModem");
-
-            enforceTelephonyFeatureWithException(getCurrentPackageName(),
-                    PackageManager.FEATURE_TELEPHONY_RADIO_ACCESS, "rebootModem");
-
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                Boolean success = (Boolean) sendRequest(CMD_MODEM_REBOOT, null);
-                if (DBG) log("rebootModem:" + ' ' + (success ? "ok" : "fail"));
-                return success;
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
+        if (phone == null) {
+            throw new IllegalArgumentException("No modem at slotIndex=" + slotIndex);
         }
-        return false;
+
+        TelephonyPermissions.enforceCallingOrSelfModifyPermissionOrCarrierPrivilege(
+                mApp, phone.getSubId(), "rebootModem");
+
+        enforceTelephonyFeatureWithException(getCurrentPackageName(),
+                PackageManager.FEATURE_TELEPHONY_RADIO_ACCESS, "rebootModem");
+
+        final boolean shouldThrow = CompatChanges.isChangeEnabled(
+                REBOOT_MODEM_THROW_EXCEPTIONS,
+                Binder.getCallingUid());
+
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            Object result = (Object) sendRequest(CMD_MODEM_REBOOT, null);
+            if (DBG) log("rebootModem:" + ' ' + (result == null ? "ok" : "fail"));
+            return switch (result) {
+                // success
+                case Success s -> {
+                    yield true;
+                }
+                // already translated, such as UnsupportedOperationException
+                case RuntimeException re -> {
+                    if (shouldThrow) throw re;
+                    yield false;
+                }
+                // untranslated, can't be sent over binder
+                default -> {
+                    Rlog.e(LOG_TAG, "Unsupported return from sendRequest()" + result);
+                    if (shouldThrow) {
+                        throw new RuntimeException(result != null ? result.toString() : "");
+                    }
+                    yield false;
+                }
+            };
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     /**
