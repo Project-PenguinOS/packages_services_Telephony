@@ -263,6 +263,8 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
     private static final String SET_SATELLITE_IGNORE_PLMN_LIST_FROM_STORAGE =
             "set-satellite-ignore-plmn-list-from-storage";
 
+    private static final String GET_PHONE_NUMBER = "get-phone-number";
+
     // Take advantage of existing methods that already contain permissions checks when possible.
     private final ITelephony mInterface;
 
@@ -420,6 +422,8 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
                 return handleAllowedNetworkTypesCommand(cmd);
             case GET_IMEI:
                 return handleGetImei();
+            case GET_PHONE_NUMBER:
+                return handleGetPhoneNumber();
             case GET_SIM_SLOTS_MAPPING:
                 return handleGetSimSlotsMapping();
             case RADIO_SUBCOMMAND:
@@ -552,8 +556,15 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
         onHelpDomainSelection();
         onHelpRilEvent();
         onHelpSimCommands();
+        onHelpGetPhoneNumber();
     }
 
+    private void onHelpGetPhoneNumber() {
+        PrintWriter pw = getOutPrintWriter();
+        pw.println("  get-phone-number <subId> <source>");
+        pw.println("    Returns the phone number for the subId from the specific source.");
+        pw.println("    Source values: 1 (UICC), 2 (CARRIER), 3 (IMS), 4 (TS43).");
+    }
     private void onHelpSimCommands() {
         PrintWriter pw = getOutPrintWriter();
         pw.println("SIM Commands:");
@@ -2414,6 +2425,39 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
         getOutPrintWriter().println("Device IMEI: " + imei);
 
         Binder.restoreCallingIdentity(identity);
+        return 0;
+    }
+
+    private int handleGetPhoneNumber() {
+        if (!checkShellUid()) {
+            Log.v(LOG_TAG, "handleGetPhoneNumber checkShellUid fails");
+            return -1;
+        }
+
+        PrintWriter pw = getOutPrintWriter();
+        int subId;
+        int source;
+
+        try {
+            // Both subId and source are mandatory arguments as requested.
+            subId = Integer.parseInt(getNextArgRequired());
+            source = Integer.parseInt(getNextArgRequired());
+        } catch (Exception e) {
+            pw.println("Error: subId and source are required and must be integers.");
+            onHelpGetPhoneNumber(); // Show specific help on error
+            return -1;
+        }
+
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            String phoneNumber = mSubscriptionManager.getPhoneNumber(subId, source);
+            pw.println(phoneNumber != null ? phoneNumber : "");
+        } catch (Exception e) {
+            pw.println("Error: " + e.getMessage());
+            return -1;
+        }  finally {
+            Binder.restoreCallingIdentity(identity);
+        }
         return 0;
     }
 
