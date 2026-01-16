@@ -76,7 +76,8 @@
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"Alle oproeprekeninge"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"Kies watter rekeninge oproepe kan maak"</string>
     <string name="voip_call_log_integration_label" msgid="2349275524959944815">"Derdepartyapps"</string>
-    <string name="voip_call_log_integration_summary" msgid="3834075007862607039">"Beheer watter apps hul oproepe met die stelseloproeprekord kan integreer. As jy hierdie opsie deaktiveer, sal dit verhoed dat die app se loglêers in die hooffoonapp gewys word."</string>
+    <!-- no translation found for voip_call_log_integration_summary (196486049335079938) -->
+    <skip />
     <string name="wifi_calling" msgid="3650509202851355742">"Wi-fi-oproepe"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"Ingeboude verbindingsdiens"</string>
     <string name="voicemail" msgid="7697769412804195032">"Stemboodskap"</string>
@@ -499,7 +500,7 @@
     <string name="newPinLabel" msgid="3585899083055354732">"Nuwe PIN"</string>
     <string name="confirmPinLabel" msgid="7783531218662473778">"Bevestig nuwe PIN"</string>
     <string name="badPin" msgid="4549286285015892321">"Die ou PIN wat jy ingevoer het, is verkeerd. Probeer weer."</string>
-    <string name="mismatchPin" msgid="1467254768290323845">"Die PIN\'s wat jy ingevoer het, stem nie ooreen nie. Probeer weer."</string>
+    <string name="mismatchPin" msgid="1467254768290323845">"Die PIN’e wat jy ingevoer het, stem nie ooreen nie. Probeer weer."</string>
     <string name="invalidPin" msgid="7363723429414001979">"Sleutel \'n PIN wat 4 to 8 nommers lank is, in."</string>
     <string name="disable_sim_pin" msgid="3112303905548613752">"Vee SIM-PIN uit"</string>
     <string name="enable_sim_pin" msgid="445461050748318980">"Stel SIM-PIN"</string>
@@ -704,7 +705,7 @@
     <string name="change_pin_enter_new_pin_header" msgid="4739465616733486118">"Stel \'n nuwe PIN op"</string>
     <string name="change_pin_enter_new_pin_hint" msgid="2326038476516364210">"PIN moet <xliff:g id="MIN">%1$d</xliff:g>-<xliff:g id="MAX">%2$d</xliff:g> syfers wees."</string>
     <string name="change_pin_confirm_pin_header" msgid="2606303906320705726">"Bevestig jou PIN"</string>
-    <string name="change_pin_confirm_pins_dont_match" msgid="305164501222587215">"PIN\'s stem nie ooreen nie"</string>
+    <string name="change_pin_confirm_pins_dont_match" msgid="305164501222587215">"PIN’e stem nie ooreen nie"</string>
     <string name="change_pin_succeeded" msgid="2504705600693014403">"Stemboodskap-PIN is opgedateer"</string>
     <string name="change_pin_system_error" msgid="7772788809875146873">"Kan nie PIN stel nie"</string>
     <string name="mobile_data_status_roaming_turned_off_subtext" msgid="6840673347416227054">"Dataswerwing is afgeskakel"</string>

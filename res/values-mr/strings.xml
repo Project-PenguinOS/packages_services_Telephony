@@ -76,7 +76,8 @@
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"सर्व कॉल करण्याची खाती"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"कोणती खाती कॉल करू शकतात ते निवडा"</string>
     <string name="voip_call_log_integration_label" msgid="2349275524959944815">"तृतीय पक्ष ॲप्स"</string>
-    <string name="voip_call_log_integration_summary" msgid="3834075007862607039">"कोणती अ‍ॅप्स त्यांचे कॉल सिस्टीम कॉल लॉगमध्ये इंटिग्रेट करू शकतात हे नियंत्रित करा. हा पर्याय बंद केल्याने मुख्य फोन अ‍ॅपमध्ये अ‍ॅपचे लॉग दाखवले जाण्यापासून रोखले जातील."</string>
+    <!-- no translation found for voip_call_log_integration_summary (196486049335079938) -->
+    <skip />
     <string name="wifi_calling" msgid="3650509202851355742">"वाय-फाय कॉलिंग"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"अंगभूत कनेक्शन सेवा"</string>
     <string name="voicemail" msgid="7697769412804195032">"व्हॉइसमेल"</string>
