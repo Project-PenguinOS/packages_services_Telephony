@@ -630,6 +630,9 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
     }
 
     private void updateDataState() {
+        if (!isAdded()) {
+            return;
+        }
         int state = mTelephonyManager.getDataState();
         Resources r = getResources();
         String display = r.getString(R.string.radioInfo_unknown);

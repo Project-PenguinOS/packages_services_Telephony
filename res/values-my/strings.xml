@@ -76,7 +76,8 @@
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"ခေါ်ဆိုနေသော အကောင့်များ အားလုံး"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"ဖုန်းခေါ်ဆိုနိုင်သည့် အကောင့်များအား ရွေးရန်"</string>
     <string name="voip_call_log_integration_label" msgid="2349275524959944815">"ပြင်ပကုမ္ပဏီအက်ပ်များ"</string>
-    <string name="voip_call_log_integration_summary" msgid="3834075007862607039">"သူတို့၏ခေါ်ဆိုမှုများကို စနစ်ခေါ်ဆိုမှတ်တမ်းတွင် ပေါင်းစည်းနိုင်သည့် အက်ပ်များကို ထိန်းချုပ်နိုင်သည်။ ဤရွေးစရာကို ပိတ်ပါက အက်ပ်မှတ်တမ်းများကို ပင်မဖုန်းအက်ပ်တွင် ပြတော့မည်မဟုတ်ပါ။"</string>
+    <!-- no translation found for voip_call_log_integration_summary (196486049335079938) -->
+    <skip />
     <string name="wifi_calling" msgid="3650509202851355742">"Wi-Fi  ခေါ်ဆိုခြင်း"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"တပ်ဆင်ပြီး ချိတ်ဆက်ရေး ဝန်ဆောင်မှု"</string>
     <string name="voicemail" msgid="7697769412804195032">"အသံမေးလ်"</string>

@@ -76,7 +76,8 @@
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"Tous les comptes téléphoniques"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"Sélectionner les comptes pour lesquels les appels sont activés"</string>
     <string name="voip_call_log_integration_label" msgid="2349275524959944815">"Applications tierces"</string>
-    <string name="voip_call_log_integration_summary" msgid="3834075007862607039">"Contrôlez les applis autorisées à intégrer leurs appels au journal d\'appels du système. Si vous désactivez cette option, les journaux de l\'appli ne s\'afficheront pas dans l\'appli principale Téléphone."</string>
+    <!-- no translation found for voip_call_log_integration_summary (196486049335079938) -->
+    <skip />
     <string name="wifi_calling" msgid="3650509202851355742">"Appels Wi-Fi"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"Service de connexion intégré"</string>
     <string name="voicemail" msgid="7697769412804195032">"Messagerie vocale"</string>
