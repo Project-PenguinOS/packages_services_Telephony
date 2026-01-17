@@ -76,8 +76,7 @@
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"Όλα οι λογαριασμοί κλήσης"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"Επιλέξτε τους λογαριασμούς που μπορούν να πραγματοποιήσουν κλήσεις"</string>
     <string name="voip_call_log_integration_label" msgid="2349275524959944815">"Εφαρμογές τρίτων μερών"</string>
-    <!-- no translation found for voip_call_log_integration_summary (196486049335079938) -->
-    <skip />
+    <string name="voip_call_log_integration_summary" msgid="196486049335079938">"Να επιτρέπεται σε άλλες εφαρμογές να εμφανίζουν κλήσεις στο ιστορικό κλήσεων. Εάν απενεργοποιηθεί, αυτές οι κλήσεις θα εμφανίζονται μόνο στις συγκεκριμένες εφαρμογές τους."</string>
     <string name="wifi_calling" msgid="3650509202851355742">"Κλήση Wi-Fi"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"Ενσωματωμένη υπηρεσία σύνδεσης"</string>
     <string name="voicemail" msgid="7697769412804195032">"Αυτόματος τηλεφωνητής"</string>

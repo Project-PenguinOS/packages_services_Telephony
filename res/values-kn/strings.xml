@@ -76,8 +76,7 @@
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"ಎಲ್ಲಾ ಕರೆ ಮಾಡುವ ಖಾತೆಗಳು"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"ಯಾವ ಖಾತೆಗಳು ಕರೆಗಳನ್ನು ಮಾಡಬಹುದು ಎಂಬುದನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="voip_call_log_integration_label" msgid="2349275524959944815">"ಥರ್ಡ್ ಪಾರ್ಟಿ ಆ್ಯಪ್‌ಗಳು"</string>
-    <!-- no translation found for voip_call_log_integration_summary (196486049335079938) -->
-    <skip />
+    <string name="voip_call_log_integration_summary" msgid="196486049335079938">"ನಿಮ್ಮ ಕರೆ ಇತಿಹಾಸದಲ್ಲಿ ಕರೆಗಳನ್ನು ತೋರಿಸಲು ಇತರ ಆ್ಯಪ್‌ಗಳಿಗೆ ಅನುಮತಿಸಿ. ಆಫ್ ಮಾಡಿದರೆ, ಈ ಕರೆಗಳು ಅವರ ನಿರ್ದಿಷ್ಟ ಆ್ಯಪ್‌ಗಳಲ್ಲಿ ಮಾತ್ರ ಗೋಚರಿಸುತ್ತವೆ."</string>
     <string name="wifi_calling" msgid="3650509202851355742">"ವೈ-ಫೈ ಕರೆ ಮಾಡುವಿಕೆ"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"ಅಂತರ್ನಿರ್ಮಿತ ಸಂಪರ್ಕ ಸೇವೆ"</string>
     <string name="voicemail" msgid="7697769412804195032">"ಧ್ವನಿಮೇಲ್"</string>
