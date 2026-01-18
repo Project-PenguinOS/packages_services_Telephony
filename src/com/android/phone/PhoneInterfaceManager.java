@@ -2334,12 +2334,9 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         synchronized (PhoneInterfaceManager.class) {
             if (sInstance == null) {
                 sInstance = new PhoneInterfaceManager(app, featureFlags);
-                if (featureFlags.publishTelephonyServicesAfterConstruction()) {
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getTelephonyServiceRegisterer()
-                            .register(sInstance);
-                }
+                TelephonyFrameworkInitializer.getTelephonyServiceManager()
+                        .getTelephonyServiceRegisterer()
+                        .register(sInstance);
             } else {
                 Log.wtf(LOG_TAG, "init() called multiple times!  sInstance = " + sInstance);
             }
@@ -2370,9 +2367,6 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         mTelephonyShellCommand = new TelephonyShellCommand(this, getDefaultPhone().getContext());
 
         PropertyInvalidatedCache.invalidateCache(TelephonyManager.CACHE_KEY_PHONE_ACCOUNT_TO_SUBID);
-        if (!mFeatureFlags.publishTelephonyServicesAfterConstruction()) {
-            publish();
-        }
         CarrierAllowListInfo.loadInstance(mApp);
 
         // Create the SatelliteEntitlementController singleton, for using the get the
@@ -7645,7 +7639,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
 
     @Override
     public boolean setOperatorBrandOverride(int subId, String brand) {
-        TelephonyPermissions.enforceCallingOrSelfCarrierPrivilege(mApp,
+        TelephonyPermissions.enforceCallingOrSelfModifyPermissionOrCarrierPrivilege(mApp,
                 subId, "setOperatorBrandOverride");
 
         enforceTelephonyFeatureWithException(getCurrentPackageName(),
@@ -14857,6 +14851,23 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         try {
             return mSatelliteController.isInSatelliteModeForCarrierRoaming(
                     SatelliteServiceUtils.getPhone(subId));
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    /**
+     * Get the list of available services for carrier roaming NTN.
+     *
+     * @param subId The subscription ID of the carrier.
+     * @return List of available services for carrier roaming NTN.
+     */
+    @Override
+    public int[] getCarrierRoamingNtnAvailableServices(int subId) {
+        enforceSatelliteCommunicationPermission("getCarrierRoamingNtnAvailableServices");
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return mSatelliteController.getSupportedServicesOnCarrierRoamingNtn(subId);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

@@ -2572,12 +2572,7 @@ public class TelephonyConnectionService extends ConnectionService {
                                 // A normal routing number is dialed when airplane mode is enabled,
                                 // but normal service is not acquired.
                                 setNormalRoutingEmergencyConnection(null);
-                                if (Flags.useEmergencyRoutingCause()) {
-                                    mForcedEmergencyRoutingConnection = connection;
-                                } else {
-                                    mAlternateEmergencyConnection = connection;
-                                }
-
+                                mForcedEmergencyRoutingConnection = connection;
                                 onEmergencyRedial(connection, phone, true);
                                 return;
                             }
@@ -2883,12 +2878,7 @@ public class TelephonyConnectionService extends ConnectionService {
             mIsEmergencyCallPending = true;
             mEmergencyConnection = (TelephonyConnection) resultConnection;
             if (routing == EmergencyNumber.EMERGENCY_CALL_ROUTING_EMERGENCY) {
-                if (Flags.useEmergencyRoutingCause()) {
-                    mForcedEmergencyRoutingConnection = (TelephonyConnection) resultConnection;
-                } else {
-                    mAlternateEmergencyConnection = (TelephonyConnection) resultConnection;
-                }
-
+                mForcedEmergencyRoutingConnection = (TelephonyConnection) resultConnection;
             }
             handleEmergencyCallStartedForSatelliteSOSMessageRecommender(mEmergencyConnection,
                     phone);
@@ -3009,16 +2999,12 @@ public class TelephonyConnectionService extends ConnectionService {
             }
             Bundle extras = request.getExtras();
             extras.putInt(PhoneConstants.EXTRA_DIAL_DOMAIN, result);
-            if (Flags.useEmergencyRoutingCause()) {
-                if (resultConnection == mAlternateEmergencyConnection) {
-                    extras.putInt(PhoneConstants.EXTRA_EMERGENCY_ROUTING_UPDATE_CAUSE,
-                            PhoneConstants.EMERGENCY_ROUTING_UPDATE_CAUSE_ALTERNATE_SERVICE);
-                } else if (resultConnection == mForcedEmergencyRoutingConnection) {
-                    extras.putInt(PhoneConstants.EXTRA_EMERGENCY_ROUTING_UPDATE_CAUSE,
-                            PhoneConstants.EMERGENCY_ROUTING_UPDATE_CAUSE_DYNAMIC_ROUTING);
-                }
-            } else if (resultConnection == mAlternateEmergencyConnection) {
-                extras.putBoolean(PhoneConstants.EXTRA_USE_EMERGENCY_ROUTING, true);
+            if (resultConnection == mAlternateEmergencyConnection) {
+                extras.putInt(PhoneConstants.EXTRA_EMERGENCY_ROUTING_UPDATE_CAUSE,
+                        PhoneConstants.EMERGENCY_ROUTING_UPDATE_CAUSE_ALTERNATE_SERVICE);
+            } else if (resultConnection == mForcedEmergencyRoutingConnection) {
+                extras.putInt(PhoneConstants.EXTRA_EMERGENCY_ROUTING_UPDATE_CAUSE,
+                        PhoneConstants.EMERGENCY_ROUTING_UPDATE_CAUSE_DYNAMIC_ROUTING);
             }
 
             CompletableFuture<Void> rejectFuture = checkAndRejectIncomingCall(phone, (ret) -> {
@@ -3523,12 +3509,8 @@ public class TelephonyConnectionService extends ConnectionService {
         final Bundle extras = new Bundle();
         extras.putInt(PhoneConstants.EXTRA_DIAL_DOMAIN, domain);
         if (connection == mAlternateEmergencyConnection) {
-            if (Flags.useEmergencyRoutingCause()) {
-                extras.putInt(PhoneConstants.EXTRA_EMERGENCY_ROUTING_UPDATE_CAUSE,
-                        PhoneConstants.EMERGENCY_ROUTING_UPDATE_CAUSE_ALTERNATE_SERVICE);
-            } else {
-                extras.putBoolean(PhoneConstants.EXTRA_USE_EMERGENCY_ROUTING, true);
-            }
+            extras.putInt(PhoneConstants.EXTRA_EMERGENCY_ROUTING_UPDATE_CAUSE,
+                    PhoneConstants.EMERGENCY_ROUTING_UPDATE_CAUSE_ALTERNATE_SERVICE);
 
             if (connection.getEmergencyServiceCategory() != null) {
                 extras.putInt(PhoneConstants.EXTRA_EMERGENCY_SERVICE_CATEGORY,

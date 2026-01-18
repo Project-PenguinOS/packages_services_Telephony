@@ -358,7 +358,6 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
 
         mBinderStub = (IConnectionService.Stub) mTestConnectionService.onBind(null);
         mSetFlagsRule.disableFlags(Flags.FLAG_IGNORE_STATE_DETAILS_UPDATE_FOR_DOMAIN_RESELECTION);
-        mSetFlagsRule.disableFlags(Flags.FLAG_USE_EMERGENCY_ROUTING_CAUSE);
     }
 
     @After
@@ -2967,8 +2966,10 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
                 dialArgs.intentExtras.getInt(PhoneConstants.EXTRA_DIAL_DOMAIN, -1));
         assertTrue(dialArgs.isEmergency);
         assertEquals(eccCategory, dialArgs.eccCategory);
-        assertTrue(dialArgs.intentExtras.getBoolean(
-                PhoneConstants.EXTRA_USE_EMERGENCY_ROUTING, false));
+        assertEquals(PhoneConstants.EMERGENCY_ROUTING_UPDATE_CAUSE_ALTERNATE_SERVICE,
+                dialArgs.intentExtras.getInt(
+                        PhoneConstants.EXTRA_EMERGENCY_ROUTING_UPDATE_CAUSE,
+                        PhoneConstants.EMERGENCY_ROUTING_UPDATE_CAUSE_UNSPECIFIED));
     }
 
     @Test
@@ -3020,14 +3021,15 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
                 dialArgs.intentExtras.getInt(PhoneConstants.EXTRA_DIAL_DOMAIN, -1));
         assertTrue(dialArgs.isEmergency);
         assertEquals(eccCategory, dialArgs.eccCategory);
-        assertTrue(dialArgs.intentExtras.getBoolean(
-                PhoneConstants.EXTRA_USE_EMERGENCY_ROUTING, false));
+        assertEquals(PhoneConstants.EMERGENCY_ROUTING_UPDATE_CAUSE_ALTERNATE_SERVICE,
+                dialArgs.intentExtras.getInt(
+                        PhoneConstants.EXTRA_EMERGENCY_ROUTING_UPDATE_CAUSE,
+                        PhoneConstants.EMERGENCY_ROUTING_UPDATE_CAUSE_UNSPECIFIED));
     }
 
     @Test
     public void testDomainSelectionUpdateEmergencyCallRoutingWithSourceModification()
             throws Exception {
-        mSetFlagsRule.enableFlags(Flags.FLAG_USE_EMERGENCY_ROUTING_CAUSE);
         setupForCallTest();
 
         int preciseDisconnectCause = com.android.internal.telephony.CallFailCause.ERROR_UNSPECIFIED;
@@ -3083,7 +3085,6 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
 
     @Test
     public void testDomainSelectionUpdateEmergencyCallRoutingButSourceKept() throws Exception {
-        mSetFlagsRule.enableFlags(Flags.FLAG_USE_EMERGENCY_ROUTING_CAUSE);
         setupForCallTest();
         int selectedDomain = DOMAIN_PS;
 
