@@ -431,11 +431,11 @@ public class RadioInfo extends AppCompatActivity {
     }
 
     private void updatePreferredNetworkType(int type) {
-        if (type >= PhoneInformationUtil.PREFERRED_NETWORK_LABELS.length || type < 0) {
-            log("Network type: unknown type value=" + type);
-            type = PhoneInformationUtil.PREFERRED_NETWORK_LABELS.length - 1; // set to Unknown
+        int index = PhoneInformationUtil.PREFERRED_NETWORK_MODES_RF.indexOf(type);
+        if (index == -1) {
+            index = PhoneInformationUtil.PREFERRED_NETWORK_LABELS_RF.length - 1;
         }
-        mPreferredNetworkTypeResult = type;
+        mPreferredNetworkTypeResult = index;
 
         mPreferredNetworkType.setSelection(mPreferredNetworkTypeResult, true);
     }
@@ -606,7 +606,7 @@ public class RadioInfo extends AppCompatActivity {
                 new ArrayAdapter<String>(
                         this,
                         android.R.layout.simple_spinner_item,
-                        PhoneInformationUtil.PREFERRED_NETWORK_LABELS);
+                        PhoneInformationUtil.PREFERRED_NETWORK_LABELS_RF);
         mPreferredNetworkTypeAdapter.setDropDownViewResource(
                 android.R.layout.simple_spinner_dropdown_item);
         mPreferredNetworkType.setAdapter(mPreferredNetworkTypeAdapter);
@@ -822,7 +822,7 @@ public class RadioInfo extends AppCompatActivity {
 
         mCellInfoRefreshRateIndex = 0; // disabled
         mPreferredNetworkTypeResult =
-                PhoneInformationUtil.PREFERRED_NETWORK_LABELS.length - 1; // Unknown
+                PhoneInformationUtil.PREFERRED_NETWORK_LABELS_RF.length - 1; // Unknown
 
         new Thread(() -> {
             int networkType = (int) mTelephonyManager.getPreferredNetworkTypeBitmask();
@@ -979,7 +979,7 @@ public class RadioInfo extends AppCompatActivity {
         mPreferredNetworkTypeResult =
                 b.getInt(
                         "mPreferredNetworkTypeResult",
-                        PhoneInformationUtil.PREFERRED_NETWORK_LABELS.length - 1);
+                        PhoneInformationUtil.PREFERRED_NETWORK_LABELS_RF.length - 1);
 
         mPhoneId = b.getInt("mSelectedPhoneIndex", 0);
         mSubId = SubscriptionManager.getSubscriptionId(mPhoneId);
@@ -2578,13 +2578,14 @@ public class RadioInfo extends AppCompatActivity {
             new AdapterView.OnItemSelectedListener() {
                 public void onItemSelected(AdapterView parent, View v, int pos, long id) {
                     if (mPreferredNetworkTypeResult != pos && pos >= 0
-                            && pos <= PhoneInformationUtil.PREFERRED_NETWORK_LABELS.length - 2) {
+                            && pos <= PhoneInformationUtil.PREFERRED_NETWORK_LABELS_RF.length - 2) {
                         mPreferredNetworkTypeResult = pos;
                         new Thread(() -> {
+                            int networkType =
+                                    PhoneInformationUtil.PREFERRED_NETWORK_MODES_RF.get(pos);
                             mTelephonyManager.setAllowedNetworkTypesForReason(
                                     TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_USER,
-                                    RadioAccessFamily.getRafFromNetworkType(
-                                            mPreferredNetworkTypeResult));
+                                    RadioAccessFamily.getRafFromNetworkType(networkType));
                         }).start();
                     }
                 }
