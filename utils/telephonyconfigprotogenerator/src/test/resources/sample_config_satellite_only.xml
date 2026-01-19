@@ -1,0 +1,20 @@
+<telephony_config>
+  <satelliteconfig>
+    <version>2</version>
+    <carriersupportedservices>
+      <carrier_id>1</carrier_id>
+      <providercapability>
+        <carrier_plmn>310062</carrier_plmn>
+        <service>1</service>
+      </providercapability>
+    </carriersupportedservices>
+    <carrier_roaming_config>
+      <max_allowed_data_mode>1</max_allowed_data_mode>
+      <device_satellite_plmn>310210</device_satellite_plmn>
+    </carrier_roaming_config>
+    <satelliteregion>
+      <country_code>US</country_code>
+      <is_allowed>TRUE</is_allowed>
+    </satelliteregion>
+  </satelliteconfig>
+</telephony_config>

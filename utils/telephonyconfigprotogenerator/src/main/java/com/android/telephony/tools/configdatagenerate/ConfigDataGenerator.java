@@ -79,6 +79,9 @@ public class ConfigDataGenerator {
         createCarrierRoamingConfigProto(doc);
         createSkyloConfigProto(doc);
 
+        DataConfigProtoGenerator dataConfigGenerator = new DataConfigProtoGenerator();
+        dataConfigGenerator.parse(doc);
+
         TelephonyConfigData.TelephonyConfigProto.Builder builder =
                 TelephonyConfigData.TelephonyConfigProto.newBuilder();
 
@@ -86,6 +89,8 @@ public class ConfigDataGenerator {
                 TelephonyConfigData.SatelliteConfigProto.newBuilder();
         SatelliteConfigProtoGenerator.buildSatelliteConfig(satBuilder);
         builder.setSatellite(satBuilder);
+
+        dataConfigGenerator.build(builder);
 
         writeToResultFile(builder, outputFile);
 
@@ -149,13 +154,20 @@ public class ConfigDataGenerator {
      * </pre>
      */
     public static void setSatelliteConfigVersion(Document doc) {
-        NodeList versionList = doc.getElementsByTagName(TAG_VERSION);
-        if (versionList.getLength() > 0) {
-            Node versionNode = versionList.item(0);
-            System.out.println("Version: " + versionNode.getTextContent());
-            SatelliteConfigProtoGenerator.sVersion = Integer.parseInt(versionNode.getTextContent());
-        } else {
-            throw new ParameterException("Version is mandatory item");
+        NodeList satelliteConfigList = doc.getElementsByTagName(TAG_SATELLITE_CONFIG);
+        if (satelliteConfigList.getLength() > 0) {
+            Element satelliteConfigElement = (Element) satelliteConfigList.item(0);
+            NodeList versionList = satelliteConfigElement.getElementsByTagName(TAG_VERSION);
+
+            if (versionList.getLength() > 0) {
+                Node versionNode = versionList.item(0);
+                System.out.println("Satellite Version: " + versionNode.getTextContent());
+                SatelliteConfigProtoGenerator.sVersion = Integer.parseInt(
+                        versionNode.getTextContent());
+            } else {
+                throw new ParameterException(
+                        "Satellite Version is mandatory in " + TAG_SATELLITE_CONFIG);
+            }
         }
     }
 
