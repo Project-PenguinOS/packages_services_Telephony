@@ -20,19 +20,13 @@ import com.android.internal.telephony.TelephonyConfigData;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
-import com.beust.jcommander.ParameterException;
 
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -40,24 +34,6 @@ import javax.xml.parsers.ParserConfigurationException;
 
 /** Creates a protubuf file **/
 public class ConfigDataGenerator {
-    public static final String TAG_SATELLITE_CONFIG = "satelliteconfig";
-    public static final String TAG_VERSION = "version";
-
-    public static final String TAG_SUPPORTED_SERVICES = "carriersupportedservices";
-    public static final String TAG_CARRIER_ID = "carrier_id";
-    public static final String TAG_PROVIDER_CAPABILITY = "providercapability";
-    public static final String TAG_CARRIER_PLMN = "carrier_plmn";
-    public static final String TAG_SERVICE = "service";
-
-    public static final String TAG_CARRIER_ROAMING_CONFIG = "carrier_roaming_config";
-    public static final String TAG_MAX_ALLOWED_DATA_MODE = "max_allowed_data_mode";
-    public static final String TAG_DEVICE_SATELLITE_PLMN = "device_satellite_plmn";
-
-    public static final String TAG_SATELLITE_REGION =  "satelliteregion";
-    public static final String TAG_S2_CELL_FILE = "s2_cell_file";
-    public static final String TAG_COUNTRY_CODE = "country_code";
-    public static final String TAG_IS_ALLOWED = "is_allowed";
-    public static final String TAG_SATELLITE_ACCESS_CONFIG_FILE = "satellite_access_config_file";
 
     /**
      * Creates a protubuf file with user inputs
@@ -75,9 +51,10 @@ public class ConfigDataGenerator {
         Document doc = getDocumentFromInput(inputFile);
 
         System.out.println("-----------------------------------------------------------------");
-        setSatelliteConfigVersion(doc);
-        createCarrierRoamingConfigProto(doc);
-        createSkyloConfigProto(doc);
+
+        SatelliteConfigProtoGenerator satelliteConfigGenerator =
+                new SatelliteConfigProtoGenerator();
+        satelliteConfigGenerator.parse(doc);
 
         DataConfigProtoGenerator dataConfigGenerator = new DataConfigProtoGenerator();
         dataConfigGenerator.parse(doc);
@@ -85,11 +62,7 @@ public class ConfigDataGenerator {
         TelephonyConfigData.TelephonyConfigProto.Builder builder =
                 TelephonyConfigData.TelephonyConfigProto.newBuilder();
 
-        TelephonyConfigData.SatelliteConfigProto.Builder satBuilder =
-                TelephonyConfigData.SatelliteConfigProto.newBuilder();
-        SatelliteConfigProtoGenerator.buildSatelliteConfig(satBuilder);
-        builder.setSatellite(satBuilder);
-
+        satelliteConfigGenerator.build(builder);
         dataConfigGenerator.build(builder);
 
         writeToResultFile(builder, outputFile);
@@ -143,257 +116,5 @@ public class ConfigDataGenerator {
         }
         doc.getDocumentElement().normalize();
         return doc;
-    }
-
-    /**
-     * Set version after getting version from the input document
-     *
-     * @param doc the input document. Format of document should be
-     * <pre>
-     * &lt;version&gt;value1&lt;/version&gt;
-     * </pre>
-     */
-    public static void setSatelliteConfigVersion(Document doc) {
-        NodeList satelliteConfigList = doc.getElementsByTagName(TAG_SATELLITE_CONFIG);
-        if (satelliteConfigList.getLength() > 0) {
-            Element satelliteConfigElement = (Element) satelliteConfigList.item(0);
-            NodeList versionList = satelliteConfigElement.getElementsByTagName(TAG_VERSION);
-
-            if (versionList.getLength() > 0) {
-                Node versionNode = versionList.item(0);
-                System.out.println("Satellite Version: " + versionNode.getTextContent());
-                SatelliteConfigProtoGenerator.sVersion = Integer.parseInt(
-                        versionNode.getTextContent());
-            } else {
-                throw new ParameterException(
-                        "Satellite Version is mandatory in " + TAG_SATELLITE_CONFIG);
-            }
-        }
-    }
-
-
-    /**
-     * Creates a list of ServiceProto from the input document
-     *
-     * @param doc the input document. Format of document should be
-     * <pre>
-     * &lt;carriersupportedservices&gt;
-     *   &lt;carrier_id&gt;value1&lt;/carrier_id&gt;
-     *   &lt;providercapability&gt;
-     *     &lt;carrier_plmn&gt;value2&lt;/carrier_plmn&gt;
-     *     &lt;service&gt;value3&lt;/service&gt;
-     *   &lt;/providercapability&gt;
-     * &lt;/carriersupportedservices&gt;
-     * </pre>
-     */
-    public static void createCarrierRoamingConfigProto(Document doc) {
-        Node carrierRoamingConfig = doc.getElementsByTagName(TAG_CARRIER_ROAMING_CONFIG).item(0);
-        if (carrierRoamingConfig != null) {
-            Element carrierRoamingConfigElement = (Element) carrierRoamingConfig;
-            System.out.println("\nCarrier Roaming Config ");
-
-            Node nodeMaxAllowedDataMode = carrierRoamingConfigElement.getElementsByTagName(
-                    TAG_MAX_ALLOWED_DATA_MODE).item(0);
-            Integer maxAllowedDataMode = null;
-            if (nodeMaxAllowedDataMode != null) {
-                maxAllowedDataMode = Integer.parseInt(nodeMaxAllowedDataMode.getTextContent());
-                if (!Util.isValidMaxAllowedDataMode(maxAllowedDataMode)) {
-                    throw new ParameterException("Invalid maxAllowedDataModel: "
-                            + maxAllowedDataMode);
-                }
-                System.out.println("└ MaxAllowedDataMode: " + maxAllowedDataMode);
-            } else {
-                System.out.println("└ MaxAllowedDataMode: empty");
-            }
-
-            NodeList nodeDeviceSatellitePlmnList =
-                    carrierRoamingConfigElement.getElementsByTagName(TAG_DEVICE_SATELLITE_PLMN);
-            List<String> satellitePlmnList = new ArrayList<>();
-            if (nodeDeviceSatellitePlmnList != null) {
-                System.out.print("└ Satellite Plmn List: ");
-                for (int k = 0; k < nodeDeviceSatellitePlmnList.getLength(); k++) {
-                    String plmn = nodeDeviceSatellitePlmnList.item(k).getTextContent();
-                    System.out.print(plmn + " ");
-                    if (!Util.isValidPlmn(plmn)) {
-                        throw new ParameterException("Invalid PLMN: " + plmn);
-                    }
-                    satellitePlmnList.add(plmn);
-                }
-            } else {
-                System.out.println("└ SatellitePLMNList: empty");
-            }
-
-            System.out.println();
-            SatelliteConfigProtoGenerator.sCarrierRoamingConfig =
-                    new RoamingConfigProto(maxAllowedDataMode, satellitePlmnList);
-        } else {
-            System.out.println("\nCarrier Roaming Config is empty");
-            SatelliteConfigProtoGenerator.sCarrierRoamingConfig = null;
-        }
-
-        NodeList carrierServicesList = doc.getElementsByTagName(TAG_SUPPORTED_SERVICES);
-        SatelliteConfigProtoGenerator.sServiceProtoList = new ArrayList<>();
-
-        if (carrierServicesList.getLength() == 0) {
-            System.out.println("\nCarrier Supported Satellite Services is empty");
-        } else {
-            System.out.println("\nCarrier Supported Satellite Services ");
-            for (int i = 0; i < carrierServicesList.getLength(); i++) {
-                Node carrierServiceNode = carrierServicesList.item(i);
-                if (carrierServiceNode.getNodeType() == Node.ELEMENT_NODE) {
-                    Element carrierServiceElement = (Element) carrierServiceNode;
-
-                    NodeList providerCapabilityList = carrierServiceElement.getElementsByTagName(
-                            TAG_PROVIDER_CAPABILITY);
-                    ProviderCapabilityProto[] capabilityProtoList = new ProviderCapabilityProto[0];
-                    if (providerCapabilityList != null) {
-                        capabilityProtoList =
-                                new ProviderCapabilityProto[providerCapabilityList.getLength()];
-                        for (int j = 0; j < providerCapabilityList.getLength(); j++) {
-                            Node providerCapabilityNode = providerCapabilityList.item(j);
-                            if (providerCapabilityNode.getNodeType() == Node.ELEMENT_NODE) {
-                                Element providerCapabilityElement =
-                                        (Element) providerCapabilityNode;
-
-                                NodeList carrierPlmnList = providerCapabilityElement
-                                        .getElementsByTagName(TAG_CARRIER_PLMN);
-                                String carrierPlmn = "";
-                                if (carrierPlmnList.getLength() == 0) {
-                                    throw new ParameterException("carrier_plmn is empty");
-                                } else {
-                                    carrierPlmn = carrierPlmnList.item(0).getTextContent();
-                                    System.out.println("└ Carrier PLMN: " + carrierPlmn);
-                                    if (!Util.isValidPlmn(carrierPlmn)) {
-                                        throw new ParameterException("Invalid plmn:" + carrierPlmn);
-                                    }
-                                }
-
-                                NodeList allowedServicesList = providerCapabilityElement
-                                        .getElementsByTagName(TAG_SERVICE);
-                                if (allowedServicesList.getLength() == 0) {
-                                    throw new ParameterException("allowedServicesList is empty");
-                                } else {
-                                    System.out.print("└ Allowed services: ");
-                                    int[] allowedServiceArray =
-                                            new int[allowedServicesList.getLength()];
-                                    for (int k = 0; k < allowedServicesList.getLength(); k++) {
-                                        int service = Integer.parseInt(allowedServicesList.item(k)
-                                                .getTextContent());
-                                        System.out.print(service + " ");
-                                        if (!Util.isValidService(service)) {
-                                            throw new ParameterException(
-                                                    "Invalid service:" + service);
-                                        }
-                                        allowedServiceArray[k] = service;
-                                    }
-                                    System.out.println();
-                                    ProviderCapabilityProto capabilityProto =
-                                            new ProviderCapabilityProto(carrierPlmn,
-                                                    allowedServiceArray);
-                                    capabilityProtoList[j] = capabilityProto;
-                                }
-                            }
-                        }
-                    }
-
-                    String carrierId = "";
-                    Node nodeCarrierId = carrierServiceElement.getElementsByTagName(TAG_CARRIER_ID)
-                            .item(0);
-                    if (nodeCarrierId != null) {
-                        carrierId = nodeCarrierId.getTextContent();
-                        System.out.println("└ Carrier ID: " + nodeCarrierId.getTextContent());
-                    } else {
-                        throw new ParameterException("* carrierId is empty");
-                    }
-
-                    if (capabilityProtoList.length != 0) {
-                        ServiceProto serviceProto = new ServiceProto(Integer.parseInt(carrierId),
-                                capabilityProtoList);
-                        SatelliteConfigProtoGenerator.sServiceProtoList.add(serviceProto);
-                    } else {
-                        throw new ParameterException("capabilityProtoList is empty");
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Creates a RegionProto from the input document
-     *
-     * @param doc the input document. Format of document should be
-     * <pre>
-     * &lt;satelliteregion&gt;
-     *   &lt;s2_cell_file&gt;value1&lt;/s2_cell_file&gt;
-     *   &lt;country_code&gt;value2&lt;/country_code&gt;
-     *   &lt;country_code&gt;value3&lt;/country_code&gt;
-     *   &lt;is_allowed&gt;value4&lt;/is_allowed&gt;
-     *   &lt;satellite_access_config_file&gt;value5lt;/satellite_access_config_file&gt;
-     * &lt;/satelliteregion&gt;
-     * </pre>
-     */
-    public static void createSkyloConfigProto(Document doc) {
-        NodeList satelliteRegionList = doc.getElementsByTagName(TAG_SATELLITE_REGION);
-        Node satelliteRegionNode = satelliteRegionList.item(0);
-        if (satelliteRegionNode != null && satelliteRegionNode.getNodeType() == Node.ELEMENT_NODE) {
-            Element satelliteRegionElement = (Element) satelliteRegionNode;
-
-            String s2CellFileName = "";
-            if (satelliteRegionElement.getElementsByTagName(TAG_S2_CELL_FILE).getLength() > 0) {
-                s2CellFileName = satelliteRegionElement.getElementsByTagName(TAG_S2_CELL_FILE)
-                        .item(0).getTextContent();
-            }
-
-            String satelliteAccessConfigFileName = "";
-            if (satelliteRegionElement.getElementsByTagName(TAG_SATELLITE_ACCESS_CONFIG_FILE)
-                            .getLength() > 0) {
-                satelliteAccessConfigFileName = satelliteRegionElement
-                                .getElementsByTagName(TAG_SATELLITE_ACCESS_CONFIG_FILE)
-                                .item(0).getTextContent();
-            }
-
-            Node nodeIsAllowed = satelliteRegionElement.getElementsByTagName(TAG_IS_ALLOWED)
-                    .item(0);
-            boolean isAllowed = true;
-            if (nodeIsAllowed != null) {
-                String isAllowedString = nodeIsAllowed.getTextContent();
-                if (isAllowedString.equalsIgnoreCase("FALSE")) {
-                    isAllowed = false;
-                }
-            } else {
-                throw new ParameterException(" "
-                        + "** isAllowed is empty, please put the value explicitly");
-            }
-
-            System.out.println("\nSatellite Region:");
-            System.out.println("└ S2 Cell File: " + s2CellFileName);
-            System.out.println("└ Is Allowed: " + isAllowed);
-            System.out.println(
-                    "└ Satellite Access Config File Name: " + satelliteAccessConfigFileName);
-
-            NodeList countryCodesList = satelliteRegionElement.getElementsByTagName(
-                    TAG_COUNTRY_CODE);
-            String[] listCountryCode = new String[0];
-            if (countryCodesList != null) {
-                listCountryCode = new String[countryCodesList.getLength()];
-                System.out.print("└ Country Codes: ");
-                for (int k = 0; k < countryCodesList.getLength(); k++) {
-                    String countryCode = countryCodesList.item(k).getTextContent();
-                    System.out.print(countryCode + " ");
-                    if (!Util.isValidCountryCode(countryCode)) {
-                        throw new ParameterException("Invalid countryCode:" + countryCode);
-                    }
-                    listCountryCode[k] = countryCode;
-                }
-            }
-
-            System.out.println();
-            SatelliteConfigProtoGenerator.sRegionProto =
-                    new RegionProto(
-                            s2CellFileName,
-                            listCountryCode,
-                            isAllowed,
-                            satelliteAccessConfigFileName);
-        }
     }
 }
