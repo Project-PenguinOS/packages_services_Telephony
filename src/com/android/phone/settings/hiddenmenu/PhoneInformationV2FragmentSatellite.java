@@ -508,7 +508,6 @@ public class PhoneInformationV2FragmentSatellite extends Fragment {
 
             PersistableBundle overrideBundle = new PersistableBundle();
             overrideBundle.putBoolean(KEY_SATELLITE_ATTACH_SUPPORTED_BOOL, true);
-            overrideBundle.putBoolean(KEY_SATELLITE_ENTITLEMENT_SUPPORTED_BOOL, true);
             overrideBundle.putBoolean(
                     CarrierConfigManager.KEY_EMERGENCY_MESSAGING_SUPPORTED_BOOL, true);
             PhoneInformationUtil.getCarrierConfig(mContext)
