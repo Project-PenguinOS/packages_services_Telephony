@@ -16,6 +16,8 @@
 
 package com.android.telephony.tools.configdatagenerate;
 
+import com.android.internal.telephony.TelephonyConfigData;
+
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
@@ -27,6 +29,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,7 +71,6 @@ public class ConfigDataGenerator {
         // Refer to the README file for an example of the input XML file
         String inputFile = arguments.inputFile;
         String outputFile = arguments.outputFile;
-        SatelliteConfigProtoGenerator.sProtoResultFile = outputFile;
 
         Document doc = getDocumentFromInput(inputFile);
 
@@ -77,11 +79,43 @@ public class ConfigDataGenerator {
         createCarrierRoamingConfigProto(doc);
         createSkyloConfigProto(doc);
 
-        SatelliteConfigProtoGenerator.generateProto();
+        DataConfigProtoGenerator dataConfigGenerator = new DataConfigProtoGenerator();
+        dataConfigGenerator.parse(doc);
+
+        TelephonyConfigData.TelephonyConfigProto.Builder builder =
+                TelephonyConfigData.TelephonyConfigProto.newBuilder();
+
+        TelephonyConfigData.SatelliteConfigProto.Builder satBuilder =
+                TelephonyConfigData.SatelliteConfigProto.newBuilder();
+        SatelliteConfigProtoGenerator.buildSatelliteConfig(satBuilder);
+        builder.setSatellite(satBuilder);
+
+        dataConfigGenerator.build(builder);
+
+        writeToResultFile(builder, outputFile);
 
         System.out.println("-----------------------------------------------------------------");
-        System.out.println(SatelliteConfigProtoGenerator.sProtoResultFile + " is generated");
+        System.out.println(outputFile + " is generated");
         System.out.println("-----------------------------------------------------------------");
+    }
+
+    private static void writeToResultFile(TelephonyConfigData
+            .TelephonyConfigProto.Builder telephonyConfigBuilder, String outputFile) {
+        try {
+            File file = new File(outputFile);
+            if (file.exists()) {
+                file.delete();
+            }
+            FileOutputStream fos = new FileOutputStream(file);
+            TelephonyConfigData.TelephonyConfigProto telephonyConfigData =
+                    telephonyConfigBuilder.build();
+            telephonyConfigData.writeTo(fos);
+
+            fos.close();
+        } catch (Exception e) {
+            throw new RuntimeException("Got exception in writing the file "
+                    + outputFile + ", e=" + e);
+        }
     }
 
     private static class Arguments {
@@ -93,7 +127,7 @@ public class ConfigDataGenerator {
         @Parameter(names = "--output-file",
                 description = "out protobuf file",
                 required = false)
-        public String outputFile = SatelliteConfigProtoGenerator.sProtoResultFile;
+        public String outputFile = "telephony_config.pb";
     }
 
     private static Document getDocumentFromInput(String inputFile) {
@@ -120,13 +154,20 @@ public class ConfigDataGenerator {
      * </pre>
      */
     public static void setSatelliteConfigVersion(Document doc) {
-        NodeList versionList = doc.getElementsByTagName(TAG_VERSION);
-        if (versionList.getLength() > 0) {
-            Node versionNode = versionList.item(0);
-            System.out.println("Version: " + versionNode.getTextContent());
-            SatelliteConfigProtoGenerator.sVersion = Integer.parseInt(versionNode.getTextContent());
-        } else {
-            throw new ParameterException("Version is mandatory item");
+        NodeList satelliteConfigList = doc.getElementsByTagName(TAG_SATELLITE_CONFIG);
+        if (satelliteConfigList.getLength() > 0) {
+            Element satelliteConfigElement = (Element) satelliteConfigList.item(0);
+            NodeList versionList = satelliteConfigElement.getElementsByTagName(TAG_VERSION);
+
+            if (versionList.getLength() > 0) {
+                Node versionNode = versionList.item(0);
+                System.out.println("Satellite Version: " + versionNode.getTextContent());
+                SatelliteConfigProtoGenerator.sVersion = Integer.parseInt(
+                        versionNode.getTextContent());
+            } else {
+                throw new ParameterException(
+                        "Satellite Version is mandatory in " + TAG_SATELLITE_CONFIG);
+            }
         }
     }
 

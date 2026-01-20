@@ -84,4 +84,21 @@ public class Util {
         }
         return true;
     }
+
+    /**
+     * @param rule target rule string for validation.
+     * @return {@code true} if the rule is in format "int:int:boolean", {@code false} otherwise.
+     */
+    public static boolean isValidConnectionCapabilityRule(String rule) {
+        // Format: Integer:Integer:Boolean (e.g., 12:8:true)
+        return isValidPattern(rule, "^\\d+:\\d+:(?i)(true|false)$");
+    }
+
+    /**
+     * @param id target capability ID.
+     * @return {@code true} if the ID is non-negative.
+     */
+    public static boolean isValidCapabilityId(int id) {
+        return id >= 0;
+    }
 }

@@ -21,14 +21,12 @@ import com.android.internal.telephony.protobuf.ByteString;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
 public class SatelliteConfigProtoGenerator {
 
     private static final String TAG = "ProtoGenerator";
-    public static String sProtoResultFile = "telephony_config.pb";
     public static int sVersion;
     public static ArrayList<ServiceProto> sServiceProtoList;
     public static RoamingConfigProto sCarrierRoamingConfig;
@@ -43,11 +41,8 @@ public class SatelliteConfigProtoGenerator {
      * https://source.corp.google.com/android/frameworks/opt/telephony/proto/src/
      * telephony_config_update.proto
      */
-    public static void generateProto() {
-        TelephonyConfigData.TelephonyConfigProto.Builder telephonyConfigBuilder =
-                TelephonyConfigData.TelephonyConfigProto.newBuilder();
-        TelephonyConfigData.SatelliteConfigProto.Builder satelliteConfigBuilder =
-                TelephonyConfigData.SatelliteConfigProto.newBuilder();
+    public static void buildSatelliteConfig(
+            TelephonyConfigData.SatelliteConfigProto.Builder satelliteConfigBuilder) {
 
         satelliteConfigBuilder.setVersion(sVersion);    // Input version
 
@@ -154,29 +149,6 @@ public class SatelliteConfigProtoGenerator {
             satelliteConfigBuilder.setDeviceSatelliteRegion(satelliteRegionBuilder);
         } else {
             System.out.println("\nRegionProto does not exist");
-        }
-
-        System.out.println();
-        telephonyConfigBuilder.setSatellite(satelliteConfigBuilder);
-        writeToResultFile(telephonyConfigBuilder);
-    }
-
-    private static void writeToResultFile(TelephonyConfigData
-            .TelephonyConfigProto.Builder telephonyConfigBuilder) {
-        try {
-            File file = new File(sProtoResultFile);
-            if (file.exists()) {
-                file.delete();
-            }
-            FileOutputStream fos = new FileOutputStream(file);
-            TelephonyConfigData.TelephonyConfigProto telephonyConfigData =
-                    telephonyConfigBuilder.build();
-            telephonyConfigData.writeTo(fos);
-
-            fos.close();
-        } catch (Exception e) {
-            throw new RuntimeException("Got exception in writing the file "
-                    + sProtoResultFile + ", e=" + e);
         }
     }
 
