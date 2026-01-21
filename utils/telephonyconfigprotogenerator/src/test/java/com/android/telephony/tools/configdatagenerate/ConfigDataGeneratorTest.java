@@ -960,12 +960,14 @@ public class ConfigDataGeneratorTest {
 
             // Create Document and Root Element
             Document doc = docBuilder.newDocument();
-            Element rootElement = doc.createElement(ConfigDataGenerator.TAG_SATELLITE_CONFIG);
+            Element rootElement = doc.createElement(
+                    SatelliteConfigProtoGenerator.TAG_SATELLITE_CONFIG);
             doc.appendChild(rootElement);
 
             if (version != null) {
                 // Add <version>
-                Element versionElement = doc.createElement(ConfigDataGenerator.TAG_VERSION);
+                Element versionElement = doc.createElement(
+                        SatelliteConfigProtoGenerator.TAG_VERSION);
                 versionElement.appendChild(doc.createTextNode(version.toString()));
                 rootElement.appendChild(versionElement);
             }
@@ -996,25 +998,28 @@ public class ConfigDataGeneratorTest {
 
             if (regionProto != null) {
                 Element satelliteRegion =
-                        doc.createElement(ConfigDataGenerator.TAG_SATELLITE_REGION);
+                        doc.createElement(SatelliteConfigProtoGenerator.TAG_SATELLITE_REGION);
                 if (regionProto.mS2CellFileName != null) {
                     satelliteRegion.appendChild(
-                            createElementWithText(doc, ConfigDataGenerator.TAG_S2_CELL_FILE,
+                            createElementWithText(doc,
+                                    SatelliteConfigProtoGenerator.TAG_S2_CELL_FILE,
                                     regionProto.mS2CellFileName));
                 }
                 if (regionProto.mCountryCodeList != null) {
                     satelliteRegion.appendChild(
-                            createElementWithText(doc, ConfigDataGenerator.TAG_COUNTRY_CODE,
+                            createElementWithText(doc,
+                                    SatelliteConfigProtoGenerator.TAG_COUNTRY_CODE,
                                     regionProto.mCountryCodeList[0]));
                 }
                 if (regionProto.mIsAllowed != null) {
                     satelliteRegion.appendChild(
-                            createElementWithText(doc, ConfigDataGenerator.TAG_IS_ALLOWED,
+                            createElementWithText(doc,
+                                    SatelliteConfigProtoGenerator.TAG_IS_ALLOWED,
                                     String.valueOf(regionProto.mIsAllowed)));
                 }
                 if (regionProto.mSatelliteAccessConfigFileName != null) {
                     satelliteRegion.appendChild(createElementWithText(
-                            doc, ConfigDataGenerator.TAG_SATELLITE_ACCESS_CONFIG_FILE,
+                            doc, SatelliteConfigProtoGenerator.TAG_SATELLITE_ACCESS_CONFIG_FILE,
                             regionProto.mSatelliteAccessConfigFileName));
                 }
                 rootElement.appendChild(satelliteRegion);
@@ -1052,11 +1057,12 @@ public class ConfigDataGeneratorTest {
 
             // Create Document and Root Element
             Document doc = docBuilder.newDocument();
-            Element rootElement = doc.createElement(ConfigDataGenerator.TAG_SATELLITE_CONFIG);
+            Element rootElement = doc.createElement(
+                    SatelliteConfigProtoGenerator.TAG_SATELLITE_CONFIG);
             doc.appendChild(rootElement);
 
             // Add <version>
-            Element versionElement = doc.createElement(ConfigDataGenerator.TAG_VERSION);
+            Element versionElement = doc.createElement(SatelliteConfigProtoGenerator.TAG_VERSION);
             versionElement.appendChild(doc.createTextNode(String.valueOf(version)));
             rootElement.appendChild(versionElement);
 
@@ -1069,19 +1075,21 @@ public class ConfigDataGeneratorTest {
                     createCarrierRoamingConfig(doc, maxAllowedDataMode, satellitePlmnList));
 
             // Add <satelliteregion>
-            Element satelliteRegion = doc.createElement(ConfigDataGenerator.TAG_SATELLITE_REGION);
+            Element satelliteRegion = doc.createElement(
+                    SatelliteConfigProtoGenerator.TAG_SATELLITE_REGION);
             satelliteRegion.appendChild(
-                    createElementWithText(doc, ConfigDataGenerator.TAG_S2_CELL_FILE,
+                    createElementWithText(doc, SatelliteConfigProtoGenerator.TAG_S2_CELL_FILE,
                             inputS2CellFileName));
             satelliteRegion.appendChild(
-                    createElementWithText(doc, ConfigDataGenerator.TAG_COUNTRY_CODE, countryCode));
+                    createElementWithText(doc,
+                            SatelliteConfigProtoGenerator.TAG_COUNTRY_CODE, countryCode));
             satelliteRegion.appendChild(
-                    createElementWithText(doc, ConfigDataGenerator.TAG_IS_ALLOWED,
+                    createElementWithText(doc, SatelliteConfigProtoGenerator.TAG_IS_ALLOWED,
                             isAllowed ? "TRUE" : "FALSE"));
             satelliteRegion.appendChild(
                     createElementWithText(
                             doc,
-                            ConfigDataGenerator.TAG_SATELLITE_ACCESS_CONFIG_FILE,
+                            SatelliteConfigProtoGenerator.TAG_SATELLITE_ACCESS_CONFIG_FILE,
                             inputSatelliteAccessConfigFileName));
             rootElement.appendChild(satelliteRegion);
 
@@ -1100,28 +1108,28 @@ public class ConfigDataGeneratorTest {
     private static Element createCarrierSupportedServices(Document doc, Integer carrierId,
             boolean isCapability, String carrierPlmn, int... services) {
         Element carrierSupportedServices = doc.createElement(
-                ConfigDataGenerator.TAG_SUPPORTED_SERVICES);
+                SatelliteConfigProtoGenerator.TAG_SUPPORTED_SERVICES);
 
         if (carrierId != null) {
             // Add CarrierId
             carrierSupportedServices.appendChild(createElementWithText(doc,
-                    ConfigDataGenerator.TAG_CARRIER_ID, String.valueOf(carrierId)));
+                    SatelliteConfigProtoGenerator.TAG_CARRIER_ID, String.valueOf(carrierId)));
         }
 
         if (isCapability) {
             // Add Plmn and Services
             Element providerCapability = doc.createElement(
-                    ConfigDataGenerator.TAG_PROVIDER_CAPABILITY);
+                    SatelliteConfigProtoGenerator.TAG_PROVIDER_CAPABILITY);
 
             if (carrierPlmn != null) {
                 providerCapability.appendChild(createElementWithText(doc,
-                        ConfigDataGenerator.TAG_CARRIER_PLMN, carrierPlmn));
+                        SatelliteConfigProtoGenerator.TAG_CARRIER_PLMN, carrierPlmn));
             }
 
             if (services != null) {
                 for (int service : services) {
                     providerCapability.appendChild(createElementWithText(doc,
-                            ConfigDataGenerator.TAG_SERVICE, String.valueOf(service)));
+                            SatelliteConfigProtoGenerator.TAG_SERVICE, String.valueOf(service)));
                 }
             }
 
@@ -1134,24 +1142,26 @@ public class ConfigDataGeneratorTest {
     private static Element createCarrierRoamingConfig(Document doc, Integer maxAllowedDataMode,
             List<String> satellitePlmns) {
         Element carrierRoamingConfig = doc.createElement(
-                ConfigDataGenerator.TAG_CARRIER_ROAMING_CONFIG);
+                SatelliteConfigProtoGenerator.TAG_CARRIER_ROAMING_CONFIG);
         // Add CarrierId
         if (maxAllowedDataMode != null) {
             carrierRoamingConfig.appendChild(createElementWithText(doc,
-                    ConfigDataGenerator.TAG_MAX_ALLOWED_DATA_MODE,
+                    SatelliteConfigProtoGenerator.TAG_MAX_ALLOWED_DATA_MODE,
                     String.valueOf(maxAllowedDataMode)));
         }
 
         if (satellitePlmns != null) {
             for (String plmn : satellitePlmns) {
                 carrierRoamingConfig.appendChild(createElementWithText(doc,
-                        ConfigDataGenerator.TAG_DEVICE_SATELLITE_PLMN, String.valueOf(plmn)));
+                        SatelliteConfigProtoGenerator.TAG_DEVICE_SATELLITE_PLMN,
+                        String.valueOf(plmn)));
             }
         }
         return carrierRoamingConfig;
     }
 
-    private static Element createElementWithText(Document doc, String tagName, String textContent) {
+    private static Element createElementWithText(
+            Document doc, String tagName, String textContent) {
         Element element = doc.createElement(tagName);
         element.appendChild(doc.createTextNode(textContent));
         return element;
@@ -1171,7 +1181,8 @@ public class ConfigDataGeneratorTest {
             }
 
             @Override
-            public FileVisitResult postVisitDirectory(Path path, IOException e) throws IOException {
+            public FileVisitResult postVisitDirectory(
+                    Path path, IOException e) throws IOException {
                 Files.delete(path);
                 return FileVisitResult.CONTINUE;
             }
