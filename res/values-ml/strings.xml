@@ -76,8 +76,7 @@
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"എല്ലാ കോളിംഗ് അക്കൗണ്ടുകളും"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"ഫോൺ വിളിക്കാനാകുന്ന അക്കൗണ്ടുകൾ തിരഞ്ഞെടുക്കുക"</string>
     <string name="voip_call_log_integration_label" msgid="2349275524959944815">"മൂന്നാം കക്ഷി ആപ്പുകൾ"</string>
-    <!-- no translation found for voip_call_log_integration_summary (196486049335079938) -->
-    <skip />
+    <string name="voip_call_log_integration_summary" msgid="196486049335079938">"നിങ്ങളുടെ കോൾ ചരിത്രത്തിൽ കോളുകൾ കാണിക്കാൻ മറ്റ് ആപ്പുകളെ അനുവദിക്കുക. ഓഫാക്കിയിട്ടുണ്ടെങ്കിൽ, ഈ കോളുകൾ അവയുടെ നിർദ്ദിഷ്ട ആപ്പുകളിൽ മാത്രമേ ദൃശ്യമാകൂ."</string>
     <string name="wifi_calling" msgid="3650509202851355742">"വൈഫൈ കോളിംഗ്"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"അന്തർ നിർമ്മിത കണക്ഷൻ സേവനം"</string>
     <string name="voicemail" msgid="7697769412804195032">"വോയ്സ് മെയില്‍"</string>

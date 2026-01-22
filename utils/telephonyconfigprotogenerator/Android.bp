@@ -18,7 +18,7 @@ package {
 }
 
 java_library_host {
-    name: "satellite-generateproto-lib",
+    name: "telephony-configproto-generator-lib",
     srcs: [
         "src/main/java/**/*.java",
     ],
@@ -30,20 +30,20 @@ java_library_host {
 
 // A tool to generate configdata protubuf file
 java_binary_host {
-    name: "satellite_generateprotobuf",
+    name: "telephony_configproto_generator",
     main_class: "com.android.telephony.tools.configdatagenerate.ConfigDataGenerator",
     static_libs: [
-        "satellite-generateproto-lib",
+        "telephony-configproto-generator-lib",
     ],
 }
 
 // Tests for ConfigDataGenerator.
 java_test_host {
-    name: "SatelliteGenerateProtoTests",
+    name: "TelephonyConfigProtoGeneratorTests",
     srcs: ["src/test/java/**/*.java"],
     static_libs: [
         "junit",
-        "satellite-generateproto-lib",
+        "telephony-configproto-generator-lib",
     ],
     test_suites: ["general-tests"],
 }

@@ -688,12 +688,15 @@ public class RadioInfo extends AppCompatActivity {
         mPrefNwLabelToIntMap = PhoneInformationUtil.createPrefNwLabelsToValueFullMapping();
         mUpdatedPrefNwLabels = PhoneInformationUtil.getUpdatedPrefNwLabels(mContext);
         mPreferredNetworkType = (Spinner) findViewById(R.id.preferredNetworkType);
-        ArrayAdapter<String> mPreferredNetworkTypeAdapter = new ArrayAdapter<String>(this,
+        ArrayAdapter<String> mPreferredNetworkTypeAdapter =
+                new ArrayAdapter<String>(
+                        this,
 // QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
-                android.R.layout.simple_spinner_item, mUpdatedPrefNwLabels);
+                        android.R.layout.simple_spinner_item,
+                        mUpdatedPrefNwLabels);
 // QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
-        mPreferredNetworkTypeAdapter
-                .setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mPreferredNetworkTypeAdapter.setDropDownViewResource(
+                android.R.layout.simple_spinner_dropdown_item);
         mPreferredNetworkType.setAdapter(mPreferredNetworkTypeAdapter);
 
         mMockSignalStrength = (Spinner) findViewById(R.id.signalStrength);
@@ -1134,9 +1137,11 @@ public class RadioInfo extends AppCompatActivity {
         mPingHostnameV6.setText(mPingHostnameResultV6);
         mHttpClientTest.setText(mHttpClientTestResult);
 
-        mPreferredNetworkTypeResult = b.getInt("mPreferredNetworkTypeResult",
+        mPreferredNetworkTypeResult =
+             b.getInt(
+                     "mPreferredNetworkTypeResult",
 // QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
-                mUpdatedPrefNwLabels.length - 1);
+                     mUpdatedPrefNwLabels.length - 1);
 // QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
 
         mPhoneId = b.getInt("mSelectedPhoneIndex", 0);
@@ -2919,10 +2924,13 @@ public class RadioInfo extends AppCompatActivity {
                             && pos <= mUpdatedPrefNwLabels.length - 2) {
                         final String prefNwLabel = mUpdatedPrefNwLabels[pos];
                         mPreferredNetworkTypeResult = mPrefNwLabelToIntMap.get(prefNwLabel);
+
                         new Thread(() -> {
+                            int networkType =
+                                    PhoneInformationUtil.PREFERRED_NETWORK_MODES_RF.get(pos);
                             mTelephonyManager.setAllowedNetworkTypesForReason(
                                     TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_USER,
-                                    RadioAccessFamily.getRafFromNetworkType(mPreferredNetworkTypeResult));
+                                    RadioAccessFamily.getRafFromNetworkType(networkType));
                         }).start();
                     }
                 }

@@ -76,8 +76,7 @@
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"سبھی کالنگ اکاؤنٹس"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"منتخب کریں کہ کون سے اکاؤنٹس کالز کر سکتے ہیں"</string>
     <string name="voip_call_log_integration_label" msgid="2349275524959944815">"فریق ثالث کی ایپس"</string>
-    <!-- no translation found for voip_call_log_integration_summary (196486049335079938) -->
-    <skip />
+    <string name="voip_call_log_integration_summary" msgid="196486049335079938">"دیگر ایپس کو اپنی کال کی سرگزشت میں کالز دکھانے کی اجازت دیں۔ آف ہونے پر، یہ کالز صرف اپنی مخصوص ایپس میں دکھائی دیں گی۔"</string>
     <string name="wifi_calling" msgid="3650509202851355742">"‏Wi-Fi کالنگ"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"پہلے سے شامل کنکشن سروس"</string>
     <string name="voicemail" msgid="7697769412804195032">"صوتی میل"</string>
