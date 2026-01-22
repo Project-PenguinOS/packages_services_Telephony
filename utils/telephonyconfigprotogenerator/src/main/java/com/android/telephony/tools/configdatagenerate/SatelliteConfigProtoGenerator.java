@@ -16,27 +16,24 @@
 
 package com.android.telephony.tools.configdatagenerate;
 
-import com.beust.jcommander.JCommander;
-import com.beust.jcommander.Parameter;
+import com.android.internal.telephony.TelephonyConfigData;
+import com.android.internal.telephony.protobuf.ByteString;
+
 import com.beust.jcommander.ParameterException;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+public class SatelliteConfigProtoGenerator extends BaseConfigGenerator {
 
-/** Creates a protubuf file **/
-public class ConfigDataGenerator {
     public static final String TAG_SATELLITE_CONFIG = "satelliteconfig";
     public static final String TAG_VERSION = "version";
 
@@ -56,59 +53,16 @@ public class ConfigDataGenerator {
     public static final String TAG_IS_ALLOWED = "is_allowed";
     public static final String TAG_SATELLITE_ACCESS_CONFIG_FILE = "satellite_access_config_file";
 
-    /**
-     * Creates a protubuf file with user inputs
-     */
-    public static void main(String[] args) {
-        Arguments arguments = new Arguments();
-        JCommander.newBuilder()
-                .addObject(arguments)
-                .build()
-                .parse(args);
-        // Refer to the README file for an example of the input XML file
-        String inputFile = arguments.inputFile;
-        String outputFile = arguments.outputFile;
-        SatelliteConfigProtoGenerator.sProtoResultFile = outputFile;
+    private int mVersion;
+    private ArrayList<ServiceProto> mServiceProtoList;
+    private RoamingConfigProto mCarrierRoamingConfig;
+    private RegionProto mRegionProto;
 
-        Document doc = getDocumentFromInput(inputFile);
-
-        System.out.println("-----------------------------------------------------------------");
+    @Override
+    public void parse(Document doc) {
         setSatelliteConfigVersion(doc);
         createCarrierRoamingConfigProto(doc);
         createSkyloConfigProto(doc);
-
-        SatelliteConfigProtoGenerator.generateProto();
-
-        System.out.println("-----------------------------------------------------------------");
-        System.out.println(SatelliteConfigProtoGenerator.sProtoResultFile + " is generated");
-        System.out.println("-----------------------------------------------------------------");
-    }
-
-    private static class Arguments {
-        @Parameter(names = "--input-file",
-                description = "input xml file",
-                required = true)
-        public String inputFile;
-
-        @Parameter(names = "--output-file",
-                description = "out protobuf file",
-                required = false)
-        public String outputFile = SatelliteConfigProtoGenerator.sProtoResultFile;
-    }
-
-    private static Document getDocumentFromInput(String inputFile) {
-        File xmlFile = new File(inputFile);
-        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder dBuilder = null;
-        Document doc = null;
-        try {
-            dBuilder = dbFactory.newDocumentBuilder();
-            doc = dBuilder.parse(xmlFile);
-        } catch (ParserConfigurationException | SAXException | IOException e) {
-            throw new RuntimeException("getDocumentFromInput: e=" + e);
-        }
-        doc.getDocumentElement().normalize();
-        return doc;
     }
 
     /**
@@ -119,17 +73,25 @@ public class ConfigDataGenerator {
      * &lt;version&gt;value1&lt;/version&gt;
      * </pre>
      */
-    public static void setSatelliteConfigVersion(Document doc) {
-        NodeList versionList = doc.getElementsByTagName(TAG_VERSION);
-        if (versionList.getLength() > 0) {
-            Node versionNode = versionList.item(0);
-            System.out.println("Version: " + versionNode.getTextContent());
-            SatelliteConfigProtoGenerator.sVersion = Integer.parseInt(versionNode.getTextContent());
+    private void setSatelliteConfigVersion(Document doc) {
+        NodeList satelliteConfigList = doc.getElementsByTagName(TAG_SATELLITE_CONFIG);
+        if (satelliteConfigList.getLength() > 0) {
+            Element satelliteConfigElement = (Element) satelliteConfigList.item(0);
+            NodeList versionList = satelliteConfigElement.getElementsByTagName(TAG_VERSION);
+
+            if (versionList.getLength() > 0) {
+                Node versionNode = versionList.item(0);
+                System.out.println("Satellite Version: " + versionNode.getTextContent());
+                mVersion = Integer.parseInt(versionNode.getTextContent());
+            } else {
+                throw new ParameterException(
+                        "Satellite Version is mandatory in " + TAG_SATELLITE_CONFIG);
+            }
         } else {
-            throw new ParameterException("Version is mandatory item");
+            throw new ParameterException(
+                    "Tag " + TAG_SATELLITE_CONFIG + " is missing. It is mandatory.");
         }
     }
-
 
     /**
      * Creates a list of ServiceProto from the input document
@@ -145,7 +107,7 @@ public class ConfigDataGenerator {
      * &lt;/carriersupportedservices&gt;
      * </pre>
      */
-    public static void createCarrierRoamingConfigProto(Document doc) {
+    private void createCarrierRoamingConfigProto(Document doc) {
         Node carrierRoamingConfig = doc.getElementsByTagName(TAG_CARRIER_ROAMING_CONFIG).item(0);
         if (carrierRoamingConfig != null) {
             Element carrierRoamingConfigElement = (Element) carrierRoamingConfig;
@@ -183,15 +145,15 @@ public class ConfigDataGenerator {
             }
 
             System.out.println();
-            SatelliteConfigProtoGenerator.sCarrierRoamingConfig =
+            mCarrierRoamingConfig =
                     new RoamingConfigProto(maxAllowedDataMode, satellitePlmnList);
         } else {
             System.out.println("\nCarrier Roaming Config is empty");
-            SatelliteConfigProtoGenerator.sCarrierRoamingConfig = null;
+            mCarrierRoamingConfig = null;
         }
 
         NodeList carrierServicesList = doc.getElementsByTagName(TAG_SUPPORTED_SERVICES);
-        SatelliteConfigProtoGenerator.sServiceProtoList = new ArrayList<>();
+        mServiceProtoList = new ArrayList<>();
 
         if (carrierServicesList.getLength() == 0) {
             System.out.println("\nCarrier Supported Satellite Services is empty");
@@ -268,7 +230,7 @@ public class ConfigDataGenerator {
                     if (capabilityProtoList.length != 0) {
                         ServiceProto serviceProto = new ServiceProto(Integer.parseInt(carrierId),
                                 capabilityProtoList);
-                        SatelliteConfigProtoGenerator.sServiceProtoList.add(serviceProto);
+                        mServiceProtoList.add(serviceProto);
                     } else {
                         throw new ParameterException("capabilityProtoList is empty");
                     }
@@ -291,7 +253,7 @@ public class ConfigDataGenerator {
      * &lt;/satelliteregion&gt;
      * </pre>
      */
-    public static void createSkyloConfigProto(Document doc) {
+    private void createSkyloConfigProto(Document doc) {
         NodeList satelliteRegionList = doc.getElementsByTagName(TAG_SATELLITE_REGION);
         Node satelliteRegionNode = satelliteRegionList.item(0);
         if (satelliteRegionNode != null && satelliteRegionNode.getNodeType() == Node.ELEMENT_NODE) {
@@ -347,12 +309,158 @@ public class ConfigDataGenerator {
             }
 
             System.out.println();
-            SatelliteConfigProtoGenerator.sRegionProto =
+            mRegionProto =
                     new RegionProto(
                             s2CellFileName,
                             listCountryCode,
                             isAllowed,
                             satelliteAccessConfigFileName);
         }
+    }
+
+    /**
+     * Generate Protobuf.
+     *
+     * The output file is a binary file of TelephonyConfigProto.
+     *
+     * The format of TelephonyConfigProto is defined in
+     * https://source.corp.google.com/android/frameworks/opt/telephony/proto/src/
+     * telephony_config_update.proto
+     */
+    @Override
+    public void build(
+            TelephonyConfigData.TelephonyConfigProto.Builder builder) {
+
+        TelephonyConfigData.SatelliteConfigProto.Builder satelliteConfigBuilder =
+                TelephonyConfigData.SatelliteConfigProto.newBuilder();
+
+        satelliteConfigBuilder.setVersion(mVersion);    // Input version
+
+        if (mServiceProtoList != null) {
+            // carrierSupportedSatelliteServiceBuilder
+            TelephonyConfigData.CarrierSupportedSatelliteServicesProto.Builder
+                    carrierSupportedSatelliteServiceBuilder =
+                    TelephonyConfigData.CarrierSupportedSatelliteServicesProto.newBuilder();
+            for (int i = 0; i < mServiceProtoList.size(); i++) {
+                ServiceProto proto = mServiceProtoList.get(i);
+                carrierSupportedSatelliteServiceBuilder.setCarrierId(proto.mCarrierId);
+                TelephonyConfigData.SatelliteProviderCapabilityProto.Builder
+                        satelliteProviderCapabilityBuilder =
+                        TelephonyConfigData.SatelliteProviderCapabilityProto.newBuilder();
+                ProviderCapabilityProto[] capabilityProtoList = proto.mCapabilityProtoList;
+                for (int j = 0; j < capabilityProtoList.length; j++) {
+                    ProviderCapabilityProto capabilityProto = capabilityProtoList[j];
+                    satelliteProviderCapabilityBuilder.setCarrierPlmn(capabilityProto.mPlmn);
+                    int[] allowedServiceList = capabilityProto.mAllowedServices;
+                    for (int k = 0; k < allowedServiceList.length; k++) {
+                        satelliteProviderCapabilityBuilder
+                                .addAllowedServices(allowedServiceList[k]);
+                    }
+                    carrierSupportedSatelliteServiceBuilder
+                            .addSupportedSatelliteProviderCapabilities(
+                                    satelliteProviderCapabilityBuilder);
+                    satelliteProviderCapabilityBuilder.clear();
+                }
+                satelliteConfigBuilder.addCarrierSupportedSatelliteServices(
+                        carrierSupportedSatelliteServiceBuilder);
+                carrierSupportedSatelliteServiceBuilder.clear();
+            }
+        } else {
+            System.out.println("ServiceProtoList does not exist");
+        }
+
+        if (mCarrierRoamingConfig != null) {
+            // carrierRoamingConfigBuilder
+            TelephonyConfigData.CarrierRoamingConfigProto.Builder carrierRoamingConfigBuilder =
+                    TelephonyConfigData.CarrierRoamingConfigProto.newBuilder();
+            if (mCarrierRoamingConfig.mMaxAllowedDataMode != null) {
+                carrierRoamingConfigBuilder.setMaxAllowedDataMode(
+                        mCarrierRoamingConfig.mMaxAllowedDataMode);
+            }
+
+            if (mCarrierRoamingConfig.mDeviceSatellitePlmns != null) {
+                carrierRoamingConfigBuilder.addAllDeviceSatellitePlmn(
+                        mCarrierRoamingConfig.mDeviceSatellitePlmns);
+            }
+
+            satelliteConfigBuilder.setCarrierRoamingConfig(carrierRoamingConfigBuilder);
+        }
+
+        if (mRegionProto != null) {
+            System.out.println("sRegionProto");
+            // satelliteRegionBuilder
+            TelephonyConfigData.SatelliteRegionProto.Builder satelliteRegionBuilder =
+                    TelephonyConfigData.SatelliteRegionProto.newBuilder();
+
+            // mS2CellFileName
+            if (mRegionProto.mS2CellFileName != null
+                    && !mRegionProto.mS2CellFileName.isEmpty()) {
+                byte[] s2SatBinaryData;
+                try {
+                    s2SatBinaryData = readFileToByteArray(mRegionProto.mS2CellFileName);
+                } catch (IOException e) {
+                    throw new RuntimeException("Got exception in reading the file "
+                            + mRegionProto.mS2CellFileName + ", e=" + e);
+                }
+                if (s2SatBinaryData != null) {
+                    satelliteRegionBuilder.setS2CellFile(ByteString.copyFrom(s2SatBinaryData));
+                }
+            }
+
+            // mCountryCodeList
+            String[] countryCodeList = mRegionProto.mCountryCodeList;
+            for (int i = 0; i < countryCodeList.length; i++) {
+                satelliteRegionBuilder.addCountryCodes(countryCodeList[i]);
+            }
+
+            // mIsAllowed
+            satelliteRegionBuilder.setIsAllowed(mRegionProto.mIsAllowed);
+
+            // mSatelliteAccessConfigFileName
+            if (mRegionProto.mSatelliteAccessConfigFileName != null
+                    && !mRegionProto.mSatelliteAccessConfigFileName.isEmpty()) {
+                byte[] satelliteAccessBinaryData;
+                try {
+                    satelliteAccessBinaryData =
+                            readFileToByteArray(mRegionProto.mSatelliteAccessConfigFileName);
+                } catch (IOException e) {
+                    throw new RuntimeException(
+                            "Got exception in reading the mSatelliteAccessConfigFileName "
+                                    + mRegionProto.mSatelliteAccessConfigFileName
+                                    + ", e="
+                                    + e);
+                }
+                if (satelliteAccessBinaryData != null) {
+                    satelliteRegionBuilder.setSatelliteAccessConfigFile(
+                            ByteString.copyFrom(satelliteAccessBinaryData));
+                }
+            }
+
+            satelliteConfigBuilder.setDeviceSatelliteRegion(satelliteRegionBuilder);
+        } else {
+            System.out.println("\nRegionProto does not exist");
+        }
+
+        builder.setSatellite(satelliteConfigBuilder);
+    }
+
+    private static byte[] readFileToByteArray(String fileName) throws IOException {
+        File file = new File(fileName);
+        if (!file.exists()) {
+            throw new IOException("File: " + fileName + " does not exist");
+        }
+
+        if (file.exists() && file.canRead()) {
+            FileInputStream fileInputStream = new FileInputStream(file);
+            long fileSize = fileInputStream.available();
+            byte[] bytes = new byte[(int) fileSize];
+            int bytesRead = fileInputStream.read(bytes);
+            fileInputStream.close();
+            if (bytesRead != fileSize) {
+                throw new IOException("file read fail: " + file.getCanonicalPath());
+            }
+            return bytes;
+        }
+        return null;
     }
 }

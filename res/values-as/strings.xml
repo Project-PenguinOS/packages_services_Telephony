@@ -76,8 +76,7 @@
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"সকলো কলিং একাউণ্ট"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"কোন কোনটো একাউণ্টে ফন কৰিব পাৰে বাছক"</string>
     <string name="voip_call_log_integration_label" msgid="2349275524959944815">"তৃতীয় পক্ষৰ এপ্"</string>
-    <!-- no translation found for voip_call_log_integration_summary (196486049335079938) -->
-    <skip />
+    <string name="voip_call_log_integration_summary" msgid="196486049335079938">"আপোনাৰ কলৰ ইতিহাসত অন্য এপ্‌সমূহক কল দেখুওৱাৰ অনুমতি দিয়ক। যদি অফ কৰা হয়, এই কলসমূহ কেৱল সেইসমূহৰ নিৰ্দিষ্ট এপ্‌সমূহতহে ওলাব।"</string>
     <string name="wifi_calling" msgid="3650509202851355742">"ৱাই-ফাই কলিং"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"বিল্ট-ইন সংযোগ সেৱা"</string>
     <string name="voicemail" msgid="7697769412804195032">"ভইচমেইল"</string>
