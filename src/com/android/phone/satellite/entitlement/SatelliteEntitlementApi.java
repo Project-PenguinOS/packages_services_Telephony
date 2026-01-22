@@ -21,9 +21,10 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.os.PersistableBundle;
 import android.telephony.CarrierConfigManager;
-
 import android.text.TextUtils;
 import android.util.Log;
+
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.libraries.entitlement.CarrierConfig;
 import com.android.libraries.entitlement.ServiceEntitlement;
 import com.android.libraries.entitlement.ServiceEntitlementException;
@@ -37,6 +38,10 @@ import com.android.libraries.entitlement.ServiceEntitlementRequest;
 public class SatelliteEntitlementApi {
     private static final String TAG = "SatelliteEntitlementApi";
     private static final String DEFAULT_APP_NAME = "androidSatmode";
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+    public static final String ENTITLEMENT_VERSION = "12.0";
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+    public static final int CONFIGURATION_VERSION = 1;
     @NonNull
     private final ServiceEntitlement mServiceEntitlement;
     private final Context mContext;
@@ -61,6 +66,8 @@ public class SatelliteEntitlementApi {
         ServiceEntitlementRequest.Builder requestBuilder = ServiceEntitlementRequest.builder();
         requestBuilder.setAcceptContentType(ServiceEntitlementRequest.ACCEPT_CONTENT_TYPE_JSON);
         requestBuilder.setAppName(getSatelliteEntitlementAppName(mCarrierConfig));
+        requestBuilder.setEntitlementVersion(ENTITLEMENT_VERSION);
+        requestBuilder.setConfigurationVersion(CONFIGURATION_VERSION);
         ServiceEntitlementRequest request = requestBuilder.build();
 
         String response = queryEntitlementStatus(
