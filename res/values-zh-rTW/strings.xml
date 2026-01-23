@@ -66,7 +66,7 @@
     <string name="phone_accounts" msgid="1216879437523774604">"通話帳戶"</string>
     <string name="phone_accounts_make_calls_with" msgid="16747814788918145">"選擇通話帳戶"</string>
     <string name="phone_accounts_make_sip_calls_with" msgid="4691221006731847255">"選擇 SIP 通話帳戶"</string>
-    <string name="phone_accounts_ask_every_time" msgid="6192347582666047168">"先詢問我"</string>
+    <string name="phone_accounts_ask_every_time" msgid="6192347582666047168">"先詢問"</string>
     <string name="phone_accounts_default_account_label" msgid="5107598881335931101">"無法連上網路"</string>
     <string name="phone_accounts_settings_header" msgid="6296501692964706536">"設定"</string>
     <string name="phone_accounts_choose_accounts" msgid="4748805293314824974">"選擇帳戶"</string>
@@ -75,6 +75,8 @@
     <string name="phone_accounts_configure_account_settings" msgid="6622119715253196586">"配置帳戶設定"</string>
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"所有通話帳戶"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"選取可撥打電話的帳戶"</string>
+    <string name="voip_call_log_integration_label" msgid="2349275524959944815">"第三方應用程式"</string>
+    <string name="voip_call_log_integration_summary" msgid="3834075007862607039">"控管哪些應用程式能將通話整合至系統通話記錄。停用這個選項後，應用程式記錄就不會顯示在主要的電話應用程式中。"</string>
     <string name="wifi_calling" msgid="3650509202851355742">"Wi-Fi 通話"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"內建連線服務"</string>
     <string name="voicemail" msgid="7697769412804195032">"語音信箱"</string>

@@ -75,6 +75,8 @@
     <string name="phone_accounts_configure_account_settings" msgid="6622119715253196586">"Kontoeinstellungen konfigurieren"</string>
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"Alle Anrufkonten"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"Auswählen, welche Konten Anrufe tätigen können"</string>
+    <string name="voip_call_log_integration_label" msgid="2349275524959944815">"Drittanbieter-Apps"</string>
+    <string name="voip_call_log_integration_summary" msgid="3834075007862607039">"Hier kannst du festlegen, welche Apps ihre Anrufe in die Systemanrufliste einbinden können. Wenn du diese Option deaktivierst, werden die Protokolle der App nicht in der Haupt-App angezeigt."</string>
     <string name="wifi_calling" msgid="3650509202851355742">"WLAN-Telefonie"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"Integrierter Verbindungsdienst"</string>
     <string name="voicemail" msgid="7697769412804195032">"Mailbox"</string>

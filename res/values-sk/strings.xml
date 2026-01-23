@@ -75,6 +75,8 @@
     <string name="phone_accounts_configure_account_settings" msgid="6622119715253196586">"Konfigurácia nastavení účtu"</string>
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"Všetky telefónne účty"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"Výber účtov, pomocou ktorých bude možné telefonovať"</string>
+    <string name="voip_call_log_integration_label" msgid="2349275524959944815">"Aplikácie tretích strán"</string>
+    <string name="voip_call_log_integration_summary" msgid="3834075007862607039">"Môžete ovládať, ktoré aplikácie budú integrovať svoje hovory do systémového zoznamu hovorov. Ak túto možnosť vypnete, denníky aplikácie sa nebudú zobrazovať v hlavnej telefónnej aplikácii."</string>
     <string name="wifi_calling" msgid="3650509202851355742">"Volanie cez Wi‑Fi"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"Vstavaná služba pripojenia"</string>
     <string name="voicemail" msgid="7697769412804195032">"Hlasová schránka"</string>

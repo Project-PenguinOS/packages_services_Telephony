@@ -3,6 +3,7 @@ package com.android.phone.settings;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Icon;
@@ -43,6 +44,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class PhoneAccountSettingsFragment extends PreferenceFragment
@@ -73,6 +75,10 @@ public class PhoneAccountSettingsFragment extends PreferenceFragment
     private static final String BUTTON_PLAYING_TONE_KEY =
             "button_playing_tone_for_outgoing_call_accepted_key";
 
+    private static final String VOIP_CALL_LOG_INTEGRATION_CATEGORY_KEY =
+            "voip_call_log_integration_category_key";
+    private static final String VOIP_CALL_LOG_PREF_SUMMARY_KEY = "voip_call_log_pref_summary_key";
+
     /**
      * Value to start ordering of phone accounts relative to other preferences. By setting this
      * value on the phone account listings, we ensure that anything that is ordered before
@@ -92,6 +98,7 @@ public class PhoneAccountSettingsFragment extends PreferenceFragment
     private SubscriptionManager mSubscriptionManager;
 
     private PreferenceCategory mAccountList;
+    private PreferenceCategory mVoipCallLogIntegrationCategory;
 
     private AccountSelectionPreference mDefaultOutgoingAccount;
     private Preference mAllCallingAccounts;
@@ -184,6 +191,8 @@ public class PhoneAccountSettingsFragment extends PreferenceFragment
          */
         mAccountList = (PreferenceCategory) getPreferenceScreen().findPreference(
                 ACCOUNTS_LIST_CATEGORY_KEY);
+        mVoipCallLogIntegrationCategory = (PreferenceCategory) getPreferenceScreen().findPreference(
+                VOIP_CALL_LOG_INTEGRATION_CATEGORY_KEY);
         mDefaultOutgoingAccount = (AccountSelectionPreference)
                 getPreferenceScreen().findPreference(DEFAULT_OUTGOING_ACCOUNT_KEY);
         mAllCallingAccounts = getPreferenceScreen().findPreference(ALL_CALLING_ACCOUNTS_KEY);
@@ -201,6 +210,7 @@ public class PhoneAccountSettingsFragment extends PreferenceFragment
         mMakeAndReceiveCallsCategoryPresent = false;
 
         updateAccounts();
+        updateVoipCallLogIntegrationSettings();
         updateMakeCallsOptions();
 
         SubscriptionManager.from(getActivity()).addOnSubscriptionsChangedListener(
@@ -223,6 +233,16 @@ public class PhoneAccountSettingsFragment extends PreferenceFragment
      */
     @Override
     public boolean onPreferenceChange(Preference pref, Object objValue) {
+        // Handle the toggle for VoIP call log integration preferences.
+        if (pref instanceof SwitchPreference) {
+            String packageName = pref.getKey();
+            boolean isEnabled = (boolean) objValue;
+            // The key of the preference is the package name.
+            if (mVoipCallLogIntegrationCategory.findPreference(packageName) != null) {
+                mTelecomManager.setVoipCallLogIntegrationEnabled(packageName, isEnabled);
+                return true;
+            }
+        }
         return false;
     }
 
@@ -450,6 +470,54 @@ public class PhoneAccountSettingsFragment extends PreferenceFragment
         }
     }
 
+    /**
+     * Populates the "Third Party Apps" section with user preferences for VoIP call log integration.
+     */
+    private void updateVoipCallLogIntegrationSettings() {
+        if (mVoipCallLogIntegrationCategory == null) {
+            return;
+        }
+        // Clear the existing preferences.
+        mVoipCallLogIntegrationCategory.removeAll();
+        // Reload the preferences from the platform.
+        Map<String, Boolean> voipPackages =
+                mTelecomManager.getVoipCallLogIntegrationStatus();
+
+        // If there are no supported packages, hide the category.
+        if (voipPackages.isEmpty()) {
+            getPreferenceScreen().removePreference(mVoipCallLogIntegrationCategory);
+            return;
+        }
+
+        getPreferenceScreen().addPreference(mVoipCallLogIntegrationCategory);
+        // Set the summary text via a new Preference
+        Preference summaryPref = new Preference(getActivity());
+        summaryPref.setKey(VOIP_CALL_LOG_PREF_SUMMARY_KEY);
+        summaryPref.setSummary(R.string.voip_call_log_integration_summary);
+        summaryPref.setSelectable(false);
+        mVoipCallLogIntegrationCategory.addPreference(summaryPref);
+
+        PackageManager pm = getActivity().getPackageManager();
+        for (Map.Entry<String, Boolean> entry : voipPackages.entrySet()) {
+            String packageName = entry.getKey();
+            boolean isEnabled = entry.getValue();
+
+            try {
+                ApplicationInfo appInfo = pm.getApplicationInfo(packageName, 0);
+                SwitchPreference pref = new SwitchPreference(getActivity());
+                pref.setKey(packageName);
+                pref.setTitle(pm.getApplicationLabel(appInfo));
+                pref.setIcon(pm.getApplicationIcon(appInfo));
+                pref.setChecked(isEnabled);
+                pref.setOnPreferenceChangeListener(this);
+                mVoipCallLogIntegrationCategory.addPreference(pref);
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.w(LOG_TAG, "Could not find package for VoIP call log integration: "
+                        + packageName, e);
+            }
+        }
+    }
+
     private List<PhoneAccountHandle> getCallingAccounts(
             boolean includeSims, boolean includeDisabledAccounts) {
         PhoneAccountHandle emergencyAccountHandle = getEmergencyPhoneAccount();
@@ -556,14 +624,10 @@ public class PhoneAccountSettingsFragment extends PreferenceFragment
 // QTI_BEGIN: 2022-04-06: Telephony: Fix for duplicate Vibrating button in single sim
         if (mButtonVibratingForMoCallAccepted != null) {
 // QTI_END: 2022-04-06: Telephony: Fix for duplicate Vibrating button in single sim
-// QTI_BEGIN: 2025-11-20: Telephony: Revert "Enable vibration preference of call connected indicator"
             if (mTelephonyManager.isMultiSimEnabled() && getResources().getBoolean(
                     R.bool.show_call_connected_indicator_preference)) {
-// QTI_END: 2025-11-20: Telephony: Revert "Enable vibration preference of call connected indicator"
                 mButtonVibratingForMoCallAccepted.setChecked((mCallConnectedIndicator
-// QTI_BEGIN: 2025-11-20: Telephony: Revert "Enable vibration preference of call connected indicator"
                         & TelecomManager.CALL_CONNECTED_INDICATOR_VIBRATION) > 0);
-// QTI_END: 2025-11-20: Telephony: Revert "Enable vibration preference of call connected indicator"
                 mButtonVibratingForMoCallAccepted.setOnPreferenceClickListener(this);
 // QTI_BEGIN: 2022-04-06: Telephony: Fix for duplicate Vibrating button in single sim
                 mMakeAndReceiveCallsCategoryPresent = true;

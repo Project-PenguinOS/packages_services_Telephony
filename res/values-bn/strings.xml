@@ -75,6 +75,8 @@
     <string name="phone_accounts_configure_account_settings" msgid="6622119715253196586">"অ্যাকাউন্ট সেটিংস কনফিগার করুন"</string>
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"সমস্ত কলিং অ্যাকাউন্ট"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"কোন অ্যাকাউন্টগুলি কল করতে পারবে তা বেছে নিন"</string>
+    <string name="voip_call_log_integration_label" msgid="2349275524959944815">"থার্ড-পার্টি অ্যাপ"</string>
+    <string name="voip_call_log_integration_summary" msgid="3834075007862607039">"কোন কোন অ্যাপ সিস্টেম কল লগে তাদের কল ইন্টিগ্রেট করতে পারবে তা কন্ট্রোল করুন। এই বিকল্প বন্ধ করে দিলে, অ্যাপের লগ মূল ফোন অ্যাপে দেখানো হবে না।"</string>
     <string name="wifi_calling" msgid="3650509202851355742">"ওয়াই-ফাই কলিং"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"অন্তর্ভুক্ত সংযোগ পরিষেবা"</string>
     <string name="voicemail" msgid="7697769412804195032">"ভয়েসমেল"</string>

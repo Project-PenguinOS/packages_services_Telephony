@@ -75,6 +75,8 @@
     <string name="phone_accounts_configure_account_settings" msgid="6622119715253196586">"Configurar ajustes de cuenta"</string>
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"Todas las cuentas de llamadas"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"Selecciona las cuentas que pueden realizar llamadas"</string>
+    <string name="voip_call_log_integration_label" msgid="2349275524959944815">"Aplicaciones de terceros"</string>
+    <string name="voip_call_log_integration_summary" msgid="3834075007862607039">"Controla qué aplicaciones pueden integrar sus llamadas en el registro de llamadas del sistema. Si inhabilitas esta opción, los registros de la aplicación no se mostrarán en la aplicación principal del teléfono."</string>
     <string name="wifi_calling" msgid="3650509202851355742">"Llamadas Wi-Fi"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"Servicio de conexión integrado"</string>
     <string name="voicemail" msgid="7697769412804195032">"Buzón de voz"</string>

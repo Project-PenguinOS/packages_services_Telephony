@@ -1795,8 +1795,6 @@ abstract class TelephonyConnection extends Connection implements Holdable,
             extrasToRemove.add(QtiCallConstants.ORIENTATION_MODE_EXTRA_KEY);
 // QTI_END: 2020-05-29: Telephony: IMS: Remove ORIENTATION mode extra key in IMS call after SRVCC
 // QTI_BEGIN: 2021-06-06: Telephony: IMS: Remove CRS info extras in IMS call after SRVCC
-            extrasToRemove.add(QtiCallConstants.EXTRA_CRS_TYPE);
-            extrasToRemove.add(QtiCallConstants.EXTRA_ORIGINAL_CALL_TYPE);
             extrasToRemove.add(QtiCallConstants.EXTRA_IS_PREPARATORY);
 // QTI_END: 2021-06-06: Telephony: IMS: Remove CRS info extras in IMS call after SRVCC
 // QTI_BEGIN: 2023-02-07: Telephony: Remove the SRTP encryption info when SRVCC occur.
@@ -1808,13 +1806,10 @@ abstract class TelephonyConnection extends Connection implements Holdable,
 // QTI_BEGIN: 2023-01-16: Telephony: IMS: Remove vos support extra in IMS call after SRVCC
             extrasToRemove.add(QtiCallConstants.EXTRA_VIDEO_ONLINE_SERVICE_SUPPORTED);
 // QTI_END: 2023-01-16: Telephony: IMS: Remove vos support extra in IMS call after SRVCC
-// QTI_BEGIN: 2024-11-19: Telephony: IMS: Support visualized voice call and CRBT call
-            extrasToRemove.add(QtiCallConstants.EXTRA_IS_VISUALIZED_VOICE_CALL);
-            extrasToRemove.add(QtiCallConstants.EXTRA_IS_CRBT_CALL);
-// QTI_END: 2024-11-19: Telephony: IMS: Support visualized voice call and CRBT call
 // QTI_BEGIN: 2025-01-02: Telephony: IMS: Support glasses free 3d video
             extrasToRemove.add(QtiCallConstants.GLASSES_FREE_3D_VIDEO_TYPE_EXTRA_KEY);
 // QTI_END: 2025-01-02: Telephony: IMS: Support glasses free 3d video
+// QTI_BEGIN: 2025-12-04: Telephony: IMS: Support to report Warning header in SIP message
             extrasToRemove.add(QtiCallConstants.EXTRAS_CALL_PROGRESS_WFA_TYPE);
             extrasToRemove.add(QtiCallConstants.EXTRAS_CALL_PROGRESS_REJECT_Q850_CODE);
             extrasToRemove.add(QtiCallConstants.EXTRAS_CALL_PROGRESS_REJECT_Q850_TEXT);
@@ -1822,6 +1817,7 @@ abstract class TelephonyConnection extends Connection implements Holdable,
             extrasToRemove.add(QtiCallConstants.EXTRAS_CALL_PROGRESS_REJECT_SIP_TEXT);
             extrasToRemove.add(QtiCallConstants.EXTRAS_CALL_PROGRESS_WARNING_CODE);
             extrasToRemove.add(QtiCallConstants.EXTRAS_CALL_PROGRESS_WARNING_TEXT);
+// QTI_END: 2025-12-04: Telephony: IMS: Support to report Warning header in SIP message
         }
         if (originalConnection instanceof ImsPhoneConnection) {
             maybeConfigureDeviceToDeviceCommunication();
