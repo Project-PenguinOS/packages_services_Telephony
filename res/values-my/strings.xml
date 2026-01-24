@@ -64,7 +64,7 @@
     <string name="apn_settings" msgid="1978652203074756623">"APN ချိတ်ဆက်ရာလမ်းကြောင်းအမည်"</string>
     <string name="settings_label" msgid="9101778088412567956">"ကွန်ရက် ဆက်တင်များ"</string>
     <string name="phone_accounts" msgid="1216879437523774604">"ခေါ်ဆိုသော အကောင့်များ"</string>
-    <string name="phone_accounts_make_calls_with" msgid="16747814788918145">"ဖြင့် ခေါ်ဆိုမှုများပြုလုပ်မည်"</string>
+    <string name="phone_accounts_make_calls_with" msgid="16747814788918145">"ခေါ်ဆိုရန်သုံးမည့်အကောင့်"</string>
     <string name="phone_accounts_make_sip_calls_with" msgid="4691221006731847255">"ဖြင့် SIP ခေါ်ဆိုမှုများ ပြုလုပ်မည်"</string>
     <string name="phone_accounts_ask_every_time" msgid="6192347582666047168">"အရင်မေးပါ"</string>
     <string name="phone_accounts_default_account_label" msgid="5107598881335931101">"ကွန်ရက်မရှိပါ"</string>
@@ -82,7 +82,7 @@
     <string name="voicemail" msgid="7697769412804195032">"အသံမေးလ်"</string>
     <string name="voicemail_settings_with_label" msgid="4228431668214894138">"အသံမေးလ် ( <xliff:g id="SUBSCRIPTIONLABEL">%s</xliff:g> )"</string>
     <string name="voicemail_abbreviated" msgid="7746778673131551185">"အသံစာပို့နစ်အမှတ် -"</string>
-    <string name="make_and_receive_calls" msgid="4868913166494621109">"ဖုန်းခေါ်ဆိုမှုများ ပြုလုပ်ခြင်း &amp; လက်ခံခြင်း"</string>
+    <string name="make_and_receive_calls" msgid="4868913166494621109">"ဖုန်းခေါ်ဆိုခြင်းနှင့် လက်ခံခြင်း"</string>
     <string name="smart_forwarding_settings_menu" msgid="8850429887958938540">"အဆင့်မြင့် ထပ်ဆင့်ပို့ခြင်း"</string>
     <string name="smart_forwarding_settings_menu_summary" msgid="5096947726032885325">"နံပါတ်တစ်ခုကို ဆက်သွယ်၍ မရနိုင်ပါက ဖုန်းခေါ်ဆိုမှုများကို သင်၏ အခြားနံပါတ်သို့ အချိန်မရွေး ထပ်ဆင့်ပို့ပါ"</string>
     <string name="voicemail_notifications_preference_title" msgid="7829238858063382977">"အကြောင်းကြားချက်များ"</string>
