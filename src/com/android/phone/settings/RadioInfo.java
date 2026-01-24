@@ -691,10 +691,8 @@ public class RadioInfo extends AppCompatActivity {
         ArrayAdapter<String> mPreferredNetworkTypeAdapter =
                 new ArrayAdapter<String>(
                         this,
-// QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
                         android.R.layout.simple_spinner_item,
                         mUpdatedPrefNwLabels);
-// QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
         mPreferredNetworkTypeAdapter.setDropDownViewResource(
                 android.R.layout.simple_spinner_dropdown_item);
         mPreferredNetworkType.setAdapter(mPreferredNetworkTypeAdapter);
@@ -1140,9 +1138,7 @@ public class RadioInfo extends AppCompatActivity {
         mPreferredNetworkTypeResult =
              b.getInt(
                      "mPreferredNetworkTypeResult",
-// QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
                      mUpdatedPrefNwLabels.length - 1);
-// QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
 
         mPhoneId = b.getInt("mSelectedPhoneIndex", 0);
         mSubId = SubscriptionManager.getSubscriptionId(mPhoneId);
