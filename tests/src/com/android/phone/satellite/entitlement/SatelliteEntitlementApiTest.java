@@ -152,6 +152,8 @@ public class SatelliteEntitlementApiTest {
         ServiceEntitlementRequest.Builder requestBuilder = ServiceEntitlementRequest.builder();
         requestBuilder.setAcceptContentType(ServiceEntitlementRequest.ACCEPT_CONTENT_TYPE_JSON);
         requestBuilder.setAppName(TEST_APP_NAME);
+        requestBuilder.setEntitlementVersion(SatelliteEntitlementApi.ENTITLEMENT_VERSION);
+        requestBuilder.setConfigurationVersion(SatelliteEntitlementApi.CONFIGURATION_VERSION);
         ServiceEntitlementRequest expectedRequest = requestBuilder.build();
 
         mSatelliteEntitlementAPI.checkEntitlementStatus();

@@ -466,13 +466,6 @@ public class ImsConferenceController {
             return;
         }
 
-        if (!mFeatureFlags.reuseOriginalConnRemoteConfBehavior()) {
-            // Mark the foreground connection as MERGE_COMPLETE before it is disconnected as part of
-            // the IMS merge conference process:
-            connection.sendTelephonyConnectionEvent(
-                    android.telecom.Connection.EVENT_MERGE_COMPLETE, null);
-        }
-
         // Make a clone of the connection which will become the Ims conference host connection.
         // This is necessary since the Connection Service does not support removing a connection
         // from Telecom.  Instead we create a new instance and remove the old one from telecom.
@@ -525,7 +518,7 @@ public class ImsConferenceController {
         conference.addTelephonyConferenceListener(mConferenceListener);
         conference.updateConferenceParticipantsAfterCreation();
 
-        if (mFeatureFlags.reuseOriginalConnRemoteConfBehavior() && conference.isRemotelyHosted()) {
+        if (conference.isRemotelyHosted()) {
             if (phoneAccountHandle != null &&
                     mTelecomAccountRegistry.isUsingSimCallManager(phoneAccountHandle)) {
                 // Fi is the only carrier that uses a SIM call manager and they do not intend to
