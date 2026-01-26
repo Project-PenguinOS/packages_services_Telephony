@@ -660,14 +660,16 @@ public class PhoneInformationUtil {
         log("restoreMaxAllowedDataMode: restoring max allowed data mode by restoring the backed"
                 + " up satellite config parser: " + sBackedUpSatelliteConfigParser + " and config: "
                 + sBackedUpSatelliteConfig);
-        TelephonyConfigUpdateInstallReceiver.getInstance().overrideConfigParser(
-                sBackedUpSatelliteConfigParser);
         if (sBackedUpSatelliteConfigParser == null) {
             log("restoreMaxAllowedDataMode: mBackedUpSatelliteConfigParser is null, therefore"
                     + " don't have to override mBackedUpSatelliteConfig, as it would null" + " as"
                     + " well");
+            TelephonyConfigUpdateInstallReceiver.getInstance().clearOverriddenConfigParser(
+                    DOMAIN_SATELLITE);
             return;
         }
+        TelephonyConfigUpdateInstallReceiver.getInstance().overrideConfigParser(
+                sBackedUpSatelliteConfigParser);
         TelephonyConfigUpdateInstallReceiver.getInstance().getConfigParser(
                 DOMAIN_SATELLITE).overrideConfig(sBackedUpSatelliteConfig);
     }
