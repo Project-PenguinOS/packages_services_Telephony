@@ -156,7 +156,7 @@ public class GsmUmtsAdditionalCallOptions extends TimeConsumingPreferenceActivit
 // QTI_END: 2024-07-08: Telephony: IMS: Save/restore InstanceStates for CW and CLIR during language changed
                         } else {
 // QTI_BEGIN: 2024-07-08: Telephony: IMS: Save/restore InstanceStates for CW and CLIR during language changed
-                            if (isUtEnabledToDisableClir()) {
+                            if (QtiPhoneUtilsHelper.isUtEnabledToDisableClir(this, mPhone)) {
                                 ((CLIRListPreference) pref).setSummary(
                                         R.string.sum_default_caller_id);
                                 mCWButton.init(this, false, mPhone);
@@ -177,18 +177,6 @@ public class GsmUmtsAdditionalCallOptions extends TimeConsumingPreferenceActivit
         }
     }
 
-// QTI_BEGIN: 2018-07-06: Telephony: Skip reading the CLIR over Ut
-    private boolean isUtEnabledToDisableClir() {
-        boolean skipClir = false;
-        CarrierConfigManager configManager = (CarrierConfigManager)
-            getSystemService(Context.CARRIER_CONFIG_SERVICE);
-        PersistableBundle pb = configManager.getConfigForSubId(mPhone.getSubId());
-        if (pb != null) {
-            skipClir = pb.getBoolean("config_disable_clir_over_ut");
-        }
-        return mPhone.isUtEnabled() && skipClir;
-    }
-// QTI_END: 2018-07-06: Telephony: Skip reading the CLIR over Ut
     @Override
     public void onResume() {
         super.onResume();
@@ -290,7 +278,7 @@ public class GsmUmtsAdditionalCallOptions extends TimeConsumingPreferenceActivit
                 ((CallWaitingSwitchPreference) pref).init(this, false, mPhone);
             } else if (pref instanceof CLIRListPreference) {
 // QTI_BEGIN: 2019-02-18: Telephony: Avoid sending two CLIR requests while enter additional settings
-                if (isUtEnabledToDisableClir()) {
+                if (QtiPhoneUtilsHelper.isUtEnabledToDisableClir(this, mPhone)) {
                   ((CLIRListPreference) pref).setSummary(R.string.sum_default_caller_id);
 // QTI_END: 2019-02-18: Telephony: Avoid sending two CLIR requests while enter additional settings
 // QTI_BEGIN: 2019-05-06: Telephony: IMS: Query call waiting after CLIR grey out

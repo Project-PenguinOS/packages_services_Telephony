@@ -306,20 +306,6 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
         }
     }
 
-// QTI_BEGIN: 2024-11-14: Telephony: Fix APN type checking issue
-    private boolean hasDefaultAPNType(String apnType) {
-        if (TextUtils.isEmpty(apnType)) {
-            return false;
-        }
-        for (String str : apnType.split(",")) {
-            if (str.equals(PhoneConstants.APN_TYPE_DEFAULT)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-// QTI_END: 2024-11-14: Telephony: Fix APN type checking issue
 // QTI_BEGIN: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
     /**
      * Receiver for intent broadcasts the Phone app cares about.
@@ -335,7 +321,7 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
                 if (PhoneConstants.DataState.DISCONNECTED.name().equals(state) &&
 // QTI_END: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
 // QTI_BEGIN: 2024-11-14: Telephony: Fix APN type checking issue
-                            hasDefaultAPNType(apnType)) {
+                            QtiPhoneUtilsHelper.hasDefaultApnType(apnType)) {
 // QTI_END: 2024-11-14: Telephony: Fix APN type checking issue
 // QTI_BEGIN: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
                     Log.d(LOG_TAG, "default data is disconnected.");
@@ -347,7 +333,8 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
                 if (mPhone != null) {
                     for (CallForwardEditPreference pref : mPreferences) {
                         if (pref != null) {
-                            pref.setEnabled(PhoneUtils.isSuppServiceAllowedInAirplaneMode(mPhone));
+                            pref.setEnabled(
+                                QtiPhoneUtilsHelper.isSuppServiceAllowedInAirplaneMode(mPhone));
                         }
                     }
                 }
