@@ -13,6 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/*
+ * Changes from Qualcomm Technologies, Inc. are provided under the following license:
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+ * SPDX-License-Identifier: BSD-3-Clause-Clear
+ */
 package com.android.phone.settings.hiddenmenu;
 
 import android.app.FragmentTransaction;
@@ -131,7 +137,7 @@ public class PhoneInformationV2 extends AppCompatActivity
         if (selectedItemId == R.id.nav_item_one_container) {
             selectedFragment = new PhoneInformationV2FragmentDeviceDetails();
         } else if (selectedItemId == R.id.nav_item_two_container) {
-            selectedFragment = new PhoneInformationV2FragmentDataNetwork();
+            selectedFragment = new QtiPhoneInformationV2FragmentDataNetwork();
         } else if (selectedItemId == R.id.nav_item_three_container) {
             selectedFragment = new PhoneInformationV2FragmentSatellite();
         } else if (selectedItemId == R.id.nav_item_four_container) {
