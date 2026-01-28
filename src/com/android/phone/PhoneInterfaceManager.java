@@ -160,6 +160,7 @@ import android.telephony.ims.aidl.IRcsConfigCallback;
 import android.telephony.ims.feature.ImsFeature;
 import android.telephony.ims.stub.ImsConfigImplBase;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
+import android.telephony.satellite.EnableRequestAttributes;
 import android.telephony.satellite.INtnSignalStrengthCallback;
 import android.telephony.satellite.ISatelliteCapabilitiesCallback;
 import android.telephony.satellite.ISatelliteCommunicationAccessStateCallback;
@@ -176,6 +177,7 @@ import android.telephony.satellite.SatelliteCapabilities;
 import android.telephony.satellite.SatelliteDatagram;
 import android.telephony.satellite.SatelliteDatagramCallback;
 import android.telephony.satellite.SatelliteManager;
+import android.telephony.satellite.SatelliteManager.SatelliteEnablementRequestReason;
 import android.telephony.satellite.SatelliteModemStateCallback;
 import android.telephony.satellite.SatelliteProvisionStateCallback;
 import android.telephony.satellite.SatelliteSessionStats;
@@ -12767,6 +12769,30 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     }
 
     /**
+     * Request to enable or disable the satellite.
+     *
+     * @param subId The subscription ID of the satellite service.
+     * @param attributes The attributes of the enable request.
+     * @param callback The callback to get the result of the request.
+     *
+     * @throws SecurityException if the caller doesn't have the required permission.
+     */
+    @Override
+    public void requestEnableSatellite(int subId,
+            @NonNull EnableRequestAttributes attributes,
+            @NonNull IIntegerConsumer callback) {
+        enforceSatelliteCommunicationPermission("requestSatelliteEnabled");
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            mSatelliteController.requestSatelliteEnabled(
+                    attributes.isEnabled(), attributes.isDemoMode(), attributes.isEmergencyMode(),
+                    callback);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    /**
      * Request to get whether the satellite modem is enabled.
      *
      * @param result The result receiver that returns whether the satellite modem is enabled
@@ -12779,6 +12805,31 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         enforceSatelliteCommunicationPermission("requestIsSatelliteEnabled");
         final long identity = Binder.clearCallingIdentity();
         try {
+            mSatelliteController.requestIsSatelliteEnabled(result);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    /**
+     * Request to get whether the satellite is enabled for the given
+     * {@link EnableRequestAttributes}.
+     *
+     * @param subId The subscription ID of the satellite service.
+     * @param connectType The type of satellite connection.
+     * @param result The result receiver that returns details of the enablement response.
+     *
+     * @throws SecurityException if the caller doesn't have the required permission.
+     */
+    @Override
+    public void requestEnableSatelliteStatus(int subId,
+            @CarrierConfigManager.CARRIER_ROAMING_NTN_CONNECT_TYPE int connectType,
+            @NonNull ResultReceiver result) {
+        enforceSatelliteCommunicationPermission("requestEnableSatelliteStatus");
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            Log.d(LOG_TAG, "requestEnableSatelliteStatus: subId=" + subId
+                    + ", connectType=" + connectType);
             mSatelliteController.requestIsSatelliteEnabled(result);
         } finally {
             Binder.restoreCallingIdentity(identity);
