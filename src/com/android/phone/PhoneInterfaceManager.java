@@ -160,6 +160,7 @@ import android.telephony.ims.aidl.IRcsConfigCallback;
 import android.telephony.ims.feature.ImsFeature;
 import android.telephony.ims.stub.ImsConfigImplBase;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
+import android.telephony.satellite.EnableRequestAttributes;
 import android.telephony.satellite.INtnSignalStrengthCallback;
 import android.telephony.satellite.ISatelliteCapabilitiesCallback;
 import android.telephony.satellite.ISatelliteCommunicationAccessStateCallback;
@@ -176,6 +177,7 @@ import android.telephony.satellite.SatelliteCapabilities;
 import android.telephony.satellite.SatelliteDatagram;
 import android.telephony.satellite.SatelliteDatagramCallback;
 import android.telephony.satellite.SatelliteManager;
+import android.telephony.satellite.SatelliteManager.SatelliteEnablementRequestReason;
 import android.telephony.satellite.SatelliteModemStateCallback;
 import android.telephony.satellite.SatelliteProvisionStateCallback;
 import android.telephony.satellite.SatelliteSessionStats;
@@ -514,6 +516,16 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     @ChangeId
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     public static final long ICC_CLOSE_CHANNEL_EXCEPTION_ON_FAILURE = 208739934L;
+
+    /**
+     * Enable expressive exceptions on calls to rebootModem() for clients targeting
+     * Android 26Q2 and later.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.CINNAMON_BUN)
+    public static final long REBOOT_MODEM_THROW_EXCEPTIONS = 476225321L;
 
     /**
      * A request object to use for transmitting data to an ICC.
@@ -1718,7 +1730,27 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
                     defaultPhone.rebootModem(onCompleted);
                     break;
                 case EVENT_CMD_MODEM_REBOOT_DONE:
-                    handleNullReturnEvent(msg, "rebootModem");
+                    ar = (AsyncResult) msg.obj;
+                    request = (MainThreadRequest) ar.userObj;
+
+                    request.result = switch (ar.exception) {
+                        case null -> new Success() {};
+                        case CommandException c -> {
+                            yield switch (c.getCommandError()) {
+                                    case CommandException.Error.REQUEST_NOT_SUPPORTED -> {
+                                        yield new UnsupportedOperationException(
+                                                "Reboot Radio not Supported");
+                                    }
+                                    case CommandException.Error.RADIO_NOT_AVAILABLE -> {
+                                        yield new IllegalStateException(
+                                                "Modem currently unavailable");
+                                    }
+                                    default -> new RuntimeException(c);
+                                };
+                        }
+                        default -> new RuntimeException(ar.exception);
+                    };
+                    notifyRequester(request);
                     break;
                 case CMD_REQUEST_ENABLE_MODEM: {
                     request = (MainThreadRequest) msg.obj;
@@ -2196,6 +2228,11 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     }
 
     /**
+     * Marker Interface to allow sendRequest() to return Success or Throwable.
+     */
+    private interface Success {}
+
+    /**
      * Posts the specified command to be executed on the main thread,
      * waits for the request to complete, and returns the result.
      * @see #sendRequestAsync
@@ -2444,8 +2481,8 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
 
     private void sendEraseModemConfig() {
         int cmd = CMD_MODEM_REBOOT;
-        Boolean success = (Boolean) sendRequest(cmd, null);
-        if (DBG) log("eraseModemConfig:" + ' ' + (success ? "ok" : "fail"));
+        Throwable error = (Throwable) sendRequest(cmd, null);
+        if (DBG) log("eraseModemConfig:" + ' ' + (error == null ? "ok" : "fail"));
     }
 
     private void sendEraseDataInSharedPreferences() {
@@ -6006,23 +6043,46 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     @Override
     public boolean rebootModem(int slotIndex) {
         Phone phone = PhoneFactory.getPhone(slotIndex);
-        if (phone != null) {
-            TelephonyPermissions.enforceCallingOrSelfModifyPermissionOrCarrierPrivilege(
-                    mApp, phone.getSubId(), "rebootModem");
-
-            enforceTelephonyFeatureWithException(getCurrentPackageName(),
-                    PackageManager.FEATURE_TELEPHONY_RADIO_ACCESS, "rebootModem");
-
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                Boolean success = (Boolean) sendRequest(CMD_MODEM_REBOOT, null);
-                if (DBG) log("rebootModem:" + ' ' + (success ? "ok" : "fail"));
-                return success;
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
+        if (phone == null) {
+            throw new IllegalArgumentException("No modem at slotIndex=" + slotIndex);
         }
-        return false;
+
+        TelephonyPermissions.enforceCallingOrSelfModifyPermissionOrCarrierPrivilege(
+                mApp, phone.getSubId(), "rebootModem");
+
+        enforceTelephonyFeatureWithException(getCurrentPackageName(),
+                PackageManager.FEATURE_TELEPHONY_RADIO_ACCESS, "rebootModem");
+
+        final boolean shouldThrow = CompatChanges.isChangeEnabled(
+                REBOOT_MODEM_THROW_EXCEPTIONS,
+                Binder.getCallingUid());
+
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            Object result = (Object) sendRequest(CMD_MODEM_REBOOT, null);
+            if (DBG) log("rebootModem:" + ' ' + (result == null ? "ok" : "fail"));
+            return switch (result) {
+                // success
+                case Success s -> {
+                    yield true;
+                }
+                // already translated, such as UnsupportedOperationException
+                case RuntimeException re -> {
+                    if (shouldThrow) throw re;
+                    yield false;
+                }
+                // untranslated, can't be sent over binder
+                default -> {
+                    Rlog.e(LOG_TAG, "Unsupported return from sendRequest()" + result);
+                    if (shouldThrow) {
+                        throw new RuntimeException(result != null ? result.toString() : "");
+                    }
+                    yield false;
+                }
+            };
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     /**
@@ -12727,6 +12787,30 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     }
 
     /**
+     * Request to enable or disable the satellite.
+     *
+     * @param subId The subscription ID of the satellite service.
+     * @param attributes The attributes of the enable request.
+     * @param callback The callback to get the result of the request.
+     *
+     * @throws SecurityException if the caller doesn't have the required permission.
+     */
+    @Override
+    public void requestEnableSatellite(int subId,
+            @NonNull EnableRequestAttributes attributes,
+            @NonNull IIntegerConsumer callback) {
+        enforceSatelliteCommunicationPermission("requestSatelliteEnabled");
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            mSatelliteController.requestSatelliteEnabled(
+                    attributes.isEnabled(), attributes.isDemoMode(), attributes.isEmergencyMode(),
+                    callback);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    /**
      * Request to get whether the satellite modem is enabled.
      *
      * @param result The result receiver that returns whether the satellite modem is enabled
@@ -12739,6 +12823,31 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         enforceSatelliteCommunicationPermission("requestIsSatelliteEnabled");
         final long identity = Binder.clearCallingIdentity();
         try {
+            mSatelliteController.requestIsSatelliteEnabled(result);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    /**
+     * Request to get whether the satellite is enabled for the given
+     * {@link EnableRequestAttributes}.
+     *
+     * @param subId The subscription ID of the satellite service.
+     * @param connectType The type of satellite connection.
+     * @param result The result receiver that returns details of the enablement response.
+     *
+     * @throws SecurityException if the caller doesn't have the required permission.
+     */
+    @Override
+    public void requestEnableSatelliteStatus(int subId,
+            @CarrierConfigManager.CARRIER_ROAMING_NTN_CONNECT_TYPE int connectType,
+            @NonNull ResultReceiver result) {
+        enforceSatelliteCommunicationPermission("requestEnableSatelliteStatus");
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            Log.d(LOG_TAG, "requestEnableSatelliteStatus: subId=" + subId
+                    + ", connectType=" + connectType);
             mSatelliteController.requestIsSatelliteEnabled(result);
         } finally {
             Binder.restoreCallingIdentity(identity);

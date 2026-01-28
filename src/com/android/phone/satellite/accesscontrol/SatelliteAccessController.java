@@ -2945,8 +2945,16 @@ public class SatelliteAccessController extends Handler {
                 Integer::intValue).toArray());
 
         List<SystemSelectionSpecifier> selectionSpecifiers = new ArrayList<>();
-        selectionSpecifiers.add(new SystemSelectionSpecifier(mccmnc, bands, earfcns,
+        if (mFeatureFlags.systemSelectionSpecifierEnhancement()) {
+            List<String> mccMncs = mSatelliteController.getSatellitePlmnsForCarrier(subId);
+            mccmnc = mccMncs.isEmpty() ? "" : mccMncs.get(0);
+            selectionSpecifiers.add(new SystemSelectionSpecifier(mccmnc, bands, earfcns,
+                satelliteInfos.toArray(new SatelliteInfo[0]), tagIds, subInfo.getIccId(),
+                mccMncs.toArray(new String[0])));
+        } else {
+            selectionSpecifiers.add(new SystemSelectionSpecifier(mccmnc, bands, earfcns,
                 satelliteInfos.toArray(new SatelliteInfo[0]), tagIds));
+        }
         mSatelliteController.updateSystemSelectionChannels(selectionSpecifiers,
                 mInternalUpdateSystemSelectionChannelsResultReceiver);
     }
