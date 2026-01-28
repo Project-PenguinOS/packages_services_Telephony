@@ -64,7 +64,7 @@
     <string name="apn_settings" msgid="1978652203074756623">"Pääsupunktide nimed"</string>
     <string name="settings_label" msgid="9101778088412567956">"Võrguseaded"</string>
     <string name="phone_accounts" msgid="1216879437523774604">"Kõnekontod"</string>
-    <string name="phone_accounts_make_calls_with" msgid="16747814788918145">"Kõnede tegemine kontoga"</string>
+    <string name="phone_accounts_make_calls_with" msgid="16747814788918145">"Kõnede tegemise konto"</string>
     <string name="phone_accounts_make_sip_calls_with" msgid="4691221006731847255">"SIP-kõnede tegemine kontoga"</string>
     <string name="phone_accounts_ask_every_time" msgid="6192347582666047168">"Küsi esmalt"</string>
     <string name="phone_accounts_default_account_label" msgid="5107598881335931101">"Ühtegi võrku pole saadaval"</string>
