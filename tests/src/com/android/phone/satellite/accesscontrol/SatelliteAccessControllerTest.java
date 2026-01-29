@@ -104,6 +104,7 @@ import android.os.ResultReceiver;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.telecom.TelecomManager;
+import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.telephony.satellite.EarfcnRange;
@@ -113,6 +114,7 @@ import android.telephony.satellite.SatelliteInfo;
 import android.telephony.satellite.SatelliteManager;
 import android.telephony.satellite.SatellitePosition;
 import android.telephony.satellite.SystemSelectionSpecifier;
+import android.text.TextUtils;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.Log;
@@ -258,6 +260,10 @@ public class SatelliteAccessControllerTest extends TelephonyTestBase {
     private CarrierRoamingSatelliteControllerStats mCarrierRoamingSatelliteControllerStats;
     @Mock
     private DataNetworkController mMockDataNetworkController;
+    @Mock
+    private SubscriptionManagerService mMockSubscriptionManagerService;
+    @Mock
+    private SubscriptionInfo mMockSubscriptionInfo;
 
     private SatelliteInfo mSatelliteInfo;
 
@@ -380,7 +386,9 @@ public class SatelliteAccessControllerTest extends TelephonyTestBase {
         replaceInstance(SatelliteModemInterface.class, "sInstance", null,
                 mMockSatelliteModemInterface);
         replaceInstance(SubscriptionManagerService.class, "sInstance", null,
-                mock(SubscriptionManagerService.class));
+                mMockSubscriptionManagerService);
+        when(mMockSubscriptionManagerService.getSubscriptionInfo(anyInt()))
+                .thenReturn(mMockSubscriptionInfo);
         replaceInstance(TelephonyCountryDetector.class, "sInstance", null,
                 mMockCountryDetector);
         replaceInstance(ControllerMetricsStats.class, "sInstance", null,
@@ -2560,6 +2568,9 @@ public class SatelliteAccessControllerTest extends TelephonyTestBase {
 
     @Test
     public void testUpdateSystemSelectionChannels() {
+        when(mMockFeatureFlags.systemSelectionSpecifierEnhancement()).thenReturn(false);
+        when(mMockSubscriptionInfo.getMccString()).thenReturn("310");
+        when(mMockSubscriptionInfo.getMncString()).thenReturn("260");
         // Set non-emergency case
         setUpResponseForRequestIsSatelliteSupported(true, SATELLITE_RESULT_SUCCESS);
         setUpResponseForRequestIsSatelliteProvisioned(true, SATELLITE_RESULT_SUCCESS);
@@ -2664,6 +2675,9 @@ public class SatelliteAccessControllerTest extends TelephonyTestBase {
         SystemSelectionSpecifier systemSelectionSpecifier = capturedList.getFirst();
 
         // Verify the fields value of given systemSelectionSpecifier matched with expected.
+        assertEquals("310260", systemSelectionSpecifier.getMccMnc());
+        assertTrue(TextUtils.isEmpty(systemSelectionSpecifier.getIccId()));
+        assertArrayEquals(new String[0], systemSelectionSpecifier.getMccMncs());
         int[] expectedBandsArray = IntStream.concat(
                 IntStream.concat(Arrays.stream(bands1), Arrays.stream(bands2)),
                 Arrays.stream(bands3)).toArray();
@@ -2716,7 +2730,89 @@ public class SatelliteAccessControllerTest extends TelephonyTestBase {
     }
 
     @Test
+    public void testUpdateSystemSelectionChannelsWithSystemSelectionSpecifierEnhancement() {
+        when(mMockFeatureFlags.systemSelectionSpecifierEnhancement()).thenReturn(true);
+        when(mMockSubscriptionInfo.getMccString()).thenReturn("312");
+        when(mMockSubscriptionInfo.getMncString()).thenReturn("213");
+        when(mMockSubscriptionInfo.getIccId()).thenReturn("12345678901234567890");
+        when(mMockSatelliteController.getSatellitePlmnsForCarrier(anyInt()))
+                .thenReturn(Arrays.asList("310260", "310410"));
+
+        // Set non-emergency case
+        setUpResponseForRequestIsSatelliteSupported(true, SATELLITE_RESULT_SUCCESS);
+        setUpResponseForRequestIsSatelliteProvisioned(true, SATELLITE_RESULT_SUCCESS);
+        when(mMockCountryDetector.getCurrentNetworkCountryIso()).thenReturn(EMPTY_STRING_LIST);
+
+        int satelliteRegionalConfigId = DEFAULT_REGIONAL_SATELLITE_CONFIG_ID;
+        mSatelliteAccessControllerUT.setRegionalConfigId(satelliteRegionalConfigId);
+
+        // Return success when SatelliteController.updateSystemSelectionChannels was invoked
+        setupResponseForUpdateSystemSelectionChannels(SATELLITE_RESULT_SUCCESS);
+
+        // Invoke updateSystemSelectionChannels when there is corresponding satellite access config.
+        // Create satellite info 1
+        String seed1 = "test-seed-satellite1";
+        UUID uuid1 = UUID.nameUUIDFromBytes(seed1.getBytes());
+        SatellitePosition satellitePosition1 = new SatellitePosition(0, 35876);
+        int[] bands1 = {200, 201, 202};
+        EarfcnRange earfcnRange1 = new EarfcnRange(300, 301);
+        EarfcnRange earfcnRange2 = new EarfcnRange(310, 311);
+        List<EarfcnRange> earfcnRangeList1 = new ArrayList<>(
+                Arrays.asList(earfcnRange1, earfcnRange2));
+        SatelliteInfo satelliteInfo1 = new SatelliteInfo(uuid1, satellitePosition1, Arrays.stream(
+                bands1).boxed().collect(Collectors.toList()), earfcnRangeList1);
+
+        int[] tagIds = {1, 2, 3};
+        SatelliteAccessConfiguration satelliteAccessConfiguration =
+                new SatelliteAccessConfiguration(new ArrayList<>(
+                        Arrays.asList(satelliteInfo1)),
+                        Arrays.stream(tagIds).boxed().collect(Collectors.toList()));
+
+        // Add satellite access configuration to map
+        mSatelliteAccessControllerUT.setSatelliteAccessConfigMap(satelliteRegionalConfigId,
+                satelliteAccessConfiguration);
+
+        // Invoke updateSystemSelectionChannel
+        mSatelliteAccessControllerUT.updateSystemSelectionChannels(
+                mSystemSelectionChannelUpdatedReceiver);
+        mTestableLooper.processAllMessages();
+        assertTrue(waitForRequestUpdateSystemSelectionChannelResult(
+                mSystemSelectionChannelUpdatedSemaphore, 1));
+        assertEquals(SATELLITE_RESULT_SUCCESS,
+                mQueriedSystemSelectionChannelUpdatedResultCode);
+        ArgumentCaptor<List<SystemSelectionSpecifier>> systemSelectionSpecifierListCaptor =
+                ArgumentCaptor.forClass(List.class);
+        verify(mMockSatelliteController, times(1)).updateSystemSelectionChannels(
+                systemSelectionSpecifierListCaptor.capture(), any(ResultReceiver.class));
+        List<SystemSelectionSpecifier> capturedList = systemSelectionSpecifierListCaptor.getValue();
+        SystemSelectionSpecifier systemSelectionSpecifier = capturedList.getFirst();
+
+        // Verify the fields value of given systemSelectionSpecifier matched with expected.
+        assertEquals("310260", systemSelectionSpecifier.getMccMnc());
+        assertEquals("12345678901234567890", systemSelectionSpecifier.getIccId());
+        assertArrayEquals(new String[]{"310260", "310410"}, systemSelectionSpecifier.getMccMncs());
+        int[] expectedBandsArray = Arrays.stream(bands1).toArray();
+        int[] actualBandsArray = systemSelectionSpecifier.getBands();
+        assertArrayEquals(expectedBandsArray, actualBandsArray);
+
+        int[] expectedEarfcnsArray = {300, 301, 310, 311};
+        int[] actualEarfcnsArray = systemSelectionSpecifier.getEarfcns();
+        assertArrayEquals(expectedEarfcnsArray, actualEarfcnsArray);
+
+        SatelliteInfo[] expectedSatelliteInfos = {satelliteInfo1};
+        assertArrayEquals(expectedSatelliteInfos,
+                systemSelectionSpecifier.getSatelliteInfos().toArray(new SatelliteInfo[0]));
+
+        int[] actualTagIdArray = systemSelectionSpecifier.getTagIds();
+        assertArrayEquals(tagIds, actualTagIdArray);
+
+        mSatelliteAccessControllerUT.resetSatelliteAccessConfigMap();
+    }
+
+    @Test
     public void testUpdateSystemSelectionChannels_HandleInvalidInput() {
+        when(mMockSubscriptionInfo.getMccString()).thenReturn("310");
+        when(mMockSubscriptionInfo.getMncString()).thenReturn("260");
         // Set non-emergency case
         setUpResponseForRequestIsSatelliteSupported(true, SATELLITE_RESULT_SUCCESS);
         setUpResponseForRequestIsSatelliteProvisioned(true, SATELLITE_RESULT_SUCCESS);

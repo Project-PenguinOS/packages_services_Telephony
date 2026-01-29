@@ -155,8 +155,8 @@ public class GsmUmtsAdditionalCallOptions extends TimeConsumingPreferenceActivit
                             ((CLIRListPreference) pref).handleGetCLIRResult(clirArray);
 // QTI_END: 2024-07-08: Telephony: IMS: Save/restore InstanceStates for CW and CLIR during language changed
                         } else {
-// QTI_BEGIN: 2024-07-08: Telephony: IMS: Save/restore InstanceStates for CW and CLIR during language changed
                             if (QtiPhoneUtilsHelper.isUtEnabledToDisableClir(this, mPhone)) {
+// QTI_BEGIN: 2024-07-08: Telephony: IMS: Save/restore InstanceStates for CW and CLIR during language changed
                                 ((CLIRListPreference) pref).setSummary(
                                         R.string.sum_default_caller_id);
                                 mCWButton.init(this, false, mPhone);
@@ -277,8 +277,8 @@ public class GsmUmtsAdditionalCallOptions extends TimeConsumingPreferenceActivit
             if (pref instanceof CallWaitingSwitchPreference) {
                 ((CallWaitingSwitchPreference) pref).init(this, false, mPhone);
             } else if (pref instanceof CLIRListPreference) {
-// QTI_BEGIN: 2019-02-18: Telephony: Avoid sending two CLIR requests while enter additional settings
                 if (QtiPhoneUtilsHelper.isUtEnabledToDisableClir(this, mPhone)) {
+// QTI_BEGIN: 2019-02-18: Telephony: Avoid sending two CLIR requests while enter additional settings
                   ((CLIRListPreference) pref).setSummary(R.string.sum_default_caller_id);
 // QTI_END: 2019-02-18: Telephony: Avoid sending two CLIR requests while enter additional settings
 // QTI_BEGIN: 2019-05-06: Telephony: IMS: Query call waiting after CLIR grey out

@@ -2382,8 +2382,8 @@ public class TelecomAccountRegistry {
         boolean isApmSimNotPwrDown = false;
         try {
 // QTI_END: 2020-07-13: Telephony: MSIM:Set available SIM as default outgoing phoneaccount.
-// QTI_BEGIN: 2021-05-04: Telephony: Remove provision check
             int propVal = QtiPhoneUtilsHelper.getExtTelManager().
+// QTI_BEGIN: 2021-05-04: Telephony: Remove provision check
                     getPropertyValueInt(APM_SIM_NOT_PWDN_PROPERTY, 0);
 // QTI_END: 2021-05-04: Telephony: Remove provision check
 // QTI_BEGIN: 2020-07-13: Telephony: MSIM:Set available SIM as default outgoing phoneaccount.
