@@ -54,8 +54,8 @@ import android.telecom.PhoneAccountHandle;
 // QTI_BEGIN: 2021-11-03: Telephony: Add SIM info to USSD sessions on UI
 import android.telecom.TelecomManager;
 // QTI_END: 2021-11-03: Telephony: Add SIM info to USSD sessions on UI
-// QTI_BEGIN: 2023-01-18: Telephony: IMS : Move RTT downgrade and upgrade logic completely to AOSP.
 import android.telephony.CarrierConfigManager;
+// QTI_BEGIN: 2023-01-18: Telephony: IMS : Move RTT downgrade and upgrade logic completely to AOSP.
 import android.telephony.SubscriptionInfo;
 // QTI_END: 2023-01-18: Telephony: IMS : Move RTT downgrade and upgrade logic completely to AOSP.
 import android.telephony.SubscriptionManager;
@@ -202,10 +202,12 @@ public class PhoneUtils {
 
             // create the indeterminate progress dialog and display it.
             ProgressDialog pd = new ProgressDialog(context, THEME);
-// QTI_BEGIN: 2021-11-03: Telephony: Add SIM info to USSD sessions on UI
             if (QtiPhoneUtilsHelper.isMultiSimMode() && phone != null) {
+// QTI_BEGIN: 2021-11-03: Telephony: Add SIM info to USSD sessions on UI
                 pd.setTitle(context.getText(R.string.ussdinitiated_title));
+// QTI_END: 2021-11-03: Telephony: Add SIM info to USSD sessions on UI
                 PhoneAccount account = QtiPhoneUtilsHelper.getPhoneAccount(phone.getSubId());
+// QTI_BEGIN: 2021-11-03: Telephony: Add SIM info to USSD sessions on UI
                 if (account != null && account.getIcon() != null) {
                     pd.setIcon(account.getIcon().loadDrawable(context));
                 }
@@ -407,9 +409,9 @@ public class PhoneUtils {
                         .setCancelable(false)
                         .create();
 
-// QTI_BEGIN: 2021-11-03: Telephony: Add SIM info to USSD sessions on UI
                 if (QtiPhoneUtilsHelper.isMultiSimMode() && phone != null) {
                     PhoneAccount account = QtiPhoneUtilsHelper.getPhoneAccount(phone.getSubId());
+// QTI_BEGIN: 2021-11-03: Telephony: Add SIM info to USSD sessions on UI
                     if (account != null && account.getIcon() != null) {
                         newDialog.setIcon(account.getIcon().loadDrawable(context));
                     }
@@ -560,9 +562,9 @@ public class PhoneUtils {
             ussdDialog
                     .setTitle(app.getResources().getString(R.string.default_carrier_mmi_msg_title));
         }
-// QTI_BEGIN: 2021-11-03: Telephony: Add SIM info to USSD sessions on UI
         if (QtiPhoneUtilsHelper.isMultiSimMode() && phone != null) {
             PhoneAccount account = QtiPhoneUtilsHelper.getPhoneAccount(phone.getSubId());
+// QTI_BEGIN: 2021-11-03: Telephony: Add SIM info to USSD sessions on UI
             if (account != null && account.getIcon() != null) {
                 ussdDialog.setIcon(account.getIcon().loadDrawable(context));
             }
@@ -836,4 +838,5 @@ public class PhoneUtils {
 
         return primayStackPhoneId;
     }
+// QTI_END: 2018-06-13: Telephony: MSIM: Emergency account handle support
 }

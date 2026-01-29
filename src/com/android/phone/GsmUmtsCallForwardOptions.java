@@ -320,9 +320,7 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
                 Log.d(LOG_TAG, "apntype is: " + apnType + " state is: " + state);
                 if (PhoneConstants.DataState.DISCONNECTED.name().equals(state) &&
 // QTI_END: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
-// QTI_BEGIN: 2024-11-14: Telephony: Fix APN type checking issue
                             QtiPhoneUtilsHelper.hasDefaultApnType(apnType)) {
-// QTI_END: 2024-11-14: Telephony: Fix APN type checking issue
 // QTI_BEGIN: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
                     Log.d(LOG_TAG, "default data is disconnected.");
                     checkDataStatus();
@@ -333,8 +331,10 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
                 if (mPhone != null) {
                     for (CallForwardEditPreference pref : mPreferences) {
                         if (pref != null) {
+// QTI_END: 2024-06-13: Telephony: Fix call forwarding alert issue in airplane mode
                             pref.setEnabled(
                                 QtiPhoneUtilsHelper.isSuppServiceAllowedInAirplaneMode(mPhone));
+// QTI_BEGIN: 2024-06-13: Telephony: Fix call forwarding alert issue in airplane mode
                         }
                     }
                 }

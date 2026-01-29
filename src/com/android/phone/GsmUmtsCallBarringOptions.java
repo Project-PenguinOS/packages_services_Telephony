@@ -497,14 +497,10 @@ public class GsmUmtsCallBarringOptions extends TimeConsumingPreferenceActivity
         if (imsPhone != null && imsPhone.isUtEnabled()) {
 // QTI_END: 2019-04-26: Telephony: IMS: Disable password if ims UT is enabled.
             useDisableaAll = false;
-// QTI_BEGIN: 2020-04-01: Telephony: IMS: Grey out change password option for Call Barring
             disableOutCallBarringOverIms = QtiPhoneUtilsHelper.isDisableOutCallBarringOverIms(
                                             mPhone);
-// QTI_END: 2020-04-01: Telephony: IMS: Grey out change password option for Call Barring
-// QTI_BEGIN: 2022-12-13: Telephony: IMS: Display call barring password UI conditionally
             mConfigDisableChangePwOverIms = QtiPhoneUtilsHelper.isDisableChangePasswordOverIms(
                                             mPhone);
-// QTI_END: 2022-12-13: Telephony: IMS: Display call barring password UI conditionally
         }
 
         // Find out if the sim card is ready.
@@ -639,9 +635,9 @@ public class GsmUmtsCallBarringOptions extends TimeConsumingPreferenceActivity
                     Log.d(LOG_TAG, "onResume: start to init ");
                 }
                 resetPwChangeState();
-// QTI_BEGIN: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
                 if (QtiPhoneUtilsHelper.isDisableOutCallBarringOverIms(mPhone) &&
                        mPhone.isUtEnabled()) {
+// QTI_BEGIN: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
                     //if disable outgoing call barring over ims, ignore all outgoing query
                     // and start query from incoming barring
                     mInitIndex = 3;
@@ -722,10 +718,9 @@ public class GsmUmtsCallBarringOptions extends TimeConsumingPreferenceActivity
             mProgressDialog = dialog;
         }
     }
-
-// QTI_END: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
-
 // QTI_BEGIN: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
+
+
     /**
      * Receiver for intent broadcasts the Phone app cares about.
      */
@@ -779,11 +774,15 @@ public class GsmUmtsCallBarringOptions extends TimeConsumingPreferenceActivity
         }
 
         if (mPhone.isUtEnabled() && mCheckData) {
+// QTI_END: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
             int activeNetworkType = QtiPhoneUtilsHelper.getActiveNetworkType(mPhone);
+// QTI_BEGIN: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
             boolean isDataRoaming = mPhone.getServiceState().getDataRoaming();
             boolean isDataRoamingEnabled = mPhone.getDataRoamingEnabled();
             boolean promptForDataRoaming = isDataRoaming && !isDataRoamingEnabled;
+// QTI_END: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
             Log.d(LOG_TAG, "activeNetworkType = " + activeNetworkType + ", sub = " + sub +
+// QTI_BEGIN: 2018-05-07: Telephony: IMS: Call barring enhancement for UT
                     ", defaultDataSub = " + defaultDataSub + ", isDataRoaming = " +
                     isDataRoaming + ", isDataRoamingEnabled= " + isDataRoamingEnabled);
             if ((activeNetworkType != ConnectivityManager.TYPE_MOBILE
