@@ -641,7 +641,7 @@
     <string name="ota_successful" msgid="1106825981548107774">"گوشی شما در حال حاضر فعال است. راه‌اندازی سرویس ممکن است ۱۵ دقیقه طول بکشد."</string>
     <string name="ota_unsuccessful" msgid="8531037653803955754">"تلفن شما فعال نشد. \nممکن است لازم باشد منطقه‌ای با پوشش بهتر (در نزدیکی پنجره، یا خارج از ساختمان) پیدا کنید. \n\nدوباره امتحان کنید یا برای اطلاع از گزینه‌های بیشتر، با سرویس مشتری تماس بگیرید."</string>
     <string name="ota_spc_failure" msgid="904092035241370080">"‏خطاهای SPC بسیار زیاد"</string>
-    <string name="ota_call_end" msgid="8657746378290737034">"برگشت"</string>
+    <string name="ota_call_end" msgid="8657746378290737034">"برگشتن"</string>
     <string name="ota_try_again" msgid="6914781945599998550">"دوباره امتحان کنید"</string>
     <string name="ota_next" msgid="2041016619313475914">"بعدی"</string>
     <string name="ecm_exit_dialog" msgid="4200691880721429078">"EcmExitDialog"</string>

@@ -82,7 +82,7 @@
     <string name="voicemail" msgid="7697769412804195032">"Voicemail"</string>
     <string name="voicemail_settings_with_label" msgid="4228431668214894138">"Voicemail (<xliff:g id="SUBSCRIPTIONLABEL">%s</xliff:g>)"</string>
     <string name="voicemail_abbreviated" msgid="7746778673131551185">"VM:"</string>
-    <string name="make_and_receive_calls" msgid="4868913166494621109">"Make &amp; receive calls"</string>
+    <string name="make_and_receive_calls" msgid="4868913166494621109">"Make and receive calls"</string>
     <string name="smart_forwarding_settings_menu" msgid="8850429887958938540">"Smart forwarding"</string>
     <string name="smart_forwarding_settings_menu_summary" msgid="5096947726032885325">"When one number isn\'t reachable, always forward calls to your other number"</string>
     <string name="voicemail_notifications_preference_title" msgid="7829238858063382977">"Notifications"</string>
