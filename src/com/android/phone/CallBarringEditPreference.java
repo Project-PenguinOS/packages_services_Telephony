@@ -121,24 +121,26 @@ public class CallBarringEditPreference extends EditPinPreference {
         this(context, null);
     }
 
-// QTI_BEGIN: 2023-04-25: Telephony: IMS: Fix serviceConnection leaked issue
     void deInit() {
         mQtiCallBarringEditPreferenceHelper.deInit();
         mQtiCallBarringEditPreferenceHelper = null;
     }
 
-// QTI_END: 2023-04-25: Telephony: IMS: Fix serviceConnection leaked issue
     void init(TimeConsumingPreferenceListener listener, boolean skipReading, Phone phone) {
         Log.d(LOG_TAG, "init: phone id = " + phone.getPhoneId());
         mPhone = phone;
         mTcpListener = listener;
         mQtiCallBarringEditPreferenceHelper.init(skipReading, phone, mTcpListener);
+// QTI_BEGIN: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
     }
 
     void setExpectMore(boolean expectMore) {
+// QTI_END: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
         mQtiCallBarringEditPreferenceHelper.setExpectMore(expectMore);
+// QTI_BEGIN: 2022-12-13: Telephony: IMS: Display call barring password UI conditionally
     }
 
+// QTI_END: 2022-12-13: Telephony: IMS: Display call barring password UI conditionally
     @Override
     public void onClick(DialogInterface dialog, int which) {
         super.onClick(dialog, which);
@@ -149,7 +151,9 @@ public class CallBarringEditPreference extends EditPinPreference {
     protected void showDialog(Bundle state) {
 // QTI_BEGIN: 2022-12-13: Telephony: IMS: Display call barring password UI conditionally
         if (!isPasswordEnabled()) {
+// QTI_END: 2022-12-13: Telephony: IMS: Display call barring password UI conditionally
             mQtiCallBarringEditPreferenceHelper.setCallBarringInternal("");
+// QTI_BEGIN: 2022-12-13: Telephony: IMS: Display call barring password UI conditionally
             return;
         }
 // QTI_END: 2022-12-13: Telephony: IMS: Display call barring password UI conditionally
@@ -227,9 +231,7 @@ public class CallBarringEditPreference extends EditPinPreference {
             }
 
             Log.d(LOG_TAG, "onDialogClosed");
-// QTI_BEGIN: 2022-12-13: Telephony: IMS: Display call barring password UI conditionally
             mQtiCallBarringEditPreferenceHelper.setCallBarringInternal(password);
-// QTI_END: 2022-12-13: Telephony: IMS: Display call barring password UI conditionally
         }
     }
 
@@ -391,8 +393,8 @@ public class CallBarringEditPreference extends EditPinPreference {
                 pref.mSetCallBarringReqInfo.mIsRequestOverIms = true;
                 pref.mSetCallBarringReqInfo.mException = ar.exception;
 // QTI_END: 2023-06-06: Telephony: Fix set call barring failure does not show Call setting error dialog
-// QTI_BEGIN: 2023-02-21: Telephony: Ensure all getCallBarring requests on IMS use sidecar API
                 pref.mQtiCallBarringEditPreferenceHelper.queryImsCallBarringStatus();
+// QTI_BEGIN: 2023-02-21: Telephony: Ensure all getCallBarring requests on IMS use sidecar API
             }
 // QTI_END: 2023-02-21: Telephony: Ensure all getCallBarring requests on IMS use sidecar API
         }
