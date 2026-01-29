@@ -514,7 +514,7 @@ public class ImsConferenceTest extends TelephonyTestBase {
                 Call.Details.DIRECTION_INCOMING);
         imsConference.handleConferenceParticipantsUpdate(mConferenceHost,
                 Arrays.asList(participant1));
-        assertFalse(imsConference.isConferenceState());
+        assertFalse(imsConference.isMultiparty());
     }
 
     /**
@@ -544,7 +544,7 @@ public class ImsConferenceTest extends TelephonyTestBase {
                 .thenReturn(cps);
         imsConference.updateConferenceParticipantsAfterCreation();
 
-        assertFalse(imsConference.isConferenceState());
+        assertFalse(imsConference.isMultiparty());
     }
 
     /**
