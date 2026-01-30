@@ -12,6 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License
+ *
+ * ​​​​​Changes from Qualcomm Technologies, Inc. are provided under the following license:
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+ * SPDX-License-Identifier: BSD-3-Clause-Clear
  */
 
 package com.android.services.telephony;
@@ -24,7 +28,9 @@ import android.telecom.Conferenceable;
 import android.telecom.Connection;
 import android.telecom.ConnectionService;
 import android.telecom.DisconnectCause;
+import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
+import android.telecom.TelecomManager;
 import android.telephony.CarrierConfigManager;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -32,6 +38,7 @@ import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.flags.FeatureFlags;
 import com.android.internal.telephony.flags.FeatureFlagsImpl;
+import com.android.phone.PhoneGlobals;
 import com.android.phone.PhoneUtils;
 import com.android.telephony.Rlog;
 
@@ -40,6 +47,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -74,7 +82,7 @@ public class ImsConferenceController {
                 // will be updated for the specified phone account in the case of simultaneous
                 // calling.
                 mTelecomAccountRegistry.refreshAdhocConference(true,
-                        getPhoneAccountHandle(conference));
+                        getPhoneAccountHandle(conference), false);
             }
             mImsConferences.remove(conference);
         }
@@ -114,6 +122,10 @@ public class ImsConferenceController {
 
         @Override
         public void onDestroyed(Connection connection) {
+            if (connection instanceof TelephonyConnection) {
+                mTelecomAccountRegistry.refreshAdhocConference(true,
+                        getPhoneAccountHandle(connection), false);
+            }
             remove(connection);
         }
     };
@@ -253,6 +265,27 @@ public class ImsConferenceController {
         return Objects.equals(leftHandle, rightHandle);
     }
 
+    private PhoneAccountHandle getActiveDsdsPaHandle(TelecomManager tm) {
+        if (tm == null) {
+            return null;
+        }
+        for (TelephonyConnection connection : mTelephonyConnections) {
+            // If device is in DSDS with a call on one sub, remove the adhoc conference
+            // capability from the other sub since the other sub will be deactivated.
+            if (connection.getState() != Connection.STATE_DISCONNECTED) {
+                PhoneAccount pa =
+                        tm.getPhoneAccount(connection.getPhoneAccountHandle());
+                if (pa != null && pa.hasSimultaneousCallingRestriction()) {
+                    Set<PhoneAccountHandle> paSet = pa.getSimultaneousCallingRestriction();
+                    if (paSet.isEmpty()) {
+                        return connection.getPhoneAccountHandle();
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
     /**
      * Calculates the conference-capable state of all GSM connections in this connection service.
      * Connections from different {@link PhoneAccountHandle}s shall not be conferenceable.
@@ -262,6 +295,17 @@ public class ImsConferenceController {
         HashSet<Conferenceable> conferenceableSet = new HashSet<>(mTelephonyConnections.size() +
                 mImsConferences.size());
         HashSet<Connection> conferenceParticipantsSet = new HashSet<>();
+        TelecomManager tm = PhoneGlobals.getInstance()
+                .getSystemService(TelecomManager.class);
+        PhoneAccountHandle activeDsdsPaHandle = getActiveDsdsPaHandle(tm);
+            List<PhoneAccountHandle> allPaHandles =
+                    tm.getCallCapablePhoneAccounts(true);
+        if (activeDsdsPaHandle != null) {
+            for (PhoneAccountHandle handle : allPaHandles) {
+                mTelecomAccountRegistry.refreshAdhocConference(handle.equals(activeDsdsPaHandle),
+                        handle, activeDsdsPaHandle != null);
+            }
+        }
 
         // Loop through and collect all calls which are active or holding
         for (TelephonyConnection connection : mTelephonyConnections) {
@@ -319,7 +363,7 @@ public class ImsConferenceController {
             // is hosted on this device. However, for simultaneous calling, we WILL allow UE to host
             // a conference call on each subscription.
             mTelecomAccountRegistry.refreshAdhocConference(false,
-                    getPhoneAccountHandle(conference));
+                    getPhoneAccountHandle(conference), false);
             switch (conference.getState()) {
                 case Connection.STATE_ACTIVE:
                     //fall through

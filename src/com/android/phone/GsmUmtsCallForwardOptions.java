@@ -1,7 +1,7 @@
 // QTI_BEGIN: 2024-03-18: Telephony: Allow to query CF from UI when Wi-Fi is on
 /**
-* Changes from Qualcomm Innovation Center, Inc. are provided under the following license:
-* Copyright (c) 2024 Qualcomm Innovation Center, Inc. All rights reserved.
+* Changes from Qualcomm Technologies, Inc. are provided under the following license:
+* Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
 * SPDX-License-Identifier: BSD-3-Clause-Clear
 */
 
@@ -49,10 +49,13 @@ import android.preference.PreferenceScreen;
 import android.provider.Settings;
 // QTI_END: 2020-04-28: Telephony: Redirect to AOSP ACTION_NETWORK_OPERATOR_SETTINGS
 import android.telephony.CarrierConfigManager;
+import android.telephony.ims.ImsException;
+import android.telephony.ims.ImsMmTelManager;
 // QTI_BEGIN: 2018-06-11: Telephony: IMS: No prompt to notify user to switch off enhanced 4G
 import android.telephony.ims.feature.ImsFeature;
 // QTI_END: 2018-06-11: Telephony: IMS: No prompt to notify user to switch off enhanced 4G
 // QTI_BEGIN: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
+import android.telephony.ims.feature.MmTelFeature;
 import android.telephony.SubscriptionManager;
 // QTI_END: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
 // QTI_BEGIN: 2018-05-13: Telephony: Check SIM status before query CF or hotswap SIM card in query CF UI
@@ -67,8 +70,6 @@ import android.view.MenuItem;
 import android.widget.Toast;
 // QTI_END: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
 // QTI_BEGIN: 2018-06-11: Telephony: IMS: No prompt to notify user to switch off enhanced 4G
-import com.android.ims.ImsException;
-import com.android.ims.ImsManager;
 // QTI_END: 2018-06-11: Telephony: IMS: No prompt to notify user to switch off enhanced 4G
 // QTI_BEGIN: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
 import com.android.internal.telephony.PhoneConstants;
@@ -152,6 +153,23 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
     private CarrierConfigManager mCarrierConfig;
 // QTI_END: 2018-06-11: Telephony: IMS: No prompt to notify user to switch off enhanced 4G
     private boolean mCallForwardByUssd;
+
+    private ImsMmTelManager.CapabilityCallback mCapabilityCallback =
+        new ImsMmTelManager.CapabilityCallback() {
+            @Override
+            public void onCapabilitiesStatusChanged(MmTelFeature.MmTelCapabilities capabilities) {
+                    boolean isUtCapable = capabilities.isCapable(
+                            MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_UT);
+                    boolean isVtCapable = capabilities.isCapable(
+                            MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VIDEO);
+                    if (mServiceClass == CommandsInterface.SERVICE_CLASS_DATA_SYNC
+                            + CommandsInterface.SERVICE_CLASS_PACKET) {
+                        Log.d(LOG_TAG, "update CF according to UtAvailability=" + isUtCapable);
+                        QtiCallForwardUtils.updateAllCfRows(mPreferences,
+                                isUtCapable && isVtCapable);
+                    }
+            }
+    };
 
     @Override
     protected void onCreate(Bundle icicle) {
@@ -515,6 +533,7 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
     @Override
     public void onResume() {
         super.onResume();
+        QtiCallForwardUtils.registerMmTelCapabilityCallback(mPhone, mCapabilityCallback);
 // QTI_BEGIN: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
         if (mCheckData) {
             checkDataStatus();
@@ -522,6 +541,13 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
             initCallforwarding();
         }
     }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        QtiCallForwardUtils.unregisterMmTelCapabilityCallback(mPhone, mCapabilityCallback);
+    }
+
 
     private void initCallforwarding () {
 // QTI_END: 2018-04-09: Telephony: IMS: Add data check for UT supplementary service of CallForwarding
