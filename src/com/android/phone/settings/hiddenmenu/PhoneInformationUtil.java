@@ -431,53 +431,6 @@ public class PhoneInformationUtil {
         return isAvailable;
     }
 
-// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-    /**
-     * Returns whether VoLTE service is available.
-     *
-     * @param imsMmTelManager The {@link ImsMmTelManager} instance.
-     * @return {@code true} if VoLTE service is available, {@code false} otherwise.
-     */
-    public static boolean isVolteEnabled(ImsMmTelManager imsMmTelManager) {
-        if (imsMmTelManager == null) {
-            return false;
-        }
-
-        try {
-            boolean availableVolte = isVoiceServiceAvailable(imsMmTelManager);
-            boolean availableVt = isVideoServiceAvailable(imsMmTelManager);
-
-            Log.d(TAG, "availableVolte:  " + availableVolte + " availableVt: " +
-                    availableVt);
-            return availableVolte || availableVt;
-        } catch (Exception e) {
-            Log.e(TAG, "isVolteEnabled e=" + e);
-        }
-        return false;
-    }
-
-    /**
-     * Returns whether VoNr service is available.
-     *
-     * @param imsMmTelManager The {@link ImsMmTelManager} instance.
-     * @return {@code true} if VoNr service is available, {@code false} otherwise.
-     */
-    public static boolean isVoNrEnabled(TelephonyManager telephonyManager) {
-        if (telephonyManager == null) {
-            return false;
-        }
-
-        try {
-            boolean result = telephonyManager.isVoNrEnabled();
-            Log.d(TAG, "isVoNrEnabled " + result);
-            return result;
-        } catch (IllegalStateException e) {
-            Log.e(TAG, "isVoNrEnabled IllegalStateException =", e);
-        }
-        return false;
-    }
-
-// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
     public static final String[] PREFERRED_NETWORK_LABELS = {
             "GSM/WCDMA preferred",
             "GSM only",

@@ -104,8 +104,8 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
     private TextView mVoiceNetwork;
     private TextView mVoiceRawReg;
     private TextView mDBm;
-    private static final long RUNNABLE_TIMEOUT_MS = 5 * 60 * 1000L;
-    private ThreadPoolExecutor mQueuedWork;
+    protected static final long RUNNABLE_TIMEOUT_MS = 5 * 60 * 1000L;
+    protected ThreadPoolExecutor mQueuedWork;
     private TextView mDownlinkKbps;
     private TextView mUplinkKbps;
     private TextView mNrAvailable;
@@ -122,23 +122,19 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
     private Switch mImsVolteProvisionedSwitch;
     private Switch mImsVtProvisionedSwitch;
     private Switch mImsWfcProvisionedSwitch;
-// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-    private Switch mEnableVoLteSwitch;
-    private Switch mEnableVoNrSwitch;
-// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
     private Switch mEabProvisionedSwitch;
-    private TelephonyManager mTelephonyManager;
-    private ImsManager mImsManager = null;
+    protected TelephonyManager mTelephonyManager;
+    protected ImsManager mImsManager = null;
     private ProvisioningManager mProvisioningManager = null;
     private Phone mPhone = null;
     private boolean mSystemUser = true;
-    private int mPhoneId = SubscriptionManager.INVALID_PHONE_INDEX;
+    protected int mPhoneId = SubscriptionManager.INVALID_PHONE_INDEX;
     private static final int DEFAULT_PHONE_ID = 0;
 
-    private int mSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
+    protected int mSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
     private TelephonyDisplayInfo mDisplayInfo;
     private CarrierConfigManager mCarrierConfigManager;
-    private Context mContext;
+    protected Context mContext;
     private Handler mHandler;
     private View mView;
     private int mCellInfoRefreshRateIndex;
@@ -317,20 +313,12 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
         mImsVtProvisionedSwitch = (Switch) view.findViewById(R.id.vt_provisioned_switch);
         mImsWfcProvisionedSwitch = (Switch) view.findViewById(R.id.wfc_provisioned_switch);
         mEabProvisionedSwitch = (Switch) view.findViewById(R.id.eab_provisioned_switch);
-// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-        mEnableVoLteSwitch = (Switch) view.findViewById(R.id.enable_volte_switch);
-        mEnableVoNrSwitch = (Switch) view.findViewById(R.id.enable_vonr_switch);
-// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
 
         if (!isImsSupportedOnDevice()) {
             mImsVolteProvisionedSwitch.setVisibility(View.GONE);
             mImsVtProvisionedSwitch.setVisibility(View.GONE);
             mImsWfcProvisionedSwitch.setVisibility(View.GONE);
             mEabProvisionedSwitch.setVisibility(View.GONE);
-// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-            mEnableVoLteSwitch.setVisibility(View.GONE);
-            mEnableVoNrSwitch.setVisibility(View.GONE);
-// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
         }
 
         // hide 5G stats on devices that don't support 5G
@@ -531,7 +519,7 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
         return getImsConfigProvisionedState(CAPABILITY_TYPE_VOICE, REGISTRATION_TECH_LTE);
     }
 
-    private boolean isImsSupportedOnDevice() {
+    protected boolean isImsSupportedOnDevice() {
         return mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY_IMS);
     }
 
@@ -732,64 +720,6 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
                 !IS_USER_BUILD && isEnabledByPlatform && isEabProvisioningRequired());
     }
 
-// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-    private void updateVoLteState() {
-// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-// QTI_BEGIN: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
-        if (!SubscriptionManager.isValidSubscriptionId(mSubId)) {
-            mEnableVoLteSwitch.setEnabled(false);
-            mEnableVoLteSwitch.setChecked(false);
-            return;
-        }
-// QTI_END: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
-// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-        ImsMmTelManager imsMmTelManager = mImsManager.getImsMmTelManager(mSubId);
-        mEnableVoLteSwitch.setChecked(PhoneInformationUtil.isVolteEnabled(imsMmTelManager));
-// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-// QTI_BEGIN: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
-        mEnableVoLteSwitch.setEnabled(true);
-// QTI_END: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
-// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-        mEnableVoLteSwitch.setOnCheckedChangeListener(mVoLteOnChangeListener);
-    }
-
-    private void updateVoNrState() {
-// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-// QTI_BEGIN: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
-        if (!SubscriptionManager.isValidSubscriptionId(mSubId)) {
-            mEnableVoNrSwitch.setEnabled(false);
-            mEnableVoNrSwitch.setChecked(false);
-            return;
-        }
-        final int subId = mSubId;
-// QTI_END: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
-// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-        mQueuedWork.execute(new Runnable() {
-            public void run() {
-// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-// QTI_BEGIN: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
-                if (subId != mSubId) {
-                    return;
-                }
-                ImsMmTelManager imsMmTelManager = mImsManager.getImsMmTelManager(subId);
-// QTI_END: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
-// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-                boolean voNrEnabled = PhoneInformationUtil.isVoNrEnabled(mTelephonyManager);
-                boolean voLteEnabled = PhoneInformationUtil.isVolteEnabled(imsMmTelManager);
-                mHandler.post(() -> {
-                    mEnableVoNrSwitch.setChecked(voNrEnabled);
-// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-// QTI_BEGIN: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
-                    mEnableVoNrSwitch.setEnabled(voLteEnabled);
-// QTI_END: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
-// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-                });
-            }
-        });
-        mEnableVoNrSwitch.setOnCheckedChangeListener(mVoNrOnChangeListener);
-    }
-
-// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
     private void updateImsProvisionedState() {
         if (!isImsSupportedOnDevice()) {
             return;
@@ -827,7 +757,7 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
                         AccessNetworkConstants.TRANSPORT_TYPE_WWAN));
     }
 
-    private void updateAllFields() {
+    protected void updateAllFields() {
         updateDataState();
         updateSelectionVisuals();
         updateRadioPowerState();
@@ -835,11 +765,6 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
         updateNetworkType();
         updateNrStats();
 
-// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-        updateVoLteState();
-        updateVoNrState();
-
-// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
         updateCellInfo(mCellInfoResult);
         mCellInfoRefreshRateSpinner.setOnItemSelectedListener(mCellInfoRefreshRateHandler);
         // set selection after registering listener to force update
@@ -1270,126 +1195,6 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
                 mPhone.getTelephonyTester().setServiceStateTestIntent(intent);
             };
 
-// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-    OnCheckedChangeListener mVoLteOnChangeListener = new OnCheckedChangeListener() {
-        @Override
-        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-            Log.d(TAG, "VoLte button onCheckedChanged " + isChecked + " on subId=" + mSubId);
-            setVoLteEnabled(isChecked);
-        }
-    };
-
-    OnCheckedChangeListener mVoNrOnChangeListener = new OnCheckedChangeListener() {
-        @Override
-        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-            Log.d(TAG, "VoNr button onCheckedChanged " + isChecked + " on subId=" + mSubId);
-            setVoNrEnabled(isChecked);
-        }
-    };
-
-    private void setVoLteEnabled(boolean isChecked) {
-        if (!SubscriptionManager.isValidSubscriptionId(mSubId) || (mTelephonyManager == null)) {
-            return;
-        }
-
-// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-// QTI_BEGIN: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
-        final int subId = mSubId;
-        final int phoneId = mPhoneId;
-// QTI_END: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
-// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-        mQueuedWork.execute(new Runnable() {
-            public void run() {
-// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-// QTI_BEGIN: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
-                if (subId != mSubId) {
-                    return;
-                }
-                ImsMmTelManager imsMmTelManager = mImsManager.getImsMmTelManager(subId);
-// QTI_END: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
-// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-                try {
-                    if (isChecked != PhoneInformationUtil.isVolteEnabled(imsMmTelManager)) {
-                        if (isChecked) {
-// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-// QTI_BEGIN: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
-                            mTelephonyManager.enableIms(phoneId);
-// QTI_END: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
-// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-                        } else {
-// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-// QTI_BEGIN: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
-                            mTelephonyManager.disableIms(phoneId);
-// QTI_END: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
-// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-                        }
-                    }
-                } catch (Exception e) {
-// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-// QTI_BEGIN: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
-                    Log.e(TAG, "fail to set VoLTE=" + isChecked + ". subId=" + subId, e);
-// QTI_END: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
-// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-                }
-
-                mHandler.post(() -> {
-                     /**
-                      * 1. VoNr option is disabled if VoLte option is disabled
-                      * 2. VoNr option is enabled if VoLte option is enabled
-                      */
-                    if (!isChecked) {
-                        mEnableVoNrSwitch.setChecked(false);
-                        mEnableVoNrSwitch.setEnabled(false);
-                    } else {
-                        mEnableVoNrSwitch.setEnabled(true);
-                    }
-                });
-            }
-        });
-    }
-
-    public void setVoNrEnabled(boolean isChecked) {
-        if (!SubscriptionManager.isValidSubscriptionId(mSubId)
-                || (mTelephonyManager == null)) {
-            return;
-        }
-// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-// QTI_BEGIN: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
-        final int subId = mSubId;
-// QTI_END: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
-// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-        mQueuedWork.execute(new Runnable() {
-            public void run() {
-// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-// QTI_BEGIN: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
-                if (subId != mSubId) {
-                    return;
-                }
-// QTI_END: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
-// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-                try {
-                    boolean isVoNrEnabled =
-                            PhoneInformationUtil.isVoNrEnabled(mTelephonyManager);
-                    if (isVoNrEnabled != isChecked) {
-                        mTelephonyManager.setVoNrEnabled(isChecked);
-// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-// QTI_BEGIN: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
-                        Log.d(TAG, "set VoNR state to " + isChecked + " on subId=" + subId);
-// QTI_END: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
-// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-                    }
-                } catch (Exception e) {
-// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-// QTI_BEGIN: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
-                    Log.e(TAG, "fail to set VoNr=" + isChecked + ". subId=" + subId, e);
-// QTI_END: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
-// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-                }
-            }
-        });
-    }
-
-// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
     private void updateSelectionVisuals() {
         LinearLayout selectedButton, unSelectedButton;
         if (mPhoneId == 0) {
