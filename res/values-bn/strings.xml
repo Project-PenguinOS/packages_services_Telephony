@@ -838,6 +838,18 @@
     <string name="supp_service_over_ut_precautions_dialog_dismiss" msgid="5934541487903081652">"খারিজ করুন"</string>
     <string name="radio_info_data_connection_enable" msgid="6183729739783252840">"ডেটা কানেকশন সক্রিয় আছে"</string>
     <string name="radio_info_data_connection_disable" msgid="6404751291511368706">"ডেটা কানেকশন নিষ্ক্রিয় করুন"</string>
+    <!-- no translation found for radio_info_apply_preferred_network_type (8828433232282314858) -->
+    <skip />
+    <!-- no translation found for radio_info_all_label (4326377691373938122) -->
+    <skip />
+    <!-- no translation found for radio_info_nr_label (4346984853962997752) -->
+    <skip />
+    <!-- no translation found for radio_info_lte_label (5721318031926928485) -->
+    <skip />
+    <!-- no translation found for radio_info_wcdma_label (5157664869835235769) -->
+    <skip />
+    <!-- no translation found for radio_info_gsm_label (2947899997551185529) -->
+    <skip />
     <string name="volte_provisioned_switch_string" msgid="4812874990480336178">"VoLTE প্রস্তুত"</string>
     <string name="vt_provisioned_switch_string" msgid="8295542122512195979">"ভিডিও কলিংয়ের ব্যবস্থা আছে"</string>
     <string name="wfc_provisioned_switch_string" msgid="3835004640321078988">"ওয়াই ফাই কলিংয়ের ব্যবস্থা আছে"</string>
