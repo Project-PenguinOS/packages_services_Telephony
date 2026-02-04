@@ -64,7 +64,7 @@
     <string name="apn_settings" msgid="1978652203074756623">"ಆ್ಯಕ್ಸೆಸ್ ಪಾಯಿಂಟ್ ಹೆಸರುಗಳು"</string>
     <string name="settings_label" msgid="9101778088412567956">"ನೆಟ್‌ವರ್ಕ್‌ ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="phone_accounts" msgid="1216879437523774604">"ಕರೆ ಮಾಡುವ ಖಾತೆಗಳು"</string>
-    <string name="phone_accounts_make_calls_with" msgid="16747814788918145">"ಇದರೊಂದಿಗೆ ಕರೆಗಳನ್ನು ಮಾಡಿ"</string>
+    <string name="phone_accounts_make_calls_with" msgid="16747814788918145">"ಇದನ್ನು ಬಳಸಿ ಕರೆಗಳನ್ನು ಮಾಡಿ"</string>
     <string name="phone_accounts_make_sip_calls_with" msgid="4691221006731847255">"ಎಸ್‌ಐಪಿ ಕರೆಗಳನ್ನು ಇದರೊಂದಿಗೆ ಮಾಡಿ"</string>
     <string name="phone_accounts_ask_every_time" msgid="6192347582666047168">"ಮೊದಲು ಕೇಳು"</string>
     <string name="phone_accounts_default_account_label" msgid="5107598881335931101">"ಯಾವುದೇ ನೆಟ್‌ವರ್ಕ್ ಲಭ್ಯವಿಲ್ಲ"</string>

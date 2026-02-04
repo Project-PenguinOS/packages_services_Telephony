@@ -2028,14 +2028,8 @@ public class RadioInfo extends AppCompatActivity {
                                 .setSatelliteIgnorePlmnListFromStorage(true);
                         // Override carrier config
                         PersistableBundle originalBundle =
-                                PhoneInformationUtil.getCarrierConfig(mContext)
-                                        .getConfigForSubId(
-                                                subId,
-                                                KEY_SATELLITE_ATTACH_SUPPORTED_BOOL,
-                                                KEY_SATELLITE_ENTITLEMENT_SUPPORTED_BOOL,
-                                                CarrierConfigManager
-                                                        .KEY_EMERGENCY_MESSAGING_SUPPORTED_BOOL);
-                        PersistableBundle overrideBundle = new PersistableBundle();
+                                PhoneInformationUtil.getSatelliteConfigsForSubId(mContext, subId);
+                        PersistableBundle overrideBundle = new PersistableBundle(originalBundle);
                         overrideBundle.putBoolean(KEY_SATELLITE_ATTACH_SUPPORTED_BOOL, true);
                         overrideBundle.putBoolean(
                                 CarrierConfigManager.KEY_EMERGENCY_MESSAGING_SUPPORTED_BOOL, true);
