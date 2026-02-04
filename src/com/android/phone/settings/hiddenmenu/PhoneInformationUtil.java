@@ -61,19 +61,16 @@ import android.os.SystemProperties;
 import android.provider.Telephony;
 import android.telephony.AccessNetworkConstants;
 import android.telephony.CarrierConfigManager;
-import android.telephony.CellIdentityCdma;
 import android.telephony.CellIdentityGsm;
 import android.telephony.CellIdentityLte;
 import android.telephony.CellIdentityNr;
 import android.telephony.CellIdentityWcdma;
 import android.telephony.CellInfo;
-import android.telephony.CellInfoCdma;
 import android.telephony.CellInfoGsm;
 import android.telephony.CellInfoLte;
 import android.telephony.CellInfoNr;
 import android.telephony.CellInfoWcdma;
 import android.telephony.CellSignalStrength;
-import android.telephony.CellSignalStrengthCdma;
 import android.telephony.CellSignalStrengthGsm;
 import android.telephony.CellSignalStrengthLte;
 import android.telephony.CellSignalStrengthNr;
@@ -190,23 +187,6 @@ public class PhoneInformationUtil {
         return regStr + connector + connStatStr;
     }
 
-    private static String buildCdmaInfoString(CellInfoCdma ci) {
-        CellIdentityCdma cidCdma = ci.getCellIdentity();
-        CellSignalStrengthCdma ssCdma = ci.getCellSignalStrength();
-
-        return String.format(
-                "%-3.3s %-5.5s %-5.5s %-5.5s %-6.6s %-6.6s %-6.6s %-6.6s %-5.5s",
-                getConnectionStatusString(ci),
-                getCellInfoDisplayString(cidCdma.getSystemId()),
-                getCellInfoDisplayString(cidCdma.getNetworkId()),
-                getCellInfoDisplayString(cidCdma.getBasestationId()),
-                getCellInfoDisplayString(ssCdma.getCdmaDbm()),
-                getCellInfoDisplayString(ssCdma.getCdmaEcio()),
-                getCellInfoDisplayString(ssCdma.getEvdoDbm()),
-                getCellInfoDisplayString(ssCdma.getEvdoEcio()),
-                getCellInfoDisplayString(ssCdma.getEvdoSnr()));
-    }
-
     private static String buildGsmInfoString(CellInfoGsm ci) {
         CellIdentityGsm cidGsm = ci.getCellIdentity();
         CellSignalStrengthGsm ssGsm = ci.getCellSignalStrength();
@@ -283,8 +263,7 @@ public class PhoneInformationUtil {
      */
     public static String buildCellInfoString(java.util.List<CellInfo> arrayCi) {
         String value = new String();
-        StringBuilder cdmaCells = new StringBuilder(),
-                gsmCells = new StringBuilder(),
+        StringBuilder gsmCells = new StringBuilder(),
                 lteCells = new StringBuilder(),
                 wcdmaCells = new StringBuilder(),
                 nrCells = new StringBuilder();
@@ -298,8 +277,6 @@ public class PhoneInformationUtil {
                     wcdmaCells.append(buildWcdmaInfoString((CellInfoWcdma) ci));
                 } else if (ci instanceof CellInfoGsm) {
                     gsmCells.append(buildGsmInfoString((CellInfoGsm) ci));
-                } else if (ci instanceof CellInfoCdma) {
-                    cdmaCells.append(buildCdmaInfoString((CellInfoCdma) ci));
                 } else if (ci instanceof CellInfoNr) {
                     nrCells.append(buildNrInfoString((CellInfoNr) ci));
                 }
@@ -336,15 +313,6 @@ public class PhoneInformationUtil {
                                 "GSM\n%-3.3s %-3.3s %-3.3s %-5.5s %-5.5s %-6.6s %-4.4s %-4.4s\n",
                                 "SRV", "MCC", "MNC", "LAC", "CID", "ARFCN", "BSIC", "RSSI");
                 value += gsmCells.toString();
-            }
-            if (cdmaCells.length() != 0) {
-                value +=
-                        String.format(
-                                "CDMA/EVDO\n%-3.3s %-5.5s %-5.5s %-5.5s"
-                                        + " %-6.6s %-6.6s %-6.6s %-6.6s %-5.5s\n",
-                                "SRV", "SID", "NID", "BSID", "C-RSSI", "C-ECIO", "E-RSSI", "E-ECIO",
-                                "E-SNR");
-                value += cdmaCells.toString();
             }
         } else {
             value = "unknown";
@@ -442,44 +410,6 @@ public class PhoneInformationUtil {
         return isAvailable;
     }
 
-    public static final String[] PREFERRED_NETWORK_LABELS = {
-            "GSM/WCDMA preferred",
-            "GSM only",
-            "WCDMA only",
-            "GSM/WCDMA auto (PRL)",
-            "CDMA/EvDo auto (PRL)",
-            "CDMA only",
-            "EvDo only",
-            "CDMA/EvDo/GSM/WCDMA (PRL)",
-            "CDMA + LTE/EvDo (PRL)",
-            "GSM/WCDMA/LTE (PRL)",
-            "LTE/CDMA/EvDo/GSM/WCDMA (PRL)",
-            "LTE only",
-            "LTE/WCDMA",
-            "TDSCDMA only",
-            "TDSCDMA/WCDMA",
-            "LTE/TDSCDMA",
-            "TDSCDMA/GSM",
-            "LTE/TDSCDMA/GSM",
-            "TDSCDMA/GSM/WCDMA",
-            "LTE/TDSCDMA/WCDMA",
-            "LTE/TDSCDMA/GSM/WCDMA",
-            "TDSCDMA/CDMA/EvDo/GSM/WCDMA ",
-            "LTE/TDSCDMA/CDMA/EvDo/GSM/WCDMA",
-            "NR only",
-            "NR/LTE",
-            "NR/LTE/CDMA/EvDo",
-            "NR/LTE/GSM/WCDMA",
-            "NR/LTE/CDMA/EvDo/GSM/WCDMA",
-            "NR/LTE/WCDMA",
-            "NR/LTE/TDSCDMA",
-            "NR/LTE/TDSCDMA/GSM",
-            "NR/LTE/TDSCDMA/WCDMA",
-            "NR/LTE/TDSCDMA/GSM/WCDMA",
-            "NR/LTE/TDSCDMA/CDMA/EvDo/GSM/WCDMA",
-            "Unknown"
-    };
-
     public static final String[] PREFERRED_NETWORK_LABELS_RF = {
             "GSM/WCDMA preferred",
             "GSM only",
@@ -550,16 +480,9 @@ public class PhoneInformationUtil {
                 ServiceState.RIL_RADIO_TECHNOLOGY_GPRS,
                 ServiceState.RIL_RADIO_TECHNOLOGY_EDGE,
                 ServiceState.RIL_RADIO_TECHNOLOGY_UMTS,
-                ServiceState.RIL_RADIO_TECHNOLOGY_IS95A,
-                ServiceState.RIL_RADIO_TECHNOLOGY_IS95B,
-                ServiceState.RIL_RADIO_TECHNOLOGY_1xRTT,
-                ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_0,
-                ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_A,
                 ServiceState.RIL_RADIO_TECHNOLOGY_HSDPA,
                 ServiceState.RIL_RADIO_TECHNOLOGY_HSUPA,
                 ServiceState.RIL_RADIO_TECHNOLOGY_HSPA,
-                ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_B,
-                ServiceState.RIL_RADIO_TECHNOLOGY_EHRPD,
                 ServiceState.RIL_RADIO_TECHNOLOGY_LTE,
                 ServiceState.RIL_RADIO_TECHNOLOGY_HSPAP,
                 ServiceState.RIL_RADIO_TECHNOLOGY_GSM,
