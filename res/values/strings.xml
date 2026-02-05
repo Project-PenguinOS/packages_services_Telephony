@@ -2067,6 +2067,14 @@
     <!-- Data Connection Disable. Only shown in diagnostic screen, so precise translation is not needed. -->
     <string name="radio_info_data_connection_disable">Disable Data Connection</string>
 
+    <!-- Multi-select Preferred Network Type -->
+    <string name="radio_info_apply_preferred_network_type">Apply</string>
+    <string name="radio_info_all_label">All</string>
+    <string name="radio_info_nr_label">NR (5G)</string>
+    <string name="radio_info_lte_label">LTE (4G)</string>
+    <string name="radio_info_wcdma_label">UMTS (3G)</string>
+    <string name="radio_info_gsm_label">GSM (2G)</string>
+
     <!-- VoLTE provisioning flag on. Only shown in diagnostic screen, so precise translation is not needed. -->
     <string name="volte_provisioned_switch_string">VoLTE Provisioned</string>
 

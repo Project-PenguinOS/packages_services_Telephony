@@ -62,6 +62,8 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.LinearLayout;
@@ -112,8 +114,13 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
     private TextView mNrState;
     private TextView mNrFrequency;
     private TextView mCellInfo;
-    private Spinner mPreferredNetworkType;
-    private int mPreferredNetworkTypeResult;
+    private CheckBox mFilterAll;
+    private CheckBox mFilterNr;
+    private CheckBox mFilterLte;
+    private CheckBox mFilterWcdma;
+    private CheckBox mFilterGsm;
+    private boolean mIsUpdating = false;
+    private Button mPreferredNetworkTypeApply;
     private Spinner mMockSignalStrength;
     private Spinner mMockDataNetworkType;
     private Spinner mCellInfoRefreshRateSpinner;
@@ -255,18 +262,80 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
 
         mCellInfo = (TextView) view.findViewById(R.id.cellinfo);
         mCellInfo.setTypeface(Typeface.MONOSPACE);
-        mPreferredNetworkType = (Spinner) view.findViewById(R.id.preferredNetworkType);
-        mPrefNwLabelToIntMap = PhoneInformationUtil.createPrefNwLabelsToValueFullMapping();
-        mUpdatedPrefNwLabels = PhoneInformationUtil.getUpdatedPrefNwLabels(mContext);
-        ArrayAdapter<String> mPreferredNetworkTypeAdapter =
-                new ArrayAdapter<String>(
-                        mContext,
-                        android.R.layout.simple_spinner_item,
-                        mUpdatedPrefNwLabels);
-        mPreferredNetworkTypeAdapter.setDropDownViewResource(
-                android.R.layout.simple_spinner_dropdown_item);
-        mPreferredNetworkType.setAdapter(mPreferredNetworkTypeAdapter);
-        mPreferredNetworkTypeResult = mUpdatedPrefNwLabels.length - 1; // Unknown
+
+        mFilterAll = (CheckBox) view.findViewById(R.id.filter_all);
+        mFilterNr = (CheckBox) view.findViewById(R.id.filter_nr);
+        mFilterLte = (CheckBox) view.findViewById(R.id.filter_lte);
+        mFilterWcdma = (CheckBox) view.findViewById(R.id.filter_wcdma);
+        mFilterGsm = (CheckBox) view.findViewById(R.id.filter_gsm);
+        mPreferredNetworkTypeApply = (Button) view.findViewById(R.id.preferredNetworkTypeApply);
+
+        OnCheckedChangeListener individualListener = (buttonView, isChecked) -> {
+            if (mIsUpdating) return;
+            mIsUpdating = true;
+            if (!isChecked) {
+                mFilterAll.setChecked(false);
+            } else {
+                if (mFilterNr.isChecked() && mFilterLte.isChecked()
+                        && mFilterWcdma.isChecked() && mFilterGsm.isChecked()) {
+                    mFilterAll.setChecked(true);
+                }
+            }
+            mIsUpdating = false;
+        };
+
+        mFilterNr.setOnCheckedChangeListener(individualListener);
+        mFilterLte.setOnCheckedChangeListener(individualListener);
+        mFilterWcdma.setOnCheckedChangeListener(individualListener);
+        mFilterGsm.setOnCheckedChangeListener(individualListener);
+
+        mFilterAll.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (mIsUpdating) return;
+            mIsUpdating = true;
+            if (isChecked) {
+                mFilterNr.setChecked(true);
+                mFilterLte.setChecked(true);
+                mFilterWcdma.setChecked(true);
+                mFilterGsm.setChecked(true);
+            } else {
+                mFilterNr.setChecked(false);
+                mFilterLte.setChecked(false);
+                mFilterWcdma.setChecked(false);
+                mFilterGsm.setChecked(false);
+            }
+            mIsUpdating = false;
+        });
+
+        mPreferredNetworkTypeApply.setOnClickListener(
+                v -> {
+                    long networkTypeBitmask = 0;
+                    if (mFilterNr.isChecked()) {
+                        networkTypeBitmask |= TelephonyManager.NETWORK_TYPE_BITMASK_NR;
+                    }
+                    if (mFilterLte.isChecked()) {
+                        networkTypeBitmask |= TelephonyManager.NETWORK_TYPE_BITMASK_LTE;
+                        networkTypeBitmask |= TelephonyManager.NETWORK_TYPE_BITMASK_LTE_CA;
+                    }
+                    if (mFilterWcdma.isChecked()) {
+                        networkTypeBitmask |= TelephonyManager.NETWORK_TYPE_BITMASK_UMTS;
+                        networkTypeBitmask |= TelephonyManager.NETWORK_TYPE_BITMASK_HSDPA;
+                        networkTypeBitmask |= TelephonyManager.NETWORK_TYPE_BITMASK_HSUPA;
+                        networkTypeBitmask |= TelephonyManager.NETWORK_TYPE_BITMASK_HSPA;
+                        networkTypeBitmask |= TelephonyManager.NETWORK_TYPE_BITMASK_HSPAP;
+                        networkTypeBitmask |= TelephonyManager.NETWORK_TYPE_BITMASK_TD_SCDMA;
+                    }
+                    if (mFilterGsm.isChecked()) {
+                        networkTypeBitmask |= TelephonyManager.NETWORK_TYPE_BITMASK_GSM;
+                        networkTypeBitmask |= TelephonyManager.NETWORK_TYPE_BITMASK_GPRS;
+                        networkTypeBitmask |= TelephonyManager.NETWORK_TYPE_BITMASK_EDGE;
+                    }
+
+                    final long mask = networkTypeBitmask;
+                    new Thread(() -> {
+                        mTelephonyManager.setAllowedNetworkTypesForReason(
+                                TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_USER, mask);
+                    }).start();
+                });
 
         mMockSignalStrength = (Spinner) view.findViewById(R.id.signalStrength);
         if (!Build.isDebuggable() || !mSystemUser) {
@@ -428,7 +497,6 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt("mPreferredNetworkTypeResult", mPreferredNetworkTypeResult);
         outState.putInt("mSelectedPhoneIndex", mPhoneId);
         outState.putInt("mCellInfoRefreshRateIndex", mCellInfoRefreshRateIndex);
     }
@@ -437,11 +505,6 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
         if (b == null) {
             return;
         }
-
-        mPreferredNetworkTypeResult =
-                b.getInt(
-                        "mPreferredNetworkTypeResult",
-                        mUpdatedPrefNwLabels.length - 1);
 
         mPhoneId = b.getInt("mSelectedPhoneIndex", 0);
         mSubId = SubscriptionManager.getSubscriptionId(mPhoneId);
@@ -765,6 +828,27 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
         updateNetworkType();
         updateNrStats();
 
+        new Thread(() -> {
+            long allowedNetworkTypes = mTelephonyManager.getAllowedNetworkTypesBitmask();
+            boolean nr = (allowedNetworkTypes & TelephonyManager.NETWORK_TYPE_BITMASK_NR) != 0;
+            boolean lte =
+                    (allowedNetworkTypes & TelephonyManager.NETWORK_TYPE_BITMASK_LTE) != 0;
+            boolean wcdma =
+                    (allowedNetworkTypes & TelephonyManager.NETWORK_TYPE_BITMASK_UMTS) != 0;
+            boolean gsm =
+                    (allowedNetworkTypes & TelephonyManager.NETWORK_TYPE_BITMASK_GSM) != 0;
+            mHandler.post(() -> {
+                mIsUpdating = true;
+
+                mFilterNr.setChecked(nr);
+                mFilterLte.setChecked(lte);
+                mFilterWcdma.setChecked(wcdma);
+                mFilterGsm.setChecked(gsm);
+                mFilterAll.setChecked(nr && lte && wcdma && gsm);
+                mIsUpdating = false;
+            });
+        }).start();
+
         updateCellInfo(mCellInfoResult);
         mCellInfoRefreshRateSpinner.setOnItemSelectedListener(mCellInfoRefreshRateHandler);
         // set selection after registering listener to force update
@@ -772,16 +856,6 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
         // Request cell information update from RIL.
         mTelephonyManager.setCellInfoListRate(
                 CELL_INFO_REFRESH_RATES[mCellInfoRefreshRateIndex], mSubId);
-
-        // set selection before registering to prevent update
-        mPreferredNetworkType.setSelection(mPreferredNetworkTypeResult, true);
-        mPreferredNetworkType.setOnItemSelectedListener(mPreferredNetworkHandler);
-
-        new Thread(() -> {
-            int networkType = (int) mTelephonyManager.getAllowedNetworkTypesBitmask();
-            mHandler.post(() -> updatePreferredNetworkType(
-                    RadioAccessFamily.getNetworkTypeFromRaf(networkType)));
-        }).start();
 
         // mock signal strength
         mMockSignalStrength.setSelection(mSelectedSignalStrengthIndex[mPhoneId]);
@@ -802,18 +876,6 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
 
         unregisterPhoneStateListener();
         registerPhoneStateListener();
-    }
-
-    private void updatePreferredNetworkType(int type) {
-        if (type >= PhoneInformationUtil.PREFERRED_NETWORK_LABELS.length || type < 0) {
-            log("Network type: unknown type value=" + type);
-            mPreferredNetworkTypeResult = mUpdatedPrefNwLabels.length - 1; //set to Unknown
-        } else {
-            int index = PhoneInformationUtil.
-                    getPrefNwTypeIndexFromUpdatedArray(type, mUpdatedPrefNwLabels);
-            mPreferredNetworkTypeResult = (index != -1) ? index : mUpdatedPrefNwLabels.length - 1;
-        }
-        mPreferredNetworkType.setSelection(mPreferredNetworkTypeResult, true);
     }
 
     private void updateCellInfo(List<CellInfo> arrayCi) {
@@ -1087,32 +1149,8 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
                 public void onNothingSelected(AdapterView parent) {}
             };
 
-    OnItemSelectedListener mPreferredNetworkHandler =
-            new OnItemSelectedListener() {
-
-                public void onItemSelected(AdapterView parent, View v, int pos, long id) {
-                    if (mPreferredNetworkTypeResult != pos
-                            && pos >= 0
-                            && pos <= mUpdatedPrefNwLabels.length - 2) {
-                        final String prefNwLabel = mUpdatedPrefNwLabels[pos];
-                        mPreferredNetworkTypeResult = mPrefNwLabelToIntMap.get(prefNwLabel);
-                        new Thread(
-                                        () -> {
-                                            mTelephonyManager.setAllowedNetworkTypesForReason(
-                                                    TelephonyManager
-                                                            .ALLOWED_NETWORK_TYPES_REASON_USER,
-                                                    RadioAccessFamily.getRafFromNetworkType(
-                                                            mPreferredNetworkTypeResult));
-                                        })
-                                .start();
-                    }
-                }
-
-                public void onNothingSelected(AdapterView parent) {}
-            };
-
-    OnItemSelectedListener mOnMockSignalStrengthSelectedListener =
-            new OnItemSelectedListener() {
+    AdapterView.OnItemSelectedListener mOnMockSignalStrengthSelectedListener =
+            new AdapterView.OnItemSelectedListener() {
 
                 public void onItemSelected(AdapterView<?> parent, View v, int pos, long id) {
                     log("mOnSignalStrengthSelectedListener: " + pos);
