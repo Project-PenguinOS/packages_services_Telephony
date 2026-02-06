@@ -82,7 +82,7 @@
     <string name="voicemail" msgid="7697769412804195032">"留守番電話"</string>
     <string name="voicemail_settings_with_label" msgid="4228431668214894138">"留守番電話（<xliff:g id="SUBSCRIPTIONLABEL">%s</xliff:g>）"</string>
     <string name="voicemail_abbreviated" msgid="7746778673131551185">"VM:"</string>
-    <string name="make_and_receive_calls" msgid="4868913166494621109">"通話の発着と着信"</string>
+    <string name="make_and_receive_calls" msgid="4868913166494621109">"通話の発信と着信"</string>
     <string name="smart_forwarding_settings_menu" msgid="8850429887958938540">"スマート転送"</string>
     <string name="smart_forwarding_settings_menu_summary" msgid="5096947726032885325">"電話がつながらない場合、必ず別の電話番号に通話を転送する"</string>
     <string name="voicemail_notifications_preference_title" msgid="7829238858063382977">"通知"</string>
@@ -838,6 +838,12 @@
     <string name="supp_service_over_ut_precautions_dialog_dismiss" msgid="5934541487903081652">"閉じる"</string>
     <string name="radio_info_data_connection_enable" msgid="6183729739783252840">"データ接続を有効にする"</string>
     <string name="radio_info_data_connection_disable" msgid="6404751291511368706">"データ接続を無効にする"</string>
+    <string name="radio_info_apply_preferred_network_type" msgid="8828433232282314858">"適用"</string>
+    <string name="radio_info_all_label" msgid="4326377691373938122">"すべて"</string>
+    <string name="radio_info_nr_label" msgid="4346984853962997752">"NR（5G）"</string>
+    <string name="radio_info_lte_label" msgid="5721318031926928485">"LTE（4G）"</string>
+    <string name="radio_info_wcdma_label" msgid="5157664869835235769">"UMTS（3G）"</string>
+    <string name="radio_info_gsm_label" msgid="2947899997551185529">"GSM（2G）"</string>
     <string name="volte_provisioned_switch_string" msgid="4812874990480336178">"VoLTE プロビジョニング有効"</string>
     <string name="vt_provisioned_switch_string" msgid="8295542122512195979">"ビデオ通話プロビジョニング有効"</string>
     <string name="wfc_provisioned_switch_string" msgid="3835004640321078988">"Wi-Fi 通話プロビジョニング有効"</string>

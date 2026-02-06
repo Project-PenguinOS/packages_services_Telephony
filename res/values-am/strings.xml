@@ -838,6 +838,12 @@
     <string name="supp_service_over_ut_precautions_dialog_dismiss" msgid="5934541487903081652">"አሰናብት"</string>
     <string name="radio_info_data_connection_enable" msgid="6183729739783252840">"የውሂብ ግንኙነትን አንቃ"</string>
     <string name="radio_info_data_connection_disable" msgid="6404751291511368706">"የውሂብ ግንኙነትን አሰናክል"</string>
+    <string name="radio_info_apply_preferred_network_type" msgid="8828433232282314858">"ተግብር"</string>
+    <string name="radio_info_all_label" msgid="4326377691373938122">"ሁሉም"</string>
+    <string name="radio_info_nr_label" msgid="4346984853962997752">"NR (5ጂ)"</string>
+    <string name="radio_info_lte_label" msgid="5721318031926928485">"LTE (4ጂ)"</string>
+    <string name="radio_info_wcdma_label" msgid="5157664869835235769">"ዩኤምቲኤስ (3ጂ)"</string>
+    <string name="radio_info_gsm_label" msgid="2947899997551185529">"GSM (2ጂ)"</string>
     <string name="volte_provisioned_switch_string" msgid="4812874990480336178">"በVoLTE የቀረበ"</string>
     <string name="vt_provisioned_switch_string" msgid="8295542122512195979">"የቪዲዮ ጥሪ ቀርቧል"</string>
     <string name="wfc_provisioned_switch_string" msgid="3835004640321078988">"የWifi ጥሪ ቀርቧል"</string>

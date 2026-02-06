@@ -198,6 +198,9 @@
     <!-- Used by PinStorage to gate access to SIM PINs based on device authentication status. -->
     <uses-permission android:name="android.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE"/>
 
+    <!-- Needed to send SMS/MMS over different transport by the Default Messaging App. -->
+    <uses-permission android:name="android.permission.BIND_ALTERNATIVE_MESSAGE_TRANSPORT_SERVICE"/>
+
     <application android:name="PhoneApp"
             android:persistent="true"
             android:label="@string/phoneAppLabel"
