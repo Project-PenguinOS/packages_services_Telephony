@@ -2899,8 +2899,7 @@ abstract class TelephonyConnection extends Connection implements Holdable,
 
         updateStateInternal();
 
-        if (Flags.ignoreStateDetailsUpdateForDomainReselection()
-                && mIsDomainReselectionInProgress) {
+        if (mIsDomainReselectionInProgress) {
             Log.d(this, "updateState: ignore state details update for domain reselection");
         } else {
             updateStateDetails();

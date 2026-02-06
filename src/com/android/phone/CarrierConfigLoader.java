@@ -42,6 +42,7 @@ import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.UserInfo;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -56,6 +57,7 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.preference.PreferenceManager;
 import android.service.carrier.CarrierIdentifier;
 import android.service.carrier.CarrierService;
@@ -67,6 +69,7 @@ import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyFrameworkInitializer;
 import android.telephony.TelephonyManager;
 import android.telephony.TelephonyRegistryManager;
+import android.telephony.UiccAccessRule;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.LocalLog;
@@ -76,6 +79,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.ICarrierConfigLoader;
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.Phone;
+import com.android.internal.telephony.TelephonyStatsLog;
 import com.android.internal.telephony.PhoneConfigurationManager;
 import com.android.internal.telephony.PhoneFactory;
 import com.android.internal.telephony.TelephonyPermissions;
@@ -248,6 +252,8 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
     // UUID to report anomaly when config changed reported with subId that map to invalid phone
     private static final String UUID_NOTIFY_CONFIG_CHANGED_WITH_INVALID_PHONE =
             "d81cef11-c2f1-4d76-955d-7f50e8590c48";
+
+    private static final int INVALID_UID = -1;
 
     // Handler to process various events.
     //
@@ -520,6 +526,7 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
                                     saveConfigToXml(getCarrierPackageForPhoneId(phoneId), "",
                                             phoneId, carrierId, config);
                                     if (config != null) {
+                                        logCarrierServiceCarrierConfigOverrides(phoneId, config);
                                         mConfigFromCarrierApp[phoneId] = config;
                                     } else {
                                         logl("Config from carrier app is null "
@@ -2078,6 +2085,75 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
             indentPW.println("");
         }
         indentPW.decreaseIndent();
+    }
+
+    private int getPackageUidForAnyUser(String packageName) {
+        // First try main user.
+        try {
+            return mPackageManager.getPackageUid(packageName, UserHandle.USER_SYSTEM);
+        } catch (PackageManager.NameNotFoundException e) {
+            // Not found
+        }
+
+        // If not found in main user, try other users.
+        UserManager userManager = mContext.getSystemService(UserManager.class);
+        if (userManager != null) {
+            for (UserInfo user : userManager.getUsers()) {
+                int userId = user.getUserHandle().getIdentifier();
+                try {
+                    return mPackageManager.getPackageUidAsUser(packageName, userId);
+                } catch (PackageManager.NameNotFoundException e) {
+                    // Didn't find package. Continue looking at other users
+                }
+            }
+        }
+
+        return INVALID_UID;
+    }
+
+    private void logCarrierServiceCarrierConfigOverrides(int phoneId,
+            @NonNull PersistableBundle config) {
+        String carrierServicePackageName = getCarrierPackageForPhoneId(phoneId);
+        if (TextUtils.isEmpty(carrierServicePackageName)) {
+            Log.wtf(LOG_TAG, "logCarrierServiceCarrierConfigOverrides called with null or empty "
+                    + "carrierServicePackageName for phoneId=" + phoneId);
+            return;
+        }
+        int carrierServiceUid = getPackageUidForAnyUser(carrierServicePackageName);
+        if (carrierServiceUid == INVALID_UID) {
+            Log.wtf(LOG_TAG, "Unable to find carrier service package: "
+                    + carrierServicePackageName);
+            return;
+        }
+
+        String[] carrierCerts = config.getStringArray(
+                CarrierConfigManager.KEY_CARRIER_CERTIFICATE_STRING_ARRAY);
+        if (ArrayUtils.isEmpty(carrierCerts)) return;
+
+        UiccAccessRule[] accessRules =
+                UiccAccessRule.decodeRulesFromCarrierConfig(carrierCerts);
+        if (ArrayUtils.isEmpty(accessRules)) return;
+
+
+        int carrierId = getSpecificCarrierIdForPhoneId(phoneId);
+
+        Set<Integer> packageUidsSet = new ArraySet<>();
+        for (UiccAccessRule rule : accessRules) {
+            String packageName = rule.getPackageName();
+            if (packageName != null) {
+                int uid = getPackageUidForAnyUser(packageName);
+                if (uid != INVALID_UID) {
+                    packageUidsSet.add(uid);
+                }
+            }
+        }
+
+        int[] packageUids = packageUidsSet.stream().mapToInt(Integer::intValue).toArray();
+
+        TelephonyStatsLog.write(TelephonyStatsLog.CARRIER_SERVICE_CONFIG_OVERRIDES_REPORTED,
+                carrierId,
+                carrierServiceUid,
+                packageUids);
     }
 
     private boolean hasCarrierPrivileges(@NonNull String pkgName, int phoneId) {

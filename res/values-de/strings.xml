@@ -64,7 +64,7 @@
     <string name="apn_settings" msgid="1978652203074756623">"Zugangspunkte (APNs)"</string>
     <string name="settings_label" msgid="9101778088412567956">"Netzwerkeinstellungen"</string>
     <string name="phone_accounts" msgid="1216879437523774604">"Anrufkonten"</string>
-    <string name="phone_accounts_make_calls_with" msgid="16747814788918145">"Telefonieren mit"</string>
+    <string name="phone_accounts_make_calls_with" msgid="16747814788918145">"Anrufen mit"</string>
     <string name="phone_accounts_make_sip_calls_with" msgid="4691221006731847255">"SIP-Anrufe tätigen mit"</string>
     <string name="phone_accounts_ask_every_time" msgid="6192347582666047168">"Erst fragen"</string>
     <string name="phone_accounts_default_account_label" msgid="5107598881335931101">"Kein Netzwerk verfügbar"</string>
@@ -82,7 +82,7 @@
     <string name="voicemail" msgid="7697769412804195032">"Mailbox"</string>
     <string name="voicemail_settings_with_label" msgid="4228431668214894138">"Mailbox (<xliff:g id="SUBSCRIPTIONLABEL">%s</xliff:g>)"</string>
     <string name="voicemail_abbreviated" msgid="7746778673131551185">"MB:"</string>
-    <string name="make_and_receive_calls" msgid="4868913166494621109">"Anrufe tätigen und annehmen"</string>
+    <string name="make_and_receive_calls" msgid="4868913166494621109">"Anrufen oder angerufen werden"</string>
     <string name="smart_forwarding_settings_menu" msgid="8850429887958938540">"Intelligente Weiterleitung"</string>
     <string name="smart_forwarding_settings_menu_summary" msgid="5096947726032885325">"Wenn eine Nummer nicht erreichbar ist, werden Anrufe immer an deine andere Nummer weitergeleitet"</string>
     <string name="voicemail_notifications_preference_title" msgid="7829238858063382977">"Benachrichtigungen"</string>
@@ -838,6 +838,18 @@
     <string name="supp_service_over_ut_precautions_dialog_dismiss" msgid="5934541487903081652">"Schließen"</string>
     <string name="radio_info_data_connection_enable" msgid="6183729739783252840">"Datenverbindung aktivieren"</string>
     <string name="radio_info_data_connection_disable" msgid="6404751291511368706">"Datenverbindung deaktivieren"</string>
+    <!-- no translation found for radio_info_apply_preferred_network_type (8828433232282314858) -->
+    <skip />
+    <!-- no translation found for radio_info_all_label (4326377691373938122) -->
+    <skip />
+    <!-- no translation found for radio_info_nr_label (4346984853962997752) -->
+    <skip />
+    <!-- no translation found for radio_info_lte_label (5721318031926928485) -->
+    <skip />
+    <!-- no translation found for radio_info_wcdma_label (5157664869835235769) -->
+    <skip />
+    <!-- no translation found for radio_info_gsm_label (2947899997551185529) -->
+    <skip />
     <string name="volte_provisioned_switch_string" msgid="4812874990480336178">"VoLTE-Kennzeichnung"</string>
     <string name="vt_provisioned_switch_string" msgid="8295542122512195979">"Videoanrufe eingerichtet"</string>
     <string name="wfc_provisioned_switch_string" msgid="3835004640321078988">"WLAN-Anrufe eingerichtet"</string>
