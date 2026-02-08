@@ -94,7 +94,6 @@ import com.android.internal.telephony.emergency.RadioOnHelper;
 import com.android.internal.telephony.emergency.RadioOnStateListener;
 import com.android.internal.telephony.flags.FeatureFlags;
 import com.android.internal.telephony.flags.FeatureFlagsImpl;
-import com.android.internal.telephony.flags.Flags;
 import com.android.internal.telephony.imsphone.ImsExternalCallTracker;
 import com.android.internal.telephony.imsphone.ImsPhone;
 import com.android.internal.telephony.imsphone.ImsPhoneConnection;
@@ -869,9 +868,7 @@ public class TelephonyConnectionService extends ConnectionService {
                         mEmergencyConnection.close();
 
                         // Handled in the same way as handling the DISCONNECTED state.
-                        if (Flags.ignoreStateDetailsUpdateForDomainReselection()) {
-                            mEmergencyConnection.updateStateDetails();
-                        }
+                        mEmergencyConnection.updateStateDetails();
 
                         TelephonyConnection c = mEmergencyConnection;
                         mEmergencyConnection.removeTelephonyConnectionListener(
@@ -923,10 +920,7 @@ public class TelephonyConnectionService extends ConnectionService {
                                     mNormalCallConnection.close();
 
                                     // Handled in the same way as handling the DISCONNECTED state.
-                                    if (Flags.ignoreStateDetailsUpdateForDomainReselection()) {
-                                        mNormalCallConnection.updateStateDetails();
-                                    }
-
+                                    mNormalCallConnection.updateStateDetails();
                                     mNormalCallConnection = null;
                                 } else {
                                     Log.v(this, "NormalCallConnection is null.");
@@ -938,8 +932,7 @@ public class TelephonyConnectionService extends ConnectionService {
                                 Log.v(this, "DomainSelectionConnection is null.");
 
                                 // Handled in the same way as handling the DISCONNECTED state.
-                                if (mNormalCallConnection != null
-                                        && Flags.ignoreStateDetailsUpdateForDomainReselection()) {
+                                if (mNormalCallConnection != null) {
                                     mNormalCallConnection.updateStateDetails();
                                 }
                             }

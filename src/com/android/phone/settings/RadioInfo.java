@@ -496,16 +496,10 @@ public class RadioInfo extends AppCompatActivity {
     }
 
     private void updatePreferredNetworkType(int type) {
-        if (type >= PhoneInformationUtil.PREFERRED_NETWORK_LABELS.length || type < 0) {
-            log("Network type: unknown type value=" + type);
-// QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
-            mPreferredNetworkTypeResult = mUpdatedPrefNwLabels.length - 1; //set to Unknown
-        } else {
-// QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
-            int index = PhoneInformationUtil.
-                    getPrefNwTypeIndexFromUpdatedArray(type, mUpdatedPrefNwLabels);
-            mPreferredNetworkTypeResult = (index != -1) ? index : mUpdatedPrefNwLabels.length - 1;
-        }
+        int index = PhoneInformationUtil.
+                getPrefNwTypeIndexFromUpdatedArray(type, mUpdatedPrefNwLabels);
+        mPreferredNetworkTypeResult = (index != -1) ? index : mUpdatedPrefNwLabels.length - 1;
+        
         mPreferredNetworkType.setSelection(mPreferredNetworkTypeResult, true);
     }
 

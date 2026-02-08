@@ -82,7 +82,7 @@
     <string name="voicemail" msgid="7697769412804195032">"Buzón de voz"</string>
     <string name="voicemail_settings_with_label" msgid="4228431668214894138">"Buzón de voz (<xliff:g id="SUBSCRIPTIONLABEL">%s</xliff:g>)"</string>
     <string name="voicemail_abbreviated" msgid="7746778673131551185">"Buzón de voz:"</string>
-    <string name="make_and_receive_calls" msgid="4868913166494621109">"Realiza y recibe llamadas"</string>
+    <string name="make_and_receive_calls" msgid="4868913166494621109">"Realizar y recibir llamadas"</string>
     <string name="smart_forwarding_settings_menu" msgid="8850429887958938540">"Desvío inteligente"</string>
     <string name="smart_forwarding_settings_menu_summary" msgid="5096947726032885325">"Cuando un número no está disponible, siempre desvía las llamadas a tu otro número"</string>
     <string name="voicemail_notifications_preference_title" msgid="7829238858063382977">"Notificaciones"</string>
@@ -838,6 +838,12 @@
     <string name="supp_service_over_ut_precautions_dialog_dismiss" msgid="5934541487903081652">"Descartar"</string>
     <string name="radio_info_data_connection_enable" msgid="6183729739783252840">"Habilitar la conexión de datos"</string>
     <string name="radio_info_data_connection_disable" msgid="6404751291511368706">"Inhabilitar la conexión de datos"</string>
+    <string name="radio_info_apply_preferred_network_type" msgid="8828433232282314858">"Aplicar"</string>
+    <string name="radio_info_all_label" msgid="4326377691373938122">"Todos"</string>
+    <string name="radio_info_nr_label" msgid="4346984853962997752">"NR (5G)"</string>
+    <string name="radio_info_lte_label" msgid="5721318031926928485">"LTE (4G)"</string>
+    <string name="radio_info_wcdma_label" msgid="5157664869835235769">"UMTS (3G)"</string>
+    <string name="radio_info_gsm_label" msgid="2947899997551185529">"GSM (2G)"</string>
     <string name="volte_provisioned_switch_string" msgid="4812874990480336178">"VoLTE aprovisionada"</string>
     <string name="vt_provisioned_switch_string" msgid="8295542122512195979">"Videollamadas aprovisionadas"</string>
     <string name="wfc_provisioned_switch_string" msgid="3835004640321078988">"Llamadas por Wi-Fi aprovisionadas"</string>
