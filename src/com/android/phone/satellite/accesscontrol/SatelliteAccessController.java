@@ -2946,7 +2946,8 @@ public class SatelliteAccessController extends Handler {
 
         List<SystemSelectionSpecifier> selectionSpecifiers = new ArrayList<>();
         if (mFeatureFlags.systemSelectionSpecifierEnhancement()) {
-            List<String> mccMncs = mSatelliteController.getSatellitePlmnsForCarrier(subId);
+            List<String> mccMncs =
+                    mSatelliteController.getManualConnectSatellitePlmnsForCarrier(subId);
             mccmnc = mccMncs.isEmpty() ? "" : mccMncs.get(0);
             selectionSpecifiers.add(new SystemSelectionSpecifier(mccmnc, bands, earfcns,
                 satelliteInfos.toArray(new SatelliteInfo[0]), tagIds, subInfo.getIccId(),
