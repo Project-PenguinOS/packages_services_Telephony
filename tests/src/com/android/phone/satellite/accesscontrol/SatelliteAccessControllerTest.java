@@ -2745,7 +2745,7 @@ public class SatelliteAccessControllerTest extends TelephonyTestBase {
         when(mMockSubscriptionInfo.getMccString()).thenReturn("312");
         when(mMockSubscriptionInfo.getMncString()).thenReturn("213");
         when(mMockSubscriptionInfo.getIccId()).thenReturn("12345678901234567890");
-        when(mMockSatelliteController.getSatellitePlmnsForCarrier(anyInt()))
+        when(mMockSatelliteController.getManualConnectSatellitePlmnsForCarrier(anyInt()))
                 .thenReturn(Arrays.asList("310260", "310410"));
 
         // Set non-emergency case
