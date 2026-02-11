@@ -2821,7 +2821,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
             return Settings.Secure.getIntForUser(defaultPhone.getContext().getContentResolver(),
                     Settings.Secure.PREFERRED_TTY_MODE, defaultPhone.getContext().getUserId());
         } catch (Settings.SettingNotFoundException e) {
-            Log.w(LOG_TAG, "Secure setting not found: ", e);
+            // Do nothing. TTY_MODE_OFF will be returned below.
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
