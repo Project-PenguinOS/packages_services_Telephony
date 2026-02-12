@@ -12,10 +12,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License
+// QTI_BEGIN: 2026-02-04: Telephony: FR114115 Dialer Enhancements
  *
  * ​​​​​Changes from Qualcomm Technologies, Inc. are provided under the following license:
  * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  * SPDX-License-Identifier: BSD-3-Clause-Clear
+// QTI_END: 2026-02-04: Telephony: FR114115 Dialer Enhancements
  */
 
 package com.android.services.telephony;
@@ -28,9 +30,13 @@ import android.telecom.Conferenceable;
 import android.telecom.Connection;
 import android.telecom.ConnectionService;
 import android.telecom.DisconnectCause;
+// QTI_BEGIN: 2026-02-04: Telephony: FR114115 Dialer Enhancements
 import android.telecom.PhoneAccount;
+// QTI_END: 2026-02-04: Telephony: FR114115 Dialer Enhancements
 import android.telecom.PhoneAccountHandle;
+// QTI_BEGIN: 2026-02-04: Telephony: FR114115 Dialer Enhancements
 import android.telecom.TelecomManager;
+// QTI_END: 2026-02-04: Telephony: FR114115 Dialer Enhancements
 import android.telephony.CarrierConfigManager;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -38,7 +44,9 @@ import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.flags.FeatureFlags;
 import com.android.internal.telephony.flags.FeatureFlagsImpl;
+// QTI_BEGIN: 2026-02-04: Telephony: FR114115 Dialer Enhancements
 import com.android.phone.PhoneGlobals;
+// QTI_END: 2026-02-04: Telephony: FR114115 Dialer Enhancements
 import com.android.phone.PhoneUtils;
 import com.android.telephony.Rlog;
 
@@ -47,8 +55,12 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+// QTI_BEGIN: 2026-02-04: Telephony: FR114115 Dialer Enhancements
 import java.util.Set;
+// QTI_END: 2026-02-04: Telephony: FR114115 Dialer Enhancements
+// QTI_BEGIN: 2021-08-10: Telephony: Add conferenceable connection if on the same sub
 import java.util.Objects;
+// QTI_END: 2021-08-10: Telephony: Add conferenceable connection if on the same sub
 import java.util.stream.Collectors;
 
 /**
@@ -82,7 +94,9 @@ public class ImsConferenceController {
                 // will be updated for the specified phone account in the case of simultaneous
                 // calling.
                 mTelecomAccountRegistry.refreshAdhocConference(true,
+// QTI_BEGIN: 2026-02-04: Telephony: FR114115 Dialer Enhancements
                         getPhoneAccountHandle(conference), false);
+// QTI_END: 2026-02-04: Telephony: FR114115 Dialer Enhancements
             }
             mImsConferences.remove(conference);
         }
@@ -122,10 +136,12 @@ public class ImsConferenceController {
 
         @Override
         public void onDestroyed(Connection connection) {
+// QTI_BEGIN: 2026-02-04: Telephony: FR114115 Dialer Enhancements
             if (connection instanceof TelephonyConnection) {
                 mTelecomAccountRegistry.refreshAdhocConference(true,
                         getPhoneAccountHandle(connection), false);
             }
+// QTI_END: 2026-02-04: Telephony: FR114115 Dialer Enhancements
             remove(connection);
         }
     };
@@ -265,6 +281,7 @@ public class ImsConferenceController {
         return Objects.equals(leftHandle, rightHandle);
     }
 
+// QTI_BEGIN: 2026-02-04: Telephony: FR114115 Dialer Enhancements
     private PhoneAccountHandle getActiveDsdsPaHandle(TelecomManager tm) {
         if (tm == null) {
             return null;
@@ -286,6 +303,7 @@ public class ImsConferenceController {
         return null;
     }
 
+// QTI_END: 2026-02-04: Telephony: FR114115 Dialer Enhancements
     /**
      * Calculates the conference-capable state of all GSM connections in this connection service.
      * Connections from different {@link PhoneAccountHandle}s shall not be conferenceable.
@@ -295,6 +313,7 @@ public class ImsConferenceController {
         HashSet<Conferenceable> conferenceableSet = new HashSet<>(mTelephonyConnections.size() +
                 mImsConferences.size());
         HashSet<Connection> conferenceParticipantsSet = new HashSet<>();
+// QTI_BEGIN: 2026-02-04: Telephony: FR114115 Dialer Enhancements
         TelecomManager tm = PhoneGlobals.getInstance()
                 .getSystemService(TelecomManager.class);
         PhoneAccountHandle activeDsdsPaHandle = getActiveDsdsPaHandle(tm);
@@ -306,6 +325,7 @@ public class ImsConferenceController {
                         handle, activeDsdsPaHandle != null);
             }
         }
+// QTI_END: 2026-02-04: Telephony: FR114115 Dialer Enhancements
 
         // Loop through and collect all calls which are active or holding
         for (TelephonyConnection connection : mTelephonyConnections) {
@@ -369,7 +389,9 @@ public class ImsConferenceController {
             // is hosted on this device. However, for simultaneous calling, we WILL allow UE to host
             // a conference call on each subscription.
             mTelecomAccountRegistry.refreshAdhocConference(false,
+// QTI_BEGIN: 2026-02-04: Telephony: FR114115 Dialer Enhancements
                     getPhoneAccountHandle(conference), false);
+// QTI_END: 2026-02-04: Telephony: FR114115 Dialer Enhancements
             switch (conference.getState()) {
                 case Connection.STATE_ACTIVE:
                     //fall through
