@@ -2820,7 +2820,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
             return Settings.Secure.getIntForUser(defaultPhone.getContext().getContentResolver(),
                     Settings.Secure.PREFERRED_TTY_MODE, defaultPhone.getContext().getUserId());
         } catch (Settings.SettingNotFoundException e) {
-            Log.w(LOG_TAG, "Secure setting not found: ", e);
+            // Do nothing. TTY_MODE_OFF will be returned below.
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -8794,6 +8794,11 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     @Override
     @TelephonyManager.SetCarrierRestrictionResult
     public int setAllowedCarriers(CarrierRestrictionRules carrierRestrictionRules) {
+        // Shell has MODIFY_PHONE_STATE permission even without root
+        // But we don't want adb shell to disable carrier restrictions
+        if (TelephonyPermissions.isShell(Binder.getCallingUid())) {
+            throw new SecurityException("setAllowedCarriers cannot be invoked by shell");
+        }
         enforceModifyPermission();
 
         enforceTelephonyFeatureWithException(getCurrentPackageName(),
