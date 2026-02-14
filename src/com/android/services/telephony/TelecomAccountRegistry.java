@@ -1900,34 +1900,8 @@ public class TelecomAccountRegistry {
                     for (Phone phone : phones) {
                         int subscriptionId = phone.getSubId();
                         Log.i(this, "setupAccounts: Phone with subscription id %d", subscriptionId);
-                        // setupAccounts can be called multiple times during service changes.
-                        // Don't add an account if subscription is not ready.
-                        if (!SubscriptionManager.isValidSubscriptionId(subscriptionId)) {
-                            Log.d(this, "setupAccounts: skipping invalid subid %d", subscriptionId);
-                            continue;
-                        }
-                        // Don't add account if it's opportunistic subscription, which is considered
-                        // data only for now.
-                        SubscriptionInfo info = SubscriptionManager.from(mContext)
-                                .getActiveSubscriptionInfo(subscriptionId);
-                        if (info == null || info.isOpportunistic()) {
-                            Log.d(this, "setupAccounts: skipping unknown or opportunistic subid %d",
-                                    subscriptionId);
-                            continue;
-                        }
 
-                        // Skip the sim for bootstrap
-                        if (info.getProfileClass() == SubscriptionManager
-                                .PROFILE_CLASS_PROVISIONING) {
-                            Log.d(this, "setupAccounts: skipping bootstrap sub id "
-                                    + subscriptionId);
-                            continue;
-                        }
-
-                        // Skip the sim for satellite as it does not support call for now
-                        if (info.isOnlyNonTerrestrialNetwork()) {
-                            Log.d(this, "setupAccounts: skipping satellite sub id "
-                                    + subscriptionId);
+                        if (shouldSkipAccountEntry(subscriptionId)) {
                             continue;
                         }
 
@@ -1986,6 +1960,50 @@ public class TelecomAccountRegistry {
 
         // Clean up any PhoneAccounts that are no longer relevant
         cleanupPhoneAccounts();
+    }
+
+    private boolean shouldSkipAccountEntry(int subscriptionId) {
+        // setupAccounts can be called multiple times during service changes.
+        // Don't add an account if subscription is not ready.
+        if (!SubscriptionManager.isValidSubscriptionId(subscriptionId)) {
+            Log.d(this, "setupAccounts: skipping invalid subid %d", subscriptionId);
+            return true;
+        }
+
+        // Don't add account if it's opportunistic subscription, which is considered
+        // data only for now.
+        SubscriptionInfo info = mSubscriptionManager.getActiveSubscriptionInfo(subscriptionId);
+        if (info == null || info.isOpportunistic()) {
+            Log.d(this, "setupAccounts: skipping unknown or opportunistic subid %d",
+                    subscriptionId);
+            return true;
+        }
+
+        // Private networks are considered data only for now. Skip them for telecom
+        // accounts.
+        if (Flags.skipPrivateNetworkForTelecomAccount()
+                && info.isPrivateNetwork()) {
+            Log.d(this, "setupAccounts: skipping private network subid %d",
+                    subscriptionId);
+            return true;
+        }
+
+        // Skip the sim for bootstrap
+        if (info.getProfileClass() == SubscriptionManager
+                .PROFILE_CLASS_PROVISIONING) {
+            Log.d(this, "setupAccounts: skipping bootstrap sub id "
+                    + subscriptionId);
+            return true;
+        }
+
+        // Skip the sim for satellite as it does not support call for now
+        if (info.isOnlyNonTerrestrialNetwork()) {
+            Log.d(this, "setupAccounts: skipping satellite sub id "
+                    + subscriptionId);
+            return true;
+        }
+
+        return false;
     }
 
     private void tearDownAccounts() {
