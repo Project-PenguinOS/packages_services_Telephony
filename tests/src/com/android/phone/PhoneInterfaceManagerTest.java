@@ -27,8 +27,8 @@ import static android.telephony.TelephonyManager.SIM_PIN_ENROLLMENT_RESULT_SUCCE
 import static android.telephony.TelephonyManager.SIM_PIN_UNENROLLMENT_RESULT_FAILED_CANNOT_CHANGE_PIN;
 import static android.telephony.TelephonyManager.SIM_PIN_UNENROLLMENT_RESULT_FAILED_CANNOT_DISABLE_PIN;
 import static android.telephony.TelephonyManager.SIM_PIN_UNENROLLMENT_RESULT_FAILED_NOT_ENROLLED;
-import static android.telephony.TelephonyManager.SIM_PIN_UNENROLLMENT_RESULT_FAILED_SIM_NOT_PRESENT;
 import static android.telephony.TelephonyManager.SIM_PIN_UNENROLLMENT_RESULT_FAILED_PIN_UNAVAILABLE;
+import static android.telephony.TelephonyManager.SIM_PIN_UNENROLLMENT_RESULT_FAILED_SIM_NOT_PRESENT;
 import static android.telephony.TelephonyManager.SIM_PIN_UNENROLLMENT_RESULT_SUCCESSFUL;
 
 import static com.android.internal.telephony.util.TelephonyUtils.TELEPHONY_FEATURE_ENFORCEMENT_VENDOR_API_LEVEL;
@@ -40,6 +40,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -68,6 +69,7 @@ import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
+import android.telephony.CarrierConfigManager;
 import android.telephony.NetworkSecurityEvent;
 import android.telephony.RadioAccessFamily;
 import android.telephony.Rlog;
@@ -76,6 +78,8 @@ import android.telephony.TelephonyManager;
 import android.telephony.UiccPortInfo;
 import android.telephony.UiccSlotInfo;
 import android.telephony.UiccSlotMapping;
+import android.telephony.satellite.EnableRequestAttributes;
+import android.telephony.satellite.SatelliteManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.Pair;
@@ -1216,5 +1220,33 @@ public class PhoneInterfaceManagerTest extends TelephonyTestBase {
         Bundle received = captor.getValue();
         assertEquals("5678", received.getString(
                 TelephonyManager.KEY_MANAGED_SIM_PIN_ENROLLMENT_GENERATED_PIN));
+    }
+
+    @Test
+    public void testRequestEnableSatellite_Auto() {
+        final int subId = 1;
+
+        // Setup attributes for automatic mode
+        EnableRequestAttributes attributes = new EnableRequestAttributes.Builder(true)
+                .setConnectType(CarrierConfigManager.CARRIER_ROAMING_NTN_CONNECT_AUTOMATIC)
+                .setSatelliteEnablementRequestReason(
+                        SatelliteManager.SATELLITE_ENABLEMENT_REQUEST_REASON_USER
+                )
+                .build();
+
+        // Mock permission check
+        doNothing().when(mPhoneGlobals).enforceCallingOrSelfPermission(
+                eq(Manifest.permission.SATELLITE_COMMUNICATION), anyString());
+
+        // Call requestEnableSatellite
+        mPhoneInterfaceManager.requestEnableSatellite(subId, attributes, mIIntegerConsumer);
+
+        // Verify mSatelliteController.requestEnableSatelliteForCarrier is called
+        verify(mSatelliteController).requestEnableSatelliteForCarrier(eq(subId),
+                eq(SatelliteManager.SATELLITE_COMMUNICATION_RESTRICTION_REASON_USER),
+                eq(mIIntegerConsumer));
+        // Verify mSatelliteController.requestSatelliteEnabled is NOT called
+        verify(mSatelliteController, never())
+                .requestSatelliteEnabled(anyBoolean(), anyBoolean(), anyBoolean(), any());
     }
 }

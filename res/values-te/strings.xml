@@ -302,7 +302,7 @@
     <string name="sip_accounts_removed_notification_message" msgid="1916856744869791592">"SIP కాలింగ్‌కు ఇకపై Android ప్లాట్‌ఫామ్‌లో సపోర్ట్ ఉండదు.\nఇప్పటికే ఉన్న మీ SIP ఖాతాలు<xliff:g id="REMOVED_SIP_ACCOUNTS">%s</xliff:g> తీసివేయబడ్డాయి.\nదయచేసి మీ ఆటోమేటిక్ కాలింగ్ ఖాతా సెట్టింగ్‌ను ధృవీకరించండి."</string>
     <string name="sip_accounts_removed_notification_action" msgid="3772778402370555562">"సెట్టింగ్‌లకు వెళ్లు"</string>
     <string name="data_usage_title" msgid="8438592133893837464">"యాప్ డేటా వినియోగం"</string>
-    <string name="data_usage_template" msgid="6287906680674061783">"<xliff:g id="ID_2">%2$s</xliff:g> మధ్య కాలంలో <xliff:g id="ID_1">%1$s</xliff:g> మొబైల్ డేటా ఉపయోగించబడింది"</string>
+    <string name="data_usage_template" msgid="6287906680674061783">"<xliff:g id="ID_2">%2$s</xliff:g> మధ్య కాలంలో <xliff:g id="ID_1">%1$s</xliff:g> మొబైల్ డేటాను ఉపయోగించారు"</string>
     <string name="advanced_options_title" msgid="9208195294513520934">"అడ్వాన్స్‌డ్ సెట్టింగ్స్"</string>
     <string name="carrier_settings_euicc" msgid="1190237227261337749">"క్యారియర్"</string>
     <string name="keywords_carrier_settings_euicc" msgid="8540160967922063745">"క్యారియర్, ఇసిమ్, సిమ్, ఇయుక్, క్యారియర్‌లను మార్చు, క్యారియర్‌ను జోడించండి"</string>
