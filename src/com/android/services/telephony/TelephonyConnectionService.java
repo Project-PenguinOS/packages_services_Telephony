@@ -2257,6 +2257,10 @@ public class TelephonyConnectionService extends ConnectionService {
         if (connection instanceof Holdable && !isExternalConnection(connection)) {
             mHoldTracker.removeHoldable((Holdable) connection);
         }
+        if (connection instanceof TelephonyConnection) {
+            removeConnectionRemovedListener((TelephonyConnection)connection);
+            fireOnConnectionRemoved((TelephonyConnection)connection);
+        }
     }
 
     @Override
@@ -4587,17 +4591,6 @@ public class TelephonyConnectionService extends ConnectionService {
         }
 
         return true;
-    }
-
-    @Override
-    public void removeConnection(Connection connection) {
-        super.removeConnection(connection);
-        if (connection instanceof TelephonyConnection) {
-// QTI_BEGIN: 2018-02-22: Telephony: IMS-VT: Fix add call option missing issue after ending VT call.
-            removeConnectionRemovedListener((TelephonyConnection)connection);
-            fireOnConnectionRemoved((TelephonyConnection)connection);
-// QTI_END: 2018-02-22: Telephony: IMS-VT: Fix add call option missing issue after ending VT call.
-        }
     }
 
     TelephonyConnection.TelephonyConnectionListener getTelephonyConnectionListener() {
