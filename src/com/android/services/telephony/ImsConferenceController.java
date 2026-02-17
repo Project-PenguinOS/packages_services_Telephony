@@ -41,6 +41,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 /**
@@ -135,7 +136,7 @@ public class ImsConferenceController {
      * One conference call can be a host conference call and another conference call formed as a
      * result of accepting incoming conference call.
      */
-    private final ArrayList<ImsConference> mImsConferences = new ArrayList<>(2);
+    private final List<ImsConference> mImsConferences = new CopyOnWriteArrayList<>();
 
     private TelecomAccountRegistry mTelecomAccountRegistry;
 
@@ -579,6 +580,33 @@ public class ImsConferenceController {
                     .setIsMultiPartyAnchorConfSupported(isMultiPartyAnchorConfSupported);
         }
         return config.build();
+    }
+
+    /**
+     * Determines if there is an active conference for the given phone account handle.
+     *
+     * @param handle The phone account handle.
+     * @return {@code true} if there is an active conference, {@code false} otherwise.
+     */
+    public boolean hasActiveConference(PhoneAccountHandle handle) {
+        for (ImsConference conference : mImsConferences) {
+            boolean multiPartyAnchorConfSupported =
+                    android.telecom.flags.Flags.multiPartyAnchorConf() &&
+                    conference.getCarrierConfig() != null &&
+                    conference.getCarrierConfig().isMultiPartyAnchorConfSupported();
+
+            if (!conference.isConferenceHost() && !multiPartyAnchorConfSupported) {
+                if (Log.VERBOSE) {
+                    Log.v(this, "skipping conference (not hosted on this device): %s", conference);
+                }
+                continue;
+            }
+
+            if (Objects.equals(getPhoneAccountHandle(conference), handle)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /* Only for testing */

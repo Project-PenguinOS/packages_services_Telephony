@@ -492,7 +492,13 @@ public class TelecomAccountRegistry {
             }
 
             if (mIsAdhocConfCapable && isCarrierAdhocConferenceCallSupported()) {
-                capabilities |= PhoneAccount.CAPABILITY_ADHOC_CONFERENCE_CALLING;
+                // If there is an active conference call, disable adhoc conference capability.
+                if (mTelephonyConnectionService != null
+                        && mTelephonyConnectionService.isConferenceActive(phoneAccountHandle)) {
+                    capabilities &= ~PhoneAccount.CAPABILITY_ADHOC_CONFERENCE_CALLING;
+                } else {
+                    capabilities |= PhoneAccount.CAPABILITY_ADHOC_CONFERENCE_CALLING;
+                }
             } else {
                 capabilities &= ~PhoneAccount.CAPABILITY_ADHOC_CONFERENCE_CALLING;
             }
