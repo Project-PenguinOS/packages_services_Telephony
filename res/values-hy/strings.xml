@@ -76,7 +76,7 @@
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"Բոլոր հաշիվները զանգերի համար"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"Ընտրեք՝ որ հաշիվները կարող են զանգեր կատարել"</string>
     <string name="voip_call_log_integration_label" msgid="2349275524959944815">"Կողմնակի հավելվածներ"</string>
-    <string name="voip_call_log_integration_summary" msgid="3834075007862607039">"Ընտրեք, թե որ հավելվածները կարող են ինտեգրել իրենց զանգերը համակարգի զանգերի մատյանում։ Այս ընտրանքն անջատելու դեպքում հավելվածի մատյանները չեն ցուցադրվի հեռախոսի հիմնական հավելվածում։"</string>
+    <string name="voip_call_log_integration_summary" msgid="196486049335079938">"Թույլատրել այլ հավելվածներին ցույց տալ զանգերը ձեր զանգերի պատմության մեջ։ Եթե անջատեք այս գործառույթը, այդ զանգերը կհայտնվեն միայն համապատասխան հավելվածներում։"</string>
     <string name="wifi_calling" msgid="3650509202851355742">"Զանգեր Wi-Fi-ի միջոցով"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"Ներկառուցված կապի ծառայություն"</string>
     <string name="voicemail" msgid="7697769412804195032">"Ձայնային փոստ"</string>
@@ -643,7 +643,7 @@
     <string name="ota_spc_failure" msgid="904092035241370080">"SPC գերազանցման ձախողումներ"</string>
     <string name="ota_call_end" msgid="8657746378290737034">"Հետ"</string>
     <string name="ota_try_again" msgid="6914781945599998550">"Կրկին փորձեք"</string>
-    <string name="ota_next" msgid="2041016619313475914">"Հաջորդը"</string>
+    <string name="ota_next" msgid="2041016619313475914">"Հաջորդ"</string>
     <string name="ecm_exit_dialog" msgid="4200691880721429078">"EcmExitDialog"</string>
     <string name="phone_entered_ecm_text" msgid="8431238297843035842">"Գտնվում է արտակարգ իրավիճակների հետզանգի ռեժիմում"</string>
     <string name="phone_in_ecm_notification_title" msgid="6825016389926367946">"Արտակարգ իրավիճակների հետզանգի ռեժիմ"</string>
@@ -838,6 +838,18 @@
     <string name="supp_service_over_ut_precautions_dialog_dismiss" msgid="5934541487903081652">"Փակել"</string>
     <string name="radio_info_data_connection_enable" msgid="6183729739783252840">"Միացնել տվյալների կապը"</string>
     <string name="radio_info_data_connection_disable" msgid="6404751291511368706">"Անջատել տվյալների կապը"</string>
+    <!-- no translation found for radio_info_apply_preferred_network_type (8828433232282314858) -->
+    <skip />
+    <!-- no translation found for radio_info_all_label (4326377691373938122) -->
+    <skip />
+    <!-- no translation found for radio_info_nr_label (4346984853962997752) -->
+    <skip />
+    <!-- no translation found for radio_info_lte_label (5721318031926928485) -->
+    <skip />
+    <!-- no translation found for radio_info_wcdma_label (5157664869835235769) -->
+    <skip />
+    <!-- no translation found for radio_info_gsm_label (2947899997551185529) -->
+    <skip />
     <string name="volte_provisioned_switch_string" msgid="4812874990480336178">"VoLTE-ի տրամադրում"</string>
     <string name="vt_provisioned_switch_string" msgid="8295542122512195979">"Տեսազանգերի նախապատրաստում"</string>
     <string name="wfc_provisioned_switch_string" msgid="3835004640321078988">"Wifi զանգերի նախապատրաստում"</string>

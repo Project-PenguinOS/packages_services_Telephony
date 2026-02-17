@@ -76,7 +76,7 @@
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"Всички профили за обаждане"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"Изберете от кои профили могат да се извършват обаждания"</string>
     <string name="voip_call_log_integration_label" msgid="2349275524959944815">"Приложения на трети страни"</string>
-    <string name="voip_call_log_integration_summary" msgid="3834075007862607039">"Контролирайте кои приложения могат да интегрират обажданията си в системния регистър на обажданията. Деактивирането на тази опция ще попречи на регистрационните файлове на приложението да се показват в основното приложение за телефон."</string>
+    <string name="voip_call_log_integration_summary" msgid="196486049335079938">"Разрешаване на другите приложения да показват обаждания в историята на обажданията ви. Ако е изключено, тези обаждания ще се показват само в съответните им приложения."</string>
     <string name="wifi_calling" msgid="3650509202851355742">"Обаждания през Wi-Fi"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"Вградена услуга за свързване"</string>
     <string name="voicemail" msgid="7697769412804195032">"Гласова поща"</string>
@@ -838,6 +838,12 @@
     <string name="supp_service_over_ut_precautions_dialog_dismiss" msgid="5934541487903081652">"Отхвърляне"</string>
     <string name="radio_info_data_connection_enable" msgid="6183729739783252840">"Активиране на връзката за данни"</string>
     <string name="radio_info_data_connection_disable" msgid="6404751291511368706">"Деактивиране на връзката за данни"</string>
+    <string name="radio_info_apply_preferred_network_type" msgid="8828433232282314858">"Прилагане"</string>
+    <string name="radio_info_all_label" msgid="4326377691373938122">"Всички"</string>
+    <string name="radio_info_nr_label" msgid="4346984853962997752">"NR (5G)"</string>
+    <string name="radio_info_lte_label" msgid="5721318031926928485">"LTE (4G)"</string>
+    <string name="radio_info_wcdma_label" msgid="5157664869835235769">"UMTS (3G)"</string>
+    <string name="radio_info_gsm_label" msgid="2947899997551185529">"GSM (2G)"</string>
     <string name="volte_provisioned_switch_string" msgid="4812874990480336178">"Обезпечен за VoLTE"</string>
     <string name="vt_provisioned_switch_string" msgid="8295542122512195979">"Видеообажданията са обезпечени"</string>
     <string name="wfc_provisioned_switch_string" msgid="3835004640321078988">"Обажданията през Wi-Fi са обезпечени"</string>

@@ -76,7 +76,7 @@
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"سبھی کالنگ اکاؤنٹس"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"منتخب کریں کہ کون سے اکاؤنٹس کالز کر سکتے ہیں"</string>
     <string name="voip_call_log_integration_label" msgid="2349275524959944815">"فریق ثالث کی ایپس"</string>
-    <string name="voip_call_log_integration_summary" msgid="3834075007862607039">"اس امر کو کنٹرول کریں کہ کون سی ایپس اپنی کالز کو سسٹم کال لاگ میں ضم کر سکتی ہیں۔ اس اختیار کو غیر فعال کرنے سے ایپ کے لاگز کو مرکزی فون ایپ میں ڈسپلے ہونے سے روک دیا جائے گا۔"</string>
+    <string name="voip_call_log_integration_summary" msgid="196486049335079938">"دیگر ایپس کو اپنی کال کی سرگزشت میں کالز دکھانے کی اجازت دیں۔ آف ہونے پر، یہ کالز صرف اپنی مخصوص ایپس میں دکھائی دیں گی۔"</string>
     <string name="wifi_calling" msgid="3650509202851355742">"‏Wi-Fi کالنگ"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"پہلے سے شامل کنکشن سروس"</string>
     <string name="voicemail" msgid="7697769412804195032">"صوتی میل"</string>
@@ -838,6 +838,18 @@
     <string name="supp_service_over_ut_precautions_dialog_dismiss" msgid="5934541487903081652">"مسترد کریں"</string>
     <string name="radio_info_data_connection_enable" msgid="6183729739783252840">"ڈیٹا کنکشن فعال کریں"</string>
     <string name="radio_info_data_connection_disable" msgid="6404751291511368706">"ڈیٹا کنکشن غیر فعال کریں"</string>
+    <!-- no translation found for radio_info_apply_preferred_network_type (8828433232282314858) -->
+    <skip />
+    <!-- no translation found for radio_info_all_label (4326377691373938122) -->
+    <skip />
+    <!-- no translation found for radio_info_nr_label (4346984853962997752) -->
+    <skip />
+    <!-- no translation found for radio_info_lte_label (5721318031926928485) -->
+    <skip />
+    <!-- no translation found for radio_info_wcdma_label (5157664869835235769) -->
+    <skip />
+    <!-- no translation found for radio_info_gsm_label (2947899997551185529) -->
+    <skip />
     <string name="volte_provisioned_switch_string" msgid="4812874990480336178">"‏VoLTE سے لیس"</string>
     <string name="vt_provisioned_switch_string" msgid="8295542122512195979">"ویڈیو کالنگ فراہم کردہ"</string>
     <string name="wfc_provisioned_switch_string" msgid="3835004640321078988">"‏WiFi کالنگ فراہم کردہ"</string>

@@ -76,7 +76,7 @@
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"所有通話帳戶"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"選擇可以撥號的帳戶"</string>
     <string name="voip_call_log_integration_label" msgid="2349275524959944815">"第三方應用程式"</string>
-    <string name="voip_call_log_integration_summary" msgid="3834075007862607039">"控制哪些應用程式可將通話整合至系統通話記錄。停用此選項將禁止在主要電話應用程式中顯示應用程式記錄。"</string>
+    <string name="voip_call_log_integration_summary" msgid="196486049335079938">"允許其他應用程式在通話記錄中顯示通話。關閉後，這些通話只會在特定應用程式中顯示。"</string>
     <string name="wifi_calling" msgid="3650509202851355742">"Wi-Fi 通話"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"內置連線服務"</string>
     <string name="voicemail" msgid="7697769412804195032">"留言信箱"</string>
@@ -838,6 +838,12 @@
     <string name="supp_service_over_ut_precautions_dialog_dismiss" msgid="5934541487903081652">"關閉"</string>
     <string name="radio_info_data_connection_enable" msgid="6183729739783252840">"啟用數據連線"</string>
     <string name="radio_info_data_connection_disable" msgid="6404751291511368706">"停用數據連線"</string>
+    <string name="radio_info_apply_preferred_network_type" msgid="8828433232282314858">"套用"</string>
+    <string name="radio_info_all_label" msgid="4326377691373938122">"全部"</string>
+    <string name="radio_info_nr_label" msgid="4346984853962997752">"NR (5G)"</string>
+    <string name="radio_info_lte_label" msgid="5721318031926928485">"LTE (4G)"</string>
+    <string name="radio_info_wcdma_label" msgid="5157664869835235769">"UMTS (3G)"</string>
+    <string name="radio_info_gsm_label" msgid="2947899997551185529">"GSM (2G)"</string>
     <string name="volte_provisioned_switch_string" msgid="4812874990480336178">"已佈建 VoLTE"</string>
     <string name="vt_provisioned_switch_string" msgid="8295542122512195979">"已佈建視像通話"</string>
     <string name="wfc_provisioned_switch_string" msgid="3835004640321078988">"已佈建 Wi-Fi 通話"</string>

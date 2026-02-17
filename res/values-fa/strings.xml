@@ -76,7 +76,7 @@
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"همه حساب‌های تماس"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"انتخاب حساب‌هایی که می‌توانند تماس بگیرند"</string>
     <string name="voip_call_log_integration_label" msgid="2349275524959944815">"برنامه‌های کاربردی شخص ثالث"</string>
-    <string name="voip_call_log_integration_summary" msgid="3834075007862607039">"کنترل کنید کدام برنامه‌ها می‌توانند تماس‌هایشان را در گزارش تماس سیستم ادغام کنند. غیرفعال کردن این گزینه باعث می‌شود گزارش‌های برنامه در برنامه اصلی تلفن نمایش داده نشود."</string>
+    <string name="voip_call_log_integration_summary" msgid="196486049335079938">"به برنامه‌های دیگر اجازه می‌دهد تماس‌ها را در سابقه تماستان نشان دهند. اگر خاموش شود، این تماس‌ها فقط در برنامه‌های خاص خودشان نشان داده می‌شود."</string>
     <string name="wifi_calling" msgid="3650509202851355742">"‏تماس از طریق Wi-Fi"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"سرویس اتصال داخلی"</string>
     <string name="voicemail" msgid="7697769412804195032">"پست صوتی"</string>
@@ -300,7 +300,7 @@
     <string name="limited_sim_function_notification_message" msgid="5338638075496721160">"ممکن است درحین استفاده از سیم‌کارت دیگر، سرویس‌های داده و تماس <xliff:g id="CARRIER_NAME">%1$s</xliff:g> مسدود شوند."</string>
     <string name="sip_accounts_removed_notification_title" msgid="3528076957535736095">"‏حساب‌های SIP منسوخ‌شده پیدا و برداشته شدند"</string>
     <string name="sip_accounts_removed_notification_message" msgid="1916856744869791592">"‏تماس SIP دیگر در پلاتفرم Android پشتیبانی نمی‌شود.\nحساب‌های SIP موجود شما (<xliff:g id="REMOVED_SIP_ACCOUNTS">%s</xliff:g>) برداشته شدند.\nلطفاً تنظیم حساب تماس پیش‌فرض را تأیید کنید."</string>
-    <string name="sip_accounts_removed_notification_action" msgid="3772778402370555562">"رفتن به تنظیمات"</string>
+    <string name="sip_accounts_removed_notification_action" msgid="3772778402370555562">"رفتن به «تنظیمات»"</string>
     <string name="data_usage_title" msgid="8438592133893837464">"مصرف داده برنامه"</string>
     <string name="data_usage_template" msgid="6287906680674061783">"<xliff:g id="ID_1">%1$s</xliff:g> داده تلفن همراه مصرف‌شده در <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="advanced_options_title" msgid="9208195294513520934">"پیشرفته"</string>
@@ -641,7 +641,7 @@
     <string name="ota_successful" msgid="1106825981548107774">"گوشی شما در حال حاضر فعال است. راه‌اندازی سرویس ممکن است ۱۵ دقیقه طول بکشد."</string>
     <string name="ota_unsuccessful" msgid="8531037653803955754">"تلفن شما فعال نشد. \nممکن است لازم باشد منطقه‌ای با پوشش بهتر (در نزدیکی پنجره، یا خارج از ساختمان) پیدا کنید. \n\nدوباره امتحان کنید یا برای اطلاع از گزینه‌های بیشتر، با سرویس مشتری تماس بگیرید."</string>
     <string name="ota_spc_failure" msgid="904092035241370080">"‏خطاهای SPC بسیار زیاد"</string>
-    <string name="ota_call_end" msgid="8657746378290737034">"برگشت"</string>
+    <string name="ota_call_end" msgid="8657746378290737034">"برگشتن"</string>
     <string name="ota_try_again" msgid="6914781945599998550">"دوباره امتحان کنید"</string>
     <string name="ota_next" msgid="2041016619313475914">"بعدی"</string>
     <string name="ecm_exit_dialog" msgid="4200691880721429078">"EcmExitDialog"</string>
@@ -838,6 +838,12 @@
     <string name="supp_service_over_ut_precautions_dialog_dismiss" msgid="5934541487903081652">"بستن"</string>
     <string name="radio_info_data_connection_enable" msgid="6183729739783252840">"فعال کردن اتصال داده"</string>
     <string name="radio_info_data_connection_disable" msgid="6404751291511368706">"غیرفعال کردن اتصال داده"</string>
+    <string name="radio_info_apply_preferred_network_type" msgid="8828433232282314858">"اعمال"</string>
+    <string name="radio_info_all_label" msgid="4326377691373938122">"همه"</string>
+    <string name="radio_info_nr_label" msgid="4346984853962997752">"NR (5G)"</string>
+    <string name="radio_info_lte_label" msgid="5721318031926928485">"LTE (4G)"</string>
+    <string name="radio_info_wcdma_label" msgid="5157664869835235769">"UMTS (3G)"</string>
+    <string name="radio_info_gsm_label" msgid="2947899997551185529">"‏‫GSM (نسل دوم)"</string>
     <string name="volte_provisioned_switch_string" msgid="4812874990480336178">"‏مشروط به VoLTE"</string>
     <string name="vt_provisioned_switch_string" msgid="8295542122512195979">"مجوز تماس تصویری داده شد"</string>
     <string name="wfc_provisioned_switch_string" msgid="3835004640321078988">"‏مجوز تماس با Wifi داده شد"</string>

@@ -76,13 +76,13 @@
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"All calling accounts"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"Select which accounts can make calls"</string>
     <string name="voip_call_log_integration_label" msgid="2349275524959944815">"Third-party apps"</string>
-    <string name="voip_call_log_integration_summary" msgid="3834075007862607039">"Control which apps can integrate their calls into the system call log. Disabling this option will prevent the app\'s logs from being displayed in the main phone app."</string>
+    <string name="voip_call_log_integration_summary" msgid="196486049335079938">"Allow other apps to show calls in your call history. If turned off, these calls will only appear in their specific apps."</string>
     <string name="wifi_calling" msgid="3650509202851355742">"Wi-Fi calling"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"Built-in connection service"</string>
     <string name="voicemail" msgid="7697769412804195032">"Voicemail"</string>
     <string name="voicemail_settings_with_label" msgid="4228431668214894138">"Voicemail (<xliff:g id="SUBSCRIPTIONLABEL">%s</xliff:g>)"</string>
     <string name="voicemail_abbreviated" msgid="7746778673131551185">"VM:"</string>
-    <string name="make_and_receive_calls" msgid="4868913166494621109">"Make &amp; receive calls"</string>
+    <string name="make_and_receive_calls" msgid="4868913166494621109">"Make and receive calls"</string>
     <string name="smart_forwarding_settings_menu" msgid="8850429887958938540">"Smart forwarding"</string>
     <string name="smart_forwarding_settings_menu_summary" msgid="5096947726032885325">"When one number isn\'t reachable, always forward calls to your other number"</string>
     <string name="voicemail_notifications_preference_title" msgid="7829238858063382977">"Notifications"</string>
@@ -838,6 +838,12 @@
     <string name="supp_service_over_ut_precautions_dialog_dismiss" msgid="5934541487903081652">"Dismiss"</string>
     <string name="radio_info_data_connection_enable" msgid="6183729739783252840">"Enable data connection"</string>
     <string name="radio_info_data_connection_disable" msgid="6404751291511368706">"Disable data connection"</string>
+    <string name="radio_info_apply_preferred_network_type" msgid="8828433232282314858">"Apply"</string>
+    <string name="radio_info_all_label" msgid="4326377691373938122">"All"</string>
+    <string name="radio_info_nr_label" msgid="4346984853962997752">"NR (5G)"</string>
+    <string name="radio_info_lte_label" msgid="5721318031926928485">"LTE (4G)"</string>
+    <string name="radio_info_wcdma_label" msgid="5157664869835235769">"UMTS (3G)"</string>
+    <string name="radio_info_gsm_label" msgid="2947899997551185529">"GSM (2G)"</string>
     <string name="volte_provisioned_switch_string" msgid="4812874990480336178">"VoLTE provisioned"</string>
     <string name="vt_provisioned_switch_string" msgid="8295542122512195979">"Video calling provisioned"</string>
     <string name="wfc_provisioned_switch_string" msgid="3835004640321078988">"Wi-Fi calling provisioned"</string>

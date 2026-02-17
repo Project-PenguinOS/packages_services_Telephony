@@ -76,7 +76,7 @@
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"બધા કૉલિંગ એકાઉન્ટ્સ"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"કયા એકાઉન્ટ્સ કૉલ કરી શકે તે પસંદ કરો"</string>
     <string name="voip_call_log_integration_label" msgid="2349275524959944815">"ત્રીજા પક્ષની ઍપ"</string>
-    <string name="voip_call_log_integration_summary" msgid="3834075007862607039">"કઈ ઍપ તેમના કૉલને સિસ્ટમ કૉલ લૉગમાં એકીકૃત કરી શકે છે તે નિયંત્રિત કરો. આ વિકલ્પ બંધ કરવાથી, ઍપના લૉગને ફોનની મુખ્ય ઍપમાં ડિસ્પ્લે કરવાથી અટકાવવામાં આવશે."</string>
+    <string name="voip_call_log_integration_summary" msgid="196486049335079938">"અન્ય ઍપને તમારા કૉલ ઇતિહાસમાં કૉલ બતાવવાની મંજૂરી આપો. જો બંધ કરવામાં આવે, તો આ કૉલ માત્ર તેમની ચોક્કસ ઍપમાં જ દેખાશે."</string>
     <string name="wifi_calling" msgid="3650509202851355742">"Wi-Fi કૉલિંગ"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"બિલ્ટ-ઇન કનેક્શન સેવા"</string>
     <string name="voicemail" msgid="7697769412804195032">"વૉઇસમેઇલ"</string>
@@ -838,6 +838,12 @@
     <string name="supp_service_over_ut_precautions_dialog_dismiss" msgid="5934541487903081652">"છોડી દો"</string>
     <string name="radio_info_data_connection_enable" msgid="6183729739783252840">"ડેટા કનેક્શન ચાલુ કરો"</string>
     <string name="radio_info_data_connection_disable" msgid="6404751291511368706">"ડેટા કનેક્શન બંધ કરો"</string>
+    <string name="radio_info_apply_preferred_network_type" msgid="8828433232282314858">"લાગુ કરો"</string>
+    <string name="radio_info_all_label" msgid="4326377691373938122">"તમામ"</string>
+    <string name="radio_info_nr_label" msgid="4346984853962997752">"NR (5G)"</string>
+    <string name="radio_info_lte_label" msgid="5721318031926928485">"LTE (4G)"</string>
+    <string name="radio_info_wcdma_label" msgid="5157664869835235769">"UMTS (3G)"</string>
+    <string name="radio_info_gsm_label" msgid="2947899997551185529">"GSM (2G)"</string>
     <string name="volte_provisioned_switch_string" msgid="4812874990480336178">"VoLTEની જોગવાઈ કરી"</string>
     <string name="vt_provisioned_switch_string" msgid="8295542122512195979">"વીડિયો કૉલિંગની જોગવાઈ કરી"</string>
     <string name="wfc_provisioned_switch_string" msgid="3835004640321078988">"વાઇ-ફાઇ કૉલિંગની જોગવાઈ કરી"</string>

@@ -20,9 +20,11 @@ import static android.content.pm.PackageManager.FEATURE_TELEPHONY_IMS;
 import static android.content.pm.PackageManager.FEATURE_TELEPHONY_IMS_SINGLE_REGISTRATION;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.permission.flags.Flags.opEnableMobileDataByUser;
+import static android.telephony.TelephonyManager.CHANGE_ICC_LOCK_SUCCESS;
 import static android.telephony.TelephonyManager.ENABLE_FEATURE_MAPPING;
 import static android.telephony.TelephonyManager.HAL_SERVICE_NETWORK;
 import static android.telephony.TelephonyManager.HAL_SERVICE_RADIO;
+import static android.telephony.TelephonyManager.SIM_PIN_ENROLLMENT_STATUS_PLATFORM_MANAGED;
 import static android.telephony.satellite.SatelliteManager.KEY_SATELLITE_COMMUNICATION_ALLOWED;
 import static android.telephony.satellite.SatelliteManager.SATELLITE_DISALLOWED_REASON_NOT_PROVISIONED;
 import static android.telephony.satellite.SatelliteManager.SATELLITE_DISALLOWED_REASON_NOT_SUPPORTED;
@@ -158,6 +160,7 @@ import android.telephony.ims.aidl.IRcsConfigCallback;
 import android.telephony.ims.feature.ImsFeature;
 import android.telephony.ims.stub.ImsConfigImplBase;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
+import android.telephony.satellite.EnableRequestAttributes;
 import android.telephony.satellite.INtnSignalStrengthCallback;
 import android.telephony.satellite.ISatelliteCapabilitiesCallback;
 import android.telephony.satellite.ISatelliteCommunicationAccessStateCallback;
@@ -170,10 +173,12 @@ import android.telephony.satellite.ISelectedNbIotSatelliteSubscriptionCallback;
 import android.telephony.satellite.NtnSignalStrength;
 import android.telephony.satellite.NtnSignalStrengthCallback;
 import android.telephony.satellite.PlmnSatelliteConfig;
+import android.telephony.satellite.PointingUiAppLaunchIntentAttributes;
 import android.telephony.satellite.SatelliteCapabilities;
 import android.telephony.satellite.SatelliteDatagram;
 import android.telephony.satellite.SatelliteDatagramCallback;
 import android.telephony.satellite.SatelliteManager;
+import android.telephony.satellite.SatelliteManager.SatelliteEnablementRequestReason;
 import android.telephony.satellite.SatelliteModemStateCallback;
 import android.telephony.satellite.SatelliteProvisionStateCallback;
 import android.telephony.satellite.SatelliteSessionStats;
@@ -258,6 +263,7 @@ import com.android.internal.telephony.util.LocaleUtils;
 import com.android.internal.telephony.util.TelephonyUtils;
 import com.android.internal.telephony.util.VoicemailNotificationSettingsUtil;
 import com.android.internal.util.FunctionalUtils;
+import com.android.libraries.entitlement.utils.Ts43Constants;
 import com.android.phone.callcomposer.CallComposerPictureManager;
 import com.android.phone.callcomposer.CallComposerPictureTransfer;
 import com.android.phone.callcomposer.ImageData;
@@ -305,7 +311,7 @@ import java.util.function.Consumer;
 public class PhoneInterfaceManager extends ITelephony.Stub {
     private static final String LOG_TAG = "PhoneInterfaceManager";
     private static final boolean DBG = (PhoneGlobals.DBG_LEVEL >= 2);
-    private static final boolean DBG_LOC = false;
+    private static final boolean DBG_LOC = false; // STOPSHIP if true
     private static final boolean DBG_MERGE = false;
 
     // Message codes used with mMainThreadHandler
@@ -482,6 +488,18 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     private boolean mIsInCtsMode = false;
 
     /**
+     * Indicates whether the PhoneInterfaceManager is in the process of modifying enrollment
+     * to automatic PIN management for the SIM.
+     * When enrolling/unenrolling a SIM from automatic PIN management, events related to
+     * success/failure to providing the PIN to the SIM should not affect the state of the
+     * PinStorage instance.
+     * When the value of this field is true, the state of the PinStorage instance should not
+     * be modified.
+     *
+     */
+    private AtomicBoolean mCurrentlyModifyingSimAutoPinManagementState = new AtomicBoolean(false);
+
+    /**
      * With support for MEP(multiple enabled profile) in Android T, a SIM card can have more than
      * one ICCID active at the same time.
      * Apps should use below API signatures if targeting SDK is T and beyond.
@@ -499,6 +517,16 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     @ChangeId
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     public static final long ICC_CLOSE_CHANNEL_EXCEPTION_ON_FAILURE = 208739934L;
+
+    /**
+     * Enable expressive exceptions on calls to rebootModem() for clients targeting
+     * Android 26Q2 and later.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.CINNAMON_BUN)
+    public static final long REBOOT_MODEM_THROW_EXCEPTIONS = 476225321L;
 
     /**
      * A request object to use for transmitting data to an ICC.
@@ -1703,7 +1731,27 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
                     defaultPhone.rebootModem(onCompleted);
                     break;
                 case EVENT_CMD_MODEM_REBOOT_DONE:
-                    handleNullReturnEvent(msg, "rebootModem");
+                    ar = (AsyncResult) msg.obj;
+                    request = (MainThreadRequest) ar.userObj;
+
+                    request.result = switch (ar.exception) {
+                        case null -> new Success() {};
+                        case CommandException c -> {
+                            yield switch (c.getCommandError()) {
+                                    case CommandException.Error.REQUEST_NOT_SUPPORTED -> {
+                                        yield new UnsupportedOperationException(
+                                                "Reboot Radio not Supported");
+                                    }
+                                    case CommandException.Error.RADIO_NOT_AVAILABLE -> {
+                                        yield new IllegalStateException(
+                                                "Modem currently unavailable");
+                                    }
+                                    default -> new RuntimeException(c);
+                                };
+                        }
+                        default -> new RuntimeException(ar.exception);
+                    };
+                    notifyRequester(request);
                     break;
                 case CMD_REQUEST_ENABLE_MODEM: {
                     request = (MainThreadRequest) msg.obj;
@@ -1864,12 +1912,17 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
                     ar = (AsyncResult) msg.obj;
                     request = (MainThreadRequest) ar.userObj;
                     if (ar.exception == null) {
+                        Log.d(LOG_TAG,
+                                "In EVENT_CHANGE_ICC_LOCK_PASSWORD_DONE, during modification? "
+                                + mCurrentlyModifyingSimAutoPinManagementState.get());
                         request.result = TelephonyManager.CHANGE_ICC_LOCK_SUCCESS;
                         // If the operation is successful, update the PIN storage
                         Pair<String, String> passwords = (Pair<String, String>) request.argument;
                         int phoneId = getPhoneFromRequest(request).getPhoneId();
-                        UiccController.getInstance().getPinStorage()
-                                .storePin(passwords.second, phoneId);
+                        if (!mCurrentlyModifyingSimAutoPinManagementState.get()) {
+                            UiccController.getInstance().getPinStorage()
+                                    .storePin(passwords.second, phoneId);
+                        }
                     } else {
                         request.result = msg.arg1;
                     }
@@ -1888,15 +1941,19 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
                     ar = (AsyncResult) msg.obj;
                     request = (MainThreadRequest) ar.userObj;
                     if (ar.exception == null) {
+                        Log.d(LOG_TAG, "In EVENT_SET_ICC_LOCK_ENABLED_DONE, during modification? "
+                                + mCurrentlyModifyingSimAutoPinManagementState.get());
                         request.result = TelephonyManager.CHANGE_ICC_LOCK_SUCCESS;
                         // If the operation is successful, update the PIN storage
                         Pair<Boolean, String> enabled = (Pair<Boolean, String>) request.argument;
                         int phoneId = getPhoneFromRequest(request).getPhoneId();
-                        if (enabled.first) {
-                            UiccController.getInstance().getPinStorage()
-                                    .storePin(enabled.second, phoneId);
-                        } else {
-                            UiccController.getInstance().getPinStorage().clearPin(phoneId);
+                        if (!mCurrentlyModifyingSimAutoPinManagementState.get()) {
+                            if (enabled.first) {
+                                UiccController.getInstance().getPinStorage()
+                                        .storePin(enabled.second, phoneId);
+                            } else {
+                                UiccController.getInstance().getPinStorage().clearPin(phoneId);
+                            }
                         }
                     } else {
                         request.result = msg.arg1;
@@ -2172,6 +2229,11 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     }
 
     /**
+     * Marker Interface to allow sendRequest() to return Success or Throwable.
+     */
+    private interface Success {}
+
+    /**
      * Posts the specified command to be executed on the main thread,
      * waits for the request to complete, and returns the result.
      * @see #sendRequestAsync
@@ -2310,12 +2372,9 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         synchronized (PhoneInterfaceManager.class) {
             if (sInstance == null) {
                 sInstance = new PhoneInterfaceManager(app, featureFlags);
-                if (featureFlags.publishTelephonyServicesAfterConstruction()) {
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getTelephonyServiceRegisterer()
-                            .register(sInstance);
-                }
+                TelephonyFrameworkInitializer.getTelephonyServiceManager()
+                        .getTelephonyServiceRegisterer()
+                        .register(sInstance);
             } else {
                 Log.wtf(LOG_TAG, "init() called multiple times!  sInstance = " + sInstance);
             }
@@ -2346,9 +2405,6 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         mTelephonyShellCommand = new TelephonyShellCommand(this, getDefaultPhone().getContext());
 
         PropertyInvalidatedCache.invalidateCache(TelephonyManager.CACHE_KEY_PHONE_ACCOUNT_TO_SUBID);
-        if (!mFeatureFlags.publishTelephonyServicesAfterConstruction()) {
-            publish();
-        }
         CarrierAllowListInfo.loadInstance(mApp);
 
         // Create the SatelliteEntitlementController singleton, for using the get the
@@ -2426,8 +2482,8 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
 
     private void sendEraseModemConfig() {
         int cmd = CMD_MODEM_REBOOT;
-        Boolean success = (Boolean) sendRequest(cmd, null);
-        if (DBG) log("eraseModemConfig:" + ' ' + (success ? "ok" : "fail"));
+        Throwable error = (Throwable) sendRequest(cmd, null);
+        if (DBG) log("eraseModemConfig:" + ' ' + (error == null ? "ok" : "fail"));
     }
 
     private void sendEraseDataInSharedPreferences() {
@@ -2689,7 +2745,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
                     Thread.currentThread().interrupt();
                 }
             }
-            Log.d(LOG_TAG, "done");
+            Log.d(LOG_TAG, "unlockSim done");
             int[] resultArray = new int[2];
             resultArray[0] = mResult;
             resultArray[1] = mRetryCount;
@@ -5988,23 +6044,46 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     @Override
     public boolean rebootModem(int slotIndex) {
         Phone phone = PhoneFactory.getPhone(slotIndex);
-        if (phone != null) {
-            TelephonyPermissions.enforceCallingOrSelfModifyPermissionOrCarrierPrivilege(
-                    mApp, phone.getSubId(), "rebootModem");
-
-            enforceTelephonyFeatureWithException(getCurrentPackageName(),
-                    PackageManager.FEATURE_TELEPHONY_RADIO_ACCESS, "rebootModem");
-
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                Boolean success = (Boolean) sendRequest(CMD_MODEM_REBOOT, null);
-                if (DBG) log("rebootModem:" + ' ' + (success ? "ok" : "fail"));
-                return success;
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
+        if (phone == null) {
+            throw new IllegalArgumentException("No modem at slotIndex=" + slotIndex);
         }
-        return false;
+
+        TelephonyPermissions.enforceCallingOrSelfModifyPermissionOrCarrierPrivilege(
+                mApp, phone.getSubId(), "rebootModem");
+
+        enforceTelephonyFeatureWithException(getCurrentPackageName(),
+                PackageManager.FEATURE_TELEPHONY_RADIO_ACCESS, "rebootModem");
+
+        final boolean shouldThrow = CompatChanges.isChangeEnabled(
+                REBOOT_MODEM_THROW_EXCEPTIONS,
+                Binder.getCallingUid());
+
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            Object result = (Object) sendRequest(CMD_MODEM_REBOOT, null);
+            if (DBG) log("rebootModem:" + ' ' + (result == null ? "ok" : "fail"));
+            return switch (result) {
+                // success
+                case Success s -> {
+                    yield true;
+                }
+                // already translated, such as UnsupportedOperationException
+                case RuntimeException re -> {
+                    if (shouldThrow) throw re;
+                    yield false;
+                }
+                // untranslated, can't be sent over binder
+                default -> {
+                    Rlog.e(LOG_TAG, "Unsupported return from sendRequest()" + result);
+                    if (shouldThrow) {
+                        throw new RuntimeException(result != null ? result.toString() : "");
+                    }
+                    yield false;
+                }
+            };
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     /**
@@ -7621,7 +7700,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
 
     @Override
     public boolean setOperatorBrandOverride(int subId, String brand) {
-        TelephonyPermissions.enforceCallingOrSelfCarrierPrivilege(mApp,
+        TelephonyPermissions.enforceCallingOrSelfModifyPermissionOrCarrierPrivilege(mApp,
                 subId, "setOperatorBrandOverride");
 
         enforceTelephonyFeatureWithException(getCurrentPackageName(),
@@ -12709,6 +12788,30 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     }
 
     /**
+     * Request to enable or disable the satellite.
+     *
+     * @param subId The subscription ID of the satellite service.
+     * @param attributes The attributes of the enable request.
+     * @param callback The callback to get the result of the request.
+     *
+     * @throws SecurityException if the caller doesn't have the required permission.
+     */
+    @Override
+    public void requestEnableSatellite(int subId,
+            @NonNull EnableRequestAttributes attributes,
+            @NonNull IIntegerConsumer callback) {
+        enforceSatelliteCommunicationPermission("requestSatelliteEnabled");
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            mSatelliteController.requestSatelliteEnabled(
+                    attributes.isEnabled(), attributes.isDemoMode(), attributes.isEmergencyMode(),
+                    callback);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    /**
      * Request to get whether the satellite modem is enabled.
      *
      * @param result The result receiver that returns whether the satellite modem is enabled
@@ -12721,6 +12824,31 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         enforceSatelliteCommunicationPermission("requestIsSatelliteEnabled");
         final long identity = Binder.clearCallingIdentity();
         try {
+            mSatelliteController.requestIsSatelliteEnabled(result);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    /**
+     * Request to get whether the satellite is enabled for the given
+     * {@link EnableRequestAttributes}.
+     *
+     * @param subId The subscription ID of the satellite service.
+     * @param connectType The type of satellite connection.
+     * @param result The result receiver that returns details of the enablement response.
+     *
+     * @throws SecurityException if the caller doesn't have the required permission.
+     */
+    @Override
+    public void requestEnableSatelliteStatus(int subId,
+            @CarrierConfigManager.CARRIER_ROAMING_NTN_CONNECT_TYPE int connectType,
+            @NonNull ResultReceiver result) {
+        enforceSatelliteCommunicationPermission("requestEnableSatelliteStatus");
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            Log.d(LOG_TAG, "requestEnableSatelliteStatus: subId=" + subId
+                    + ", connectType=" + connectType);
             mSatelliteController.requestIsSatelliteEnabled(result);
         } finally {
             Binder.restoreCallingIdentity(identity);
@@ -14780,6 +14908,39 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         }
     }
 
+    /**
+     * This API is used by FCM client app to notify telephony module about the FCM tickle
+     * received from server.
+     *
+     * <p> Requires permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     *
+     * @param subId subscription id
+     * @param appIds list of application IDs for which the entitlement status has changed
+     * @param timeInMillis time when entitlement status changed
+     * @hide
+     */
+    @Override
+    public void notifyEntitlementStatusChanged(int subId,
+            @NonNull @Ts43Constants.AppId List<String> appIds, long timeInMillis) {
+        enforceModifyPermission();
+
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            if (appIds.contains(Ts43Constants.APP_SATELLITE_ENTITLEMENT)) {
+                IIntegerConsumer callback = new IIntegerConsumer.Stub() {
+                    @Override
+                    public void accept(int result) {
+                        Log.d(LOG_TAG, "Entitlement refresh result: " + result);
+                    }
+                };
+                mSatelliteEntitlementController.requestEntitlementRefresh(subId, callback);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
 
     /**
      * Get whether device is connected to satellite via carrier, either manually or automatically.
@@ -14800,6 +14961,43 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         try {
             return mSatelliteController.isInSatelliteModeForCarrierRoaming(
                     SatelliteServiceUtils.getPhone(subId));
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    /**
+     * Get the list of available services for carrier roaming NTN.
+     *
+     * @param subId The subscription ID of the carrier.
+     * @return List of available services for carrier roaming NTN.
+     */
+    @Override
+    public int[] getCarrierRoamingNtnAvailableServices(int subId) {
+        enforceSatelliteCommunicationPermission("getCarrierRoamingNtnAvailableServices");
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return mSatelliteController.getSupportedServicesOnCarrierRoamingNtn(subId);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    /**
+     * Request to get the PendingIntent to launch the PointingUI app.
+     *
+     * @param launchIntentAttributes The attributes to create the launch intent.
+     * @param receiver The result receiver that returns the {@link PendingIntent} to launch the
+     * PointingUI app if the request is successful or an error code if the request failed.
+     */
+    @Override
+    public void requestPointingUiAppLaunchIntent(
+            @NonNull PointingUiAppLaunchIntentAttributes launchIntentAttributes,
+            @NonNull ResultReceiver receiver) {
+        enforceSatelliteCommunicationPermission("requestPointingUiAppLaunchIntent");
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            mSatelliteController.requestPointingUiAppLaunchIntent(launchIntentAttributes, receiver);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -14877,5 +15075,262 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
                 + String.join(",", callingPackages) + " is not allowed in CTS mode"
                 + " for method: " + methodName);
         return false;
+    }
+
+    /**
+     * Returns the enrollment status of a sim identified by {@code subscriptionId} in the automatic
+     * PIN management feature.
+     *
+     * @param subscriptionId Subscription identifier of the SIM card.
+     * @return One of {@link android.telephony.TelephonyManager.SimPinEnrollmentStatus}.
+     */
+    public int getSimAutoPinManagementEnrollmentStatus(int subscriptionId) {
+        SubscriptionInfo subInfo = getSubscriptionManagerService().getSubscriptionInfo(
+                subscriptionId);
+        if (subInfo == null) {
+            throw new IllegalArgumentException("Invalid subscription ID: " + subscriptionId);
+        }
+        PinStorage pinStorage = UiccController.getInstance().getPinStorage();
+        if (pinStorage.isPinPlatformManaged(subInfo.getCardString())) {
+            return SIM_PIN_ENROLLMENT_STATUS_PLATFORM_MANAGED;
+        }
+        return TelephonyManager.SIM_PIN_ENROLLMENT_STATUS_MANUALLY_MANAGED;
+    }
+
+    private Bundle putNumberOfRemainingPinAttemptsInBundle(int numAttempts) {
+        Bundle bundle = new Bundle();
+        bundle.putInt(TelephonyManager.KEY_MANAGED_SIM_PIN_ENROLLMENT_ATTEMPTS,
+                numAttempts);
+        return bundle;
+    }
+
+    private Bundle putManagedPinResultInBundle(String pin) {
+        Bundle bundle = new Bundle();
+        bundle.putString(TelephonyManager.KEY_MANAGED_SIM_PIN_ENROLLMENT_GENERATED_PIN, pin);
+        return bundle;
+    }
+
+
+    /**
+     * Enrolls the SIM card identified by the subscription ID into automatic PIN management.
+     * With this feature, the platform will generate and set a PIN1 for the SIM card. The
+     * platform will automatically supply the PIN to the SIM card instead of prompting the user
+     * to provide it.
+     *
+     * @param subscriptionId Subscription identifier of the SIM card.
+     * @param currentPin     The current PIN1 value for the SIM card, needed in order to change the
+     *                       SIM
+     *                       PIN.
+     * @param resultReceiver {@code ResultReceiver} for the resultReceiver.
+     */
+    @Override
+    @RequiresPermission(permission.CONTROL_SIM_AUTO_PIN_MANAGEMENT)
+    public void enrollSimInAutoPinManagement(int subscriptionId, @NonNull String currentPin,
+            @NonNull ResultReceiver resultReceiver) {
+        TelephonyPermissions.enforceControlSimAutoPinManagementPermission(mApp,
+                "Missing permission to enroll SIM in automatic PIN management.");
+        SubscriptionInfo subInfo = getSubscriptionManagerService().getSubscriptionInfo(
+                subscriptionId);
+        if (subInfo == null) {
+            resultReceiver.send(TelephonyManager.SIM_PIN_ENROLLMENT_RESULT_FAILED_INVALID_SIM,
+                    new Bundle());
+            return;
+        }
+        Log.d(LOG_TAG, "Enrollment request for subId " + subscriptionId);
+
+        // Check if ICC lock is currently enabled. If so, error out. That is to reduce the number
+        // of states we need to account for in the UI (and test).
+        if (isIccLockEnabled(subscriptionId)) {
+            Log.d(LOG_TAG, "SIM currently locked, returning.");
+            resultReceiver.send(
+                    TelephonyManager.SIM_PIN_ENROLLMENT_RESULT_FAILED_SIM_LOCK_ALREADY_ACTIVE,
+                    new Bundle());
+            return;
+        }
+
+        try {
+            // Indicate we're in the enrollment process so its state should not be modified in
+            // the PinStorage instance.
+            mCurrentlyModifyingSimAutoPinManagementState.set(true);
+
+            // The lock must be enabled so that we can change the PIN, so do it first.
+            int lockEnableRes = setIccLockEnabled(subscriptionId, true, currentPin);
+            if (lockEnableRes != CHANGE_ICC_LOCK_SUCCESS) {
+                Log.d(LOG_TAG, "Failed to turn on SIM lock, error: " + lockEnableRes);
+                resultReceiver.send(TelephonyManager.SIM_PIN_ENROLLMENT_RESULT_FAILED_WRONG_PIN,
+                        putNumberOfRemainingPinAttemptsInBundle(lockEnableRes));
+                return;
+            }
+
+            // Generate a new random PIN.
+            String randomPin = String.format("%04d",
+                    new java.security.SecureRandom().nextInt(10000));
+            if (DBG_LOC) {
+                // Only log the pin in debug mode!
+                // STOPSHIP if true
+                Log.d(LOG_TAG, "Generated PIN: " + randomPin);
+            }
+
+            // Finally, change to the new PIN.
+            int res = changeIccLockPassword(subscriptionId, currentPin, randomPin);
+            if (res == CHANGE_ICC_LOCK_SUCCESS) {
+                PinStorage pinStorage = UiccController.getInstance().getPinStorage();
+                pinStorage.storePlatformManagedPin(subInfo.getSimSlotIndex(), randomPin,
+                        currentPin);
+                resultReceiver.send(TelephonyManager.SIM_PIN_ENROLLMENT_RESULT_SUCCESSFUL,
+                        putManagedPinResultInBundle(randomPin));
+                return;
+            }
+
+            // Handle error case.
+            Log.d(LOG_TAG, "Failed to change SIM PIN, error: " + res);
+            int resultToSend = TelephonyManager.SIM_PIN_ENROLLMENT_RESULT_FAILED_CHANGING_PIN;
+            Bundle bundleToSend = null;
+            // A positive result from changeIccLockPassword indicates the number of attempts left
+            // to enter the PIN correctly.
+            if (res > 0) {
+                resultToSend = TelephonyManager.SIM_PIN_ENROLLMENT_RESULT_FAILED_WRONG_PIN;
+                bundleToSend = putNumberOfRemainingPinAttemptsInBundle(res);
+            } else {
+                // Result <= 0 - unknown error.
+                bundleToSend = new Bundle();
+            }
+
+            resultReceiver.send(resultToSend, bundleToSend);
+        } finally {
+            // Clear the state.
+            mCurrentlyModifyingSimAutoPinManagementState.set(false);
+        }
+    }
+
+    /**
+     * Unenrolls the SIM card identified by the subscription ID from automatic PIN management.
+     * The PIN provided for {@link #mCurrentlyModifyingSimAutoPinManagementState} will be set as
+     * PIN1 for the SIM card and the requirement to supply a PIN for the SIM card will be turned
+     * off.
+     *
+     * @param subscriptionId  Subscription identifier of the SIM card.
+     * @param resultReceiver Receiver for the
+     * {@link android.telephony.TelephonyManager.SimPinUnenrollmentResult}.
+     */
+    @Override
+    @RequiresPermission(permission.CONTROL_SIM_AUTO_PIN_MANAGEMENT)
+    public void unenrollSimFromAutoPinManagement(int subscriptionId,
+            @NonNull ResultReceiver resultReceiver) {
+        TelephonyPermissions.enforceControlSimAutoPinManagementPermission(mApp,
+                "Missing permission to unenroll SIM from automatic PIN management.");
+
+        SubscriptionInfo subInfo = getSubscriptionManagerService().getSubscriptionInfo(
+                subscriptionId);
+        if (subInfo == null) {
+            Log.d(LOG_TAG, "No subscription info for subscription ID " + subscriptionId);
+            resultReceiver.send(TelephonyManager.SIM_PIN_UNENROLLMENT_RESULT_FAILED_SIM_NOT_PRESENT,
+                    new Bundle());
+            return;
+        }
+
+        int slotIndex = subInfo.getSimSlotIndex();
+        String iccId = subInfo.getCardString();
+        PinStorage pinStorage = UiccController.getInstance().getPinStorage();
+        if (!pinStorage.isPinPlatformManaged(iccId)) {
+            Log.d(LOG_TAG, "ICC not enrolled " + iccId + " on slot " + slotIndex);
+            resultReceiver.send(TelephonyManager.SIM_PIN_UNENROLLMENT_RESULT_FAILED_NOT_ENROLLED,
+                    new Bundle());
+            return;
+        }
+
+        Log.d(LOG_TAG, "Proceeding to unenroll SIM " + iccId + " in slot " + slotIndex
+                + " from automatic PIN management.");
+
+        String currentPin = pinStorage.getPin(slotIndex, iccId);
+        if (currentPin.equals("")) {
+            Log.d(LOG_TAG, "Failed getting current pin.");
+            resultReceiver.send(TelephonyManager.SIM_PIN_UNENROLLMENT_RESULT_FAILED_PIN_UNAVAILABLE,
+                    new Bundle());
+            return;
+        }
+
+        String originalPin = pinStorage.getOldPin(iccId);
+        if (originalPin.equals("")) {
+            Log.d(LOG_TAG, "Failed getting old pin.");
+            resultReceiver.send(TelephonyManager.SIM_PIN_UNENROLLMENT_RESULT_FAILED_PIN_UNAVAILABLE,
+                    new Bundle());
+            return;
+        }
+
+        try {
+            mCurrentlyModifyingSimAutoPinManagementState.set(true);
+
+            // Revert to the original PIN.
+            int res = changeIccLockPassword(subscriptionId, currentPin, originalPin);
+            if (res != CHANGE_ICC_LOCK_SUCCESS) {
+                Log.d(LOG_TAG, "Failed changing pin for " + iccId);
+                resultReceiver.send(
+                        TelephonyManager.SIM_PIN_UNENROLLMENT_RESULT_FAILED_CANNOT_CHANGE_PIN,
+                        new Bundle());
+                return;
+            }
+
+            // Store the original pin, as non-platform-managed.
+            pinStorage.clearPlatformManagedPin(slotIndex);
+
+            // Disable lock.
+            int lockDisableRes = setIccLockEnabled(subscriptionId, false, originalPin);
+            if (lockDisableRes != CHANGE_ICC_LOCK_SUCCESS) {
+                resultReceiver.send(
+                        TelephonyManager.SIM_PIN_UNENROLLMENT_RESULT_FAILED_CANNOT_DISABLE_PIN,
+                        putNumberOfRemainingPinAttemptsInBundle(lockDisableRes));
+                return;
+            }
+
+            resultReceiver.send(TelephonyManager.SIM_PIN_UNENROLLMENT_RESULT_SUCCESSFUL,
+                    new Bundle());
+        } finally {
+            mCurrentlyModifyingSimAutoPinManagementState.set(false);
+        }
+    }
+
+    /**
+     * Returns the platform-generated PIN for a SIM card identified by the subscription ID, if
+     * this SIM is enrolled in automatic PIN management.
+     * The device must be unlocked - the user recently authenticated - for the PIN to be read.
+     *
+     * @param subscriptionId  Subscription identifier of the SIM card.
+     * @param resultReceiver receiver for the PIN.
+     */
+    @Override
+    @RequiresPermission(permission.CONTROL_SIM_AUTO_PIN_MANAGEMENT)
+    public void getAutoManagedPinForSim(int subscriptionId,
+            @NonNull ResultReceiver resultReceiver) {
+        TelephonyPermissions.enforceControlSimAutoPinManagementPermission(mApp,
+                "Missing permission to read platform-managed PIN for SIM.");
+        SubscriptionInfo subInfo = getSubscriptionManagerService().getSubscriptionInfo(
+                subscriptionId);
+        if (subInfo == null) {
+            resultReceiver.send(TelephonyManager.GET_AUTO_MANAGED_PIN_RESULT_FAILED_NOT_ENROLLED,
+                    putManagedPinResultInBundle(""));
+            return;
+        }
+
+        int slotIndex = subInfo.getSimSlotIndex();
+        String iccId = subInfo.getCardString();
+        PinStorage pinStorage = UiccController.getInstance().getPinStorage();
+        if (!pinStorage.isPinPlatformManaged(iccId)) {
+            resultReceiver.send(TelephonyManager.GET_AUTO_MANAGED_PIN_RESULT_FAILED_NOT_ENROLLED,
+                    putManagedPinResultInBundle(""));
+            return;
+        }
+
+        String pin = pinStorage.getPin(slotIndex, iccId);
+        Bundle bundleToSend = putManagedPinResultInBundle(pin);
+        int resultToSend;
+        if (pin.equals("")) {
+            // SIM PIN is platform-managed but returned PIN is empty - implies the user has not
+            // authenticated.
+            resultToSend = TelephonyManager.GET_AUTO_MANAGED_PIN_RESULT_USER_AUTH_REQUIRED;
+        } else {
+            resultToSend = TelephonyManager.GET_AUTO_MANAGED_PIN_RESULT_SUCCESSFUL;
+        }
+        resultReceiver.send(resultToSend, bundleToSend);
     }
 }

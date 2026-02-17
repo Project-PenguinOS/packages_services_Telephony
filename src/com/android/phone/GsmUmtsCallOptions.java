@@ -74,7 +74,9 @@ public class GsmUmtsCallOptions extends PreferenceActivity {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (action.equals(Intent.ACTION_AIRPLANE_MODE_CHANGED) && mPhone != null) {
-                setPreferencesState(PhoneUtils.isSuppServiceAllowedInAirplaneMode(mPhone));
+// QTI_END: 2024-11-06: Telephony: Fix the issues related to UT service in airplane mode am: e74f539a23 am: e74f539a23
+                setPreferencesState(QtiPhoneUtilsHelper.isSuppServiceAllowedInAirplaneMode(mPhone));
+// QTI_BEGIN: 2024-11-06: Telephony: Fix the issues related to UT service in airplane mode am: e74f539a23 am: e74f539a23
             }
         }
     };
@@ -118,7 +120,9 @@ public class GsmUmtsCallOptions extends PreferenceActivity {
 // QTI_BEGIN: 2024-11-06: Telephony: Fix the issues related to UT service in airplane mode am: e74f539a23 am: e74f539a23
         mPhone = subInfoHelper.getPhone();
         if (mPhone != null) {
-            setPreferencesState(PhoneUtils.isSuppServiceAllowedInAirplaneMode(mPhone));
+// QTI_END: 2024-11-06: Telephony: Fix the issues related to UT service in airplane mode am: e74f539a23 am: e74f539a23
+            setPreferencesState(QtiPhoneUtilsHelper.isSuppServiceAllowedInAirplaneMode(mPhone));
+// QTI_BEGIN: 2024-11-06: Telephony: Fix the issues related to UT service in airplane mode am: e74f539a23 am: e74f539a23
         }
 // QTI_END: 2024-11-06: Telephony: Fix the issues related to UT service in airplane mode am: e74f539a23 am: e74f539a23
         if (!Flags.deleteCdma()

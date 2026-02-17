@@ -36,10 +36,7 @@ import static android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.CAPAB
 import static android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE;
 import static android.telephony.ims.stub.ImsRegistrationImplBase.REGISTRATION_TECH_IWLAN;
 import static android.telephony.ims.stub.ImsRegistrationImplBase.REGISTRATION_TECH_LTE;
-// QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
-import static com.qti.extphone.ExtTelephonyManager.FEATURE_TDSCDMA_SUPPORT;
 
-// QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 import android.annotation.NonNull;
@@ -153,11 +150,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
-// QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.IntStream;
-// QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
 
 import com.qti.extphone.ExtTelephonyManager;
 import com.qti.extphone.QtiImeiInfo;
@@ -174,8 +166,8 @@ public class RadioInfo extends AppCompatActivity {
 
 // QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
     private String[] mUpdatedPrefNwLabels;
-    private final HashMap<String, Integer> mPrefNwLabelToIntMap = new HashMap<>();
 // QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
+    private HashMap<String, Integer> mPrefNwLabelToIntMap = new HashMap<>();
 
     private static String[] sPhoneIndexLabels = new String[0];
 
@@ -233,7 +225,7 @@ public class RadioInfo extends AppCompatActivity {
     private static final String ACTION_REMOVABLE_ESIM_AS_DEFAULT =
             "android.telephony.euicc.action.REMOVABLE_ESIM_AS_DEFAULT";
 
-    private Context mContext;
+    protected Context mContext;
     private TextView mDeviceId; // DeviceId is the IMEI in GSM and the MEID in CDMA
     private TextView mLine1Number;
     private TextView mSubscriptionId;
@@ -297,10 +289,6 @@ public class RadioInfo extends AppCompatActivity {
     private Switch mCbrsDataSwitch;
     private Switch mDsdsSwitch;
     private Switch mRemovableEsimSwitch;
-// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-    private Switch mEnableVoLteSwitch;
-    private Switch mEnableVoNrSwitch;
-// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
     private Spinner mPreferredNetworkType;
     private Spinner mMockSignalStrength;
     private Spinner mMockDataNetworkType;
@@ -310,11 +298,11 @@ public class RadioInfo extends AppCompatActivity {
 
     private static final long RUNNABLE_TIMEOUT_MS = 5 * 60 * 1000L;
 
-    private ThreadPoolExecutor mQueuedWork;
+    protected ThreadPoolExecutor mQueuedWork;
 
     private ConnectivityManager mConnectivityManager;
-    private TelephonyManager mTelephonyManager;
-    private ImsManager mImsManager = null;
+    protected TelephonyManager mTelephonyManager;
+    protected ImsManager mImsManager = null;
     private Phone mPhone = null;
     private ProvisioningManager mProvisioningManager = null;
     private EuiccManager mEuiccManager;
@@ -345,10 +333,10 @@ public class RadioInfo extends AppCompatActivity {
 
     private int mPreferredNetworkTypeResult;
     private int mCellInfoRefreshRateIndex;
-    private int mPhoneId = SubscriptionManager.INVALID_PHONE_INDEX;
+    protected int mPhoneId = SubscriptionManager.INVALID_PHONE_INDEX;
     private static final int DEFAULT_PHONE_ID = 0;
 
-    private int mSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
+    protected int mSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
     private boolean isExtServiceConnected = false;
 
@@ -508,28 +496,13 @@ public class RadioInfo extends AppCompatActivity {
     }
 
     private void updatePreferredNetworkType(int type) {
-        if (type >= PhoneInformationUtil.PREFERRED_NETWORK_LABELS.length || type < 0) {
-            log("Network type: unknown type value=" + type);
-// QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
-            mPreferredNetworkTypeResult = mUpdatedPrefNwLabels.length - 1; //set to Unknown
-        } else {
-            mPreferredNetworkTypeResult = getPrefNwTypeIndexFromUpdatedArray(type);
-// QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
-        }
+        int index = PhoneInformationUtil.
+                getPrefNwTypeIndexFromUpdatedArray(type, mUpdatedPrefNwLabels);
+        mPreferredNetworkTypeResult = (index != -1) ? index : mUpdatedPrefNwLabels.length - 1;
+        
         mPreferredNetworkType.setSelection(mPreferredNetworkTypeResult, true);
     }
 
-// QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
-    private int getPrefNwTypeIndexFromUpdatedArray(int type) {
-        return IntStream.range(0, mUpdatedPrefNwLabels.length)
-// QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
-                .filter(i -> mUpdatedPrefNwLabels[i].equals(PhoneInformationUtil.PREFERRED_NETWORK_LABELS[type]))
-// QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
-                .findFirst()
-                .orElse(-1);
-    }
-
-// QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
     private void updatePhoneIndex() {
         // unregister listeners on the old subId
         unregisterPhoneStateListener();
@@ -702,16 +675,16 @@ public class RadioInfo extends AppCompatActivity {
             setNrStatsVisibility(View.GONE);
         }
 
-// QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
-        mUpdatedPrefNwLabels = getUpdatedPrefNwLabels();
-// QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
+        mPrefNwLabelToIntMap = PhoneInformationUtil.createPrefNwLabelsToValueFullMapping();
+        mUpdatedPrefNwLabels = PhoneInformationUtil.getUpdatedPrefNwLabels(mContext);
         mPreferredNetworkType = (Spinner) findViewById(R.id.preferredNetworkType);
-        ArrayAdapter<String> mPreferredNetworkTypeAdapter = new ArrayAdapter<String>(this,
-// QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
-                android.R.layout.simple_spinner_item, mUpdatedPrefNwLabels);
-// QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
-        mPreferredNetworkTypeAdapter
-                .setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        ArrayAdapter<String> mPreferredNetworkTypeAdapter =
+                new ArrayAdapter<String>(
+                        this,
+                        android.R.layout.simple_spinner_item,
+                        mUpdatedPrefNwLabels);
+        mPreferredNetworkTypeAdapter.setDropDownViewResource(
+                android.R.layout.simple_spinner_dropdown_item);
         mPreferredNetworkType.setAdapter(mPreferredNetworkTypeAdapter);
 
         mMockSignalStrength = (Spinner) findViewById(R.id.signalStrength);
@@ -764,20 +737,12 @@ public class RadioInfo extends AppCompatActivity {
         mImsVtProvisionedSwitch = (Switch) findViewById(R.id.vt_provisioned_switch);
         mImsWfcProvisionedSwitch = (Switch) findViewById(R.id.wfc_provisioned_switch);
         mEabProvisionedSwitch = (Switch) findViewById(R.id.eab_provisioned_switch);
-// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-        mEnableVoLteSwitch = (Switch) findViewById(R.id.enable_volte_switch);
-        mEnableVoNrSwitch = (Switch) findViewById(R.id.enable_vonr_switch);
-// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
 
         if (!isImsSupportedOnDevice()) {
             mImsVolteProvisionedSwitch.setVisibility(View.GONE);
             mImsVtProvisionedSwitch.setVisibility(View.GONE);
             mImsWfcProvisionedSwitch.setVisibility(View.GONE);
             mEabProvisionedSwitch.setVisibility(View.GONE);
-// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-            mEnableVoLteSwitch.setVisibility(View.GONE);
-            mEnableVoNrSwitch.setVisibility(View.GONE);
-// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
         }
 
         mCbrsDataSwitch = (Switch) findViewById(R.id.cbrs_data_switch);
@@ -949,42 +914,6 @@ public class RadioInfo extends AppCompatActivity {
     }
 // QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
 
-// QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
-    private String[] getUpdatedPrefNwLabels() {
-        final ArrayList<String> updatedPrefdNwLabels = new ArrayList<>();
-        final boolean tdscdmaSupported = isTdscdmaSupported();
-        final boolean cdmaSupported = isCdmaSupported();
-        log("tdscdmaSupported " + tdscdmaSupported + ", cdmaSupported " + cdmaSupported);
-        // Exclude CDMA/TDSCDMA RATs if unsupported
-        final Pattern pattern = Pattern.compile("(?<!W|TDS)CDMA|EvDo");
-// QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
-        for (int i = 0; i < PhoneInformationUtil.PREFERRED_NETWORK_LABELS.length; i++) {
-            String entry = PhoneInformationUtil.PREFERRED_NETWORK_LABELS[i];
-// QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
-            mPrefNwLabelToIntMap.put(entry, i);
-            Matcher matcher = pattern.matcher(entry);
-            if (cdmaSupported || !matcher.find()) {
-                updatedPrefdNwLabels.add(entry);
-            }
-            if (!tdscdmaSupported && entry.contains("TDSCDMA")) {
-                updatedPrefdNwLabels.remove(entry);
-            }
-        }
-        return updatedPrefdNwLabels.toArray(new String[updatedPrefdNwLabels.size()]);
-    }
-
-    private boolean isTdscdmaSupported() {
-        return mExtTelephonyManager.isFeatureSupported(FEATURE_TDSCDMA_SUPPORT);
-    }
-// QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
-
-// QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
-    private boolean isCdmaSupported() {
-        final PackageManager pm = getPackageManager();
-        return pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY_CDMA);
-// QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
-    }
-
     boolean shouldHideButton(String action) {
         if (!Build.isDebuggable()) {
             return true;
@@ -1076,7 +1005,7 @@ public class RadioInfo extends AppCompatActivity {
         }
     }
 
-    private void updateAllFields() {
+    protected void updateAllFields() {
         updateMessageWaiting();
         updateCallRedirect();
         updateDataState();
@@ -1091,11 +1020,6 @@ public class RadioInfo extends AppCompatActivity {
         updateCellInfo(mCellInfoResult);
         updateSubscriptionIds();
 
-// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-        updateVoLteState();
-        updateVoNrState();
-
-// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
         mPingHostnameV4.setText(mPingHostnameResultV4);
         mPingHostnameV6.setText(mPingHostnameResultV6);
         mHttpClientTest.setText(mHttpClientTestResult);
@@ -1188,10 +1112,10 @@ public class RadioInfo extends AppCompatActivity {
         mPingHostnameV6.setText(mPingHostnameResultV6);
         mHttpClientTest.setText(mHttpClientTestResult);
 
-        mPreferredNetworkTypeResult = b.getInt("mPreferredNetworkTypeResult",
-// QTI_BEGIN: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
-                mUpdatedPrefNwLabels.length - 1);
-// QTI_END: 2025-01-16: Telephony: Deprecate CDMA/TDSCDMA
+        mPreferredNetworkTypeResult =
+             b.getInt(
+                     "mPreferredNetworkTypeResult",
+                     mUpdatedPrefNwLabels.length - 1);
 
         mPhoneId = b.getInt("mSelectedPhoneIndex", 0);
         mSubId = SubscriptionManager.getSubscriptionId(mPhoneId);
@@ -1708,7 +1632,6 @@ public class RadioInfo extends AppCompatActivity {
     }
 
     private void updateAllCellInfo() {
-
         mCellInfo.setText("");
 
         final Runnable updateAllCellInfoResults =
@@ -1902,46 +1825,6 @@ public class RadioInfo extends AppCompatActivity {
         return mTelephonyManager.getRadioPowerState() == TelephonyManager.RADIO_POWER_ON;
     }
 
-// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-    private void updateVoLteState() {
-        if (!SubscriptionManager.isValidSubscriptionId(mSubId)) {
-            mEnableVoLteSwitch.setEnabled(false);
-            mEnableVoLteSwitch.setChecked(false);
-            return;
-        }
-        ImsMmTelManager imsMmTelManager = mImsManager.getImsMmTelManager(mSubId);
-        mEnableVoLteSwitch.setChecked(PhoneInformationUtil.isVolteEnabled(imsMmTelManager));
-        mEnableVoLteSwitch.setEnabled(true);
-        mEnableVoLteSwitch.setOnCheckedChangeListener(mVoLteOnChangeListener);
-    }
-
-    private void updateVoNrState() {
-        if (!SubscriptionManager.isValidSubscriptionId(mSubId)) {
-            mEnableVoNrSwitch.setEnabled(false);
-            mEnableVoNrSwitch.setChecked(false);
-            return;
-        }
-        final int subId = mSubId;
-        mQueuedWork.execute(new Runnable() {
-            public void run() {
-                if (subId != mSubId) {
-                    return;
-                }
-                ImsMmTelManager imsMmTelManager = mImsManager.getImsMmTelManager(subId);
-                boolean voNrEnabled = PhoneInformationUtil.isVoNrEnabled(mTelephonyManager);
-                boolean voLteEnabled = PhoneInformationUtil.isVolteEnabled(imsMmTelManager);
-                mHandler.post(() -> {
-                    mEnableVoNrSwitch.setChecked(voNrEnabled);
-
-                    // Disable VoNr option if VoLte is disabled
-                    mEnableVoNrSwitch.setEnabled(voLteEnabled);
-                });
-            }
-        });
-        mEnableVoNrSwitch.setOnCheckedChangeListener(mVoNrOnChangeListener);
-    }
-
-// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
     private void updateRadioPowerState() {
         // delightful hack to prevent on-checked-changed calls from
         // actually forcing the radio preference to its transient/current value.
@@ -2084,87 +1967,6 @@ public class RadioInfo extends AppCompatActivity {
                 mPhone.getTelephonyTester().setServiceStateTestIntent(intent);
             };
 
-// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-    OnCheckedChangeListener mVoLteOnChangeListener = new OnCheckedChangeListener() {
-        @Override
-        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-            Log.d(TAG, "VoLte button onCheckedChanged " + isChecked + " on subId=" + mSubId);
-            setVoLteEnabled(isChecked);
-        }
-    };
-
-    OnCheckedChangeListener mVoNrOnChangeListener = new OnCheckedChangeListener() {
-        @Override
-        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-            Log.d(TAG, "VoNr button onCheckedChanged " + isChecked + " on subId=" + mSubId);
-            setVoNrEnabled(isChecked);
-        }
-    };
-
-    private void setVoLteEnabled(boolean isChecked) {
-        if (!SubscriptionManager.isValidSubscriptionId(mSubId) || (mTelephonyManager == null)) {
-            return;
-        }
-
-        final int subId = mSubId;
-        final int phoneId = mPhoneId;
-        mQueuedWork.execute(new Runnable() {
-            public void run() {
-                if (subId != mSubId) {
-                    return;
-                }
-                ImsMmTelManager imsMmTelManager = mImsManager.getImsMmTelManager(subId);
-                try {
-                    if (isChecked != PhoneInformationUtil.isVolteEnabled(imsMmTelManager)) {
-                        if (isChecked) {
-                            mTelephonyManager.enableIms(phoneId);
-                        } else {
-                            mTelephonyManager.disableIms(phoneId);
-                        }
-                    }
-                } catch (Exception e) {
-                    Log.e(TAG, "fail to set VoLTE=" + isChecked + ". subId=" + subId, e);
-                }
-
-                mHandler.post(() -> {
-                     /**
-                      * 1. VoNr option is disabled if VoLte option is disabled
-                      * 2. VoNr option is enabled if VoLte option is enabled
-                      */
-                    if (!isChecked) {
-                        mEnableVoNrSwitch.setChecked(false);
-                        mEnableVoNrSwitch.setEnabled(false);
-                    } else {
-                        mEnableVoNrSwitch.setEnabled(true);
-                    }
-                });
-            }
-        });
-    }
-
-    public void setVoNrEnabled(boolean isChecked) {
-        if (!SubscriptionManager.isValidSubscriptionId(mSubId)
-                || (mTelephonyManager == null)) {
-            return;
-        }
-        final int subId = mSubId;
-        mQueuedWork.execute(new Runnable() {
-            public void run() {
-                try {
-                    boolean isVoNrEnabled =
-                            PhoneInformationUtil.isVoNrEnabled(mTelephonyManager);
-                    if (isVoNrEnabled != isChecked) {
-                        mTelephonyManager.setVoNrEnabled(isChecked);
-                        Log.d(TAG, "set VoNR state to " + isChecked + " on subId=" + subId);
-                    }
-                } catch (Exception e) {
-                    Log.e(TAG, "fail to set VoNr=" + isChecked + ". subId=" + subId, e);
-                }
-            }
-        });
-    }
-
-// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
     // satellite radio group function
     private final RadioGroup.OnCheckedChangeListener
             mForceCampSatelliteSelectionRadioGroupListener =
@@ -2220,16 +2022,9 @@ public class RadioInfo extends AppCompatActivity {
                                 .setSatelliteIgnorePlmnListFromStorage(true);
                         // Override carrier config
                         PersistableBundle originalBundle =
-                                PhoneInformationUtil.getCarrierConfig(mContext)
-                                        .getConfigForSubId(
-                                                subId,
-                                                KEY_SATELLITE_ATTACH_SUPPORTED_BOOL,
-                                                KEY_SATELLITE_ENTITLEMENT_SUPPORTED_BOOL,
-                                                CarrierConfigManager
-                                                        .KEY_EMERGENCY_MESSAGING_SUPPORTED_BOOL);
-                        PersistableBundle overrideBundle = new PersistableBundle();
+                                PhoneInformationUtil.getSatelliteConfigsForSubId(mContext, subId);
+                        PersistableBundle overrideBundle = new PersistableBundle(originalBundle);
                         overrideBundle.putBoolean(KEY_SATELLITE_ATTACH_SUPPORTED_BOOL, true);
-                        overrideBundle.putBoolean(KEY_SATELLITE_ENTITLEMENT_SUPPORTED_BOOL, true);
                         overrideBundle.putBoolean(
                                 CarrierConfigManager.KEY_EMERGENCY_MESSAGING_SUPPORTED_BOOL, true);
 
@@ -2921,10 +2716,13 @@ public class RadioInfo extends AppCompatActivity {
                             && pos <= mUpdatedPrefNwLabels.length - 2) {
                         final String prefNwLabel = mUpdatedPrefNwLabels[pos];
                         mPreferredNetworkTypeResult = mPrefNwLabelToIntMap.get(prefNwLabel);
+
                         new Thread(() -> {
+                            int networkType =
+                                    PhoneInformationUtil.PREFERRED_NETWORK_MODES_RF.get(pos);
                             mTelephonyManager.setAllowedNetworkTypesForReason(
                                     TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_USER,
-                                    RadioAccessFamily.getRafFromNetworkType(mPreferredNetworkTypeResult));
+                                    RadioAccessFamily.getRafFromNetworkType(networkType));
                         }).start();
                     }
                 }
@@ -3113,7 +2911,7 @@ public class RadioInfo extends AppCompatActivity {
         sendBroadcast(intent);
     }
 
-    private boolean isImsSupportedOnDevice() {
+    protected boolean isImsSupportedOnDevice() {
         return getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY_IMS);
     }
 

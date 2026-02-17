@@ -29,14 +29,14 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.android.internal.telephony.satellite.SatelliteConfigData.CarrierRoamingConfigProto;
-import com.android.internal.telephony.satellite.SatelliteConfigData.CarrierSupportedSatelliteServicesProto;
-import com.android.internal.telephony.satellite.SatelliteConfigData.SatelliteConfigProto;
-import com.android.internal.telephony.satellite.SatelliteConfigData.SatelliteProviderCapabilityProto;
-import com.android.internal.telephony.satellite.SatelliteConfigData.SatelliteRegionProto;
-import com.android.internal.telephony.satellite.SatelliteConfigData.TelephonyConfigProto;
-
-import com.google.protobuf.ByteString;
+import com.android.internal.telephony.TelephonyConfigData.CarrierRoamingConfigProto;
+import com.android.internal.telephony.TelephonyConfigData.CarrierSupportedSatelliteServicesProto;
+import com.android.internal.telephony.TelephonyConfigData.DataConfigProto;
+import com.android.internal.telephony.TelephonyConfigData.SatelliteConfigProto;
+import com.android.internal.telephony.TelephonyConfigData.SatelliteProviderCapabilityProto;
+import com.android.internal.telephony.TelephonyConfigData.SatelliteRegionProto;
+import com.android.internal.telephony.TelephonyConfigData.TelephonyConfigProto;
+import com.android.internal.telephony.protobuf.ByteString;
 
 import org.junit.After;
 import org.junit.Before;
@@ -786,6 +786,168 @@ public class ConfigDataGeneratorTest {
         }
     }
 
+    @Test
+    public void testFullConfigGeneration() throws Exception {
+        prepareInAndOutData(100);
+        createFullInputXml(mInputXmlFile);
+
+        String[] args = {
+                "--input-file", mInputXmlFilePath.toAbsolutePath().toString(),
+                "--output-file", mOutputPbFilePath.toAbsolutePath().toString()
+        };
+
+        ConfigDataGenerator.main(args);
+
+        byte[] fileBytes = Files.readAllBytes(
+                Paths.get(mOutputPbFilePath.toAbsolutePath().toString()));
+        TelephonyConfigProto configProto = TelephonyConfigProto.parseFrom(fileBytes);
+        SatelliteConfigProto satelliteConfigProto = configProto.getSatellite();
+
+        assertTrue(configProto.hasSatellite());
+        assertEquals(2, satelliteConfigProto.getVersion());
+        assertEquals(1, satelliteConfigProto.getCarrierSupportedSatelliteServicesCount());
+        assertEquals("US", satelliteConfigProto.getDeviceSatelliteRegion().getCountryCodes(0));
+
+        assertTrue(configProto.hasData());
+        DataConfigProto dataProto = configProto.getData();
+        assertEquals(10, dataProto.getVersion());
+
+        assertTrue(dataProto.hasConnectionCapabilityConfigs());
+        assertEquals(1,
+                dataProto.getConnectionCapabilityConfigs()
+                        .getDefaultConnectionCapabilityConfig().getRulesCount());
+        assertEquals("10:20:true",
+                dataProto.getConnectionCapabilityConfigs()
+                        .getDefaultConnectionCapabilityConfig().getRules(0));
+
+        assertEquals(1,
+                dataProto.getConnectionCapabilityConfigs()
+                        .getCarrierConnectionCapabilityConfigsCount());
+        assertEquals(1001,
+                dataProto.getConnectionCapabilityConfigs()
+                        .getCarrierConnectionCapabilityConfigs(0).getCarrierId());
+        assertEquals("30:40:false",
+                dataProto.getConnectionCapabilityConfigs()
+                        .getCarrierConnectionCapabilityConfigs(0).getRules(0));
+
+        assertTrue(dataProto.hasHomeMeteredCapabilityConfigs());
+        assertEquals(1,
+                dataProto.getHomeMeteredCapabilityConfigs()
+                        .getDefaultMeteredCapabilityConfig().getCapabilityIdsCount());
+        assertEquals(123,
+                dataProto.getHomeMeteredCapabilityConfigs()
+                        .getDefaultMeteredCapabilityConfig().getCapabilityIds(0));
+
+        assertTrue(dataProto.hasRoamMeteredCapabilityConfigs());
+        assertEquals(1,
+                dataProto.getRoamMeteredCapabilityConfigs()
+                        .getDefaultMeteredCapabilityConfig().getCapabilityIdsCount());
+        assertEquals(789,
+                dataProto.getRoamMeteredCapabilityConfigs()
+                        .getDefaultMeteredCapabilityConfig().getCapabilityIds(0));
+    }
+
+    private void createFullInputXml(File outputFile) {
+        try {
+            DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+            Document doc = docBuilder.newDocument();
+
+            Element rootElement = doc.createElement("telephony_config");
+            doc.appendChild(rootElement);
+
+            Element satConfig = doc.createElement("satelliteconfig");
+            rootElement.appendChild(satConfig);
+
+            Element satVersion = doc.createElement("version");
+            satVersion.appendChild(doc.createTextNode("2"));
+            satConfig.appendChild(satVersion);
+
+            Element carriers = doc.createElement("carriersupportedservices");
+            satConfig.appendChild(carriers);
+            Element carrierId = doc.createElement("carrier_id");
+            carrierId.appendChild(doc.createTextNode("1"));
+            carriers.appendChild(carrierId);
+            Element capability = doc.createElement("providercapability");
+            carriers.appendChild(capability);
+            Element plmn = doc.createElement("carrier_plmn");
+            plmn.appendChild(doc.createTextNode("310062"));
+            capability.appendChild(plmn);
+            Element service = doc.createElement("service");
+            service.appendChild(doc.createTextNode("1"));
+            capability.appendChild(service);
+
+            Element roaming = doc.createElement("carrier_roaming_config");
+            satConfig.appendChild(roaming);
+            Element dataMode = doc.createElement("max_allowed_data_mode");
+            dataMode.appendChild(doc.createTextNode("1"));
+            roaming.appendChild(dataMode);
+            Element devPlmn = doc.createElement("device_satellite_plmn");
+            devPlmn.appendChild(doc.createTextNode("310210"));
+            roaming.appendChild(devPlmn);
+
+            Element region = doc.createElement("satelliteregion");
+            satConfig.appendChild(region);
+            Element cc = doc.createElement("country_code");
+            cc.appendChild(doc.createTextNode("US"));
+            region.appendChild(cc);
+            Element allowed = doc.createElement("is_allowed");
+            allowed.appendChild(doc.createTextNode("TRUE"));
+            region.appendChild(allowed);
+
+            Element dataConfig = doc.createElement("dataconfig");
+            rootElement.appendChild(dataConfig);
+
+            Element dataVersion = doc.createElement("version");
+            dataVersion.appendChild(doc.createTextNode("10"));
+            dataConfig.appendChild(dataVersion);
+
+            Element connConfigs = doc.createElement("connection_capability_configs");
+            dataConfig.appendChild(connConfigs);
+
+            Element defaultConn = doc.createElement("default_connection_capability_config");
+            connConfigs.appendChild(defaultConn);
+            Element rule1 = doc.createElement("rules");
+            rule1.appendChild(doc.createTextNode("10:20:true"));
+            defaultConn.appendChild(rule1);
+
+            Element carrierConn = doc.createElement("carrier_connection_capability_configs");
+            connConfigs.appendChild(carrierConn);
+            Element cid1 = doc.createElement("carrier_id");
+            cid1.appendChild(doc.createTextNode("1001"));
+            carrierConn.appendChild(cid1);
+            Element rule2 = doc.createElement("rules");
+            rule2.appendChild(doc.createTextNode("30:40:false"));
+            carrierConn.appendChild(rule2);
+
+            Element homeMetered = doc.createElement("home_metered_capability_configs");
+            dataConfig.appendChild(homeMetered);
+            Element defaultHome = doc.createElement("default_metered_capability_config");
+            homeMetered.appendChild(defaultHome);
+            Element cap1 = doc.createElement("capability_ids");
+            cap1.appendChild(doc.createTextNode("123"));
+            defaultHome.appendChild(cap1);
+
+            Element roamMetered = doc.createElement("roam_metered_capability_configs");
+            dataConfig.appendChild(roamMetered);
+            Element defaultRoam = doc.createElement("default_metered_capability_config");
+            roamMetered.appendChild(defaultRoam);
+            Element cap2 = doc.createElement("capability_ids");
+            cap2.appendChild(doc.createTextNode("789"));
+            defaultRoam.appendChild(cap2);
+
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            Transformer transformer = transformerFactory.newTransformer();
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+            DOMSource source = new DOMSource(doc);
+            StreamResult result = new StreamResult(outputFile);
+            transformer.transform(source, result);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error creating full input XML", e);
+        }
+    }
+
     private void createInputXmlWithProto(
             File outputFile,
             Integer version,
@@ -798,12 +960,14 @@ public class ConfigDataGeneratorTest {
 
             // Create Document and Root Element
             Document doc = docBuilder.newDocument();
-            Element rootElement = doc.createElement(ConfigDataGenerator.TAG_SATELLITE_CONFIG);
+            Element rootElement = doc.createElement(
+                    SatelliteConfigProtoGenerator.TAG_SATELLITE_CONFIG);
             doc.appendChild(rootElement);
 
             if (version != null) {
                 // Add <version>
-                Element versionElement = doc.createElement(ConfigDataGenerator.TAG_VERSION);
+                Element versionElement = doc.createElement(
+                        SatelliteConfigProtoGenerator.TAG_VERSION);
                 versionElement.appendChild(doc.createTextNode(version.toString()));
                 rootElement.appendChild(versionElement);
             }
@@ -834,25 +998,28 @@ public class ConfigDataGeneratorTest {
 
             if (regionProto != null) {
                 Element satelliteRegion =
-                        doc.createElement(ConfigDataGenerator.TAG_SATELLITE_REGION);
+                        doc.createElement(SatelliteConfigProtoGenerator.TAG_SATELLITE_REGION);
                 if (regionProto.mS2CellFileName != null) {
                     satelliteRegion.appendChild(
-                            createElementWithText(doc, ConfigDataGenerator.TAG_S2_CELL_FILE,
+                            createElementWithText(doc,
+                                    SatelliteConfigProtoGenerator.TAG_S2_CELL_FILE,
                                     regionProto.mS2CellFileName));
                 }
                 if (regionProto.mCountryCodeList != null) {
                     satelliteRegion.appendChild(
-                            createElementWithText(doc, ConfigDataGenerator.TAG_COUNTRY_CODE,
+                            createElementWithText(doc,
+                                    SatelliteConfigProtoGenerator.TAG_COUNTRY_CODE,
                                     regionProto.mCountryCodeList[0]));
                 }
                 if (regionProto.mIsAllowed != null) {
                     satelliteRegion.appendChild(
-                            createElementWithText(doc, ConfigDataGenerator.TAG_IS_ALLOWED,
+                            createElementWithText(doc,
+                                    SatelliteConfigProtoGenerator.TAG_IS_ALLOWED,
                                     String.valueOf(regionProto.mIsAllowed)));
                 }
                 if (regionProto.mSatelliteAccessConfigFileName != null) {
                     satelliteRegion.appendChild(createElementWithText(
-                            doc, ConfigDataGenerator.TAG_SATELLITE_ACCESS_CONFIG_FILE,
+                            doc, SatelliteConfigProtoGenerator.TAG_SATELLITE_ACCESS_CONFIG_FILE,
                             regionProto.mSatelliteAccessConfigFileName));
                 }
                 rootElement.appendChild(satelliteRegion);
@@ -890,11 +1057,12 @@ public class ConfigDataGeneratorTest {
 
             // Create Document and Root Element
             Document doc = docBuilder.newDocument();
-            Element rootElement = doc.createElement(ConfigDataGenerator.TAG_SATELLITE_CONFIG);
+            Element rootElement = doc.createElement(
+                    SatelliteConfigProtoGenerator.TAG_SATELLITE_CONFIG);
             doc.appendChild(rootElement);
 
             // Add <version>
-            Element versionElement = doc.createElement(ConfigDataGenerator.TAG_VERSION);
+            Element versionElement = doc.createElement(SatelliteConfigProtoGenerator.TAG_VERSION);
             versionElement.appendChild(doc.createTextNode(String.valueOf(version)));
             rootElement.appendChild(versionElement);
 
@@ -907,19 +1075,21 @@ public class ConfigDataGeneratorTest {
                     createCarrierRoamingConfig(doc, maxAllowedDataMode, satellitePlmnList));
 
             // Add <satelliteregion>
-            Element satelliteRegion = doc.createElement(ConfigDataGenerator.TAG_SATELLITE_REGION);
+            Element satelliteRegion = doc.createElement(
+                    SatelliteConfigProtoGenerator.TAG_SATELLITE_REGION);
             satelliteRegion.appendChild(
-                    createElementWithText(doc, ConfigDataGenerator.TAG_S2_CELL_FILE,
+                    createElementWithText(doc, SatelliteConfigProtoGenerator.TAG_S2_CELL_FILE,
                             inputS2CellFileName));
             satelliteRegion.appendChild(
-                    createElementWithText(doc, ConfigDataGenerator.TAG_COUNTRY_CODE, countryCode));
+                    createElementWithText(doc,
+                            SatelliteConfigProtoGenerator.TAG_COUNTRY_CODE, countryCode));
             satelliteRegion.appendChild(
-                    createElementWithText(doc, ConfigDataGenerator.TAG_IS_ALLOWED,
+                    createElementWithText(doc, SatelliteConfigProtoGenerator.TAG_IS_ALLOWED,
                             isAllowed ? "TRUE" : "FALSE"));
             satelliteRegion.appendChild(
                     createElementWithText(
                             doc,
-                            ConfigDataGenerator.TAG_SATELLITE_ACCESS_CONFIG_FILE,
+                            SatelliteConfigProtoGenerator.TAG_SATELLITE_ACCESS_CONFIG_FILE,
                             inputSatelliteAccessConfigFileName));
             rootElement.appendChild(satelliteRegion);
 
@@ -938,28 +1108,28 @@ public class ConfigDataGeneratorTest {
     private static Element createCarrierSupportedServices(Document doc, Integer carrierId,
             boolean isCapability, String carrierPlmn, int... services) {
         Element carrierSupportedServices = doc.createElement(
-                ConfigDataGenerator.TAG_SUPPORTED_SERVICES);
+                SatelliteConfigProtoGenerator.TAG_SUPPORTED_SERVICES);
 
         if (carrierId != null) {
             // Add CarrierId
             carrierSupportedServices.appendChild(createElementWithText(doc,
-                    ConfigDataGenerator.TAG_CARRIER_ID, String.valueOf(carrierId)));
+                    SatelliteConfigProtoGenerator.TAG_CARRIER_ID, String.valueOf(carrierId)));
         }
 
         if (isCapability) {
             // Add Plmn and Services
             Element providerCapability = doc.createElement(
-                    ConfigDataGenerator.TAG_PROVIDER_CAPABILITY);
+                    SatelliteConfigProtoGenerator.TAG_PROVIDER_CAPABILITY);
 
             if (carrierPlmn != null) {
                 providerCapability.appendChild(createElementWithText(doc,
-                        ConfigDataGenerator.TAG_CARRIER_PLMN, carrierPlmn));
+                        SatelliteConfigProtoGenerator.TAG_CARRIER_PLMN, carrierPlmn));
             }
 
             if (services != null) {
                 for (int service : services) {
                     providerCapability.appendChild(createElementWithText(doc,
-                            ConfigDataGenerator.TAG_SERVICE, String.valueOf(service)));
+                            SatelliteConfigProtoGenerator.TAG_SERVICE, String.valueOf(service)));
                 }
             }
 
@@ -972,24 +1142,26 @@ public class ConfigDataGeneratorTest {
     private static Element createCarrierRoamingConfig(Document doc, Integer maxAllowedDataMode,
             List<String> satellitePlmns) {
         Element carrierRoamingConfig = doc.createElement(
-                ConfigDataGenerator.TAG_CARRIER_ROAMING_CONFIG);
+                SatelliteConfigProtoGenerator.TAG_CARRIER_ROAMING_CONFIG);
         // Add CarrierId
         if (maxAllowedDataMode != null) {
             carrierRoamingConfig.appendChild(createElementWithText(doc,
-                    ConfigDataGenerator.TAG_MAX_ALLOWED_DATA_MODE,
+                    SatelliteConfigProtoGenerator.TAG_MAX_ALLOWED_DATA_MODE,
                     String.valueOf(maxAllowedDataMode)));
         }
 
         if (satellitePlmns != null) {
             for (String plmn : satellitePlmns) {
                 carrierRoamingConfig.appendChild(createElementWithText(doc,
-                        ConfigDataGenerator.TAG_DEVICE_SATELLITE_PLMN, String.valueOf(plmn)));
+                        SatelliteConfigProtoGenerator.TAG_DEVICE_SATELLITE_PLMN,
+                        String.valueOf(plmn)));
             }
         }
         return carrierRoamingConfig;
     }
 
-    private static Element createElementWithText(Document doc, String tagName, String textContent) {
+    private static Element createElementWithText(
+            Document doc, String tagName, String textContent) {
         Element element = doc.createElement(tagName);
         element.appendChild(doc.createTextNode(textContent));
         return element;
@@ -1009,7 +1181,8 @@ public class ConfigDataGeneratorTest {
             }
 
             @Override
-            public FileVisitResult postVisitDirectory(Path path, IOException e) throws IOException {
+            public FileVisitResult postVisitDirectory(
+                    Path path, IOException e) throws IOException {
                 Files.delete(path);
                 return FileVisitResult.CONTINUE;
             }

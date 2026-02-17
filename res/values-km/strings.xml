@@ -76,7 +76,7 @@
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"គណនីហៅទូរស័ព្ទទាំងអស់"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"ជ្រើសគណនីណាមួយដែលអាចធ្វើការហៅទូរស័ព្ទ"</string>
     <string name="voip_call_log_integration_label" msgid="2349275524959944815">"កម្មវិធី​ភាគីទីបី"</string>
-    <string name="voip_call_log_integration_summary" msgid="3834075007862607039">"គ្រប់គ្រង​កម្មវិធី​ដែលអាច​រួមបញ្ចូល​ការហៅទូរសព្ទ​របស់កម្មវិធី​ទាំងនោះ​ទៅក្នុង​កំណត់ហេតុហៅទូរសព្ទ​របស់​ប្រព័ន្ធ។ ការបិទ​ជម្រើសនេះ​នឹង​ទប់ស្កាត់​មិនឱ្យ​បង្ហាញ​កំណត់ហេតុ​របស់​កម្មវិធី​នៅក្នុង​កម្មវិធី​ទូរសព្ទ​ចម្បង។"</string>
+    <string name="voip_call_log_integration_summary" msgid="196486049335079938">"អនុញ្ញាតឱ្យ​កម្មវិធី​ផ្សេងទៀត​បង្ហាញ​ការហៅទូរសព្ទ​នៅក្នុង​ប្រវត្តិហៅទូរសព្ទ​របស់អ្នក។ ប្រសិនបើ​បិទ ការហៅទូរសព្ទ​ទាំងនេះ​នឹងបង្ហាញ​នៅក្នុង​កម្មវិធី​ជាក់លាក់​របស់​ពួកវា​តែប៉ុណ្ណោះ។"</string>
     <string name="wifi_calling" msgid="3650509202851355742">"ការហៅតាម Wi-Fi"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"សេវាកម្ម​ភ្ជាប់​ដែល​ជាប់​ជា​មួយ"</string>
     <string name="voicemail" msgid="7697769412804195032">"សារ​ជា​សំឡេង"</string>
@@ -838,6 +838,12 @@
     <string name="supp_service_over_ut_precautions_dialog_dismiss" msgid="5934541487903081652">"បដិសេធ"</string>
     <string name="radio_info_data_connection_enable" msgid="6183729739783252840">"បើក​ការតភ្ជាប់ទិន្នន័យ"</string>
     <string name="radio_info_data_connection_disable" msgid="6404751291511368706">"បិទការតភ្ជាប់ទិន្នន័យ"</string>
+    <string name="radio_info_apply_preferred_network_type" msgid="8828433232282314858">"ដាក់ប្រើ"</string>
+    <string name="radio_info_all_label" msgid="4326377691373938122">"ទាំងអស់"</string>
+    <string name="radio_info_nr_label" msgid="4346984853962997752">"NR (5G)"</string>
+    <string name="radio_info_lte_label" msgid="5721318031926928485">"LTE (4G)"</string>
+    <string name="radio_info_wcdma_label" msgid="5157664869835235769">"UMTS (3G)"</string>
+    <string name="radio_info_gsm_label" msgid="2947899997551185529">"GSM (2G)"</string>
     <string name="volte_provisioned_switch_string" msgid="4812874990480336178">"បានផ្តល់ VoLTE"</string>
     <string name="vt_provisioned_switch_string" msgid="8295542122512195979">"បានផ្តល់​ការហៅជាវីដេអូ"</string>
     <string name="wfc_provisioned_switch_string" msgid="3835004640321078988">"បាន​ផ្តល់​ការហៅ​ទូរសព្ទ​តាម Wifi"</string>

@@ -76,7 +76,7 @@
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"എല്ലാ കോളിംഗ് അക്കൗണ്ടുകളും"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"ഫോൺ വിളിക്കാനാകുന്ന അക്കൗണ്ടുകൾ തിരഞ്ഞെടുക്കുക"</string>
     <string name="voip_call_log_integration_label" msgid="2349275524959944815">"മൂന്നാം കക്ഷി ആപ്പുകൾ"</string>
-    <string name="voip_call_log_integration_summary" msgid="3834075007862607039">"ഏതൊക്കെ ആപ്പുകൾക്ക് അവയുടെ കോളുകൾ സിസ്റ്റം കോൾ ലോഗിലേക്ക് സംയോജിപ്പിക്കാനാകുമെന്നത് നിയന്ത്രിക്കുക. ഈ ഓപ്ഷൻ പ്രവർത്തനരഹിതമാക്കുന്നത്, ആപ്പിന്റെ ലോഗുകൾ പ്രധാന ഫോൺ ആപ്പിൽ ദൃശ്യമാകുന്നത് തടയുന്നു."</string>
+    <string name="voip_call_log_integration_summary" msgid="196486049335079938">"നിങ്ങളുടെ കോൾ ചരിത്രത്തിൽ കോളുകൾ കാണിക്കാൻ മറ്റ് ആപ്പുകളെ അനുവദിക്കുക. ഓഫാക്കിയിട്ടുണ്ടെങ്കിൽ, ഈ കോളുകൾ അവയുടെ നിർദ്ദിഷ്ട ആപ്പുകളിൽ മാത്രമേ ദൃശ്യമാകൂ."</string>
     <string name="wifi_calling" msgid="3650509202851355742">"വൈഫൈ കോളിംഗ്"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"അന്തർ നിർമ്മിത കണക്ഷൻ സേവനം"</string>
     <string name="voicemail" msgid="7697769412804195032">"വോയ്സ് മെയില്‍"</string>
@@ -838,6 +838,12 @@
     <string name="supp_service_over_ut_precautions_dialog_dismiss" msgid="5934541487903081652">"നിരസിക്കുക"</string>
     <string name="radio_info_data_connection_enable" msgid="6183729739783252840">"ഡാറ്റാ കണക്ഷൻ പ്രവർത്തനക്ഷമമാക്കുക"</string>
     <string name="radio_info_data_connection_disable" msgid="6404751291511368706">"ഡാറ്റ കണക്ഷൻ പ്രവർത്തനരഹിതമാക്കുക"</string>
+    <string name="radio_info_apply_preferred_network_type" msgid="8828433232282314858">"ബാധകമാക്കുക"</string>
+    <string name="radio_info_all_label" msgid="4326377691373938122">"എല്ലാം"</string>
+    <string name="radio_info_nr_label" msgid="4346984853962997752">"NR (5G)"</string>
+    <string name="radio_info_lte_label" msgid="5721318031926928485">"LTE (4G)"</string>
+    <string name="radio_info_wcdma_label" msgid="5157664869835235769">"UMTS (3G)"</string>
+    <string name="radio_info_gsm_label" msgid="2947899997551185529">"GSM (2G)"</string>
     <string name="volte_provisioned_switch_string" msgid="4812874990480336178">"VoLTE ഏർപ്പെടുത്തി"</string>
     <string name="vt_provisioned_switch_string" msgid="8295542122512195979">"വീഡിയോ കോളിംഗ് ഏർപ്പെടുത്തി"</string>
     <string name="wfc_provisioned_switch_string" msgid="3835004640321078988">"വൈഫൈ കോളിംഗ് ഏർപ്പെടുത്തി"</string>

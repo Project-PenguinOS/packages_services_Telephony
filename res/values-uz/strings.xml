@@ -64,7 +64,7 @@
     <string name="apn_settings" msgid="1978652203074756623">"Internetga ulanish nuqtalari (APN)"</string>
     <string name="settings_label" msgid="9101778088412567956">"Tarmoq sozlamalari"</string>
     <string name="phone_accounts" msgid="1216879437523774604">"Chaqiruv uchun hisoblar"</string>
-    <string name="phone_accounts_make_calls_with" msgid="16747814788918145">"Qo‘ng‘iroqlar uchun hisob"</string>
+    <string name="phone_accounts_make_calls_with" msgid="16747814788918145">"Chaqiruvlar uchun hisob"</string>
     <string name="phone_accounts_make_sip_calls_with" msgid="4691221006731847255">"SIP qo‘ng‘iroqlari uchun hisob"</string>
     <string name="phone_accounts_ask_every_time" msgid="6192347582666047168">"Avval so‘ralsin"</string>
     <string name="phone_accounts_default_account_label" msgid="5107598881335931101">"Birorta tarmoq yo‘q."</string>
@@ -76,13 +76,13 @@
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"Barcha qo‘ng‘iroq hisoblari"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"Qo‘ng‘iroqlarni amalga oshirish mumkin bo‘lgan hisoblarni tanlang"</string>
     <string name="voip_call_log_integration_label" msgid="2349275524959944815">"Tashqi ilovalar"</string>
-    <string name="voip_call_log_integration_summary" msgid="3834075007862607039">"Qaysi ilovalar oʻz chaqiruvlarini tizim chaqiruvlar jurnaliga integratsiya qilishini boshqaring. Bu sozlama faolsizlantirilsa, ilova jurnallari asosiy telefon ilovasida chiqmaydi."</string>
+    <string name="voip_call_log_integration_summary" msgid="196486049335079938">"Boshqa ilovalarga chaqiruvlar tarixida chaqiruvlarni chiqarishga ruxsat bering. Bu faolsizlantirilsa, ushbu chaqiruvlar faqat ayrim ilovalarda chiqadi."</string>
     <string name="wifi_calling" msgid="3650509202851355742">"Wi-Fi chaqiruv"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"Ichki o‘rnatilgan ulanish xizmati"</string>
     <string name="voicemail" msgid="7697769412804195032">"Ovozli pochta"</string>
     <string name="voicemail_settings_with_label" msgid="4228431668214894138">"Ovozli pochta (<xliff:g id="SUBSCRIPTIONLABEL">%s</xliff:g>)"</string>
     <string name="voicemail_abbreviated" msgid="7746778673131551185">"VM:"</string>
-    <string name="make_and_receive_calls" msgid="4868913166494621109">"Telefon qilish va qabul qilish"</string>
+    <string name="make_and_receive_calls" msgid="4868913166494621109">"Kiruvchi va chiquvchi chaqiruvlar"</string>
     <string name="smart_forwarding_settings_menu" msgid="8850429887958938540">"Smart uzatish"</string>
     <string name="smart_forwarding_settings_menu_summary" msgid="5096947726032885325">"Chaqiruvlar har doim band bo‘lmagan raqamga uzatilsin."</string>
     <string name="voicemail_notifications_preference_title" msgid="7829238858063382977">"Bildirishnomalar"</string>
@@ -838,6 +838,12 @@
     <string name="supp_service_over_ut_precautions_dialog_dismiss" msgid="5934541487903081652">"Yopish"</string>
     <string name="radio_info_data_connection_enable" msgid="6183729739783252840">"Mobil internetni yoqish"</string>
     <string name="radio_info_data_connection_disable" msgid="6404751291511368706">"Mobil internetni faolsizlantirish"</string>
+    <string name="radio_info_apply_preferred_network_type" msgid="8828433232282314858">"Tatbiq etish"</string>
+    <string name="radio_info_all_label" msgid="4326377691373938122">"Hammasi"</string>
+    <string name="radio_info_nr_label" msgid="4346984853962997752">"NR (5G)"</string>
+    <string name="radio_info_lte_label" msgid="5721318031926928485">"LTE (4G)"</string>
+    <string name="radio_info_wcdma_label" msgid="5157664869835235769">"UMTS (3G)"</string>
+    <string name="radio_info_gsm_label" msgid="2947899997551185529">"GSM (2G)"</string>
     <string name="volte_provisioned_switch_string" msgid="4812874990480336178">"VoLTE sinxronizatsiyasi yoniq"</string>
     <string name="vt_provisioned_switch_string" msgid="8295542122512195979">"Video chaqiruvlar funksiyasi yoniq"</string>
     <string name="wfc_provisioned_switch_string" msgid="3835004640321078988">"Wi-Fi orqali chaqiruvlar funksiyasi yoniq"</string>

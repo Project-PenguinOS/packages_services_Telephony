@@ -24,10 +24,6 @@
 // QTI_END: 2024-06-13: Telephony: Fix call forwarding alert issue in airplane mode
 package com.android.phone;
 
-// QTI_BEGIN: 2025-02-10: Telephony: Expect more flag not enabled for back to back SS requests
-import static com.qti.extphone.ExtTelephonyManager.FEATURE_BACK_TO_BACK_SUPPLEMENTARY_SERVICE_REQ;
-
-// QTI_END: 2025-02-10: Telephony: Expect more flag not enabled for back to back SS requests
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -53,18 +49,12 @@ import android.os.PersistableBundle;
 import android.os.UserHandle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
-// QTI_BEGIN: 2024-06-13: Telephony: Fix call forwarding alert issue in airplane mode
-import android.provider.Settings;
-// QTI_END: 2024-06-13: Telephony: Fix call forwarding alert issue in airplane mode
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
 // QTI_BEGIN: 2021-11-03: Telephony: Add SIM info to USSD sessions on UI
 import android.telecom.TelecomManager;
 // QTI_END: 2021-11-03: Telephony: Add SIM info to USSD sessions on UI
 import android.telephony.CarrierConfigManager;
-// QTI_BEGIN: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
-import android.telephony.ims.ImsReasonInfo;
-// QTI_END: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
 // QTI_BEGIN: 2023-01-18: Telephony: IMS : Move RTT downgrade and upgrade logic completely to AOSP.
 import android.telephony.SubscriptionInfo;
 // QTI_END: 2023-01-18: Telephony: IMS : Move RTT downgrade and upgrade logic completely to AOSP.
@@ -83,14 +73,6 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.android.internal.telephony.Call;
-// QTI_BEGIN: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
-import com.android.internal.telephony.CommandException;
-// QTI_END: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
-// QTI_BEGIN: 2023-03-16: Telephony: Enable telephony FDN check for side car SS requests.
-import com.android.internal.telephony.FdnUtils;
-import com.android.internal.telephony.gsm.GsmMmiCode;
-import com.android.internal.telephony.gsm.SsData;
-// QTI_END: 2023-03-16: Telephony: Enable telephony FDN check for side car SS requests.
 import com.android.internal.telephony.IccCard;
 import com.android.internal.telephony.MmiCode;
 import com.android.internal.telephony.Phone;
@@ -101,19 +83,8 @@ import com.android.services.telephony.TelecomAccountRegistry;
 // QTI_END: 2023-01-18: Telephony: IMS : Move RTT downgrade and upgrade logic completely to AOSP.
 import com.android.telephony.Rlog;
 
-// QTI_BEGIN: 2021-02-10: Telephony: Move IExtTelephony to IExtPhone
-import com.qti.extphone.ExtTelephonyManager;
-import com.qti.extphone.ServiceCallback;
-
-// QTI_END: 2021-02-10: Telephony: Move IExtTelephony to IExtPhone
 import java.io.IOException;
-// QTI_BEGIN: 2023-03-16: Telephony: Enable telephony FDN check for side car SS requests.
-import java.util.ArrayList;
-// QTI_END: 2023-03-16: Telephony: Enable telephony FDN check for side car SS requests.
 import java.util.List;
-// QTI_BEGIN: 2023-03-16: Telephony: Enable telephony FDN check for side car SS requests.
-import java.util.Locale;
-// QTI_END: 2023-03-16: Telephony: Enable telephony FDN check for side car SS requests.
 
 // QTI_BEGIN: 2018-02-23: Telephony: Enable proprietary MobileNetworkSettings
 import org.codeaurora.internal.IExtTelephony;
@@ -137,11 +108,6 @@ public class PhoneUtils {
     /** Define for default vibrate pattern if res cannot be found */
     private static final long[] DEFAULT_VIBRATE_PATTERN = {0, 250, 250, 250};
 
-// QTI_BEGIN: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
-    private static final int INVALID = -1;
-    private static int mBackToBackSSFeature = INVALID;
-
-// QTI_END: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
     /**
      * Theme to use for dialogs displayed by utility methods in this class. This is needed
      * because these dialogs are displayed using the application context, which does not resolve
@@ -160,13 +126,6 @@ public class PhoneUtils {
 // QTI_END: 2018-06-13: Telephony: MSIM: Emergency account handle support
     /** USSD information used to aggregate all USSD messages */
     private static StringBuilder sUssdMsg = new StringBuilder();
-// QTI_BEGIN: 2021-02-10: Telephony: Move IExtTelephony to IExtPhone
-    private static ExtTelephonyManager mExtTelephonyManager;
-// QTI_END: 2021-02-10: Telephony: Move IExtTelephony to IExtPhone
-// QTI_BEGIN: 2021-11-03: Telephony: Add SIM info to USSD sessions on UI
-    private static TelephonyManager sTelephonyManager;
-    private static TelecomManager sTelecomManager;
-// QTI_END: 2021-11-03: Telephony: Add SIM info to USSD sessions on UI
 
     private static final ComponentName PSTN_CONNECTION_SERVICE_COMPONENT =
             new ComponentName("com.android.phone",
@@ -243,10 +202,12 @@ public class PhoneUtils {
 
             // create the indeterminate progress dialog and display it.
             ProgressDialog pd = new ProgressDialog(context, THEME);
+            if (QtiPhoneUtilsHelper.isMultiSimMode() && phone != null) {
 // QTI_BEGIN: 2021-11-03: Telephony: Add SIM info to USSD sessions on UI
-            if (isMultiSimMode() && phone != null) {
                 pd.setTitle(context.getText(R.string.ussdinitiated_title));
-                PhoneAccount account = getPhoneAccount(phone.getSubId());
+// QTI_END: 2021-11-03: Telephony: Add SIM info to USSD sessions on UI
+                PhoneAccount account = QtiPhoneUtilsHelper.getPhoneAccount(phone.getSubId());
+// QTI_BEGIN: 2021-11-03: Telephony: Add SIM info to USSD sessions on UI
                 if (account != null && account.getIcon() != null) {
                     pd.setIcon(account.getIcon().loadDrawable(context));
                 }
@@ -448,9 +409,9 @@ public class PhoneUtils {
                         .setCancelable(false)
                         .create();
 
+                if (QtiPhoneUtilsHelper.isMultiSimMode() && phone != null) {
+                    PhoneAccount account = QtiPhoneUtilsHelper.getPhoneAccount(phone.getSubId());
 // QTI_BEGIN: 2021-11-03: Telephony: Add SIM info to USSD sessions on UI
-                if (isMultiSimMode() && phone != null) {
-                    PhoneAccount account = getPhoneAccount(phone.getSubId());
                     if (account != null && account.getIcon() != null) {
                         newDialog.setIcon(account.getIcon().loadDrawable(context));
                     }
@@ -601,9 +562,9 @@ public class PhoneUtils {
             ussdDialog
                     .setTitle(app.getResources().getString(R.string.default_carrier_mmi_msg_title));
         }
+        if (QtiPhoneUtilsHelper.isMultiSimMode() && phone != null) {
+            PhoneAccount account = QtiPhoneUtilsHelper.getPhoneAccount(phone.getSubId());
 // QTI_BEGIN: 2021-11-03: Telephony: Add SIM info to USSD sessions on UI
-        if (isMultiSimMode() && phone != null) {
-            PhoneAccount account = getPhoneAccount(phone.getSubId());
             if (account != null && account.getIcon() != null) {
                 ussdDialog.setIcon(account.getIcon().loadDrawable(context));
             }
@@ -878,154 +839,4 @@ public class PhoneUtils {
         return primayStackPhoneId;
     }
 // QTI_END: 2018-06-13: Telephony: MSIM: Emergency account handle support
-// QTI_BEGIN: 2021-02-10: Telephony: Move IExtTelephony to IExtPhone
-
-    public static void connectExtTelephonyManager(Context context) {
-        mExtTelephonyManager = ExtTelephonyManager.getInstance(context);
-
-        mExtTelephonyManager.connectService(mExtTelManagerServiceCallback);
-    }
-
-    public static ExtTelephonyManager getExtTelManager() {
-        return mExtTelephonyManager;
-    }
-
-    private static ServiceCallback mExtTelManagerServiceCallback = new ServiceCallback() {
-
-        @Override
-        public void onConnected() {
-            Log.d(LOG_TAG, "mExtTelManagerServiceCallback: service connected");
-        }
-
-        @Override
-        public void onDisconnected() {
-            Log.d(LOG_TAG, "mExtTelManagerServiceCallback: service disconnected");
-        }
-    };
-
-// QTI_END: 2021-02-10: Telephony: Move IExtTelephony to IExtPhone
-// QTI_BEGIN: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
-    static boolean isBacktoBackSSFeatureSupported() {
-        if (mBackToBackSSFeature == INVALID) {
-            mBackToBackSSFeature =
-// QTI_END: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
-// QTI_BEGIN: 2025-02-10: Telephony: Expect more flag not enabled for back to back SS requests
-                   (mExtTelephonyManager.isFeatureSupported(
-                   FEATURE_BACK_TO_BACK_SUPPLEMENTARY_SERVICE_REQ)) ? 1 : 0;
-// QTI_END: 2025-02-10: Telephony: Expect more flag not enabled for back to back SS requests
-// QTI_BEGIN: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
-        }
-        return (mBackToBackSSFeature == 1);
-    }
-
-    public static CommandException getCommandException(int code) {
-            CommandException.Error error = CommandException.Error.GENERIC_FAILURE;
-
-        switch(code) {
-            case ImsReasonInfo.CODE_UT_NOT_SUPPORTED:
-                error = CommandException.Error.REQUEST_NOT_SUPPORTED;
-                break;
-            case ImsReasonInfo.CODE_UT_CB_PASSWORD_MISMATCH:
-                error = CommandException.Error.PASSWORD_INCORRECT;
-                break;
-            case ImsReasonInfo.CODE_UT_SERVICE_UNAVAILABLE:
-                error = CommandException.Error.RADIO_NOT_AVAILABLE;
-                break;
-            case ImsReasonInfo.CODE_FDN_BLOCKED:
-                error = CommandException.Error.FDN_CHECK_FAILURE;
-                break;
-            case ImsReasonInfo.CODE_UT_SS_MODIFIED_TO_DIAL:
-                error = CommandException.Error.SS_MODIFIED_TO_DIAL;
-                break;
-            case ImsReasonInfo.CODE_UT_SS_MODIFIED_TO_USSD:
-                error = CommandException.Error.SS_MODIFIED_TO_USSD;
-                break;
-            case ImsReasonInfo.CODE_UT_SS_MODIFIED_TO_SS:
-                error = CommandException.Error.SS_MODIFIED_TO_SS;
-                break;
-            case ImsReasonInfo.CODE_UT_SS_MODIFIED_TO_DIAL_VIDEO:
-                error = CommandException.Error.SS_MODIFIED_TO_DIAL_VIDEO;
-                break;
-            default:
-                break;
-        }
-
-        return new CommandException(error);
-    }
-// QTI_END: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
-
-// QTI_BEGIN: 2023-03-16: Telephony: Enable telephony FDN check for side car SS requests.
-    public static boolean isRequestBlockedByFDN(SsData.RequestType requestType,
-            SsData.ServiceType serviceType, int phoneId, Context context) {
-        TelephonyManager telephonyManager =
-                (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-        String countryIso = (telephonyManager != null) ?
-                telephonyManager.getNetworkCountryIso(phoneId).toUpperCase(Locale.ROOT) :
-                "";
-        ArrayList<String> controlStrings = GsmMmiCode.getControlStrings(requestType, serviceType);
-        return FdnUtils.isSuppServiceRequestBlockedByFdn(phoneId, controlStrings, countryIso);
-    }
-// QTI_END: 2023-03-16: Telephony: Enable telephony FDN check for side car SS requests.
-// QTI_BEGIN: 2024-06-13: Telephony: Fix call forwarding alert issue in airplane mode
-    /**
-     * To check whether supplementary service is allowed in airplane mode.
-     */
-    public static boolean isSuppServiceAllowedInAirplaneMode(Phone phone) {
-        if (phone == null) {
-            return false;
-        }
-        final PhoneGlobals app = PhoneGlobals.getInstance();
-        int subId = phone.getSubId();
-        PersistableBundle b = SubscriptionManager.isValidSubscriptionId(subId)
-                ? app.getCarrierConfigForSubId(subId) : app.getCarrierConfig();
-        boolean config = b != null && b.getBoolean(
-                CarrierConfigManager.KEY_DISABLE_SUPPLEMENTARY_SERVICES_IN_AIRPLANE_MODE_BOOL);
-        if (!config) {
-            return true;
-        }
-        boolean isAirplaneModeOn = Settings.Global.getInt(phone.getContext().getContentResolver(),
-                Settings.Global.AIRPLANE_MODE_ON, PhoneGlobals.AIRPLANE_OFF)
-                == PhoneGlobals.AIRPLANE_ON;
-        return !isAirplaneModeOn || phone.isWifiCallingEnabled() && phone.isImsRegistered();
-    }
-// QTI_END: 2024-06-13: Telephony: Fix call forwarding alert issue in airplane mode
-
-// QTI_BEGIN: 2021-11-03: Telephony: Add SIM info to USSD sessions on UI
-    /**
-     * To get the phone account using subscription ID.
-     */
-    private static PhoneAccount getPhoneAccount(int subId) {
-        PhoneAccountHandle handle = getTelephonyManager() != null ?
-                getTelephonyManager().getPhoneAccountHandleForSubscriptionId(subId) : null;
-        return getTelecomManager() != null && handle != null ?
-                getTelecomManager().getPhoneAccount(handle) : null;
-    }
-
-    /**
-     * Returns true if device is in Single Standby mode, false otherwise.
-     */
-    private static boolean isMultiSimMode() {
-        return getTelephonyManager() != null && getTelephonyManager().getActiveModemCount() > 1;
-    }
-
-    /**
-     * To get the instance of TelephonyManager.
-     */
-    private static TelephonyManager getTelephonyManager() {
-        if (sTelephonyManager == null) {
-            sTelephonyManager = PhoneGlobals.getInstance().getSystemService(TelephonyManager.class);
-        }
-        return sTelephonyManager;
-    }
-
-    /**
-     * To get the instance of TelecomManager.
-     */
-    private static TelecomManager getTelecomManager() {
-        if (sTelecomManager == null) {
-            sTelecomManager = PhoneGlobals.getInstance().getSystemService(TelecomManager.class);
-        }
-        return sTelecomManager;
-    }
-// QTI_END: 2021-11-03: Telephony: Add SIM info to USSD sessions on UI
 }

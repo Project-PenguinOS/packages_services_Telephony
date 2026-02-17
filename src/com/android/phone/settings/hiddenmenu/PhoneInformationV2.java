@@ -13,6 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/*
+ * Changes from Qualcomm Technologies, Inc. are provided under the following license:
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+ * SPDX-License-Identifier: BSD-3-Clause-Clear
+ */
 package com.android.phone.settings.hiddenmenu;
 
 import android.app.FragmentTransaction;
@@ -37,6 +43,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneFactory;
+import com.android.phone.settings.SettingsConstants;
 import com.android.phone.R;
 
 import java.util.ArrayList;
@@ -59,6 +66,7 @@ public class PhoneInformationV2 extends AppCompatActivity
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.phone_information_v2);
+        SettingsConstants.setupEdgeToEdge(this);
         mViewModel = new ViewModelProvider(this).get(PhoneInfoSharedViewModel.class);
         phoneId = DEFAULT_PHONE_ID;
         itemOneContainer = findViewById(R.id.nav_item_one_container);
@@ -129,7 +137,7 @@ public class PhoneInformationV2 extends AppCompatActivity
         if (selectedItemId == R.id.nav_item_one_container) {
             selectedFragment = new PhoneInformationV2FragmentDeviceDetails();
         } else if (selectedItemId == R.id.nav_item_two_container) {
-            selectedFragment = new PhoneInformationV2FragmentDataNetwork();
+            selectedFragment = new QtiPhoneInformationV2FragmentDataNetwork();
         } else if (selectedItemId == R.id.nav_item_three_container) {
             selectedFragment = new PhoneInformationV2FragmentSatellite();
         } else if (selectedItemId == R.id.nav_item_four_container) {

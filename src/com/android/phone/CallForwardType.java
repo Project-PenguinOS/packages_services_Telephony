@@ -139,7 +139,10 @@ public class CallForwardType extends PreferenceActivity {
                 }
             } else if (action.equals(Intent.ACTION_AIRPLANE_MODE_CHANGED)) {
                 if (mPhone != null) {
-                    setPreferencesState(PhoneUtils.isSuppServiceAllowedInAirplaneMode(mPhone));
+// QTI_END: 2024-06-13: Telephony: Fix call forwarding alert issue in airplane mode
+                    setPreferencesState(
+                        QtiPhoneUtilsHelper.isSuppServiceAllowedInAirplaneMode(mPhone));
+// QTI_BEGIN: 2024-06-13: Telephony: Fix call forwarding alert issue in airplane mode
                 }
             }
         }
@@ -215,7 +218,10 @@ public class CallForwardType extends PreferenceActivity {
 // QTI_END: 2018-09-19: Telephony: IMS: Video call forwarding option does not disappear after UT is false
 // QTI_BEGIN: 2024-06-13: Telephony: Fix call forwarding alert issue in airplane mode
             if (mPhone != null) {
-                mVideoPreference.setEnabled(PhoneUtils.isSuppServiceAllowedInAirplaneMode(mPhone));
+// QTI_END: 2024-06-13: Telephony: Fix call forwarding alert issue in airplane mode
+                mVideoPreference.setEnabled(
+                    QtiPhoneUtilsHelper.isSuppServiceAllowedInAirplaneMode(mPhone));
+// QTI_BEGIN: 2024-06-13: Telephony: Fix call forwarding alert issue in airplane mode
             }
 // QTI_END: 2024-06-13: Telephony: Fix call forwarding alert issue in airplane mode
 // QTI_BEGIN: 2018-09-19: Telephony: IMS: Video call forwarding option does not disappear after UT is false
@@ -326,8 +332,8 @@ public class CallForwardType extends PreferenceActivity {
 // QTI_END: 2018-03-30: Telephony: IMS: Add UT interface to query CF setting for service class.
 // QTI_BEGIN: 2024-06-13: Telephony: Fix call forwarding alert issue in airplane mode
         /*set preference state base on whether supplementary service is allowed*/
-        setPreferencesState(PhoneUtils.isSuppServiceAllowedInAirplaneMode(mPhone));
 // QTI_END: 2024-06-13: Telephony: Fix call forwarding alert issue in airplane mode
+        setPreferencesState(QtiPhoneUtilsHelper.isSuppServiceAllowedInAirplaneMode(mPhone));
 // QTI_BEGIN: 2024-07-29: Telephony: Fix call forward option button is not grayed out issue
         registerReceiver(mBroadcastReceiver, mIntentFilter);
 // QTI_END: 2024-07-29: Telephony: Fix call forward option button is not grayed out issue

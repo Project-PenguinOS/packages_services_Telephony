@@ -62,7 +62,6 @@ import android.net.Uri;
 import android.os.AsyncResult;
 import android.os.Bundle;
 import android.os.Handler;
-import android.platform.test.flag.junit.SetFlagsRule;
 import android.telecom.Conference;
 import android.telecom.Conferenceable;
 import android.telecom.ConnectionRequest;
@@ -107,7 +106,6 @@ import com.android.internal.telephony.emergency.EmergencyStateTracker;
 import com.android.internal.telephony.emergency.RadioOnHelper;
 import com.android.internal.telephony.emergency.RadioOnStateListener;
 import com.android.internal.telephony.flags.FeatureFlags;
-import com.android.internal.telephony.flags.Flags;
 import com.android.internal.telephony.gsm.SuppServiceNotification;
 import com.android.internal.telephony.imsphone.ImsPhone;
 import com.android.internal.telephony.imsphone.ImsPhoneCall;
@@ -120,7 +118,6 @@ import com.android.services.telephony.domainselection.DynamicRoutingController;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -143,7 +140,6 @@ import java.util.function.Consumer;
 
 @RunWith(AndroidJUnit4.class)
 public class TelephonyConnectionServiceTest extends TelephonyTestBase {
-    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
     private static final String NORMAL_ROUTED_EMERGENCY_NUMBER = "110";
     private static final String EMERGENCY_ROUTED_EMERGENCY_NUMBER = "911";
     private static final EmergencyNumber MOCK_NORMAL_NUMBER = new EmergencyNumber(
@@ -357,8 +353,6 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
         mTestConnectionService.setTelephonyManagerProxy(mTelephonyManagerProxy);
 
         mBinderStub = (IConnectionService.Stub) mTestConnectionService.onBind(null);
-        mSetFlagsRule.disableFlags(Flags.FLAG_IGNORE_STATE_DETAILS_UPDATE_FOR_DOMAIN_RESELECTION);
-        mSetFlagsRule.disableFlags(Flags.FLAG_USE_EMERGENCY_ROUTING_CAUSE);
     }
 
     @After
@@ -2967,8 +2961,10 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
                 dialArgs.intentExtras.getInt(PhoneConstants.EXTRA_DIAL_DOMAIN, -1));
         assertTrue(dialArgs.isEmergency);
         assertEquals(eccCategory, dialArgs.eccCategory);
-        assertTrue(dialArgs.intentExtras.getBoolean(
-                PhoneConstants.EXTRA_USE_EMERGENCY_ROUTING, false));
+        assertEquals(PhoneConstants.EMERGENCY_ROUTING_UPDATE_CAUSE_ALTERNATE_SERVICE,
+                dialArgs.intentExtras.getInt(
+                        PhoneConstants.EXTRA_EMERGENCY_ROUTING_UPDATE_CAUSE,
+                        PhoneConstants.EMERGENCY_ROUTING_UPDATE_CAUSE_UNSPECIFIED));
     }
 
     @Test
@@ -3020,14 +3016,15 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
                 dialArgs.intentExtras.getInt(PhoneConstants.EXTRA_DIAL_DOMAIN, -1));
         assertTrue(dialArgs.isEmergency);
         assertEquals(eccCategory, dialArgs.eccCategory);
-        assertTrue(dialArgs.intentExtras.getBoolean(
-                PhoneConstants.EXTRA_USE_EMERGENCY_ROUTING, false));
+        assertEquals(PhoneConstants.EMERGENCY_ROUTING_UPDATE_CAUSE_ALTERNATE_SERVICE,
+                dialArgs.intentExtras.getInt(
+                        PhoneConstants.EXTRA_EMERGENCY_ROUTING_UPDATE_CAUSE,
+                        PhoneConstants.EMERGENCY_ROUTING_UPDATE_CAUSE_UNSPECIFIED));
     }
 
     @Test
     public void testDomainSelectionUpdateEmergencyCallRoutingWithSourceModification()
             throws Exception {
-        mSetFlagsRule.enableFlags(Flags.FLAG_USE_EMERGENCY_ROUTING_CAUSE);
         setupForCallTest();
 
         int preciseDisconnectCause = com.android.internal.telephony.CallFailCause.ERROR_UNSPECIFIED;
@@ -3083,7 +3080,6 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
 
     @Test
     public void testDomainSelectionUpdateEmergencyCallRoutingButSourceKept() throws Exception {
-        mSetFlagsRule.enableFlags(Flags.FLAG_USE_EMERGENCY_ROUTING_CAUSE);
         setupForCallTest();
         int selectedDomain = DOMAIN_PS;
 
@@ -3351,57 +3347,6 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
 
         assertNotNull(disconnectCause);
         assertEquals(ERROR_UNSPECIFIED, disconnectCause.getTelephonyDisconnectCause());
-        // The connection properties are not updated even if the domain selection is terminated.
-        assertEquals(PROPERTY_IS_RTT, c.getConnectionProperties() & PROPERTY_IS_RTT);
-    }
-
-    @Test
-    public void testEmergencyCallOnSelectionTerminated_enableIgnoreStateDetailsUpdate()
-            throws Exception {
-        mSetFlagsRule.enableFlags(Flags.FLAG_IGNORE_STATE_DETAILS_UPDATE_FOR_DOMAIN_RESELECTION);
-        setupForCallTest();
-        setupImsPhoneCall(mPhone0, Call.State.DIALING, true);
-
-        doReturn(mEmergencyCallDomainSelectionConnection).when(mDomainSelectionResolver)
-                .getDomainSelectionConnection(any(), anyInt(), eq(true));
-        doReturn(mPhone0).when(mEmergencyCallDomainSelectionConnection).getPhone();
-        doReturn(true).when(mTelephonyManagerProxy).isCurrentEmergencyNumber(anyString());
-        doReturn(true).when(mDomainSelectionResolver).isDomainSelectionSupported();
-
-        mConnection = mTestConnectionService.onCreateOutgoingConnection(PHONE_ACCOUNT_HANDLE_1,
-                createConnectionRequest(PHONE_ACCOUNT_HANDLE_1,
-                        TEST_EMERGENCY_NUMBER, TELECOM_CALL_ID1));
-
-        TelephonyConnection c = (TelephonyConnection) mConnection;
-
-        assertNotNull(c);
-        assertNull(c.getOriginalConnection());
-
-        c.setOriginalConnection(mImsPhoneConnection);
-        assertEquals(PROPERTY_IS_RTT, c.getConnectionProperties() & PROPERTY_IS_RTT);
-
-        ArgumentCaptor<DomainSelectionConnection.DomainSelectionConnectionCallback> callbackCaptor =
-                ArgumentCaptor.forClass(
-                        DomainSelectionConnection.DomainSelectionConnectionCallback.class);
-
-        verify(mEmergencyCallDomainSelectionConnection).createEmergencyConnection(
-                any(), callbackCaptor.capture());
-
-        DomainSelectionConnection.DomainSelectionConnectionCallback callback =
-                callbackCaptor.getValue();
-
-        assertNotNull(callback);
-
-        replaceInstance(TelephonyConnection.class, "mOriginalConnection", c, null);
-        callback.onSelectionTerminated(ERROR_UNSPECIFIED);
-
-        verify(mEmergencyCallDomainSelectionConnection).cancelSelection();
-        verify(mEmergencyStateTracker).endCall(eq(c));
-
-        android.telecom.DisconnectCause disconnectCause = c.getDisconnectCause();
-
-        assertNotNull(disconnectCause);
-        assertEquals(ERROR_UNSPECIFIED, disconnectCause.getTelephonyDisconnectCause());
         // The connection properties are updated when the domain selection is terminated.
         assertEquals(0, c.getConnectionProperties() & PROPERTY_IS_RTT);
     }
@@ -3445,59 +3390,12 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
         android.telecom.DisconnectCause disconnectCause = c.getDisconnectCause();
         assertNotNull(disconnectCause);
         assertEquals(ERROR_UNSPECIFIED, disconnectCause.getTelephonyDisconnectCause());
-        // The connection properties are not updated even if the domain selection is terminated.
-        assertEquals(PROPERTY_IS_RTT, c.getConnectionProperties() & PROPERTY_IS_RTT);
-    }
-
-    @Test
-    public void testNormalCallOnSelectionTerminated_enableIgnoreStateDetailsUpdate()
-            throws Exception {
-        mSetFlagsRule.enableFlags(Flags.FLAG_IGNORE_STATE_DETAILS_UPDATE_FOR_DOMAIN_RESELECTION);
-        setupForCallTest();
-        setupImsPhoneCall(mPhone0, Call.State.DIALING, true);
-        setPhonesDialConnection(mPhone0, mImsPhoneConnection);
-        setupForDialForDomainSelection(mPhone0, DOMAIN_PS, false);
-
-        mConnection = mTestConnectionService.onCreateOutgoingConnection(PHONE_ACCOUNT_HANDLE_1,
-                createConnectionRequest(PHONE_ACCOUNT_HANDLE_1, "1234", TELECOM_CALL_ID1));
-
-        TelephonyConnection c = (TelephonyConnection) mConnection;
-
-        assertNotNull(c);
-
-        if (c.getOriginalConnection() == null) {
-            c.setOriginalConnection(mImsPhoneConnection);
-        }
-        assertEquals(PROPERTY_IS_RTT, c.getConnectionProperties() & PROPERTY_IS_RTT);
-
-        ArgumentCaptor<DomainSelectionConnection.DomainSelectionConnectionCallback> callbackCaptor =
-                ArgumentCaptor.forClass(
-                        DomainSelectionConnection.DomainSelectionConnectionCallback.class);
-
-        verify(mNormalCallDomainSelectionConnection).createNormalConnection(
-                any(), callbackCaptor.capture());
-
-        DomainSelectionConnection.DomainSelectionConnectionCallback callback =
-                callbackCaptor.getValue();
-
-        assertNotNull(callback);
-
-        replaceInstance(TelephonyConnection.class, "mOriginalConnection", c, null);
-        callback.onSelectionTerminated(ERROR_UNSPECIFIED);
-
-        verify(mNormalCallDomainSelectionConnection).finishSelection();
-
-        android.telecom.DisconnectCause disconnectCause = c.getDisconnectCause();
-        assertNotNull(disconnectCause);
-        assertEquals(ERROR_UNSPECIFIED, disconnectCause.getTelephonyDisconnectCause());
         // The connection properties are updated when the domain selection is terminated.
         assertEquals(0, c.getConnectionProperties() & PROPERTY_IS_RTT);
     }
 
     @Test
-    public void testNormalCallOnSelectionTerminated_dscCleared_enableIgnoreStateDetailsUpdate()
-            throws Exception {
-        mSetFlagsRule.enableFlags(Flags.FLAG_IGNORE_STATE_DETAILS_UPDATE_FOR_DOMAIN_RESELECTION);
+    public void testNormalCallOnSelectionTerminated_dscCleared() throws Exception {
         setupForCallTest();
         setupImsPhoneCall(mPhone0, Call.State.DIALING, true);
         setPhonesDialConnection(mPhone0, mImsPhoneConnection);

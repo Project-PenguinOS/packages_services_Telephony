@@ -76,7 +76,7 @@
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"Alle opkaldskonti"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"Vælg, hvilke konti der kan foretage opkald"</string>
     <string name="voip_call_log_integration_label" msgid="2349275524959944815">"Tredjepartsapps"</string>
-    <string name="voip_call_log_integration_summary" msgid="3834075007862607039">"Styr, hvilke apps der kan integrere deres opkald i systemopkaldshistorikken. Hvis du deaktiverer denne indstilling, forhindres det, at appens logs vises i den primære opkaldsapp."</string>
+    <string name="voip_call_log_integration_summary" msgid="196486049335079938">"Tillad, at andre apps viser opkald i din opkaldshistorik. Hvis du deaktiverer denne funktion, vises disse opkald kun i de specifikke apps."</string>
     <string name="wifi_calling" msgid="3650509202851355742">"Opkald via Wi-Fi"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"Indbygget forbindelsestjeneste"</string>
     <string name="voicemail" msgid="7697769412804195032">"Telefonsvarer"</string>
@@ -838,6 +838,18 @@
     <string name="supp_service_over_ut_precautions_dialog_dismiss" msgid="5934541487903081652">"Luk"</string>
     <string name="radio_info_data_connection_enable" msgid="6183729739783252840">"Aktivér dataforbindelse"</string>
     <string name="radio_info_data_connection_disable" msgid="6404751291511368706">"Deaktiver dataforbindelse"</string>
+    <!-- no translation found for radio_info_apply_preferred_network_type (8828433232282314858) -->
+    <skip />
+    <!-- no translation found for radio_info_all_label (4326377691373938122) -->
+    <skip />
+    <!-- no translation found for radio_info_nr_label (4346984853962997752) -->
+    <skip />
+    <!-- no translation found for radio_info_lte_label (5721318031926928485) -->
+    <skip />
+    <!-- no translation found for radio_info_wcdma_label (5157664869835235769) -->
+    <skip />
+    <!-- no translation found for radio_info_gsm_label (2947899997551185529) -->
+    <skip />
     <string name="volte_provisioned_switch_string" msgid="4812874990480336178">"VoLTE er provisioneret"</string>
     <string name="vt_provisioned_switch_string" msgid="8295542122512195979">"Videoopkald er provisioneret"</string>
     <string name="wfc_provisioned_switch_string" msgid="3835004640321078988">"Wi-Fi-opkald er provisioneret"</string>
@@ -915,7 +927,7 @@
     <string name="radio_info_cellinfo_label" msgid="8199062974670377659">"Alle oplysninger om cellemåling:"</string>
     <string name="radio_info_gprs_service_label" msgid="6819204246355412952">"Datatjeneste:"</string>
     <string name="radio_info_roaming_label" msgid="6636932886446857120">"Roaming:"</string>
-    <string name="radio_info_imei_label" msgid="8947899706930120368">"IMEI-nummer:"</string>
+    <string name="radio_info_imei_label" msgid="8947899706930120368">"IMEI:"</string>
     <string name="radio_info_call_redirect_label" msgid="4526480903023362276">"Omdirigering af opkald:"</string>
     <string name="radio_info_ppp_resets_label" msgid="9131901102339077661">"Antal PPP-nulstillinger siden start:"</string>
     <string name="radio_info_current_network_label" msgid="3052098695239642450">"Nuværende netværk:"</string>

@@ -76,7 +76,7 @@
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"எல்லா அழைப்புக் கணக்குகளும்"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"அழைப்புகள் செய்வதற்கான கணக்குகளைத் தேர்ந்தெடுக்கவும்"</string>
     <string name="voip_call_log_integration_label" msgid="2349275524959944815">"மூன்றாம் தரப்பு ஆப்ஸ்"</string>
-    <string name="voip_call_log_integration_summary" msgid="3834075007862607039">"எந்தெந்த ஆப்ஸ் அவற்றின் அழைப்புகளை சிஸ்டம் அழைப்புப் பதிவில் ஒருங்கிணைக்கலாம் என்பதைக் கட்டுப்படுத்தலாம். இந்த விருப்பத்தை ஆஃப் செய்தால், ஆப்ஸின் பதிவுகள் முதன்மை மொபைல் ஆப்ஸில் காட்டப்படுவது தடுக்கப்படும்."</string>
+    <string name="voip_call_log_integration_summary" msgid="196486049335079938">"அழைப்புகளை உங்கள் அழைப்புப் பதிவுகளில் காட்ட பிற ஆப்ஸை அனுமதிக்கலாம். ஆஃப் செய்தால், இந்த அழைப்புகள் அவற்றின் குறிப்பிட்ட ஆப்ஸில் மட்டுமே காட்டப்படும்."</string>
     <string name="wifi_calling" msgid="3650509202851355742">"வைஃபை அழைப்பு"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"உள்ளமைக்கப்பட்ட இணைப்பு சேவை"</string>
     <string name="voicemail" msgid="7697769412804195032">"குரலஞ்சல்"</string>
@@ -838,6 +838,12 @@
     <string name="supp_service_over_ut_precautions_dialog_dismiss" msgid="5934541487903081652">"நிராகரி"</string>
     <string name="radio_info_data_connection_enable" msgid="6183729739783252840">"டேட்டா இணைப்பை இயக்கு"</string>
     <string name="radio_info_data_connection_disable" msgid="6404751291511368706">"டேட்டா இணைப்பை முடக்கு"</string>
+    <string name="radio_info_apply_preferred_network_type" msgid="8828433232282314858">"பயன்படுத்து"</string>
+    <string name="radio_info_all_label" msgid="4326377691373938122">"எல்லாம்"</string>
+    <string name="radio_info_nr_label" msgid="4346984853962997752">"NR (5G)"</string>
+    <string name="radio_info_lte_label" msgid="5721318031926928485">"LTE (4G)"</string>
+    <string name="radio_info_wcdma_label" msgid="5157664869835235769">"UMTS (3G)"</string>
+    <string name="radio_info_gsm_label" msgid="2947899997551185529">"GSM (2G)"</string>
     <string name="volte_provisioned_switch_string" msgid="4812874990480336178">"VoLTE அமைக்கப்பட்டது"</string>
     <string name="vt_provisioned_switch_string" msgid="8295542122512195979">"வீடியோ அழைப்பு அமைக்கப்பட்டது"</string>
     <string name="wfc_provisioned_switch_string" msgid="3835004640321078988">"வைஃபை அழைப்பு அமைக்கப்பட்டது"</string>

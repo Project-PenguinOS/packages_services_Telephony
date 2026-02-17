@@ -64,9 +64,9 @@
     <string name="apn_settings" msgid="1978652203074756623">"שמות של נקודות גישה"</string>
     <string name="settings_label" msgid="9101778088412567956">"הגדרות רשת"</string>
     <string name="phone_accounts" msgid="1216879437523774604">"חשבונות להתקשרות"</string>
-    <string name="phone_accounts_make_calls_with" msgid="16747814788918145">"ביצוע שיחות באמצעות"</string>
+    <string name="phone_accounts_make_calls_with" msgid="16747814788918145">"מאיזה חשבון לבצע שיחות?"</string>
     <string name="phone_accounts_make_sip_calls_with" msgid="4691221006731847255">"‏ביצוע שיחות SIP באמצעות"</string>
-    <string name="phone_accounts_ask_every_time" msgid="6192347582666047168">"יש לשאול לפני ביצוע"</string>
+    <string name="phone_accounts_ask_every_time" msgid="6192347582666047168">"לשאול לפני השיחה"</string>
     <string name="phone_accounts_default_account_label" msgid="5107598881335931101">"אין רשתות זמינות"</string>
     <string name="phone_accounts_settings_header" msgid="6296501692964706536">"הגדרות"</string>
     <string name="phone_accounts_choose_accounts" msgid="4748805293314824974">"בחירת חשבונות"</string>
@@ -76,7 +76,7 @@
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"כל החשבונות לביצוע שיחות"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"בחירת החשבונות שיכולים להתקשר"</string>
     <string name="voip_call_log_integration_label" msgid="2349275524959944815">"אפליקציות של צד שלישי"</string>
-    <string name="voip_call_log_integration_summary" msgid="3834075007862607039">"אפשר לבחור את האפליקציות שיכולות לשלב את השיחות שלהן ביומן של המערכת. כשהאפשרות הזו מושבתת, היומנים של האפליקציה לא יופיעו באפליקציית הטלפון הראשית."</string>
+    <string name="voip_call_log_integration_summary" msgid="196486049335079938">"אפליקציות אחרות יוכלו לראות את השיחות בהיסטוריה שלך. כשההגדרה הזו מושבתת, השיחות יופיעו רק באפליקציות הספציפיות שלהן."</string>
     <string name="wifi_calling" msgid="3650509202851355742">"‏שיחות ב-Wi-Fi"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"שירות חיבור מובנה"</string>
     <string name="voicemail" msgid="7697769412804195032">"דואר קולי"</string>
@@ -705,7 +705,7 @@
     <string name="change_pin_enter_new_pin_header" msgid="4739465616733486118">"הגדרת קוד גישה חדש"</string>
     <string name="change_pin_enter_new_pin_hint" msgid="2326038476516364210">"האורך של קוד הגישה חייב להיות <xliff:g id="MAX">%2$d</xliff:g>-<xliff:g id="MIN">%1$d</xliff:g> ספרות."</string>
     <string name="change_pin_confirm_pin_header" msgid="2606303906320705726">"אישור קוד הגישה"</string>
-    <string name="change_pin_confirm_pins_dont_match" msgid="305164501222587215">"קודי הגישה לא תואמים"</string>
+    <string name="change_pin_confirm_pins_dont_match" msgid="305164501222587215">"קודי האימות לא זהים"</string>
     <string name="change_pin_succeeded" msgid="2504705600693014403">"קוד הגישה לדואר הקולי עודכן"</string>
     <string name="change_pin_system_error" msgid="7772788809875146873">"לא ניתן להגדיר את קוד הגישה"</string>
     <string name="mobile_data_status_roaming_turned_off_subtext" msgid="6840673347416227054">"חבילת הגלישה בנדידה הושבתה"</string>
@@ -839,6 +839,12 @@
     <string name="supp_service_over_ut_precautions_dialog_dismiss" msgid="5934541487903081652">"סגירה"</string>
     <string name="radio_info_data_connection_enable" msgid="6183729739783252840">"הפעלת חיבור נתונים"</string>
     <string name="radio_info_data_connection_disable" msgid="6404751291511368706">"השבת חיבור נתונים"</string>
+    <string name="radio_info_apply_preferred_network_type" msgid="8828433232282314858">"אישור"</string>
+    <string name="radio_info_all_label" msgid="4326377691373938122">"הכול"</string>
+    <string name="radio_info_nr_label" msgid="4346984853962997752">"‏‎NR (5G)"</string>
+    <string name="radio_info_lte_label" msgid="5721318031926928485">"‏‎LTE (4G)"</string>
+    <string name="radio_info_wcdma_label" msgid="5157664869835235769">"‏‎UMTS (3G)"</string>
+    <string name="radio_info_gsm_label" msgid="2947899997551185529">"‏‎GSM (2G)"</string>
     <string name="volte_provisioned_switch_string" msgid="4812874990480336178">"‏ניהול התצורה של VoLTE"</string>
     <string name="vt_provisioned_switch_string" msgid="8295542122512195979">"ניהול תצורה של שיחות וידאו"</string>
     <string name="wfc_provisioned_switch_string" msgid="3835004640321078988">"‏ניהול תצורה של שיחות Wifi"</string>

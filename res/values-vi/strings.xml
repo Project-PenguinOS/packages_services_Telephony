@@ -63,7 +63,7 @@
     <string name="labelCdmaMore_with_label" msgid="7759692829160238152">"Cài đặt cuộc gọi CDMA (<xliff:g id="SUBSCRIPTIONLABEL">%s</xliff:g>)"</string>
     <string name="apn_settings" msgid="1978652203074756623">"Tên điểm truy cập"</string>
     <string name="settings_label" msgid="9101778088412567956">"Cài đặt mạng"</string>
-    <string name="phone_accounts" msgid="1216879437523774604">"Tài khoản gọi"</string>
+    <string name="phone_accounts" msgid="1216879437523774604">"Tài khoản gọi điện"</string>
     <string name="phone_accounts_make_calls_with" msgid="16747814788918145">"Thực hiện cuộc gọi bằng"</string>
     <string name="phone_accounts_make_sip_calls_with" msgid="4691221006731847255">"Thực hiện cuộc gọi SIP bằng"</string>
     <string name="phone_accounts_ask_every_time" msgid="6192347582666047168">"Hỏi trước"</string>
@@ -76,7 +76,7 @@
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"Tất cả các tài khoản gọi"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"Chọn tài khoản có thể thực hiện cuộc gọi"</string>
     <string name="voip_call_log_integration_label" msgid="2349275524959944815">"Ứng dụng của bên thứ ba"</string>
-    <string name="voip_call_log_integration_summary" msgid="3834075007862607039">"Kiểm soát những ứng dụng có thể tích hợp cuộc gọi của mình vào nhật ký cuộc gọi của hệ thống. Nếu bạn tắt chế độ này, nhật ký của ứng dụng sẽ không xuất hiện trong ứng dụng điện thoại chính."</string>
+    <string name="voip_call_log_integration_summary" msgid="196486049335079938">"Cho phép các ứng dụng khác hiển thị cuộc gọi trong nhật ký cuộc gọi của bạn. Nếu bạn tắt chế độ này, các cuộc gọi này sẽ chỉ xuất hiện trong ứng dụng tương ứng."</string>
     <string name="wifi_calling" msgid="3650509202851355742">"Gọi qua Wi-Fi"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"Dịch vụ kết nối được tích hợp"</string>
     <string name="voicemail" msgid="7697769412804195032">"Thư thoại"</string>
@@ -838,6 +838,18 @@
     <string name="supp_service_over_ut_precautions_dialog_dismiss" msgid="5934541487903081652">"Bỏ qua"</string>
     <string name="radio_info_data_connection_enable" msgid="6183729739783252840">"Bật kết nối dữ liệu"</string>
     <string name="radio_info_data_connection_disable" msgid="6404751291511368706">"Tắt kết nối dữ liệu"</string>
+    <!-- no translation found for radio_info_apply_preferred_network_type (8828433232282314858) -->
+    <skip />
+    <!-- no translation found for radio_info_all_label (4326377691373938122) -->
+    <skip />
+    <!-- no translation found for radio_info_nr_label (4346984853962997752) -->
+    <skip />
+    <!-- no translation found for radio_info_lte_label (5721318031926928485) -->
+    <skip />
+    <!-- no translation found for radio_info_wcdma_label (5157664869835235769) -->
+    <skip />
+    <!-- no translation found for radio_info_gsm_label (2947899997551185529) -->
+    <skip />
     <string name="volte_provisioned_switch_string" msgid="4812874990480336178">"Đã cấp phép VoLTE"</string>
     <string name="vt_provisioned_switch_string" msgid="8295542122512195979">"Đã cấp phép gọi video"</string>
     <string name="wfc_provisioned_switch_string" msgid="3835004640321078988">"Đã cấp phép Gọi qua Wi-Fi"</string>

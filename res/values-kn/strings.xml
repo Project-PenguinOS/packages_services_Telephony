@@ -64,7 +64,7 @@
     <string name="apn_settings" msgid="1978652203074756623">"ಆ್ಯಕ್ಸೆಸ್ ಪಾಯಿಂಟ್ ಹೆಸರುಗಳು"</string>
     <string name="settings_label" msgid="9101778088412567956">"ನೆಟ್‌ವರ್ಕ್‌ ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="phone_accounts" msgid="1216879437523774604">"ಕರೆ ಮಾಡುವ ಖಾತೆಗಳು"</string>
-    <string name="phone_accounts_make_calls_with" msgid="16747814788918145">"ಇದರೊಂದಿಗೆ ಕರೆಗಳನ್ನು ಮಾಡಿ"</string>
+    <string name="phone_accounts_make_calls_with" msgid="16747814788918145">"ಇದನ್ನು ಬಳಸಿ ಕರೆಗಳನ್ನು ಮಾಡಿ"</string>
     <string name="phone_accounts_make_sip_calls_with" msgid="4691221006731847255">"ಎಸ್‌ಐಪಿ ಕರೆಗಳನ್ನು ಇದರೊಂದಿಗೆ ಮಾಡಿ"</string>
     <string name="phone_accounts_ask_every_time" msgid="6192347582666047168">"ಮೊದಲು ಕೇಳು"</string>
     <string name="phone_accounts_default_account_label" msgid="5107598881335931101">"ಯಾವುದೇ ನೆಟ್‌ವರ್ಕ್ ಲಭ್ಯವಿಲ್ಲ"</string>
@@ -76,7 +76,7 @@
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"ಎಲ್ಲಾ ಕರೆ ಮಾಡುವ ಖಾತೆಗಳು"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"ಯಾವ ಖಾತೆಗಳು ಕರೆಗಳನ್ನು ಮಾಡಬಹುದು ಎಂಬುದನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="voip_call_log_integration_label" msgid="2349275524959944815">"ಥರ್ಡ್ ಪಾರ್ಟಿ ಆ್ಯಪ್‌ಗಳು"</string>
-    <string name="voip_call_log_integration_summary" msgid="3834075007862607039">"ಯಾವ ಆ್ಯಪ್‌ಗಳು ತಮ್ಮ ಕರೆಗಳನ್ನು ಸಿಸ್ಟಮ್ ಕರೆಯ ಲಾಗ್‌ಗೆ ಸಂಯೋಜಿಸಬಹುದು ಎಂಬುದನ್ನು ನಿಯಂತ್ರಿಸಿ. ಈ ಆಯ್ಕೆಯನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸುವುದು ಮುಖ್ಯ ಫೋನ್ ಆ್ಯಪ್‌ನಲ್ಲಿ ಆ್ಯಪ್‌ನ ಲಾಗ್‌ಗಳನ್ನು ಪ್ರದರ್ಶಿಸುವುದನ್ನು ತಡೆಯುತ್ತದೆ."</string>
+    <string name="voip_call_log_integration_summary" msgid="196486049335079938">"ನಿಮ್ಮ ಕರೆ ಇತಿಹಾಸದಲ್ಲಿ ಕರೆಗಳನ್ನು ತೋರಿಸಲು ಇತರ ಆ್ಯಪ್‌ಗಳಿಗೆ ಅನುಮತಿಸಿ. ಆಫ್ ಮಾಡಿದರೆ, ಈ ಕರೆಗಳು ಅವರ ನಿರ್ದಿಷ್ಟ ಆ್ಯಪ್‌ಗಳಲ್ಲಿ ಮಾತ್ರ ಗೋಚರಿಸುತ್ತವೆ."</string>
     <string name="wifi_calling" msgid="3650509202851355742">"ವೈ-ಫೈ ಕರೆ ಮಾಡುವಿಕೆ"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"ಅಂತರ್ನಿರ್ಮಿತ ಸಂಪರ್ಕ ಸೇವೆ"</string>
     <string name="voicemail" msgid="7697769412804195032">"ಧ್ವನಿಮೇಲ್"</string>
@@ -723,7 +723,7 @@
     <string name="mobile_data_activate_cancel_button" msgid="3530174817572005860">"ರದ್ದುಮಾಡಿ"</string>
     <string name="clh_card_title_call_ended_txt" msgid="5977978317527299698">"ಕರೆ ಅಂತ್ಯಗೊಂಡಿದೆ"</string>
     <string name="clh_callFailed_powerOff_txt" msgid="8279934912560765361">"ಏರ್‌ಪ್ಲೇನ್ ಮೋಡ್ ಆನ್ ಆಗಿದೆ"</string>
-    <string name="clh_callFailed_simError_txt" msgid="5128538525762326413">"ಸಿಮ್ ಕಾರ್ಡ್ ಪ್ರವೇಶಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
+    <string name="clh_callFailed_simError_txt" msgid="5128538525762326413">"ಸಿಮ್ ಕಾರ್ಡ್ ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="clh_incall_error_out_of_service_txt" msgid="2736010617446749869">"ಮೊಬೈಲ್ ನೆಟ್‌ವರ್ಕ್ ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="clh_callFailed_satelliteEnabled_txt" msgid="1675517238240377396">"ಸ್ಯಾಟಲೈಟ್ ಮೋಡ್ ಆನ್ ಆಗಿದೆ"</string>
     <string name="clh_callFailed_unassigned_number_txt" msgid="141967660286695682">"ನೀವು ಡಯಲ್‌ ಮಾಡಲು ಪ್ರಯತ್ನಿಸುತ್ತಿರುವ ಫೋನ್‌ ಸಂಖ್ಯೆಯು ತಪ್ಪಾಗಿದೆ. ದೋಷ ಕೋಡ್‌ 1."</string>
@@ -838,6 +838,12 @@
     <string name="supp_service_over_ut_precautions_dialog_dismiss" msgid="5934541487903081652">"ವಜಾಗೊಳಿಸಿ"</string>
     <string name="radio_info_data_connection_enable" msgid="6183729739783252840">"ಡೇಟಾ ಸಂಪರ್ಕ ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="radio_info_data_connection_disable" msgid="6404751291511368706">"ಡೇಟಾ ಸಂಪರ್ಕ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ"</string>
+    <string name="radio_info_apply_preferred_network_type" msgid="8828433232282314858">"ಅನ್ವಯಿಸಿ"</string>
+    <string name="radio_info_all_label" msgid="4326377691373938122">"ಎಲ್ಲಾ"</string>
+    <string name="radio_info_nr_label" msgid="4346984853962997752">"NR (5G)"</string>
+    <string name="radio_info_lte_label" msgid="5721318031926928485">"LTE (4G)"</string>
+    <string name="radio_info_wcdma_label" msgid="5157664869835235769">"UMTS (3G)"</string>
+    <string name="radio_info_gsm_label" msgid="2947899997551185529">"GSM (2G)"</string>
     <string name="volte_provisioned_switch_string" msgid="4812874990480336178">"VoLTE ಕಲ್ಪಿಸಲಾಗಿದೆ"</string>
     <string name="vt_provisioned_switch_string" msgid="8295542122512195979">"ವೀಡಿಯೊ ಕರೆ ಸೌಲಭ್ಯ ಕಲ್ಪಿಸಲಾಗಿದೆ"</string>
     <string name="wfc_provisioned_switch_string" msgid="3835004640321078988">"ವೈಫೈ ಕರೆ ಸೌಲಭ್ಯ ಕಲ್ಪಿಸಲಾಗಿದೆ"</string>

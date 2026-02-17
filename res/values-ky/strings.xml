@@ -64,7 +64,7 @@
     <string name="apn_settings" msgid="1978652203074756623">"Туташуу түйүндөрү (APN)"</string>
     <string name="settings_label" msgid="9101778088412567956">"Тармак параметрлери"</string>
     <string name="phone_accounts" msgid="1216879437523774604">"Чалуу аккаунттары"</string>
-    <string name="phone_accounts_make_calls_with" msgid="16747814788918145">"Чалууларды төмөнкү менен жасоо"</string>
+    <string name="phone_accounts_make_calls_with" msgid="16747814788918145">"Чыгуучу чалуулар үчүн аккаунттар"</string>
     <string name="phone_accounts_make_sip_calls_with" msgid="4691221006731847255">"SIP чалууларын төмөнкү менен жасоо"</string>
     <string name="phone_accounts_ask_every_time" msgid="6192347582666047168">"Биринчи сурасын"</string>
     <string name="phone_accounts_default_account_label" msgid="5107598881335931101">"Тармак жок"</string>
@@ -76,7 +76,7 @@
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"Бардык чалуу каттоо эсептери"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"Чалуулар жасала турган каттоо эсептерин тандаңыз"</string>
     <string name="voip_call_log_integration_label" msgid="2349275524959944815">"Үчүнчү тараптын колдонмолору"</string>
-    <string name="voip_call_log_integration_summary" msgid="3834075007862607039">"Чалууларды тутумдун чалуулар тизмесине кайсы колдонмолор бириктире аларын көзөмөлдөңүз. Бул параметр өчүрүлсө, колдонмонун таржымалдары телефондун негизги колдонмосунда көрсөтүлбөйт."</string>
+    <string name="voip_call_log_integration_summary" msgid="196486049335079938">"Башка колдонмолорго чалуулар таржымалыңыздагы чалууларды көрсөтүүгө уруксат бересиз. Эгер бул параметр өчүп турса, чалуулар кайсы колдонмодон жасалса, ошолордо гана көрүнөт."</string>
     <string name="wifi_calling" msgid="3650509202851355742">"Wi-Fi чалуу"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"Кыналган туташуу кызматы"</string>
     <string name="voicemail" msgid="7697769412804195032">"Үн почтасы"</string>
@@ -838,6 +838,12 @@
     <string name="supp_service_over_ut_precautions_dialog_dismiss" msgid="5934541487903081652">"Жабуу"</string>
     <string name="radio_info_data_connection_enable" msgid="6183729739783252840">"Мобилдик туташууну иштетүү"</string>
     <string name="radio_info_data_connection_disable" msgid="6404751291511368706">"Мобилдик туташууну өчүрүү"</string>
+    <string name="radio_info_apply_preferred_network_type" msgid="8828433232282314858">"Колдонуу"</string>
+    <string name="radio_info_all_label" msgid="4326377691373938122">"Баары"</string>
+    <string name="radio_info_nr_label" msgid="4346984853962997752">"NR (5G)"</string>
+    <string name="radio_info_lte_label" msgid="5721318031926928485">"LTE (4G)"</string>
+    <string name="radio_info_wcdma_label" msgid="5157664869835235769">"UMTS (3G)"</string>
+    <string name="radio_info_gsm_label" msgid="2947899997551185529">"GSM (2G)"</string>
     <string name="volte_provisioned_switch_string" msgid="4812874990480336178">"VoLTE камсыздалган"</string>
     <string name="vt_provisioned_switch_string" msgid="8295542122512195979">"Видео чалуу камсыздалган"</string>
     <string name="wfc_provisioned_switch_string" msgid="3835004640321078988">"Wifi аркылуу чалуу камсыздалган"</string>

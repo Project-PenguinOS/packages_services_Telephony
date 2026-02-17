@@ -966,7 +966,7 @@ public class ImsConference extends TelephonyConferenceBase implements Holdable {
         boolean couldManageConference =
                 (getConnectionCapabilities() & Connection.CAPABILITY_MANAGE_CONFERENCE) != 0;
         boolean canManageConference = mFeatureFlagProxy.isUsingSinglePartyCallEmulation()
-                && !isConferenceState()
+                && !isMultiparty()
                 ? mConferenceParticipantConnections.size() > 1
                 : mConferenceParticipantConnections.size() != 0;
         Log.v(this, "updateManageConference was :%s is:%s", couldManageConference ? "Y" : "N",
@@ -1126,8 +1126,8 @@ public class ImsConference extends TelephonyConferenceBase implements Holdable {
             // 1. We're not emulating a single party call.
             // 2. We're emulating a single party call and the CEP contains more than just the
             //    single party
-            if ((!isConferenceState() && !isCepForSinglePartyConference)
-                    || isConferenceState()) {
+            if ((!isMultiparty() && !isCepForSinglePartyConference)
+                    || isMultiparty()) {
                 // Add any new participants and update existing.
                 for (ConferenceParticipant participant : participants) {
                     Pair<Uri, Uri> userEntity = new Pair<>(participant.getHandle(),
@@ -1219,7 +1219,7 @@ public class ImsConference extends TelephonyConferenceBase implements Holdable {
             int newParticipantCount = mConferenceParticipantConnections.size();
             Log.v(this, "handleConferenceParticipantsUpdate: oldParticipantCount=%d, "
                             + "newParticipantCount=%d, isMultiPty=%b, cepParticipantCt=%d",
-                    oldParticipantCount, newParticipantCount, isConferenceState(),
+                    oldParticipantCount, newParticipantCount, isMultiparty(),
                     numActiveCepParticipantsOtherThanHost);
             // If the single party call emulation feature flag is enabled, we can potentially treat
             // the conference as a single party call when there is just one participant.
@@ -1228,7 +1228,7 @@ public class ImsConference extends TelephonyConferenceBase implements Holdable {
                 if (oldParticipantCount != 1 && newParticipantCount == 1) {
                     // If number of participants goes to 1, emulate a single party call.
                     startEmulatingSinglePartyCall();
-                } else if (!isConferenceState() && !isCepForSinglePartyConference) {
+                } else if (!isMultiparty() && !isCepForSinglePartyConference) {
                     // Number of participants increased, so stop emulating a single party call.
                     stopEmulatingSinglePartyCall();
                 }
@@ -1251,7 +1251,7 @@ public class ImsConference extends TelephonyConferenceBase implements Holdable {
                     // If we dropped from > 0 participants to zero
                     // OR if the conference had a single participant and is emulating a standalone
                     // call.
-                    && (oldParticipantCount > 0 || !isConferenceState())
+                    && (oldParticipantCount > 0 || !isMultiparty())
                     // AND the CEP says there is nobody left anymore.
                     && numActiveCepParticipantsOtherThanHost == 0) {
                 Log.i(this, "handleConferenceParticipantsUpdate: empty conference; "
@@ -1403,7 +1403,13 @@ public class ImsConference extends TelephonyConferenceBase implements Holdable {
         connection.setConnectionProperties(applyHostPropertiesToChild(
                 connection.getConnectionProperties(), parent.getConnectionProperties()));
         connection.setStatusHints(parent.getStatusHints());
-        connection.setExtras(getChildExtrasFromHostBundle(parent.getExtras()));
+        Bundle newExtras = getChildExtrasFromHostBundle(parent.getExtras());
+        if (isParticipantHost(mConferenceHostAddress, participant.getHandle())) {
+            Log.i(this,
+                    "createCallForExistingConnection: Adding TelecomManager.EXTRA_DO_NOT_LOG_CALL");
+            newExtras.putBoolean(TelecomManager.EXTRA_DO_NOT_LOG_CALL, true);
+        }
+        connection.setExtras(newExtras);
 
         Log.i(this, "createConferenceParticipantConnection: participant=%s, connection=%s",
                 participant, connection);

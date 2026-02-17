@@ -64,7 +64,7 @@
     <string name="apn_settings" msgid="1978652203074756623">"APN ချိတ်ဆက်ရာလမ်းကြောင်းအမည်"</string>
     <string name="settings_label" msgid="9101778088412567956">"ကွန်ရက် ဆက်တင်များ"</string>
     <string name="phone_accounts" msgid="1216879437523774604">"ခေါ်ဆိုသော အကောင့်များ"</string>
-    <string name="phone_accounts_make_calls_with" msgid="16747814788918145">"ဖြင့် ခေါ်ဆိုမှုများပြုလုပ်မည်"</string>
+    <string name="phone_accounts_make_calls_with" msgid="16747814788918145">"ခေါ်ဆိုရန်သုံးမည့်အကောင့်"</string>
     <string name="phone_accounts_make_sip_calls_with" msgid="4691221006731847255">"ဖြင့် SIP ခေါ်ဆိုမှုများ ပြုလုပ်မည်"</string>
     <string name="phone_accounts_ask_every_time" msgid="6192347582666047168">"အရင်မေးပါ"</string>
     <string name="phone_accounts_default_account_label" msgid="5107598881335931101">"ကွန်ရက်မရှိပါ"</string>
@@ -76,13 +76,13 @@
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"ခေါ်ဆိုနေသော အကောင့်များ အားလုံး"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"ဖုန်းခေါ်ဆိုနိုင်သည့် အကောင့်များအား ရွေးရန်"</string>
     <string name="voip_call_log_integration_label" msgid="2349275524959944815">"ပြင်ပကုမ္ပဏီအက်ပ်များ"</string>
-    <string name="voip_call_log_integration_summary" msgid="3834075007862607039">"သူတို့၏ခေါ်ဆိုမှုများကို စနစ်ခေါ်ဆိုမှတ်တမ်းတွင် ပေါင်းစည်းနိုင်သည့် အက်ပ်များကို ထိန်းချုပ်နိုင်သည်။ ဤရွေးစရာကို ပိတ်ပါက အက်ပ်မှတ်တမ်းများကို ပင်မဖုန်းအက်ပ်တွင် ပြတော့မည်မဟုတ်ပါ။"</string>
+    <string name="voip_call_log_integration_summary" msgid="196486049335079938">"အခြားအက်ပ်များအား သင့်ခေါ်ဆိုမှုမှတ်တမ်းတွင် ခေါ်ဆိုမှုများ ပြခွင့်ပြုသည်။ ပိတ်ထားပါက ဤခေါ်ဆိုမှုများကို သက်ဆိုင်ရာအက်ပ်များတွင်သာ မြင်ရမည်။"</string>
     <string name="wifi_calling" msgid="3650509202851355742">"Wi-Fi  ခေါ်ဆိုခြင်း"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"တပ်ဆင်ပြီး ချိတ်ဆက်ရေး ဝန်ဆောင်မှု"</string>
     <string name="voicemail" msgid="7697769412804195032">"အသံမေးလ်"</string>
     <string name="voicemail_settings_with_label" msgid="4228431668214894138">"အသံမေးလ် ( <xliff:g id="SUBSCRIPTIONLABEL">%s</xliff:g> )"</string>
     <string name="voicemail_abbreviated" msgid="7746778673131551185">"အသံစာပို့နစ်အမှတ် -"</string>
-    <string name="make_and_receive_calls" msgid="4868913166494621109">"ဖုန်းခေါ်ဆိုမှုများ ပြုလုပ်ခြင်း &amp; လက်ခံခြင်း"</string>
+    <string name="make_and_receive_calls" msgid="4868913166494621109">"ဖုန်းခေါ်ဆိုခြင်းနှင့် လက်ခံခြင်း"</string>
     <string name="smart_forwarding_settings_menu" msgid="8850429887958938540">"အဆင့်မြင့် ထပ်ဆင့်ပို့ခြင်း"</string>
     <string name="smart_forwarding_settings_menu_summary" msgid="5096947726032885325">"နံပါတ်တစ်ခုကို ဆက်သွယ်၍ မရနိုင်ပါက ဖုန်းခေါ်ဆိုမှုများကို သင်၏ အခြားနံပါတ်သို့ အချိန်မရွေး ထပ်ဆင့်ပို့ပါ"</string>
     <string name="voicemail_notifications_preference_title" msgid="7829238858063382977">"အကြောင်းကြားချက်များ"</string>
@@ -838,6 +838,18 @@
     <string name="supp_service_over_ut_precautions_dialog_dismiss" msgid="5934541487903081652">"ပယ်ရန်"</string>
     <string name="radio_info_data_connection_enable" msgid="6183729739783252840">"ဒေတာချိတ်ဆက်မှုကို ဖွင့်ပါ"</string>
     <string name="radio_info_data_connection_disable" msgid="6404751291511368706">"ဒေတာချိတ်ဆက်မှုကို ပိတ်ပါ"</string>
+    <!-- no translation found for radio_info_apply_preferred_network_type (8828433232282314858) -->
+    <skip />
+    <!-- no translation found for radio_info_all_label (4326377691373938122) -->
+    <skip />
+    <!-- no translation found for radio_info_nr_label (4346984853962997752) -->
+    <skip />
+    <!-- no translation found for radio_info_lte_label (5721318031926928485) -->
+    <skip />
+    <!-- no translation found for radio_info_wcdma_label (5157664869835235769) -->
+    <skip />
+    <!-- no translation found for radio_info_gsm_label (2947899997551185529) -->
+    <skip />
     <string name="volte_provisioned_switch_string" msgid="4812874990480336178">"VoLTE ထောက်ပံ့ထားသည်"</string>
     <string name="vt_provisioned_switch_string" msgid="8295542122512195979">"ဗီဒီယိုခေါ်ဆိုမှု ပံ့ပိုးထားပါသည်"</string>
     <string name="wfc_provisioned_switch_string" msgid="3835004640321078988">"Wifi ဖြင့် ခေါ်ဆိုမှုကို ပံ့ပိုးထားပါသည်"</string>

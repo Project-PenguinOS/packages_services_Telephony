@@ -292,7 +292,9 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
                                     new QtiImsException("Service Not Registered", errCode));
                         } else {
                             AsyncResult.forMessage(msg, null,
-                                                   PhoneUtils.getCommandException(errCode));
+// QTI_END: 2025-01-10: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
+                                                   QtiPhoneUtilsHelper.getCommandException(errCode));
+// QTI_BEGIN: 2025-01-10: Telephony: FR104165 - IMS Enhancements: Sidecar Threading Enhancement Telephony Changes
                         }
                         msg.sendToTarget();
                     }
@@ -745,7 +747,9 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
 // QTI_END: 2019-03-13: Telephony: Avoid to send 2 PUT requests to network when SS service is activated from UI
 // QTI_BEGIN: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
                 if (mPhone.getPhoneType() == TelephonyManager.PHONE_TYPE_GSM &&
-                        PhoneUtils.isBacktoBackSSFeatureSupported()) {
+// QTI_END: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
+                        QtiPhoneUtilsHelper.isBacktoBackSSFeatureSupported()) {
+// QTI_BEGIN: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
                     queryCallForwardStatus();
                 } else {
                     mPhone.getCallForwardingOption(reason, mServiceClass,
@@ -774,8 +778,10 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
             return false;
         }
         SsData.ServiceType serviceType = GsmMmiCode.cfReasonToServiceType(reason);
-        return PhoneUtils.isRequestBlockedByFDN(SsData.RequestType.SS_INTERROGATION, serviceType,
-                mPhone.getPhoneId(), getContext());
+// QTI_END: 2023-03-16: Telephony: Enable telephony FDN check for side car SS requests.
+        return QtiPhoneUtilsHelper.isRequestBlockedByFdn(SsData.RequestType.SS_INTERROGATION,
+                serviceType, mPhone.getPhoneId(), getContext());
+// QTI_BEGIN: 2023-03-16: Telephony: Enable telephony FDN check for side car SS requests.
     }
 
 // QTI_END: 2023-03-16: Telephony: Enable telephony FDN check for side car SS requests.

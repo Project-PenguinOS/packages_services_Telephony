@@ -64,7 +64,7 @@
     <string name="apn_settings" msgid="1978652203074756623">"ଆକ୍ସେସ୍ ପଏଣ୍ଟ ନାମ"</string>
     <string name="settings_label" msgid="9101778088412567956">"ନେଟ୍‍ୱର୍କ ସେଟିଙ୍ଗ"</string>
     <string name="phone_accounts" msgid="1216879437523774604">"କଲ୍ କରିବା ଆକାଉଣ୍ଟ"</string>
-    <string name="phone_accounts_make_calls_with" msgid="16747814788918145">"ଏହା ସହିତ କଲ୍ କରନ୍ତୁ"</string>
+    <string name="phone_accounts_make_calls_with" msgid="16747814788918145">"ଏହା ସହିତ କଲ କରନ୍ତୁ"</string>
     <string name="phone_accounts_make_sip_calls_with" msgid="4691221006731847255">"ଏହା ସହିତ SIP କଲ୍ କରନ୍ତୁ"</string>
     <string name="phone_accounts_ask_every_time" msgid="6192347582666047168">"ପ୍ରଥମେ ପଚାରନ୍ତୁ"</string>
     <string name="phone_accounts_default_account_label" msgid="5107598881335931101">"କୈଣସି ନେଟ୍‌ୱର୍କ ଉପଲବ୍ଧ ନାହିଁ"</string>
@@ -76,13 +76,13 @@
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"ସମସ୍ତ କଲିଙ୍ଗ ଆକାଉଣ୍ଟ"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"କଲ୍ କରିପାରୁଥିବା ଆକାଉଣ୍ଟକୁ ଚୟନ କରନ୍ତୁ"</string>
     <string name="voip_call_log_integration_label" msgid="2349275524959944815">"ତୃତୀୟ-ପକ୍ଷ ଆପ୍ସ"</string>
-    <string name="voip_call_log_integration_summary" msgid="3834075007862607039">"କେଉଁ ଆପ୍ସ ସିଷ୍ଟମ କଲ ଲଗରେ ସେଗୁଡ଼ିକର କଲଗୁଡ଼ିକୁ ଇଣ୍ଟିଗ୍ରେଟ କରିପାରିବ ତାହା ନିୟନ୍ତ୍ରଣ କରନ୍ତୁ। ଏହି ବିକଳ୍ପକୁ ଅକ୍ଷମ କରିବା ଫଳରେ ଏହା ମୁଖ୍ୟ ଫୋନ ଆପରେ ଆପର ଲଗଗୁଡ଼ିକ ଡିସପ୍ଲେ ହେବାରୁ ପ୍ରତିରୋଧ କରିବ।"</string>
+    <string name="voip_call_log_integration_summary" msgid="196486049335079938">"ଆପଣଙ୍କ କଲ ଇତିହାସରେ କଲଗୁଡ଼ିକ ଦେଖାଇବାକୁ ଅନ୍ୟ ଆପ୍ସକୁ ଅନୁମତି ଦିଅନ୍ତୁ। ଯଦି ବନ୍ଦ ଥାଏ, ତେବେ ଏହି କଲଗୁଡ଼ିକ କେବଳ ସେଗୁଡ଼ିକର ନିର୍ଦ୍ଦିଷ୍ଟ ଆପ୍ସରେ ଦେଖାଯିବ।"</string>
     <string name="wifi_calling" msgid="3650509202851355742">"ୱାଇ-ଫାଇ କଲିଂ"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"ବିଲ୍ଟ-ଇନ୍ ସଂଯୋଗ ସେବା"</string>
     <string name="voicemail" msgid="7697769412804195032">"ଭଏସମେଲ୍"</string>
     <string name="voicemail_settings_with_label" msgid="4228431668214894138">"ଭଏସମେଲ୍ (<xliff:g id="SUBSCRIPTIONLABEL">%s</xliff:g>)"</string>
     <string name="voicemail_abbreviated" msgid="7746778673131551185">"VM:"</string>
-    <string name="make_and_receive_calls" msgid="4868913166494621109">"କଲ୍ କରନ୍ତୁ ଏବଂ ପ୍ରାପ୍ତ କରନ୍ତୁ"</string>
+    <string name="make_and_receive_calls" msgid="4868913166494621109">"କଲ କରନ୍ତୁ ଏବଂ ପାଆନ୍ତୁ"</string>
     <string name="smart_forwarding_settings_menu" msgid="8850429887958938540">"ସ୍ମାର୍ଟ ଫରୱାର୍ଡିଂ"</string>
     <string name="smart_forwarding_settings_menu_summary" msgid="5096947726032885325">"ଯେତେବେଳେ ଏକ ନମ୍ବର୍ ଅପହଞ୍ଚ ଦୂରରେ ରହିଥାଏ, ସେତେବେଳେ ସର୍ବଦା ଆପଣଙ୍କର ଅନ୍ୟ ନମ୍ବର୍‍କୁ କଲ୍‍‍ଗୁଡ଼ିକ ଫର୍‍ୱର୍ଡ ହେବ"</string>
     <string name="voicemail_notifications_preference_title" msgid="7829238858063382977">"ବିଜ୍ଞପ୍ତି"</string>
@@ -659,7 +659,7 @@
     <string name="phone_in_ecm_call_notification_text_without_data_restriction_hint" msgid="3747860785153531225">"ଫୋନଟି ଜରୁରୀକାଳୀନ କଲବ୍ୟାକ୍ ମୋଡରେ ଅଛି"</string>
     <string name="phone_in_ecm_notification_complete_time_without_data_restriction_hint" msgid="3690292264812050858">"<xliff:g id="COMPLETETIME">%s</xliff:g> ପର୍ଯ୍ୟନ୍ତ"</string>
     <string name="alert_dialog_exit_ecm_without_data_restriction_hint" msgid="7549850847524907932">"{count,plural, =1{ଫୋନଟି ଏକ ମିନିଟ ପାଇଁ ଜରୁରୀକାଳୀନ କଲବ୍ୟାକ ମୋଡରେ ରହିବ। \nଆପଣ ବର୍ତ୍ତମାନ ବାହାରି ଯିବାକୁ ଚାହାଁନ୍ତି?}other{ଫୋନଟି %s ମିନିଟ ପାଇଁ ଜରୁରୀକାଳୀନ କଲବ୍ୟାକ ମୋଡରେ ରହିବ।\nଆପଣ ବର୍ତ୍ତମାନ ବାହାରି ଯିବାକୁ ଚାହାଁନ୍ତି?}}"</string>
-    <string name="voicemail_provider" msgid="4158806657253745294">"ସେବା"</string>
+    <string name="voicemail_provider" msgid="4158806657253745294">"ସର୍ଭିସ"</string>
     <string name="voicemail_settings" msgid="4451045613238972776">"ସେଟଅପ୍ କରନ୍ତୁ"</string>
     <string name="voicemail_number_not_set" msgid="8831561283386938155">"&lt;ସେଟ୍ ହୋ‌ଇନାହିଁ&gt;"</string>
     <string name="other_settings" msgid="8895088007393598447">"ଅନ୍ୟାନ୍ୟ କଲ୍‌ ସେଟିଙ୍ଗ"</string>
@@ -838,6 +838,12 @@
     <string name="supp_service_over_ut_precautions_dialog_dismiss" msgid="5934541487903081652">"ଖାରଜ କରନ୍ତୁ"</string>
     <string name="radio_info_data_connection_enable" msgid="6183729739783252840">"ଡାଟା ସଂଯୋଗ ସକ୍ରିୟ କରନ୍ତୁ"</string>
     <string name="radio_info_data_connection_disable" msgid="6404751291511368706">"ଡାଟା ସଂଯୋଗ ଅକ୍ଷମ ହୋଇଛି"</string>
+    <string name="radio_info_apply_preferred_network_type" msgid="8828433232282314858">"ଲାଗୁ କରନ୍ତୁ"</string>
+    <string name="radio_info_all_label" msgid="4326377691373938122">"ସମସ୍ତ"</string>
+    <string name="radio_info_nr_label" msgid="4346984853962997752">"NR (5G)"</string>
+    <string name="radio_info_lte_label" msgid="5721318031926928485">"LTE (4G)"</string>
+    <string name="radio_info_wcdma_label" msgid="5157664869835235769">"UMTS (3G)"</string>
+    <string name="radio_info_gsm_label" msgid="2947899997551185529">"GSM (2G)"</string>
     <string name="volte_provisioned_switch_string" msgid="4812874990480336178">"VoLTE ପ୍ରାବଧାନ କରାଯାଇଛି"</string>
     <string name="vt_provisioned_switch_string" msgid="8295542122512195979">"ଭିଡିଓ କଲିଂ ପ୍ରାବଧାନ କରାଯାଇଛି"</string>
     <string name="wfc_provisioned_switch_string" msgid="3835004640321078988">"Wifi କଲିଂ ପ୍ରାବଧାନ କରାଯାଇଛି"</string>

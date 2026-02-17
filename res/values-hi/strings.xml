@@ -76,13 +76,13 @@
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"सभी कॉलिंग खाते"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"चुनें कि कौन से खाते कॉल कर सकते हैं"</string>
     <string name="voip_call_log_integration_label" msgid="2349275524959944815">"तीसरे पक्ष के ऐप्लिकेशन"</string>
-    <string name="voip_call_log_integration_summary" msgid="3834075007862607039">"यह कंट्रोल करें कि कौनसे ऐप्लिकेशन, अपने कॉल लॉग को सिस्टम कॉल लॉग में इंटिग्रेट कर सकते हैं. इस विकल्प को बंद करने पर ऐप्लिकेशन के लॉग, मुख्य फ़ोन ऐप्लिकेशन में नहीं दिखेंगे."</string>
+    <string name="voip_call_log_integration_summary" msgid="196486049335079938">"अन्य ऐप्लिकेशन को कॉल इतिहास में कॉल दिखाने की अनुमति दें. अनुमति न देने पर, ये कॉल सिर्फ़ उन्हीं ऐप्लिकेशन में दिखेंगे."</string>
     <string name="wifi_calling" msgid="3650509202851355742">"वाई-फ़ाई कॉलिंग"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"अंतर्निहित कनेक्शन सेवा"</string>
     <string name="voicemail" msgid="7697769412804195032">"वॉयस मेल"</string>
     <string name="voicemail_settings_with_label" msgid="4228431668214894138">"वॉइसमेल (<xliff:g id="SUBSCRIPTIONLABEL">%s</xliff:g>)"</string>
     <string name="voicemail_abbreviated" msgid="7746778673131551185">"VM:"</string>
-    <string name="make_and_receive_calls" msgid="4868913166494621109">"कॉल लगाएं और कॉल उठाएं"</string>
+    <string name="make_and_receive_calls" msgid="4868913166494621109">"कॉल करें और उनका जवाब दें"</string>
     <string name="smart_forwarding_settings_menu" msgid="8850429887958938540">"स्मार्ट फ़ॉरवर्डिंग"</string>
     <string name="smart_forwarding_settings_menu_summary" msgid="5096947726032885325">"अगर एक नंबर पर कॉल न लग रही हो, तो उसे हमेशा आपके दूसरे नंबर पर भेज दें"</string>
     <string name="voicemail_notifications_preference_title" msgid="7829238858063382977">"सूचनाएं"</string>
@@ -838,6 +838,12 @@
     <string name="supp_service_over_ut_precautions_dialog_dismiss" msgid="5934541487903081652">"खारिज करें"</string>
     <string name="radio_info_data_connection_enable" msgid="6183729739783252840">"डेटा कनेक्शन चालू करें"</string>
     <string name="radio_info_data_connection_disable" msgid="6404751291511368706">"डेटा कनेक्शन बंद करें"</string>
+    <string name="radio_info_apply_preferred_network_type" msgid="8828433232282314858">"लागू करें"</string>
+    <string name="radio_info_all_label" msgid="4326377691373938122">"सभी"</string>
+    <string name="radio_info_nr_label" msgid="4346984853962997752">"एनआर (5G)"</string>
+    <string name="radio_info_lte_label" msgid="5721318031926928485">"एलटीई (4G)"</string>
+    <string name="radio_info_wcdma_label" msgid="5157664869835235769">"यूएमटीएस (3G)"</string>
+    <string name="radio_info_gsm_label" msgid="2947899997551185529">"जीएसएम (2G)"</string>
     <string name="volte_provisioned_switch_string" msgid="4812874990480336178">"VoLTE काम कर रहा है"</string>
     <string name="vt_provisioned_switch_string" msgid="8295542122512195979">"वीडियो कॉलिंग की सुविधा काम कर रही है"</string>
     <string name="wfc_provisioned_switch_string" msgid="3835004640321078988">"वाई-फ़ाई कॉलिंग की सुविधा काम कर रही है"</string>

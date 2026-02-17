@@ -64,7 +64,7 @@
     <string name="apn_settings" msgid="1978652203074756623">"أسماء نقاط الوصول"</string>
     <string name="settings_label" msgid="9101778088412567956">"إعدادات الشبكة"</string>
     <string name="phone_accounts" msgid="1216879437523774604">"حسابات الاتصال"</string>
-    <string name="phone_accounts_make_calls_with" msgid="16747814788918145">"إجراء المكالمات باستخدام"</string>
+    <string name="phone_accounts_make_calls_with" msgid="16747814788918145">"الحساب المستخدَم للاتصال"</string>
     <string name="phone_accounts_make_sip_calls_with" msgid="4691221006731847255">"‏إجراء اتصالات SIP باستخدام"</string>
     <string name="phone_accounts_ask_every_time" msgid="6192347582666047168">"السؤال أولاً"</string>
     <string name="phone_accounts_default_account_label" msgid="5107598881335931101">"لا تتوفر أي شبكة"</string>
@@ -76,7 +76,7 @@
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"كل حسابات الاتصال"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"حدد الحسابات التي يمكنها إجراء مكالمات"</string>
     <string name="voip_call_log_integration_label" msgid="2349275524959944815">"التطبيقات الخارجية"</string>
-    <string name="voip_call_log_integration_summary" msgid="3834075007862607039">"يمكنك تحديد التطبيقات التي يمكنها دمج مكالماتها في سجلّ المكالمات في النظام. وسيؤدي إيقاف هذا الخيار إلى منع عرض سجلات التطبيق في تطبيق الهاتف الرئيسي."</string>
+    <string name="voip_call_log_integration_summary" msgid="196486049335079938">"بعد تفعيل الخيار، يتم السماح للتطبيقات الأخرى بعرض المكالمات في سجلّ المكالمات. وفي حال إيقافه، ستظهر هذه المكالمات في التطبيقات المخصّصة لها فقط."</string>
     <string name="wifi_calling" msgid="3650509202851355742">"‏الاتصال عبر Wi-Fi"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"خدمة اتصال مدمجة"</string>
     <string name="voicemail" msgid="7697769412804195032">"البريد الصوتي"</string>
@@ -838,6 +838,12 @@
     <string name="supp_service_over_ut_precautions_dialog_dismiss" msgid="5934541487903081652">"رفض"</string>
     <string name="radio_info_data_connection_enable" msgid="6183729739783252840">"تفعيل اتصال البيانات"</string>
     <string name="radio_info_data_connection_disable" msgid="6404751291511368706">"إيقاف اتصال البيانات"</string>
+    <string name="radio_info_apply_preferred_network_type" msgid="8828433232282314858">"تطبيق"</string>
+    <string name="radio_info_all_label" msgid="4326377691373938122">"الكل"</string>
+    <string name="radio_info_nr_label" msgid="4346984853962997752">"‏‫NR (شبكة الجيل الخامس)"</string>
+    <string name="radio_info_lte_label" msgid="5721318031926928485">"‏‫LTE (شبكة الجيل الرابع)"</string>
+    <string name="radio_info_wcdma_label" msgid="5157664869835235769">"‏النظام العالمي لاتصالات الجوال عن بعد (UMTS) (شبكة الجيل الثالث)"</string>
+    <string name="radio_info_gsm_label" msgid="2947899997551185529">"‏بروتوكول GSM (شبكة الجيل الثاني)"</string>
     <string name="volte_provisioned_switch_string" msgid="4812874990480336178">"‏تم توفير VoLTE"</string>
     <string name="vt_provisioned_switch_string" msgid="8295542122512195979">"تم توفير مكالمات الفيديو"</string>
     <string name="wfc_provisioned_switch_string" msgid="3835004640321078988">"‏تم توفير اتصال Wifi"</string>

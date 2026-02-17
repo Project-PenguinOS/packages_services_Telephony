@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
+// QTI_BEGIN: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
 /*
  * Changes from Qualcomm Technologies, Inc. are provided under the following license:
  * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  * SPDX-License-Identifier: BSD-3-Clause-Clear
  */
+// QTI_END: 2026-01-06: Telephony: PhoneInfo : Fix IMS crash related to invalid sub id.
 package com.android.phone.settings.hiddenmenu;
 
 import static android.telephony.ims.feature.MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VIDEO;
@@ -60,6 +62,8 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.LinearLayout;
@@ -78,6 +82,7 @@ import com.android.internal.telephony.PhoneFactory;
 import com.android.phone.R;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -101,16 +106,21 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
     private TextView mVoiceNetwork;
     private TextView mVoiceRawReg;
     private TextView mDBm;
-    private static final long RUNNABLE_TIMEOUT_MS = 5 * 60 * 1000L;
-    private ThreadPoolExecutor mQueuedWork;
+    protected static final long RUNNABLE_TIMEOUT_MS = 5 * 60 * 1000L;
+    protected ThreadPoolExecutor mQueuedWork;
     private TextView mDownlinkKbps;
     private TextView mUplinkKbps;
     private TextView mNrAvailable;
     private TextView mNrState;
     private TextView mNrFrequency;
     private TextView mCellInfo;
-    private Spinner mPreferredNetworkType;
-    private int mPreferredNetworkTypeResult;
+    private CheckBox mFilterAll;
+    private CheckBox mFilterNr;
+    private CheckBox mFilterLte;
+    private CheckBox mFilterWcdma;
+    private CheckBox mFilterGsm;
+    private boolean mIsUpdating = false;
+    private Button mPreferredNetworkTypeApply;
     private Spinner mMockSignalStrength;
     private Spinner mMockDataNetworkType;
     private Spinner mCellInfoRefreshRateSpinner;
@@ -119,23 +129,19 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
     private Switch mImsVolteProvisionedSwitch;
     private Switch mImsVtProvisionedSwitch;
     private Switch mImsWfcProvisionedSwitch;
-// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-    private Switch mEnableVoLteSwitch;
-    private Switch mEnableVoNrSwitch;
-// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
     private Switch mEabProvisionedSwitch;
-    private TelephonyManager mTelephonyManager;
-    private ImsManager mImsManager = null;
+    protected TelephonyManager mTelephonyManager;
+    protected ImsManager mImsManager = null;
     private ProvisioningManager mProvisioningManager = null;
     private Phone mPhone = null;
     private boolean mSystemUser = true;
-    private int mPhoneId = SubscriptionManager.INVALID_PHONE_INDEX;
+    protected int mPhoneId = SubscriptionManager.INVALID_PHONE_INDEX;
     private static final int DEFAULT_PHONE_ID = 0;
 
-    private int mSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
+    protected int mSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
     private TelephonyDisplayInfo mDisplayInfo;
     private CarrierConfigManager mCarrierConfigManager;
-    private Context mContext;
+    protected Context mContext;
     private Handler mHandler;
     private View mView;
     private int mCellInfoRefreshRateIndex;
@@ -152,6 +158,9 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
     private static final String[] CELL_INFO_REFRESH_RATE_LABELS = {
         "Disabled", "Immediate", "Min 5s", "Min 10s", "Min 60s"
     };
+
+    private String[] mUpdatedPrefNwLabels;
+    private HashMap<String, Integer> mPrefNwLabelToIntMap = new HashMap<>();
 
     // Values in seconds, must match CELL_INFO_REFRESH_RATE_LABELS
     private static final int[] CELL_INFO_REFRESH_RATES = {
@@ -253,17 +262,80 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
 
         mCellInfo = (TextView) view.findViewById(R.id.cellinfo);
         mCellInfo.setTypeface(Typeface.MONOSPACE);
-        mPreferredNetworkType = (Spinner) view.findViewById(R.id.preferredNetworkType);
-        ArrayAdapter<String> mPreferredNetworkTypeAdapter =
-                new ArrayAdapter<String>(
-                        mContext,
-                        android.R.layout.simple_spinner_item,
-                        PhoneInformationUtil.PREFERRED_NETWORK_LABELS);
-        mPreferredNetworkTypeAdapter.setDropDownViewResource(
-                android.R.layout.simple_spinner_dropdown_item);
-        mPreferredNetworkType.setAdapter(mPreferredNetworkTypeAdapter);
-        mPreferredNetworkTypeResult =
-                PhoneInformationUtil.PREFERRED_NETWORK_LABELS.length - 1; // Unknown
+
+        mFilterAll = (CheckBox) view.findViewById(R.id.filter_all);
+        mFilterNr = (CheckBox) view.findViewById(R.id.filter_nr);
+        mFilterLte = (CheckBox) view.findViewById(R.id.filter_lte);
+        mFilterWcdma = (CheckBox) view.findViewById(R.id.filter_wcdma);
+        mFilterGsm = (CheckBox) view.findViewById(R.id.filter_gsm);
+        mPreferredNetworkTypeApply = (Button) view.findViewById(R.id.preferredNetworkTypeApply);
+
+        OnCheckedChangeListener individualListener = (buttonView, isChecked) -> {
+            if (mIsUpdating) return;
+            mIsUpdating = true;
+            if (!isChecked) {
+                mFilterAll.setChecked(false);
+            } else {
+                if (mFilterNr.isChecked() && mFilterLte.isChecked()
+                        && mFilterWcdma.isChecked() && mFilterGsm.isChecked()) {
+                    mFilterAll.setChecked(true);
+                }
+            }
+            mIsUpdating = false;
+        };
+
+        mFilterNr.setOnCheckedChangeListener(individualListener);
+        mFilterLte.setOnCheckedChangeListener(individualListener);
+        mFilterWcdma.setOnCheckedChangeListener(individualListener);
+        mFilterGsm.setOnCheckedChangeListener(individualListener);
+
+        mFilterAll.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (mIsUpdating) return;
+            mIsUpdating = true;
+            if (isChecked) {
+                mFilterNr.setChecked(true);
+                mFilterLte.setChecked(true);
+                mFilterWcdma.setChecked(true);
+                mFilterGsm.setChecked(true);
+            } else {
+                mFilterNr.setChecked(false);
+                mFilterLte.setChecked(false);
+                mFilterWcdma.setChecked(false);
+                mFilterGsm.setChecked(false);
+            }
+            mIsUpdating = false;
+        });
+
+        mPreferredNetworkTypeApply.setOnClickListener(
+                v -> {
+                    long networkTypeBitmask = 0;
+                    if (mFilterNr.isChecked()) {
+                        networkTypeBitmask |= TelephonyManager.NETWORK_TYPE_BITMASK_NR;
+                    }
+                    if (mFilterLte.isChecked()) {
+                        networkTypeBitmask |= TelephonyManager.NETWORK_TYPE_BITMASK_LTE;
+                        networkTypeBitmask |= TelephonyManager.NETWORK_TYPE_BITMASK_LTE_CA;
+                    }
+                    if (mFilterWcdma.isChecked()) {
+                        networkTypeBitmask |= TelephonyManager.NETWORK_TYPE_BITMASK_UMTS;
+                        networkTypeBitmask |= TelephonyManager.NETWORK_TYPE_BITMASK_HSDPA;
+                        networkTypeBitmask |= TelephonyManager.NETWORK_TYPE_BITMASK_HSUPA;
+                        networkTypeBitmask |= TelephonyManager.NETWORK_TYPE_BITMASK_HSPA;
+                        networkTypeBitmask |= TelephonyManager.NETWORK_TYPE_BITMASK_HSPAP;
+                        networkTypeBitmask |= TelephonyManager.NETWORK_TYPE_BITMASK_TD_SCDMA;
+                    }
+                    if (mFilterGsm.isChecked()) {
+                        networkTypeBitmask |= TelephonyManager.NETWORK_TYPE_BITMASK_GSM;
+                        networkTypeBitmask |= TelephonyManager.NETWORK_TYPE_BITMASK_GPRS;
+                        networkTypeBitmask |= TelephonyManager.NETWORK_TYPE_BITMASK_EDGE;
+                    }
+
+                    final long mask = networkTypeBitmask;
+                    new Thread(() -> {
+                        mTelephonyManager.setAllowedNetworkTypesForReason(
+                                TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_USER, mask);
+                    }).start();
+                });
 
         mMockSignalStrength = (Spinner) view.findViewById(R.id.signalStrength);
         if (!Build.isDebuggable() || !mSystemUser) {
@@ -310,20 +382,12 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
         mImsVtProvisionedSwitch = (Switch) view.findViewById(R.id.vt_provisioned_switch);
         mImsWfcProvisionedSwitch = (Switch) view.findViewById(R.id.wfc_provisioned_switch);
         mEabProvisionedSwitch = (Switch) view.findViewById(R.id.eab_provisioned_switch);
-// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-        mEnableVoLteSwitch = (Switch) view.findViewById(R.id.enable_volte_switch);
-        mEnableVoNrSwitch = (Switch) view.findViewById(R.id.enable_vonr_switch);
-// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
 
         if (!isImsSupportedOnDevice()) {
             mImsVolteProvisionedSwitch.setVisibility(View.GONE);
             mImsVtProvisionedSwitch.setVisibility(View.GONE);
             mImsWfcProvisionedSwitch.setVisibility(View.GONE);
             mEabProvisionedSwitch.setVisibility(View.GONE);
-// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-            mEnableVoLteSwitch.setVisibility(View.GONE);
-            mEnableVoNrSwitch.setVisibility(View.GONE);
-// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
         }
 
         // hide 5G stats on devices that don't support 5G
@@ -433,7 +497,6 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt("mPreferredNetworkTypeResult", mPreferredNetworkTypeResult);
         outState.putInt("mSelectedPhoneIndex", mPhoneId);
         outState.putInt("mCellInfoRefreshRateIndex", mCellInfoRefreshRateIndex);
     }
@@ -442,11 +505,6 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
         if (b == null) {
             return;
         }
-
-        mPreferredNetworkTypeResult =
-                b.getInt(
-                        "mPreferredNetworkTypeResult",
-                        PhoneInformationUtil.PREFERRED_NETWORK_LABELS.length - 1);
 
         mPhoneId = b.getInt("mSelectedPhoneIndex", 0);
         mSubId = SubscriptionManager.getSubscriptionId(mPhoneId);
@@ -524,7 +582,7 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
         return getImsConfigProvisionedState(CAPABILITY_TYPE_VOICE, REGISTRATION_TECH_LTE);
     }
 
-    private boolean isImsSupportedOnDevice() {
+    protected boolean isImsSupportedOnDevice() {
         return mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY_IMS);
     }
 
@@ -623,6 +681,9 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
     }
 
     private void updateDataState() {
+        if (!isAdded()) {
+            return;
+        }
         int state = mTelephonyManager.getDataState();
         Resources r = getResources();
         String display = r.getString(R.string.radioInfo_unknown);
@@ -722,44 +783,6 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
                 !IS_USER_BUILD && isEnabledByPlatform && isEabProvisioningRequired());
     }
 
-// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-    private void updateVoLteState() {
-        if (!SubscriptionManager.isValidSubscriptionId(mSubId)) {
-            mEnableVoLteSwitch.setEnabled(false);
-            mEnableVoLteSwitch.setChecked(false);
-            return;
-        }
-        ImsMmTelManager imsMmTelManager = mImsManager.getImsMmTelManager(mSubId);
-        mEnableVoLteSwitch.setChecked(PhoneInformationUtil.isVolteEnabled(imsMmTelManager));
-        mEnableVoLteSwitch.setEnabled(true);
-        mEnableVoLteSwitch.setOnCheckedChangeListener(mVoLteOnChangeListener);
-    }
-
-    private void updateVoNrState() {
-        if (!SubscriptionManager.isValidSubscriptionId(mSubId)) {
-            mEnableVoNrSwitch.setEnabled(false);
-            mEnableVoNrSwitch.setChecked(false);
-            return;
-        }
-        final int subId = mSubId;
-        mQueuedWork.execute(new Runnable() {
-            public void run() {
-                if (subId != mSubId) {
-                    return;
-                }
-                ImsMmTelManager imsMmTelManager = mImsManager.getImsMmTelManager(subId);
-                boolean voNrEnabled = PhoneInformationUtil.isVoNrEnabled(mTelephonyManager);
-                boolean voLteEnabled = PhoneInformationUtil.isVolteEnabled(imsMmTelManager);
-                mHandler.post(() -> {
-                    mEnableVoNrSwitch.setChecked(voNrEnabled);
-                    mEnableVoNrSwitch.setEnabled(voLteEnabled);
-                });
-            }
-        });
-        mEnableVoNrSwitch.setOnCheckedChangeListener(mVoNrOnChangeListener);
-    }
-
-// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
     private void updateImsProvisionedState() {
         if (!isImsSupportedOnDevice()) {
             return;
@@ -797,7 +820,7 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
                         AccessNetworkConstants.TRANSPORT_TYPE_WWAN));
     }
 
-    private void updateAllFields() {
+    protected void updateAllFields() {
         updateDataState();
         updateSelectionVisuals();
         updateRadioPowerState();
@@ -805,11 +828,27 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
         updateNetworkType();
         updateNrStats();
 
-// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-        updateVoLteState();
-        updateVoNrState();
+        new Thread(() -> {
+            long allowedNetworkTypes = mTelephonyManager.getAllowedNetworkTypesBitmask();
+            boolean nr = (allowedNetworkTypes & TelephonyManager.NETWORK_TYPE_BITMASK_NR) != 0;
+            boolean lte =
+                    (allowedNetworkTypes & TelephonyManager.NETWORK_TYPE_BITMASK_LTE) != 0;
+            boolean wcdma =
+                    (allowedNetworkTypes & TelephonyManager.NETWORK_TYPE_BITMASK_UMTS) != 0;
+            boolean gsm =
+                    (allowedNetworkTypes & TelephonyManager.NETWORK_TYPE_BITMASK_GSM) != 0;
+            mHandler.post(() -> {
+                mIsUpdating = true;
 
-// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
+                mFilterNr.setChecked(nr);
+                mFilterLte.setChecked(lte);
+                mFilterWcdma.setChecked(wcdma);
+                mFilterGsm.setChecked(gsm);
+                mFilterAll.setChecked(nr && lte && wcdma && gsm);
+                mIsUpdating = false;
+            });
+        }).start();
+
         updateCellInfo(mCellInfoResult);
         mCellInfoRefreshRateSpinner.setOnItemSelectedListener(mCellInfoRefreshRateHandler);
         // set selection after registering listener to force update
@@ -817,16 +856,6 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
         // Request cell information update from RIL.
         mTelephonyManager.setCellInfoListRate(
                 CELL_INFO_REFRESH_RATES[mCellInfoRefreshRateIndex], mSubId);
-
-        // set selection before registering to prevent update
-        mPreferredNetworkType.setSelection(mPreferredNetworkTypeResult, true);
-        mPreferredNetworkType.setOnItemSelectedListener(mPreferredNetworkHandler);
-
-        new Thread(() -> {
-            int networkType = (int) mTelephonyManager.getAllowedNetworkTypesBitmask();
-            mHandler.post(() -> updatePreferredNetworkType(
-                    RadioAccessFamily.getNetworkTypeFromRaf(networkType)));
-        }).start();
 
         // mock signal strength
         mMockSignalStrength.setSelection(mSelectedSignalStrengthIndex[mPhoneId]);
@@ -847,16 +876,6 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
 
         unregisterPhoneStateListener();
         registerPhoneStateListener();
-    }
-
-    private void updatePreferredNetworkType(int type) {
-        if (type >= PhoneInformationUtil.PREFERRED_NETWORK_LABELS.length || type < 0) {
-            log("Network type: unknown type value=" + type);
-            type = PhoneInformationUtil.PREFERRED_NETWORK_LABELS.length - 1; // set to Unknown
-        }
-        mPreferredNetworkTypeResult = type;
-
-        mPreferredNetworkType.setSelection(mPreferredNetworkTypeResult, true);
     }
 
     private void updateCellInfo(List<CellInfo> arrayCi) {
@@ -1130,31 +1149,8 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
                 public void onNothingSelected(AdapterView parent) {}
             };
 
-    OnItemSelectedListener mPreferredNetworkHandler =
-            new OnItemSelectedListener() {
-
-                public void onItemSelected(AdapterView parent, View v, int pos, long id) {
-                    if (mPreferredNetworkTypeResult != pos
-                            && pos >= 0
-                            && pos <= PhoneInformationUtil.PREFERRED_NETWORK_LABELS.length - 2) {
-                        mPreferredNetworkTypeResult = pos;
-                        new Thread(
-                                        () -> {
-                                            mTelephonyManager.setAllowedNetworkTypesForReason(
-                                                    TelephonyManager
-                                                            .ALLOWED_NETWORK_TYPES_REASON_USER,
-                                                    RadioAccessFamily.getRafFromNetworkType(
-                                                            mPreferredNetworkTypeResult));
-                                        })
-                                .start();
-                    }
-                }
-
-                public void onNothingSelected(AdapterView parent) {}
-            };
-
-    OnItemSelectedListener mOnMockSignalStrengthSelectedListener =
-            new OnItemSelectedListener() {
+    AdapterView.OnItemSelectedListener mOnMockSignalStrengthSelectedListener =
+            new AdapterView.OnItemSelectedListener() {
 
                 public void onItemSelected(AdapterView<?> parent, View v, int pos, long id) {
                     log("mOnSignalStrengthSelectedListener: " + pos);
@@ -1237,90 +1233,6 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
                 mPhone.getTelephonyTester().setServiceStateTestIntent(intent);
             };
 
-// QTI_BEGIN: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
-    OnCheckedChangeListener mVoLteOnChangeListener = new OnCheckedChangeListener() {
-        @Override
-        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-            Log.d(TAG, "VoLte button onCheckedChanged " + isChecked + " on subId=" + mSubId);
-            setVoLteEnabled(isChecked);
-        }
-    };
-
-    OnCheckedChangeListener mVoNrOnChangeListener = new OnCheckedChangeListener() {
-        @Override
-        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-            Log.d(TAG, "VoNr button onCheckedChanged " + isChecked + " on subId=" + mSubId);
-            setVoNrEnabled(isChecked);
-        }
-    };
-
-    private void setVoLteEnabled(boolean isChecked) {
-        if (!SubscriptionManager.isValidSubscriptionId(mSubId) || (mTelephonyManager == null)) {
-            return;
-        }
-
-        final int subId = mSubId;
-        final int phoneId = mPhoneId;
-        mQueuedWork.execute(new Runnable() {
-            public void run() {
-                if (subId != mSubId) {
-                    return;
-                }
-                ImsMmTelManager imsMmTelManager = mImsManager.getImsMmTelManager(subId);
-                try {
-                    if (isChecked != PhoneInformationUtil.isVolteEnabled(imsMmTelManager)) {
-                        if (isChecked) {
-                            mTelephonyManager.enableIms(phoneId);
-                        } else {
-                            mTelephonyManager.disableIms(phoneId);
-                        }
-                    }
-                } catch (Exception e) {
-                    Log.e(TAG, "fail to set VoLTE=" + isChecked + ". subId=" + subId, e);
-                }
-
-                mHandler.post(() -> {
-                     /**
-                      * 1. VoNr option is disabled if VoLte option is disabled
-                      * 2. VoNr option is enabled if VoLte option is enabled
-                      */
-                    if (!isChecked) {
-                        mEnableVoNrSwitch.setChecked(false);
-                        mEnableVoNrSwitch.setEnabled(false);
-                    } else {
-                        mEnableVoNrSwitch.setEnabled(true);
-                    }
-                });
-            }
-        });
-    }
-
-    public void setVoNrEnabled(boolean isChecked) {
-        if (!SubscriptionManager.isValidSubscriptionId(mSubId)
-                || (mTelephonyManager == null)) {
-            return;
-        }
-        final int subId = mSubId;
-        mQueuedWork.execute(new Runnable() {
-            public void run() {
-                if (subId != mSubId) {
-                    return;
-                }
-                try {
-                    boolean isVoNrEnabled =
-                            PhoneInformationUtil.isVoNrEnabled(mTelephonyManager);
-                    if (isVoNrEnabled != isChecked) {
-                        mTelephonyManager.setVoNrEnabled(isChecked);
-                        Log.d(TAG, "set VoNR state to " + isChecked + " on subId=" + subId);
-                    }
-                } catch (Exception e) {
-                    Log.e(TAG, "fail to set VoNr=" + isChecked + ". subId=" + subId, e);
-                }
-            }
-        });
-    }
-
-// QTI_END: 2025-10-13: Telephony: Add VoLte/VoNr enable/disable function in PhoneInfo
     private void updateSelectionVisuals() {
         LinearLayout selectedButton, unSelectedButton;
         if (mPhoneId == 0) {

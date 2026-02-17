@@ -12,6 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Changes from Qualcomm Technologies, Inc. are provided under the following license:
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+ * SPDX-License-Identifier: BSD-3-Clause-Clear
  */
 
 package com.android.services.telephony;
@@ -93,6 +97,7 @@ import com.android.internal.telephony.subscription.SubscriptionManagerService;
 import com.android.phone.PhoneGlobals;
 import com.android.phone.PhoneInterfaceManager;
 import com.android.phone.PhoneUtils;
+import com.android.phone.QtiPhoneUtilsHelper;
 import com.android.phone.R;
 import com.android.telephony.Rlog;
 
@@ -1916,9 +1921,15 @@ public class TelecomAccountRegistry {
      * @param isEnableAdhocConf The new enablement value for adhoc conference capability
      * @param handle The associated handle to update adhoc conference capability for in simultaneous
      *               calling.
+     * @param isActiveCallInDsds This flag is to indicate a special use case where there is an
+     *                           active call in DSDS, so we need to remove the adhoc conference
+     *                           capability from the disabled phone account but keep the capability
+     *                           enabled for the active phone account.
      */
-    public void refreshAdhocConference(boolean isEnableAdhocConf, PhoneAccountHandle handle) {
-        if (!isSimultaneousCallingEnabled() || handle == null) {
+    public void refreshAdhocConference(boolean isEnableAdhocConf, PhoneAccountHandle handle,
+            boolean isActiveCallInDsds) {
+        if ((!isSimultaneousCallingEnabled() || handle == null) && !isActiveCallInDsds) {
+            Log.i(this, "refreshadhocconference handle: " + handle);
             refreshAdhocConference(isEnableAdhocConf);
         } else { // For simultaneous calling, we will allow adhoc conferences to be added per
             // subscription.
@@ -2381,8 +2392,8 @@ public class TelecomAccountRegistry {
         boolean isApmSimNotPwrDown = false;
         try {
 // QTI_END: 2020-07-13: Telephony: MSIM:Set available SIM as default outgoing phoneaccount.
+            int propVal = QtiPhoneUtilsHelper.getExtTelManager().
 // QTI_BEGIN: 2021-05-04: Telephony: Remove provision check
-            int propVal = PhoneUtils.getExtTelManager().
                     getPropertyValueInt(APM_SIM_NOT_PWDN_PROPERTY, 0);
 // QTI_END: 2021-05-04: Telephony: Remove provision check
 // QTI_BEGIN: 2020-07-13: Telephony: MSIM:Set available SIM as default outgoing phoneaccount.

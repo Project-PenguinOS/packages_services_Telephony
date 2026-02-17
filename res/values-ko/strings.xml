@@ -76,7 +76,7 @@
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"모든 통화 계정"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"전화를 걸 수 있는 계정 선택"</string>
     <string name="voip_call_log_integration_label" msgid="2349275524959944815">"서드 파티 앱"</string>
-    <string name="voip_call_log_integration_summary" msgid="3834075007862607039">"통화를 시스템 통화 기록에 통합할 수 있는 앱을 관리합니다. 이 옵션을 사용 중지하면 앱의 기록이 기본 전화 앱에 표시되지 않습니다."</string>
+    <string name="voip_call_log_integration_summary" msgid="196486049335079938">"다른 앱에서 통화 기록에 통화를 표시하도록 허용합니다. 사용 중지하면 이러한 통화가 특정 앱에만 표시됩니다."</string>
     <string name="wifi_calling" msgid="3650509202851355742">"Wi-Fi 통화"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"내장된 연결 서비스"</string>
     <string name="voicemail" msgid="7697769412804195032">"음성사서함"</string>
@@ -838,6 +838,18 @@
     <string name="supp_service_over_ut_precautions_dialog_dismiss" msgid="5934541487903081652">"닫기"</string>
     <string name="radio_info_data_connection_enable" msgid="6183729739783252840">"데이터 연결 사용"</string>
     <string name="radio_info_data_connection_disable" msgid="6404751291511368706">"데이터 연결 사용 안함"</string>
+    <!-- no translation found for radio_info_apply_preferred_network_type (8828433232282314858) -->
+    <skip />
+    <!-- no translation found for radio_info_all_label (4326377691373938122) -->
+    <skip />
+    <!-- no translation found for radio_info_nr_label (4346984853962997752) -->
+    <skip />
+    <!-- no translation found for radio_info_lte_label (5721318031926928485) -->
+    <skip />
+    <!-- no translation found for radio_info_wcdma_label (5157664869835235769) -->
+    <skip />
+    <!-- no translation found for radio_info_gsm_label (2947899997551185529) -->
+    <skip />
     <string name="volte_provisioned_switch_string" msgid="4812874990480336178">"VoLTE 프로비저닝됨"</string>
     <string name="vt_provisioned_switch_string" msgid="8295542122512195979">"화상 통화 프로비저닝됨"</string>
     <string name="wfc_provisioned_switch_string" msgid="3835004640321078988">"Wi-Fi 통화 프로비저닝됨"</string>

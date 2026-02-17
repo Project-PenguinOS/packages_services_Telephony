@@ -75,8 +75,8 @@
     <string name="phone_accounts_configure_account_settings" msgid="6622119715253196586">"खाता सेटिङ कन्फिगर गर्नुहोस्"</string>
     <string name="phone_accounts_all_calling_accounts" msgid="1609600743500618823">"सबै कलिङ खाताहरू"</string>
     <string name="phone_accounts_all_calling_accounts_summary" msgid="2214134955430107240">"कुन खाताहरूले कल गर्न सक्छन् चयन गर्नुहोस्"</string>
-    <string name="voip_call_log_integration_label" msgid="2349275524959944815">"तेस्रा पक्षीय एपहरू"</string>
-    <string name="voip_call_log_integration_summary" msgid="3834075007862607039">"कुन कुन एपलाई सिस्टमको कल लगमा आफ्ना कलहरू इन्टिग्रेट गर्न दिने भन्ने कुरा नियन्त्रण गर्नुहोस्। तपाईंले यो विकल्प अफ गर्नुभयो भने एपका लगहरू मुख्य फोन एपमा देखिने छैनन्।"</string>
+    <string name="voip_call_log_integration_label" msgid="2349275524959944815">"तेस्रो पक्षीय एपहरू"</string>
+    <string name="voip_call_log_integration_summary" msgid="196486049335079938">"अन्य एपहरूलाई तपाईंको कल हिस्ट्रीमा कलहरू देखाउने अनुमति दिनुहोस्। तपाईंले यसलाई अफ गर्नुभयो भने यी कलहरू सम्बन्धित एपहरूमा मात्र देखिने छन्।"</string>
     <string name="wifi_calling" msgid="3650509202851355742">"Wi-Fi कलिङ"</string>
     <string name="connection_service_default_label" msgid="7332739049855715584">"निर्मित जडान सेवा"</string>
     <string name="voicemail" msgid="7697769412804195032">"भ्वाइसमेल"</string>
@@ -838,6 +838,18 @@
     <string name="supp_service_over_ut_precautions_dialog_dismiss" msgid="5934541487903081652">"खारेज गर्नुहोस्"</string>
     <string name="radio_info_data_connection_enable" msgid="6183729739783252840">"डेटा जडान सक्षम पार्नुहोस्"</string>
     <string name="radio_info_data_connection_disable" msgid="6404751291511368706">"डेटा जडानलाई असक्षम पार्नुहोस्"</string>
+    <!-- no translation found for radio_info_apply_preferred_network_type (8828433232282314858) -->
+    <skip />
+    <!-- no translation found for radio_info_all_label (4326377691373938122) -->
+    <skip />
+    <!-- no translation found for radio_info_nr_label (4346984853962997752) -->
+    <skip />
+    <!-- no translation found for radio_info_lte_label (5721318031926928485) -->
+    <skip />
+    <!-- no translation found for radio_info_wcdma_label (5157664869835235769) -->
+    <skip />
+    <!-- no translation found for radio_info_gsm_label (2947899997551185529) -->
+    <skip />
     <string name="volte_provisioned_switch_string" msgid="4812874990480336178">"VoLTE को प्रावधान सक्रिय गरिएको छ"</string>
     <string name="vt_provisioned_switch_string" msgid="8295542122512195979">"भिडियो कलिङसम्बन्धी प्रावधानलाई सक्रिय गरिएको छ"</string>
     <string name="wfc_provisioned_switch_string" msgid="3835004640321078988">"Wifi कलिङसम्बन्धी प्रावधानलाई सक्रिय गरिएको छ"</string>

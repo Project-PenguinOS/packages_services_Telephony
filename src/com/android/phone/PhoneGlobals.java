@@ -717,9 +717,7 @@ public class PhoneGlobals extends ContextWrapper {
                     new BinderCallsStats.Injector(),
                     com.android.internal.os.BinderLatencyProto.Dims.TELEPHONY));
 
-// QTI_BEGIN: 2021-02-10: Telephony: Move IExtTelephony to IExtPhone
-        PhoneUtils.connectExtTelephonyManager(this);
-// QTI_END: 2021-02-10: Telephony: Move IExtTelephony to IExtPhone
+       QtiPhoneUtilsHelper.connectExtTelephonyManager(this);
     }
 
     /**
