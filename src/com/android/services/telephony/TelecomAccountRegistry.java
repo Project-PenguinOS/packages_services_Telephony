@@ -1239,8 +1239,15 @@ public class TelecomAccountRegistry {
 
             // Any time the SubscriptionInfo changes rerun the setup
             Log.i(this, "TelecomAccountRegistry: onSubscriptionsChanged - update accounts");
-            tearDownAccounts();
-            setupAccounts();
+            if (Flags.rebuildTelecomAccountsAsync()) {
+                mHandler.post(() -> {
+                    tearDownAccounts();
+                    setupAccounts();
+                });
+            } else {
+                tearDownAccounts();
+                setupAccounts();
+            }
         }
 
         @Override
@@ -1252,8 +1259,15 @@ public class TelecomAccountRegistry {
             // Even though registering the listener failed, we will still try to setup the phone
             // accounts now; the phone instances should already be present and ready, so even if
             // telephony registry is poking along we can still try to setup the phone account.
-            tearDownAccounts();
-            setupAccounts();
+            if (Flags.rebuildTelecomAccountsAsync()) {
+                mHandler.post(() -> {
+                    tearDownAccounts();
+                    setupAccounts();
+                });
+            } else {
+                tearDownAccounts();
+                setupAccounts();
+            }
 
             if (mSubscriptionListenerState == LISTENER_STATE_UNREGISTERED) {
                 // Initial registration attempt failed; start exponential backoff.
