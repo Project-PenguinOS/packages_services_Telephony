@@ -590,7 +590,7 @@ public class PhoneGlobals extends ContextWrapper {
             Intent intent = new Intent(this, TelephonyDebugService.class);
             startService(intent);
 
-            mCM = CallManager.getInstance();
+            mCM = CallManager.getInstance(this);
 
             // Create the NotificationMgr singleton, which is used to display
             // status bar icons and control other status bar behavior.
