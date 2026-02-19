@@ -194,10 +194,10 @@ public class TelecomAccountRegistry {
         TWO
     }
 
+// QTI_END: 2018-02-22: Telephony: Fixes related to manul provisioning
     // TODO: Verify this value matches frameworks/base/telecomm/java/android/telecom/PhoneAccount.java
     private static final int CAPABILITY_DOWNGRADE_RTT = 0x4000000; // Example value; check your source
 
-// QTI_END: 2018-02-22: Telephony: Fixes related to manul provisioning
     final class AccountEntry implements PstnPhoneCapabilitiesNotifier.Listener {
         private final Phone mPhone;
         private PhoneAccount mAccount;
@@ -559,7 +559,9 @@ public class TelecomAccountRegistry {
 
 // QTI_BEGIN: 2023-01-18: Telephony: IMS : Move RTT downgrade and upgrade logic completely to AOSP.
             if (isRttDowngradeSupported()) {
+// QTI_END: 2023-01-18: Telephony: IMS : Move RTT downgrade and upgrade logic completely to AOSP.
                 capabilities |= CAPABILITY_DOWNGRADE_RTT;
+// QTI_BEGIN: 2023-01-18: Telephony: IMS : Move RTT downgrade and upgrade logic completely to AOSP.
             }
 
 // QTI_END: 2023-01-18: Telephony: IMS : Move RTT downgrade and upgrade logic completely to AOSP.
