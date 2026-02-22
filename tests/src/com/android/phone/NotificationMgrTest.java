@@ -191,6 +191,19 @@ public class NotificationMgrTest extends TelephonyTestBase {
     }
 
     @Test
+    public void testUpdateMwi_emptyVmNumber_simNotLoaded_notificationNotSent() {
+        // Given: VoiceMailNumber is empty string (not null), and SIM records are NOT loaded.
+        when(mPhone.getVoiceMailNumber()).thenReturn("");
+        when(mPhone.getIccRecordsLoaded()).thenReturn(false);
+
+        // When: updateMwi is called
+        mNotificationMgr.updateMwi(TEST_SUB_ID, /*visible=*/true, /*isFresh=*/true);
+
+        // Then: The broadcast should NOT be sent.
+        verify(mApp, never()).sendBroadcastAsUser(any(), any(UserHandle.class), any(), any());
+    }
+
+    @Test
     public void testUpdateMwi_visible_noActiveSubscription_notificationNeverSent() {
         // Given no active subscription available
         when(mSubscriptionManager.getActiveSubscriptionInfo(eq(TEST_SUB_ID))).thenReturn(null);
