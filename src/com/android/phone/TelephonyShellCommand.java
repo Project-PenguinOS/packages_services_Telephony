@@ -3924,7 +3924,7 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
                 Log.v(LOG_TAG, "handleSetShouldSendDatagramToModemInDemoMode returns: "
                         + result);
             }
-            getOutPrintWriter().println(false);
+            getOutPrintWriter().println(result);
         } catch (RemoteException e) {
             Log.w(LOG_TAG, "setShouldSendDatagramToModemInDemoMode(" + shouldSendToDemoMode
                     + "), error = " + e.getMessage());
@@ -4026,7 +4026,7 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
                     "handleOverrideSatelliteEntitlementStatusResponseForCtsTest returns: "
                     + result);
             }
-            getOutPrintWriter().println(false);
+            getOutPrintWriter().println(result);
         } catch (RemoteException e) {
             Log.w(LOG_TAG, "handleOverrideSatelliteEntitlementStatusResponseForCtsTest("
                     + overriddenResponse
@@ -4068,7 +4068,7 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
                     "handleOverrideSatelliteEntilementQueryConditions returns: "
                     + result);
             }
-            getOutPrintWriter().println(false);
+            getOutPrintWriter().println(result);
         } catch (RemoteException e) {
             Log.w(LOG_TAG, "handleOverrideSatelliteEntilementQueryConditions("
                 + ignoreInternetConnection + ", entilementRefreshDays=" + ignoreRefreshCondition
@@ -4103,7 +4103,7 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
                 Log.v(LOG_TAG,
                     "handleSetMaxAllowedSatelliteDataModeForCtsTest returns: " + result);
             }
-            getOutPrintWriter().println(false);
+            getOutPrintWriter().println(result);
         } catch (RemoteException e) {
             Log.w(LOG_TAG, "handleSetMaxAllowedSatelliteDataModeForCtsTest("
                     + maxAllowedDataMode + "), error = " + e.getMessage());
