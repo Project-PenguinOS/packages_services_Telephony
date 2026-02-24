@@ -477,6 +477,17 @@ final class PstnIncomingCallNotifier {
         Connection original = telephonyConnection.getOriginalConnection();
         if (original != null && !original.isIncoming()
                 && Objects.equals(original.getAddress(), unknown.getAddress())) {
+
+            // we only want to swap in one direction (IMS -> GSM) or (GSM->IMS) for some reason.
+            // There should be no SRVCC for the same Connection class type.
+            if (Flags.supportSameUriConferenceSrvcc()
+                    && original.getClass().equals(unknown.getClass())) {
+                Log.i(this, "maybeSwapWithUnknownConnection - not swapping, "
+                        + "original connection is already the same type: "
+                        + original.getClass().getSimpleName());
+                return false;
+            }
+
             // If the new unknown connection is an external connection, don't swap one with an
             // actual connection.  This means a call got pulled away.  We want the actual connection
             // to disconnect.

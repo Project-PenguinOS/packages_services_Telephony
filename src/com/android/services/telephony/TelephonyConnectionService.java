@@ -1878,6 +1878,12 @@ public class TelephonyConnectionService extends ConnectionService {
         if (connection instanceof TelephonyConnection) {
             TelephonyConnection telephonyConnection = (TelephonyConnection) connection;
             maybeSendInternationalCallEvent(telephonyConnection);
+            // In the srvcc case, there is an unknown connection that gets added. Recalculate the
+            // conference state to pick up this change.
+            if (mFeatureFlags.supportSameUriConferenceSrvcc()
+                    && mTelephonyConferenceController.shouldRecalculate()) {
+                mTelephonyConferenceController.recalculate();
+            }
         }
     }
 
@@ -2058,7 +2064,8 @@ public class TelephonyConnectionService extends ConnectionService {
             return Connection.createCanceledConnection();
         } else {
             connection.updateState();
-            if (mTelephonyConferenceController.shouldRecalculate()) {
+            if (!mFeatureFlags.supportSameUriConferenceSrvcc()
+                    && mTelephonyConferenceController.shouldRecalculate()) {
                 mTelephonyConferenceController.recalculate();
             }
             return connection;
