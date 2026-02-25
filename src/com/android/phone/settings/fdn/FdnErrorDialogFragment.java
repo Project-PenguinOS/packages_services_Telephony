@@ -57,6 +57,7 @@ public class FdnErrorDialogFragment extends DialogFragment {
     static final int DIALOG_ID_INCORRECT_PUK2_ENTRY = 14;
     static final int DIALOG_ID_INVALID_PIN2_ENTRY = 15;
     static final int DIALOG_ID_FDN_FAILED_ERROR = 16;
+    static final int DIALOG_ID_PIN2_ALREADY_BLOCKED = 17;
 
     private Listener mListener;
     private int mId;
@@ -88,9 +89,11 @@ public class FdnErrorDialogFragment extends DialogFragment {
                 return alert;
             }
 
-            case DIALOG_ID_PUK2_REQUESTED_ON_PIN_CHANGED, DIALOG_ID_PUK2_REQUESTED_ON_PIN_ENTRY -> {
+            case DIALOG_ID_PUK2_REQUESTED_ON_PIN_CHANGED, DIALOG_ID_PUK2_REQUESTED_ON_PIN_ENTRY,
+                 DIALOG_ID_PIN2_ALREADY_BLOCKED -> {
                 AlertDialog alert = new AlertDialog.Builder(activity)
-                        .setMessage(R.string.puk2_requested)
+                        .setMessage(mId == DIALOG_ID_PIN2_ALREADY_BLOCKED
+                                ? R.string.pin2_blocked : R.string.puk2_requested)
                         .setCancelable(true)
                         .create();
                 alert.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
@@ -137,7 +140,8 @@ public class FdnErrorDialogFragment extends DialogFragment {
     @Override
     public void onCancel(DialogInterface dialog) {
         if (mId == DIALOG_ID_PUK2_REQUESTED_ON_PIN_CHANGED
-                || mId == DIALOG_ID_PUK2_REQUESTED_ON_PIN_ENTRY) {
+                || mId == DIALOG_ID_PUK2_REQUESTED_ON_PIN_ENTRY
+                || mId == DIALOG_ID_PIN2_ALREADY_BLOCKED) {
             mListener.onRequestPuk2(mId);
         }
         dialog.dismiss();
