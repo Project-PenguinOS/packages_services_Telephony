@@ -445,6 +445,10 @@ public class TelecomAccountRegistry {
                 mIsRttCapable = false;
             }
 
+            if (isCarrierRttDowngradeToAudioSupported()) {
+                capabilities |= PhoneAccount.CAPABILITY_CHANGE_RTT_CALL_TO_AUDIO_CALL;
+            }
+
             if (mIsCallComposerCapable) {
                 capabilities |= PhoneAccount.CAPABILITY_CALL_COMPOSER;
             }
@@ -860,6 +864,16 @@ public class TelecomAccountRegistry {
                     PhoneGlobals.getInstance().getCarrierConfigForSubId(mPhone.getSubId());
             if (b == null) return false;
             return b.getBoolean(CarrierConfigManager.KEY_RTT_SUPPORTED_WHILE_ROAMING_BOOL);
+        }
+
+        /**
+         * Determines from carrier config whether changing an RTT call to audio-only is supported.
+         */
+        private boolean isCarrierRttDowngradeToAudioSupported() {
+            PersistableBundle b =
+                    PhoneGlobals.getInstance().getCarrierConfigForSubId(mPhone.getSubId());
+            if (b == null) return false;
+            return b.getBoolean(CarrierConfigManager.KEY_RTT_DOWNGRADE_SUPPORTED_BOOL);
         }
 
         /**
