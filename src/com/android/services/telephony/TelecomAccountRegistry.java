@@ -2402,8 +2402,7 @@ public class TelecomAccountRegistry {
 
         // Private networks are considered data only for now. Skip them for telecom
         // accounts.
-        if (Flags.skipPrivateNetworkForTelecomAccount()
-                && info.isPrivateNetwork()) {
+        if (info.isPrivateNetwork()) {
             Log.d(this, "setupAccounts: skipping private network subid %d",
                     subscriptionId);
             return true;

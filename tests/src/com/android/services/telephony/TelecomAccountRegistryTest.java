@@ -331,7 +331,6 @@ public class TelecomAccountRegistryTest extends TelephonyTestBase {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_SKIP_PRIVATE_NETWORK_FOR_TELECOM_ACCOUNT)
     public void testSkipPrivateNetworkSubscriptions() {
         SubscriptionInfo subInfo1 = Mockito.mock(SubscriptionInfo.class);
         when(subInfo1.isPrivateNetwork()).thenReturn(true);
