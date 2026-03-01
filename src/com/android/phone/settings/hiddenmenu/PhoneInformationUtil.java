@@ -227,7 +227,7 @@ public class PhoneInformationUtil {
         CellSignalStrengthNr ssNr = (CellSignalStrengthNr) ci.getCellSignalStrength();
 
         return String.format(
-                "%-3.3s %-3.3s %-3.3s %-5.5s %-5.5s %-3.3s %-6.6s %-4.4s %-4.4s\n",
+                "%-3.3s %-3.3s %-3.3s %-5.5s %-5.5s %-3.3s %-7.7s %-7.7s %-7.7s\n",
                 getConnectionStatusString(ci),
                 cidNr.getMccString(),
                 cidNr.getMncString(),
@@ -285,7 +285,7 @@ public class PhoneInformationUtil {
                 value +=
                         String.format(
                                 "NR\n%-3.3s %-3.3s %-3.3s %-5.5s %-5.5s %-3.3s"
-                                        + " %-6.6s %-4.4s %-4.4s\n",
+                                        + " %-7.7s %-7.7s %-7.7s\n",
                                 "SRV", "MCC", "MNC", "TAC", "NCI", "PCI", "NRARFCN", "SS-RSRP",
                                 "SS-RSRQ");
                 value += nrCells.toString();
