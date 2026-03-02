@@ -83,10 +83,14 @@ public abstract class BaseFdnContactScreen extends Activity
     }
 
     protected void authenticatePin2() {
-        Intent intent = new Intent();
-        intent.setClass(this, GetPin2Screen.class);
-        intent.setData(FdnList.getContentUri(mSubscriptionInfoHelper));
-        startActivityForResult(intent, PIN2_REQUEST_CODE);
+        if (mPhone.getIccCard().getIccPin2Blocked()) {
+            showFdnErrorDialog(FdnErrorDialogFragment.DIALOG_ID_PIN2_ALREADY_BLOCKED);
+        } else {
+            Intent intent = new Intent();
+            intent.setClass(this, GetPin2Screen.class);
+            intent.setData(FdnList.getContentUri(mSubscriptionInfoHelper));
+            startActivityForResult(intent, PIN2_REQUEST_CODE);
+        }
     }
 
     protected void displayProgress(boolean flag) {
@@ -144,7 +148,8 @@ public abstract class BaseFdnContactScreen extends Activity
                         if (ce.getCommandError() == CommandException.Error.SIM_PUK2) {
                             // make sure we set the PUK2 state so that we can skip some
                             // redundant behaviour.
-                            showPin2LockedDialog();
+                            showFdnErrorDialog(
+                                    FdnErrorDialogFragment.DIALOG_ID_PUK2_REQUESTED_ON_PIN_ENTRY);
                         } else {
                             final int attemptsRemaining = msg.arg1;
                             if (attemptsRemaining > 0) {
@@ -197,15 +202,14 @@ public abstract class BaseFdnContactScreen extends Activity
         }
     }
 
-    private void showPin2LockedDialog() {
+    protected void showFdnErrorDialog(int dialogId) {
         final FragmentManager fragmentManager = getFragmentManager();
         FdnErrorDialogFragment dialogFragment = (FdnErrorDialogFragment) fragmentManager
                 .findFragmentByTag(FdnErrorDialogFragment.TAG_PIN2_LOCKED_DIALOG);
         if (dialogFragment == null) {
             dialogFragment = new FdnErrorDialogFragment();
             Bundle args = new Bundle();
-            args.putInt(FdnErrorDialogFragment.KEY_DIALOG_ID,
-                    FdnErrorDialogFragment.DIALOG_ID_PUK2_REQUESTED_ON_PIN_ENTRY);
+            args.putInt(FdnErrorDialogFragment.KEY_DIALOG_ID, dialogId);
             dialogFragment.setArguments(args);
             dialogFragment.show(fragmentManager, FdnErrorDialogFragment.TAG_PIN2_LOCKED_DIALOG);
         } else {
@@ -217,6 +221,15 @@ public abstract class BaseFdnContactScreen extends Activity
 
     @Override
     public void onRequestPuk2(int id) {
+        Intent intent = mSubscriptionInfoHelper.getIntent(FdnSetting.class);
+        intent.setAction(Intent.ACTION_MAIN);
+        // If the dialog ID is for PUK2 requested on PIN changed, we should auto launch the change
+        // PIN2 dialog, since the user was trying to change PIN2.
+        if (id == FdnErrorDialogFragment.DIALOG_ID_PUK2_REQUESTED_ON_PIN_CHANGED
+                || id == FdnErrorDialogFragment.DIALOG_ID_PIN2_ALREADY_BLOCKED) {
+            intent.putExtra(FdnSetting.EXTRA_AUTO_CHANGE_PIN2, true);
+        }
+        startActivity(intent);
         finish();
     }
 }
