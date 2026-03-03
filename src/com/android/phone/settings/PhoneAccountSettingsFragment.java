@@ -77,6 +77,10 @@ public class PhoneAccountSettingsFragment extends PreferenceFragment
 
     private static final String LOG_TAG = PhoneAccountSettingsFragment.class.getSimpleName();
 
+    private static final String FALLBACK_TELECOM_UI_PACKAGE = "com.android.server.telecomui";
+    private static final String ENABLE_ACCOUNT_PREFERENCE_ACTIVITY =
+            "com.android.server.telecomui.settings.EnableAccountPreferenceActivity";
+
     private TelecomManager mTelecomManager;
     private TelephonyManager mTelephonyManager;
     private SubscriptionManager mSubscriptionManager;
@@ -160,6 +164,12 @@ public class PhoneAccountSettingsFragment extends PreferenceFragment
         mDefaultOutgoingAccount = (AccountSelectionPreference)
                 getPreferenceScreen().findPreference(DEFAULT_OUTGOING_ACCOUNT_KEY);
         mAllCallingAccounts = getPreferenceScreen().findPreference(ALL_CALLING_ACCOUNTS_KEY);
+        if (mAllCallingAccounts != null) {
+            Intent intent = new Intent(Intent.ACTION_MAIN);
+            intent.setComponent(new ComponentName(getTelecomUiPackageName(),
+                    ENABLE_ACCOUNT_PREFERENCE_ACTIVITY));
+            mAllCallingAccounts.setIntent(intent);
+        }
 
         mMakeAndReceiveCallsCategory = (PreferenceCategory) getPreferenceScreen().findPreference(
                 MAKE_AND_RECEIVE_CALLS_CATEGORY_KEY);
@@ -405,7 +415,12 @@ public class PhoneAccountSettingsFragment extends PreferenceFragment
             mMakeAndReceiveCallsCategoryPresent = true;
             mDefaultOutgoingAccount.setListener(this);
             updateDefaultOutgoingAccountsModel();
-
+            if (Flags.hideDefaultOutgoingAccountIfNotMultiple() && enabledAccounts.size() <= 1) {
+                // Only one account, so disable the selection of the option.
+                mDefaultOutgoingAccount.setEnabled(false);
+            } else {
+                mDefaultOutgoingAccount.setEnabled(true);
+            }
             // If there are no third party (nonSim) accounts,
             // then don't show enable/disable dialog.
             if (!allNonSimAccounts.isEmpty()) {
@@ -596,6 +611,20 @@ public class PhoneAccountSettingsFragment extends PreferenceFragment
         if (!mMakeAndReceiveCallsCategoryPresent) {
             getPreferenceScreen().removePreference(mMakeAndReceiveCallsCategory);
         }
+    }
+
+    private String getTelecomUiPackageName() {
+        // This is weird looking, but the idea is that creating this intent will cause
+        // TelecomManager to query telecom for the name of TelecomUi in setPackage.
+        // Don't use this intent, simply create to extract the correct package name.
+        Intent blockedNumbersIntent = mTelecomManager.createManageBlockedNumbersIntent();
+
+        if (blockedNumbersIntent != null && blockedNumbersIntent.getPackage() != null) {
+            return blockedNumbersIntent.getPackage();
+        }
+
+        Log.w(LOG_TAG, "getTelecomUiPackageName: couldn't resolve");
+        return FALLBACK_TELECOM_UI_PACKAGE;
     }
 
     /**
