@@ -2229,7 +2229,7 @@ public class TelecomAccountRegistry {
                         int slotId = phone.getPhoneId();
                         boolean isAccountAdded = false;
 
-                        Log.i(this, "setupAccounts: Phone with subscription id %d", subscriptionId +
+                        Log.i(this, "setupAccounts: Phone with subscription id: " + subscriptionId +
 // QTI_BEGIN: 2021-05-04: Telephony: Remove provision check
                                 " slotId: " + slotId);
 // QTI_END: 2021-05-04: Telephony: Remove provision check
