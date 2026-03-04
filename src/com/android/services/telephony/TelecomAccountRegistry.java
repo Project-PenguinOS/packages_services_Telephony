@@ -979,10 +979,17 @@ public class TelecomAccountRegistry {
          * Determines from carrier config whether changing an RTT call to audio-only is supported.
          */
         private boolean isCarrierRttDowngradeToAudioSupported() {
-            PersistableBundle b =
-                    PhoneGlobals.getInstance().getCarrierConfigForSubId(mPhone.getSubId());
-            if (b == null) return false;
-            return b.getBoolean(CarrierConfigManager.KEY_RTT_DOWNGRADE_SUPPORTED_BOOL);
+            /**
+             * We can return the current cached value for both sim and simless case
+             * when the device has sim, cached value will have the current value
+             * for simless case, it will have the previous sub's config value, but in simless only
+             * emergency call is supported, it's assumend this API will be called for emergency
+             * RTT only.
+             */
+            int simLessRttDowngradeSupported = Settings.Secure.getInt(
+                    mContext.getContentResolver(), RTT_DOWNGRADE_SUPPORTED +
+                    convertRttPhoneId(mPhone.getPhoneId()), RTT_DOWNGRADE_NOT_SUPPORTED);
+            return simLessRttDowngradeSupported != RTT_DOWNGRADE_NOT_SUPPORTED;
         }
 
         /**
