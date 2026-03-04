@@ -1243,6 +1243,7 @@ public class PhoneInterfaceManagerTest extends TelephonyTestBase {
 
         // Verify mSatelliteController.requestEnableSatelliteForCarrier is called
         verify(mSatelliteController).requestEnableSatelliteForCarrier(eq(subId),
+                eq(true),
                 eq(SatelliteManager.SATELLITE_COMMUNICATION_RESTRICTION_REASON_USER),
                 eq(mIIntegerConsumer));
         // Verify mSatelliteController.requestSatelliteEnabled is NOT called

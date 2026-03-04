@@ -161,6 +161,7 @@ import android.telephony.ims.feature.ImsFeature;
 import android.telephony.ims.stub.ImsConfigImplBase;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
 import android.telephony.satellite.EnableRequestAttributes;
+import android.telephony.satellite.EnableResponse;
 import android.telephony.satellite.INtnSignalStrengthCallback;
 import android.telephony.satellite.ISatelliteCapabilitiesCallback;
 import android.telephony.satellite.ISatelliteCommunicationAccessStateCallback;
@@ -2193,9 +2194,12 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
                 case CMD_PREPARE_UNATTENDED_REBOOT:
                     request = (MainThreadRequest) msg.obj;
                     PinStorage pinStorage = UiccController.getInstance().getPinStorage();
-                    request.result =
-                            pinStorage.prepareUnattendedReboot(request.workSource);
-                    notifyRequester(request);
+                    MainThreadRequest finalRequest = request;
+                    pinStorage.post(() -> {
+                        finalRequest.result =
+                                pinStorage.prepareUnattendedReboot(finalRequest.workSource);
+                        notifyRequester(finalRequest);
+                    });
                     break;
 
                 default:
@@ -12807,15 +12811,21 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         enforceSatelliteCommunicationPermission("requestSatelliteEnabled");
         final long identity = Binder.clearCallingIdentity();
         try {
+            Log.d(LOG_TAG, "requestEnableSatellite: subId=" + subId
+                    + ", attributes=" + attributes);
             final boolean isAutomaticAndUser = attributes.getConnectType()
                     == CarrierConfigManager.CARRIER_ROAMING_NTN_CONNECT_AUTOMATIC
                     && attributes.getSatelliteEnablementRequestReason()
                     == SatelliteManager.SATELLITE_ENABLEMENT_REQUEST_REASON_USER;
             if (isAutomaticAndUser) {
+                Log.d(LOG_TAG, "requestEnableSatellite: isAutomaticAndUser, calling"
+                        + " requestEnableSatelliteForCarrier");
                 mSatelliteController.requestEnableSatelliteForCarrier(subId,
+                        attributes.isEnabled(),
                         SatelliteManager.SATELLITE_COMMUNICATION_RESTRICTION_REASON_USER,
                         callback);
             } else {
+                Log.d(LOG_TAG, "requestEnableSatellite: falling back to requestSatelliteEnabled");
                 mSatelliteController.requestSatelliteEnabled(
                         attributes.isEnabled(), attributes.isDemoMode(),
                         attributes.isEmergencyMode(), callback);
@@ -12867,9 +12877,12 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
                 // TODO(b/323046234): Migrate to use Auto Satellite Enablement.
                 final Set<Integer> restrictions = mSatelliteController
                         .getAttachRestrictionReasonsForCarrier(subId);
+                Log.d(LOG_TAG, "requestEnableSatelliteStatus: restrictions=" + restrictions);
                 final Bundle bundle = new Bundle();
                 final boolean isSatelliteEnabled = restrictions.isEmpty();
-                bundle.putBoolean(SatelliteManager.KEY_SATELLITE_ENABLED, isSatelliteEnabled);
+                EnableResponse enableResponse = new EnableResponse(
+                        isSatelliteEnabled, false, false, new int[0]);
+                bundle.putParcelable(SatelliteManager.KEY_ENABLE_RESPONSE, enableResponse);
                 result.send(SatelliteManager.SATELLITE_RESULT_SUCCESS, bundle);
             } else {
                 mSatelliteController.requestIsSatelliteEnabled(result);
