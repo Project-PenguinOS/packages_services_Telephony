@@ -558,14 +558,6 @@ public class TelecomAccountRegistry {
                 capabilities |= PhoneAccount.CAPABILITY_CHANGE_RTT_CALL_TO_AUDIO_CALL;
             }
 
-// QTI_BEGIN: 2023-01-18: Telephony: IMS : Move RTT downgrade and upgrade logic completely to AOSP.
-            if (isRttDowngradeSupported()) {
-// QTI_END: 2023-01-18: Telephony: IMS : Move RTT downgrade and upgrade logic completely to AOSP.
-                capabilities |= PhoneAccount.CAPABILITY_DOWNGRADE_RTT;
-// QTI_BEGIN: 2023-01-18: Telephony: IMS : Move RTT downgrade and upgrade logic completely to AOSP.
-            }
-
-// QTI_END: 2023-01-18: Telephony: IMS : Move RTT downgrade and upgrade logic completely to AOSP.
             if (mIsCallComposerCapable) {
                 capabilities |= PhoneAccount.CAPABILITY_CALL_COMPOSER;
             }
@@ -1210,26 +1202,6 @@ public class TelecomAccountRegistry {
             }
         }
 
-// QTI_BEGIN: 2023-01-18: Telephony: IMS : Move RTT downgrade and upgrade logic completely to AOSP.
-        /**
-         * Determines whether RTT downgrade is supported given the current state of the
-         * device.
-         */
-        private boolean isRttDowngradeSupported() {
-            /**
-             * We can return the current cached value for both sim and simless case
-             * when the device has sim, cached value will have the current value
-             * for simless case, it will have the previous sub's config value, but in simless only
-             * emergency call is supported, it's assumend this API will be called for emergency
-             * RTT only.
-             */
-            int simLessRttDowngradeSupported = Settings.Secure.getInt(
-                    mContext.getContentResolver(), RTT_DOWNGRADE_SUPPORTED +
-                    convertRttPhoneId(mPhone.getPhoneId()), RTT_DOWNGRADE_NOT_SUPPORTED);
-            return simLessRttDowngradeSupported != RTT_DOWNGRADE_NOT_SUPPORTED;
-        }
-
-// QTI_END: 2023-01-18: Telephony: IMS : Move RTT downgrade and upgrade logic completely to AOSP.
         /**
          * Determines whether RTT is supported given the current state of the
          * device.
