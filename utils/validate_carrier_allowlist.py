@@ -59,7 +59,7 @@ def validate_consistency(json_data, cts_path):
     return errors
 
 def main():
-    repo_root = os.environ.get("REPO_ROOT", ".")
+    repo_root = os.environ.get("ANDROID_BUILD_TOP", ".")
     telephony_path = os.path.join(repo_root, "packages/services/Telephony")
     json_path = os.path.join(telephony_path, "assets/CarrierRestrictionOperatorDetails.json")
     cts_path = os.path.join(repo_root, "cts/tests/tests/telephony/current/src/android/telephony/cts/TelephonyManagerTest.java")
