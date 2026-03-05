@@ -59,6 +59,9 @@ public class ConferenceParticipantConnection extends Connection {
      */
     private final com.android.internal.telephony.Connection mParentConnection;
 
+    // TODO: Verify this value matches frameworks/base/telecomm/java/android/telecom/Connection.java
+    private static final int PROPERTY_IS_PARTICIPANT_HOST = 0x8000; // Example value; check your source
+
     /**
      * Creates a new instance.
      *

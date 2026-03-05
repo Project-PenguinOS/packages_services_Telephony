@@ -12,10 +12,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+// QTI_BEGIN: 2026-02-04: Telephony: FR114115 Dialer Enhancements
  *
  * Changes from Qualcomm Technologies, Inc. are provided under the following license:
  * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  * SPDX-License-Identifier: BSD-3-Clause-Clear
+// QTI_END: 2026-02-04: Telephony: FR114115 Dialer Enhancements
  */
 
 package com.android.services.telephony;
@@ -191,6 +193,9 @@ public class TelecomAccountRegistry {
         ONE,
         TWO
     }
+
+    // TODO: Verify this value matches frameworks/base/telecomm/java/android/telecom/PhoneAccount.java
+    private static final int CAPABILITY_DOWNGRADE_RTT = 0x4000000; // Example value; check your source
 
 // QTI_END: 2018-02-22: Telephony: Fixes related to manul provisioning
     final class AccountEntry implements PstnPhoneCapabilitiesNotifier.Listener {
@@ -554,7 +559,7 @@ public class TelecomAccountRegistry {
 
 // QTI_BEGIN: 2023-01-18: Telephony: IMS : Move RTT downgrade and upgrade logic completely to AOSP.
             if (isRttDowngradeSupported()) {
-                capabilities |= PhoneAccount.CAPABILITY_DOWNGRADE_RTT;
+                capabilities |= CAPABILITY_DOWNGRADE_RTT;
             }
 
 // QTI_END: 2023-01-18: Telephony: IMS : Move RTT downgrade and upgrade logic completely to AOSP.
@@ -1921,15 +1926,19 @@ public class TelecomAccountRegistry {
      * @param isEnableAdhocConf The new enablement value for adhoc conference capability
      * @param handle The associated handle to update adhoc conference capability for in simultaneous
      *               calling.
+// QTI_BEGIN: 2026-02-04: Telephony: FR114115 Dialer Enhancements
      * @param isActiveCallInDsds This flag is to indicate a special use case where there is an
      *                           active call in DSDS, so we need to remove the adhoc conference
      *                           capability from the disabled phone account but keep the capability
      *                           enabled for the active phone account.
+// QTI_END: 2026-02-04: Telephony: FR114115 Dialer Enhancements
      */
+// QTI_BEGIN: 2026-02-04: Telephony: FR114115 Dialer Enhancements
     public void refreshAdhocConference(boolean isEnableAdhocConf, PhoneAccountHandle handle,
             boolean isActiveCallInDsds) {
         if ((!isSimultaneousCallingEnabled() || handle == null) && !isActiveCallInDsds) {
             Log.i(this, "refreshadhocconference handle: " + handle);
+// QTI_END: 2026-02-04: Telephony: FR114115 Dialer Enhancements
             refreshAdhocConference(isEnableAdhocConf);
         } else { // For simultaneous calling, we will allow adhoc conferences to be added per
             // subscription.

@@ -1065,11 +1065,16 @@ public class NotificationMgr {
         if (subId == SubscriptionManager.INVALID_SUBSCRIPTION_ID
                 || carrierConfig == null
                 || !carrierConfig.getBoolean(
-                CarrierConfigManager.KEY_OPERATOR_SELECTION_EXPAND_BOOL)
+                        CarrierConfigManager.KEY_OPERATOR_SELECTION_EXPAND_BOOL)
                 || carrierConfig.getBoolean(
-                CarrierConfigManager.KEY_HIDE_CARRIER_NETWORK_SETTINGS_BOOL)
+                        CarrierConfigManager.KEY_HIDE_CARRIER_NETWORK_SETTINGS_BOOL)
                 || (carrierConfig.getBoolean(CarrierConfigManager.KEY_CSP_ENABLED_BOOL)
-                && !telephonyManager.isManualNetworkSelectionAllowed())) {
+                        && !telephonyManager.isManualNetworkSelectionAllowed())) {
+            return false;
+        }
+
+        SubscriptionInfo subInfo = mSubscriptionManager.getActiveSubscriptionInfo(subId);
+        if (subInfo != null && subInfo.isPrivateNetwork()) {
             return false;
         }
 
