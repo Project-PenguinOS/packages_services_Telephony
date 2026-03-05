@@ -560,7 +560,9 @@ public class TelecomAccountRegistry {
 
 // QTI_BEGIN: 2023-01-18: Telephony: IMS : Move RTT downgrade and upgrade logic completely to AOSP.
             if (isRttDowngradeSupported()) {
+// QTI_END: 2023-01-18: Telephony: IMS : Move RTT downgrade and upgrade logic completely to AOSP.
                 capabilities |= PhoneAccount.CAPABILITY_DOWNGRADE_RTT;
+// QTI_BEGIN: 2023-01-18: Telephony: IMS : Move RTT downgrade and upgrade logic completely to AOSP.
             }
 
 // QTI_END: 2023-01-18: Telephony: IMS : Move RTT downgrade and upgrade logic completely to AOSP.
@@ -2391,6 +2393,7 @@ public class TelecomAccountRegistry {
             }
         }
     }
+// QTI_END: 2020-07-13: Telephony: MSIM:Set available SIM as default outgoing phoneaccount.
 
     private boolean shouldSkipAccountEntry(int subscriptionId) {
         // setupAccounts can be called multiple times during service changes.
@@ -2434,6 +2437,7 @@ public class TelecomAccountRegistry {
 
         return false;
     }
+// QTI_BEGIN: 2020-07-13: Telephony: MSIM:Set available SIM as default outgoing phoneaccount.
 
     private boolean areAllSimAccountsFound() {
         final Iterator<PhoneAccountHandle> phoneAccounts =
