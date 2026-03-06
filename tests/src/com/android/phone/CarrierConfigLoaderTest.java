@@ -109,6 +109,9 @@ public class CarrierConfigLoaderTest extends TelephonyTestBase {
     private TelephonyManager mTelephonyManager;
     private CarrierConfigLoader mCarrierConfigLoader;
     private Handler mHandler;
+    private int mCapturedCarrierId;
+    private int mCapturedCarrierServiceUid;
+    private int[] mCapturedPackageUids;
 
     // The AIDL stub will use PermissionEnforcer to check permission from the caller.
     private FakePermissionEnforcer mFakePermissionEnforcer = new FakePermissionEnforcer();
@@ -160,6 +163,14 @@ public class CarrierConfigLoaderTest extends TelephonyTestBase {
             @Override
             public boolean isUserBuild() {
                 return true;
+            }
+
+            @Override
+            protected void writeCarrierServiceConfigOverridesReported(int carrierId,
+                    int carrierServiceUid, int[] packageUids) {
+                mCapturedCarrierId = carrierId;
+                mCapturedCarrierServiceUid = carrierServiceUid;
+                mCapturedPackageUids = packageUids;
             }
         };
         mHandler = mCarrierConfigLoader.getHandler();
@@ -606,5 +617,35 @@ public class CarrierConfigLoaderTest extends TelephonyTestBase {
         // But callback should not be sent.
         verify(mTelephonyRegistryManager, never()).notifyCarrierConfigChanged(
                 anyInt(), anyInt(), anyInt(), anyInt());
+    }
+
+    @Test
+    public void testLogCarrierServiceCarrierConfigOverrides() throws Exception {
+        String carrierPackageName = "com.test.carrier";
+        int carrierUid = 12345;
+        String cert = "1234567890ABCDEF";
+        String overridePackageName = "com.test.override";
+        int testSpecificCarrierId = 123;
+        int overrideUid = 54321;
+        doReturn(testSpecificCarrierId).when(mPhone).getSpecificCarrierId();
+        doReturn(carrierPackageName).when(mTelephonyManager)
+                .getCarrierServicePackageNameForLogicalSlot(anyInt());
+        doReturn(carrierUid).when(mPackageManager).getPackageUid(
+                eq(carrierPackageName), anyInt());
+        doReturn(overrideUid).when(mPackageManager).getPackageUid(
+                eq(overridePackageName), anyInt());
+        doReturn(overrideUid).when(mPackageManager).getPackageUidAsUser(
+                eq(overridePackageName), anyInt());
+
+        // Prepare config with access rules
+        PersistableBundle config = new PersistableBundle();
+        config.putStringArray(CarrierConfigManager.KEY_CARRIER_CERTIFICATE_STRING_ARRAY,
+                new String[] { cert + ":" + overridePackageName });
+
+        mCarrierConfigLoader.logCarrierServiceCarrierConfigOverrides(DEFAULT_PHONE_ID, config);
+
+        assertThat(mCapturedCarrierId).isEqualTo(testSpecificCarrierId);
+        assertThat(mCapturedCarrierServiceUid).isEqualTo(carrierUid);
+        assertThat(mCapturedPackageUids).asList().containsExactly(overrideUid);
     }
 }
