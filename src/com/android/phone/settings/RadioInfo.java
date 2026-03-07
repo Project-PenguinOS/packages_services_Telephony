@@ -31,11 +31,13 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 import android.annotation.NonNull;
 import android.content.ActivityNotFoundException;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ComponentInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -496,6 +498,10 @@ public class RadioInfo extends AppCompatActivity {
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
+        if (PhoneInformationUtil.isRadioInfoAccessRestricted(this)) {
+            finish();
+            return;
+        }
         mContext = this;
         SettingsConstants.setupEdgeToEdge(this);
         int currentNightMode = getResources().getConfiguration().uiMode
@@ -517,6 +523,24 @@ public class RadioInfo extends AppCompatActivity {
         }
 
         setContentView(R.layout.radio_info);
+
+        if (PhoneInformationUtil.isUserBuild()) {
+            mCarrierConfigReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if (CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED
+                            .equals(intent.getAction())) {
+                        if (PhoneInformationUtil.isRadioInfoAccessRestricted(context)) {
+                            finish();
+                        }
+                    }
+                }
+            };
+            IntentFilter filter =
+                    new IntentFilter(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED);
+            registerReceiver(mCarrierConfigReceiver, filter, Context.RECEIVER_EXPORTED);
+        }
+
         Resources r = getResources();
         mActionEsos =
                 r.getString(
@@ -1047,6 +1071,10 @@ public class RadioInfo extends AppCompatActivity {
         super.onDestroy();
         if (mQueuedWork != null) {
             mQueuedWork.shutdown();
+        }
+        if (mCarrierConfigReceiver != null) {
+            unregisterReceiver(mCarrierConfigReceiver);
+            mCarrierConfigReceiver = null;
         }
     }
 
@@ -2804,4 +2832,6 @@ public class RadioInfo extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
+    private BroadcastReceiver mCarrierConfigReceiver;
 }
