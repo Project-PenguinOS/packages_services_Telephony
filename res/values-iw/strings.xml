@@ -522,7 +522,7 @@
     <string name="label_puk2_code" msgid="2852217004288085562">"‏הזנת קוד PUK2"</string>
     <string name="fdn_enable_puk2_requested" msgid="5793652792131588041">"‏סיסמה שגויה. קוד אימות 2 חסום כעת. כדי לנסות שוב, יש לשנות את PIN 2."</string>
     <string name="puk2_requested" msgid="6992374450720307514">"‏סיסמה שגויה. ה-SIM נעול כעת. יש להזין PUK2."</string>
-    <string name="pin2_blocked" msgid="1179589285280498087">"‏קוד האימות השני (PIN2) חסום. כדי לבטל את החסימה, צריך להקליד את קוד ה-PUK2."</string>
+    <string name="pin2_blocked" msgid="1179589285280498087">"‏קוד האימות השני (PIN2) חסום. כדי לבטל את החסימה, צריך למלא את קוד ה-PUK2."</string>
     <string name="puk2_blocked" msgid="3131139031779319911">"‏PUK2 נחסם לצמיתות."</string>
     <string name="pin2_attempts" msgid="5625178102026453023">\n"נותרו לך עוד <xliff:g id="NUMBER">%d</xliff:g> ניסיונות."</string>
     <string name="puk2_locked" msgid="6497760825455461057">"‏נעילת PUK2. כדי לבטל את הנעילה, צריך לפנות לספק השירות."</string>
