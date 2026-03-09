@@ -5196,6 +5196,29 @@ private List<Connection> disconnectAllCallsOnOtherSubs(@NonNull PhoneAccountHand
         mFeatureFlags = featureFlags;
     }
 
+    @Override
+    public void onStartRtt(@NonNull Conference conference,
+            @NonNull Connection.RttTextStream rttTextStream) {
+        if (conference instanceof ImsConference) {
+            Connection hostConnection = ((ImsConference) conference).getConferenceHost();
+            if (hostConnection instanceof TelephonyConnection) {
+                Log.i(this, "onStartRtt: routing to ImsConference host connection");
+                ((TelephonyConnection) hostConnection).onStartRtt(rttTextStream);
+            }
+        }
+    }
+
+    @Override
+    public void onStopRtt(@NonNull Conference conference) {
+        if (conference instanceof ImsConference) {
+            Connection hostConnection = ((ImsConference) conference).getConferenceHost();
+            if (hostConnection instanceof TelephonyConnection) {
+                Log.i(this, "onStopRtt: routing to ImsConference host connection");
+                ((TelephonyConnection) hostConnection).onStopRtt();
+            }
+        }
+    }
+
     private void loge(String s) {
         Log.d(this, s);
     }
