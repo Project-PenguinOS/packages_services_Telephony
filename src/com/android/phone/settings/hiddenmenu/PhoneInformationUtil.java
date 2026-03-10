@@ -1131,26 +1131,15 @@ public class PhoneInformationUtil {
                 ExtTelephonyManager.FEATURE_TDSCDMA_SUPPORT);
     }
 
-    public static boolean isCdmaSupported(Context context) {
-        PackageManager pm = context.getPackageManager();
-        return pm != null ? pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY_CDMA) : false;
-    }
-
     public static String[] getUpdatedPrefNwLabels(Context context) {
         final ArrayList<String> updatedPrefdNwLabels = new ArrayList<>();
         final boolean tdscdmaSupported = isTdscdmaSupported(context);
-        final boolean cdmaSupported = isCdmaSupported(context);
-        log("tdscdmaSupported " + tdscdmaSupported + ", cdmaSupported " + cdmaSupported);
-        // Exclude CDMA/TDSCDMA RATs if unsupported
-        final Pattern pattern = Pattern.compile("(?<!W|TDS)CDMA|EvDo");
+        log("tdscdmaSupported :" + tdscdmaSupported);
+        // Exclude TDSCDMA RATs if unsupported
         for (int i = 0; i < PREFERRED_NETWORK_LABELS_RF.length; i++) {
             String entry = PREFERRED_NETWORK_LABELS_RF[i];
-            Matcher matcher = pattern.matcher(entry);
-            if (cdmaSupported || !matcher.find()) {
+            if (tdscdmaSupported || !entry.contains("TDSCDMA")) {
                 updatedPrefdNwLabels.add(entry);
-            }
-            if (!tdscdmaSupported && entry.contains("TDSCDMA")) {
-                updatedPrefdNwLabels.remove(entry);
             }
         }
         return updatedPrefdNwLabels.toArray(new String[updatedPrefdNwLabels.size()]);
@@ -1166,8 +1155,13 @@ public class PhoneInformationUtil {
     }
 
     public static int getPrefNwTypeIndexFromUpdatedArray(int type, String[] updatedPrefNwLabels) {
+        int requiredIndex = PREFERRED_NETWORK_MODES_RF.indexOf(type);
+        if (requiredIndex == -1 || requiredIndex >= PREFERRED_NETWORK_LABELS_RF.length) {
+            return -1;
+        }
         return IntStream.range(0, updatedPrefNwLabels.length)
-                .filter(i -> updatedPrefNwLabels[i].equals(PREFERRED_NETWORK_LABELS_RF[type]))
+                .filter(i -> updatedPrefNwLabels[i]
+                       .equals(PREFERRED_NETWORK_LABELS_RF[requiredIndex]))
                 .findFirst()
                 .orElse(-1);
     }
