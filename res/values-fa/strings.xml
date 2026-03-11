@@ -522,7 +522,7 @@
     <string name="label_puk2_code" msgid="2852217004288085562">"‏کد PUK2 را وارد کنید"</string>
     <string name="fdn_enable_puk2_requested" msgid="5793652792131588041">"گذرواژه نادرست است. اکنون پین۲ مسدود شده است. برای امتحان مجدد، پین۲ را تغییر دهید."</string>
     <string name="puk2_requested" msgid="6992374450720307514">"‏گذرواژه نادرست است. اکنون سیم‌کارت قفل شده است. PUK2 را وارد کنید."</string>
-    <string name="pin2_blocked" msgid="1179589285280498087">"‏‫PIN2 مسدود است. برای رفع انسداد، PUK2 را وارد کنید."</string>
+    <string name="pin2_blocked" msgid="1179589285280498087">"‏‫PIN2 مسدود شده است. برای رفع انسداد، PUK2 را وارد کنید."</string>
     <string name="puk2_blocked" msgid="3131139031779319911">"‏PUK2 به صورت دائمی مسدود شده است."</string>
     <string name="pin2_attempts" msgid="5625178102026453023">\n"<xliff:g id="NUMBER">%d</xliff:g> تلاش باقی‌مانده دارید."</string>
     <string name="puk2_locked" msgid="6497760825455461057">"‏PUK2 قفل است. برای باز کردن قفل، با ارائه دهنده خدمات تماس بگیرید."</string>
@@ -608,7 +608,7 @@
     <string name="hac_mode_title" msgid="4127986689621125468">"سمعک"</string>
     <string name="hac_mode_summary" msgid="7774989500136009881">"روشن کردن سازگاری دستگاه کمک‌شنوایی"</string>
     <string name="rtt_mode_title" msgid="3075948111362818043">"‏تماس با نوشتار هم‌زمان (RTT)"</string>
-    <string name="rtt_mode_summary" msgid="8631541375609989562">"پیام‌رسانی در تماس صوتی مجاز است"</string>
+    <string name="rtt_mode_summary" msgid="8631541375609989562">"اجازه دادن پیام‌رسانی در تماس صوتی"</string>
     <string name="rtt_mode_more_information" msgid="587500128658756318">"‏«نوشتار هم‌زمان» به تماس گیرندگان ناشنوا، دارای مشکل شنوایی، دارای ناتوانی گفتاری یا افرادی که به چیزی بیش از صدا نیاز دارند کمک می‌کند.&lt;br&gt; &lt;a href=<xliff:g id="URL">http://support.google.com/mobile?p=telephony_rtt</xliff:g>&gt;بیشتر بدانید&lt;/a&gt;\n       ‏&lt;br&gt;&lt;br&gt; تماس‌های «نوشتار هم‌زمان» به‌صورت ترانویسی پیام ذخیره می‌شود\n       &lt;br&gt; «نوشتار هم‌زمان» برای تماس‌های تصویری دردسترس نیست"</string>
     <string name="no_rtt_when_roaming" msgid="5268008247378355389">"نکته: «نوشتار هم‌زمان» در هنگام فراگردی دردسترس نیست"</string>
   <string-array name="tty_mode_entries">
