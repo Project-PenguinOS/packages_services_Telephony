@@ -44,7 +44,6 @@ import android.annotation.NonNull;
 import android.content.BroadcastReceiver;
 // QTI_END: 2023-07-11: Telephony: Gray out the "Enable DSDS" button upon switch
 import android.content.ActivityNotFoundException;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
@@ -560,10 +559,6 @@ public class RadioInfo extends AppCompatActivity {
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
-        if (PhoneInformationUtil.isRadioInfoAccessRestricted(this)) {
-            finish();
-            return;
-        }
         mContext = this;
         SettingsConstants.setupEdgeToEdge(this);
         int currentNightMode = getResources().getConfiguration().uiMode
@@ -585,24 +580,6 @@ public class RadioInfo extends AppCompatActivity {
         }
 
         setContentView(R.layout.radio_info);
-
-        if (PhoneInformationUtil.isUserBuild()) {
-            mCarrierConfigReceiver = new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    if (CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED
-                            .equals(intent.getAction())) {
-                        if (PhoneInformationUtil.isRadioInfoAccessRestricted(context)) {
-                            finish();
-                        }
-                    }
-                }
-            };
-            IntentFilter filter =
-                    new IntentFilter(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED);
-            registerReceiver(mCarrierConfigReceiver, filter, Context.RECEIVER_EXPORTED);
-        }
-
         Resources r = getResources();
         mActionEsos =
                 r.getString(
@@ -1206,10 +1183,6 @@ public class RadioInfo extends AppCompatActivity {
         super.onDestroy();
         if (mQueuedWork != null) {
             mQueuedWork.shutdown();
-        }
-        if (mCarrierConfigReceiver != null) {
-            unregisterReceiver(mCarrierConfigReceiver);
-            mCarrierConfigReceiver = null;
         }
         if (mExtTelephonyManager != null && mServiceCallback != null) {
             mExtTelephonyManager.disconnectService(mServiceCallback);
@@ -2975,8 +2948,6 @@ public class RadioInfo extends AppCompatActivity {
             e.printStackTrace();
         }
     }
-
-    private BroadcastReceiver mCarrierConfigReceiver;
 
 // QTI_BEGIN: 2023-07-11: Telephony: Gray out the "Enable DSDS" button upon switch
     private void handleRadioPowerStateChanged(int slotId, int radioState) {

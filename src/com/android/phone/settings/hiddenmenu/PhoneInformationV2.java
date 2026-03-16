@@ -22,10 +22,7 @@
 package com.android.phone.settings.hiddenmenu;
 
 import android.app.FragmentTransaction;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
@@ -64,15 +61,10 @@ public class PhoneInformationV2 extends AppCompatActivity
     private LinearLayout itemOneContainer, itemTwoContainer, itemThreeContainer, itemFourContainer;
     private List<LinearLayout> navItemContainers = new ArrayList<>();
     private int currentlySelectedItem = -1;
-    private BroadcastReceiver mCarrierConfigReceiver;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (PhoneInformationUtil.isRadioInfoAccessRestricted(this)) {
-            finish();
-            return;
-        }
         setContentView(R.layout.phone_information_v2);
         SettingsConstants.setupEdgeToEdge(this);
         mViewModel = new ViewModelProvider(this).get(PhoneInfoSharedViewModel.class);
@@ -96,23 +88,6 @@ public class PhoneInformationV2 extends AppCompatActivity
         int defaultTab = R.id.nav_item_one_container;
         int lastSelectedTab = prefs.getInt(KEY_LAST_SELECTED_TAB, defaultTab);
         selectNavItem(lastSelectedTab, false);
-
-        if (PhoneInformationUtil.isUserBuild()) {
-            mCarrierConfigReceiver = new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    if (CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED
-                            .equals(intent.getAction())) {
-                        if (PhoneInformationUtil.isRadioInfoAccessRestricted(context)) {
-                            finish();
-                        }
-                    }
-                }
-            };
-            IntentFilter filter =
-                    new IntentFilter(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED);
-            registerReceiver(mCarrierConfigReceiver, filter, Context.RECEIVER_EXPORTED);
-        }
     }
 
     @Override
@@ -150,10 +125,6 @@ public class PhoneInformationV2 extends AppCompatActivity
             mViewModel.resetToDefaults();
         }
         super.onDestroy();
-        if (mCarrierConfigReceiver != null) {
-            unregisterReceiver(mCarrierConfigReceiver);
-            mCarrierConfigReceiver = null;
-        }
     }
 
     private void selectNavItem(int selectedItemId, boolean savePreference) {
