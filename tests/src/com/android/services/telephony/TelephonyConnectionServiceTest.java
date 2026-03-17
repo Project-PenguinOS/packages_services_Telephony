@@ -995,6 +995,7 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
         TestTelephonyConnection c = new TestTelephonyConnection();
         Phone slot0Phone = c.getPhone();
         when(slot0Phone.getPhoneId()).thenReturn(SLOT_0_PHONE_ID);
+        setPhonesDialConnection(slot0Phone, c.getOriginalConnection());
         List<Phone> phones = new ArrayList<>(1);
         phones.add(slot0Phone);
         setPhones(phones);
@@ -1145,6 +1146,7 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
         TestTelephonyConnection c = new TestTelephonyConnection();
         Phone slot0Phone = c.getPhone();
         when(slot0Phone.getPhoneId()).thenReturn(SLOT_0_PHONE_ID);
+        setPhonesDialConnection(slot0Phone, c.getOriginalConnection());
         Phone slot1Phone = makeTestPhone(SLOT_1_PHONE_ID, ServiceState.STATE_OUT_OF_SERVICE,
                 false /*isEmergencyOnly*/);
         setPhonesDialConnection(slot1Phone, c.getOriginalConnection());
@@ -1689,6 +1691,9 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
         doReturn(true).when(testPhone0).isWifiCallingEnabled();
         doReturn(false).when(testPhone1).isRadioOn();
         doReturn(true).when(testPhone1).isWifiCallingEnabled();
+        TestTelephonyConnection c = new TestTelephonyConnection();
+        c.setMockPhone(testPhone0);
+        setPhonesDialConnection(testPhone0, c.getOriginalConnection());
         List<Phone> phones = new ArrayList<>(2);
         phones.add(testPhone0);
         phones.add(testPhone1);
