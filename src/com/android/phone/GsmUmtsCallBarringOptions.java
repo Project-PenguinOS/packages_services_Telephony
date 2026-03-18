@@ -830,9 +830,11 @@ public class GsmUmtsCallBarringOptions extends TimeConsumingPreferenceActivity
     // Since this method will be called once per get_call_barring response, compare with current
     // enable value to avoid multiple calls to UI framework APIs
     void setChangePasswordPreference(boolean passwordRequired) {
-        if (!mConfigDisableChangePwOverIms &&
-                        mPasswordRequiredOverIms != passwordRequired) {
-            mPasswordRequiredOverIms = passwordRequired;
+        if (mPasswordRequiredOverIms == passwordRequired) {
+            return;
+        }
+        mPasswordRequiredOverIms = passwordRequired;
+        if (!mConfigDisableChangePwOverIms) {
             mButtonChangePW.setEnabled(passwordRequired);
             if (!passwordRequired) {
                 mButtonChangePW.setSummary(R.string.call_barring_change_pwd_description_disabled);
