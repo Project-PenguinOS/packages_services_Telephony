@@ -12805,17 +12805,28 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         try {
             Log.d(LOG_TAG, "requestEnableSatellite: subId=" + subId
                     + ", attributes=" + attributes);
-            final boolean isAutomaticAndUser = attributes.getConnectType()
-                    == CarrierConfigManager.CARRIER_ROAMING_NTN_CONNECT_AUTOMATIC
-                    && attributes.getSatelliteEnablementRequestReason()
-                    == SatelliteManager.SATELLITE_ENABLEMENT_REQUEST_REASON_USER;
-            if (isAutomaticAndUser) {
-                Log.d(LOG_TAG, "requestEnableSatellite: isAutomaticAndUser, calling"
-                        + " requestEnableSatelliteForCarrier");
-                mSatelliteController.requestEnableSatelliteForCarrier(subId,
-                        attributes.isEnabled(),
-                        SatelliteManager.SATELLITE_COMMUNICATION_RESTRICTION_REASON_USER,
-                        callback);
+            final boolean isAutomatic = attributes.getConnectType()
+                    == CarrierConfigManager.CARRIER_ROAMING_NTN_CONNECT_AUTOMATIC;
+            if (isAutomatic) {
+                if (attributes.getSatelliteEnablementRequestReason()
+                        == SatelliteManager.SATELLITE_ENABLEMENT_REQUEST_REASON_USER) {
+                    Log.d(LOG_TAG, "requestEnableSatellite: isAutomaticAndUser, calling"
+                            + " requestEnableSatelliteForCarrier with enable="
+                            + attributes.isEnabled());
+                    mSatelliteController.requestEnableSatelliteForCarrier(subId,
+                            attributes.isEnabled(),
+                            SatelliteManager.SATELLITE_COMMUNICATION_RESTRICTION_REASON_USER,
+                            callback);
+                } else {
+                    Log.d(LOG_TAG, "requestEnableSatellite: isAutomatic but reason is "
+                            + attributes.getSatelliteEnablementRequestReason()
+                            + ", returning SATELLITE_RESULT_REQUEST_NOT_SUPPORTED");
+                    try {
+                        callback.accept(SatelliteManager.SATELLITE_RESULT_REQUEST_NOT_SUPPORTED);
+                    } catch (RemoteException e) {
+                        Log.e(LOG_TAG, "requestEnableSatellite: " + e);
+                    }
+                }
             } else {
                 Log.d(LOG_TAG, "requestEnableSatellite: falling back to requestSatelliteEnabled");
                 mSatelliteController.requestSatelliteEnabled(
