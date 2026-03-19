@@ -30,6 +30,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -39,6 +40,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -670,5 +672,50 @@ public class CarrierConfigLoaderTest extends TelephonyTestBase {
         assertThrows(SecurityException.class,
                 () -> mCarrierConfigLoader.overrideConfig(DEFAULT_SUB_ID, new PersistableBundle(),
                         true/*persistent*/));
+    }
+
+    @Test
+    public void testOverrideConfig_persistent_nonSystemApp_fails() throws Exception {
+        mFakePermissionEnforcer.grant(android.Manifest.permission.MODIFY_PHONE_STATE);
+
+        int nonSystemUid = 12345;
+        mFakeCallingUid = nonSystemUid;
+        String pkgName = "com.thirdparty.app";
+
+        doReturn(new String[]{pkgName}).when(mPackageManager).getPackagesForUid(eq(nonSystemUid));
+        ApplicationInfo appInfo = new ApplicationInfo();
+        appInfo.flags = 0; // Not a system app
+        doReturn(appInfo).when(mPackageManager).getApplicationInfo(eq(pkgName), anyInt());
+        assertThrows(SecurityException.class, () -> mCarrierConfigLoader
+                .overrideConfig(DEFAULT_SUB_ID, getTestConfig(), true /*persistent*/));
+    }
+
+    @Test
+    public void testOverrideConfig_sharedUid_systemApp_succeeds() throws Exception {
+        if (!SubscriptionManager.isValidPhoneId(SubscriptionManager.getPhoneId(DEFAULT_SUB_ID))) {
+            return;
+        }
+        mFakePermissionEnforcer.grant(android.Manifest.permission.MODIFY_PHONE_STATE);
+
+        int sharedUid = 12345;
+        mFakeCallingUid = sharedUid;
+        String thirdPartyPkg = "com.thirdparty.app";
+        String systemPkg = "com.system.app";
+
+        doReturn(new String[]{thirdPartyPkg, systemPkg}).when(mPackageManager)
+                .getPackagesForUid(eq(sharedUid));
+
+        // First package throws NameNotFoundException
+        doThrow(new PackageManager.NameNotFoundException()).when(mPackageManager)
+                .getApplicationInfo(eq(thirdPartyPkg), anyInt());
+
+        // Second package is a system app
+        ApplicationInfo systemAppInfo = new ApplicationInfo();
+        systemAppInfo.flags = ApplicationInfo.FLAG_SYSTEM;
+        doReturn(systemAppInfo).when(mPackageManager)
+                .getApplicationInfo(eq(systemPkg), anyInt());
+
+        // Assert that no SecurityException is thrown (the method should execute successfully)
+        mCarrierConfigLoader.overrideConfig(DEFAULT_SUB_ID, getTestConfig(), true /*persistent*/);
     }
 }
