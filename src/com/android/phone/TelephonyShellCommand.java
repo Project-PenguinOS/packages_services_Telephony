@@ -4304,11 +4304,11 @@ public class TelephonyShellCommand extends BasicShellCommandHandler {
         } else {
             switch (opt) {
                 case "-p": {
-                    name = opt + "/" + "android.telephony.cts";
+                    name = opt + "/" + "android.telephony.satellite.cts";
                     break;
                 }
                 case "-c": {
-                    name = opt + "/" + "android.telephony.cts.SatelliteReceiver";
+                    name = opt + "/" + "android.telephony.satellite.cts.SatelliteReceiver";
                     break;
                 }
                 case "-r": {
