@@ -1225,20 +1225,20 @@ public class RadioInfo extends AppCompatActivity {
             if (mSystemUser) {
                 mPhone = PhoneFactory.getPhone(phoneId);
             }
-            if (mSimulateOos[mPhoneId]) {
+            if (mSimulateOos[phoneId]) {
                 mSimulateOosOnChangeListener.onCheckedChanged(mSimulateOutOfServiceSwitch, false);
             }
-            if (mCarrierSatelliteOriginalBundle[mPhoneId] != null) {
+            if (mCarrierSatelliteOriginalBundle[phoneId] != null) {
                 mMockSatelliteListener.onCheckedChanged(mMockSatellite, false);
             }
-            if (mSatelliteDataOriginalBundle[mPhoneId] != null) {
+            if (mSatelliteDataOriginalBundle[phoneId] != null) {
                 mMockSatelliteDataSwitchListener.onCheckedChanged(mMockSatelliteDataSwitch, false);
-                mSatelliteDataOriginalBundle[mPhoneId] = null;
+                mSatelliteDataOriginalBundle[phoneId] = null;
             }
-            if (mSelectedSignalStrengthIndex[mPhoneId] > 0) {
+            if (mSelectedSignalStrengthIndex[phoneId] > 0) {
                 mOnMockSignalStrengthSelectedListener.onItemSelected(null, null, 0 /*pos*/, 0);
             }
-            if (mSelectedMockDataNetworkTypeIndex[mPhoneId] > 0) {
+            if (mSelectedMockDataNetworkTypeIndex[phoneId] > 0) {
                 mOnMockDataNetworkTypeSelectedListener.onItemSelected(null, null, 0 /*pos*/, 0);
             }
         }
