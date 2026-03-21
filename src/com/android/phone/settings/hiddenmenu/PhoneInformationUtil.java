@@ -596,11 +596,11 @@ public class PhoneInformationUtil {
      */
     public static boolean shouldHideNonEmergencyMode(Context context, int mSubId) {
         if (!Build.isDebuggable()) {
-            return false;
+            return true;
         }
         String action = SatelliteManager.ACTION_SATELLITE_START_NON_EMERGENCY_SESSION;
         if (TextUtils.isEmpty(action)) {
-            return false;
+            return true;
         }
         if (mNonEsosIntent != null) {
             mNonEsosIntent = null;
@@ -609,18 +609,18 @@ public class PhoneInformationUtil {
                 context.getSystemService(CarrierConfigManager.class);
         if (carrierConfigManager == null) {
             loge("shouldHideNonEmergencyMode: cm is null");
-            return false;
+            return true;
         }
         android.os.PersistableBundle bundle = carrierConfigManager.getConfigForSubId(mSubId,
                 KEY_SATELLITE_ATTACH_SUPPORTED_BOOL,
                 CarrierConfigManager.KEY_SATELLITE_ESOS_SUPPORTED_BOOL);
         if (!bundle.getBoolean(CarrierConfigManager.KEY_SATELLITE_ESOS_SUPPORTED_BOOL, false)) {
             log("shouldHideNonEmergencyMode: esos_supported false");
-            return false;
+            return true;
         }
         if (!bundle.getBoolean(KEY_SATELLITE_ATTACH_SUPPORTED_BOOL, false)) {
             log("shouldHideNonEmergencyMode: attach_supported false");
-            return false;
+            return true;
         }
 
         String packageName = getStringFromOverlayConfig(context,
@@ -632,17 +632,17 @@ public class PhoneInformationUtil {
         if (packageName == null || className == null || packageName.isEmpty()
                 || className.isEmpty()) {
             log("shouldHideNonEmergencyMode:" + " packageName or className is null or empty.");
-            return false;
+            return true;
         }
         PackageManager pm = context.getPackageManager();
         Intent intent = new Intent(action);
         intent.setComponent(new ComponentName(packageName, className));
         if (pm.queryBroadcastReceivers(intent, 0).isEmpty()) {
             log("shouldHideNonEmergencyMode: Broadcast receiver not found for intent: " + intent);
-            return false;
+            return true;
         }
         mNonEsosIntent = intent;
-        return true;
+        return false;
     }
 
     /**
