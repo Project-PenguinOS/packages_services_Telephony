@@ -485,6 +485,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     private static final int LINE1_NUMBER_MAX_LEN = 50;
 
     private static final String CTS_PACKAGE = "android.telephony.cts";
+    private static final String SATELLITE_CTS_PACKAGE = "android.telephony.satellite.cts";
     private static final String PHONE_PACKAGE = "com.android.phone";
     private boolean mIsInCtsMode = false;
 
@@ -13137,6 +13138,9 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     @Override
     public void requestIsSatelliteProvisioned(@NonNull ResultReceiver result) {
         enforceSatelliteCommunicationPermission("requestIsSatelliteProvisioned");
+        if (shouldIgnoreSatelliteRequestInCtsMode("requestIsSatelliteProvisioned", result)) {
+            return;
+        }
         final long identity = Binder.clearCallingIdentity();
         try {
             mSatelliteController.requestIsSatelliteProvisioned(result);
@@ -15052,7 +15056,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
      * {@code false} otherwise.
      */
     public boolean setCtsMode(boolean ctsMode) {
-        Log.d(LOG_TAG, "setCtsMode - " + ctsMode);
+        Rlog.d(LOG_TAG, "setCtsMode - " + ctsMode);
         TelephonyPermissions.enforceShellOnly(
                 Binder.getCallingUid(), "setCtsMode");
         TelephonyPermissions.enforceCallingOrSelfModifyPermissionOrCarrierPrivilege(mApp,
@@ -15099,21 +15103,32 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     }
 
     private boolean isCallingPackageAllowedInCtsMode(String methodName) {
+        int callingUid = Binder.getCallingUid();
         PackageManager pm = mApp.getBaseContext().createContextAsUser(
                 Binder.getCallingUserHandle(), 0).getPackageManager();
-        if (pm == null) return false;
-        String[] callingPackages = pm.getPackagesForUid(Binder.getCallingUid());
-        if (callingPackages == null) return false;
+        if (pm == null) {
+            Rlog.e(LOG_TAG, "isCallingPackageAllowedInCtsMode: pm is null");
+            return false;
+        }
+        String[] callingPackages = pm.getPackagesForUid(callingUid);
+        if (callingPackages == null) {
+            Log.e(LOG_TAG, "isCallingPackageAllowedInCtsMode: callingPackages is null for uid="
+                    + callingUid);
+            return false;
+        }
 
         for (String callingPackage : callingPackages) {
-            if (TextUtils.equals(callingPackage, CTS_PACKAGE)
-                    || TextUtils.equals(callingPackage, PHONE_PACKAGE)) {
+            Rlog.w(LOG_TAG, "isCallingPackageAllowedInCtsMode: checking " + callingPackage);
+            if (callingPackage != null && (callingPackage.contains(".preconditions")
+                    || TextUtils.equals(callingPackage, CTS_PACKAGE)
+                    || TextUtils.equals(callingPackage, SATELLITE_CTS_PACKAGE)
+                    || TextUtils.equals(callingPackage, PHONE_PACKAGE))) {
                 return true;
             }
         }
-        Log.d(LOG_TAG, "isCallingPackageAllowedInCtsMode: calling packages="
-                + String.join(",", callingPackages) + " is not allowed in CTS mode"
-                + " for method: " + methodName);
+        Log.e(LOG_TAG, "isCallingPackageAllowedInCtsMode: callingUid=" + callingUid
+                + ", callingPackages=" + String.join(",", callingPackages)
+                + " is not allowed in CTS mode for method: " + methodName);
         return false;
     }
 

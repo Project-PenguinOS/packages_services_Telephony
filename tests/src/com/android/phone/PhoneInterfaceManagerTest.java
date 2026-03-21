@@ -703,14 +703,14 @@ public class PhoneInterfaceManagerTest extends TelephonyTestBase {
     public void testGetSatelliteDataOptimizedApps() throws Exception {
         mPhoneInterfaceManager.setFeatureFlags(mFeatureFlags);
         loge("FeatureFlagApi is set to return true");
-
         boolean containsCtsApp = false;
         String ctsPackageName = "android.telephony.cts";
+        String satelliteCtsPackageName = "android.telephony.satellite.cts";
         List<String> listSatelliteApplications =
                 mPhoneInterfaceManager.getSatelliteDataOptimizedApps();
 
         for (String packageName : listSatelliteApplications) {
-            if (ctsPackageName.equals(packageName)) {
+            if (ctsPackageName.equals(packageName) || satelliteCtsPackageName.equals(packageName)) {
                 containsCtsApp = true;
             }
         }
