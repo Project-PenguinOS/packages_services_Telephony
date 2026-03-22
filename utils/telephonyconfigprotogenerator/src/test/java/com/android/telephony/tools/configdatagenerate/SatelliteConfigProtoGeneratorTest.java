@@ -16,6 +16,7 @@
 
 package com.android.telephony.tools.configdatagenerate;
 
+import static com.android.telephony.tools.configdatagenerate.Util.SATELLITE_DATA_SUPPORT_ALL;
 import static com.android.telephony.tools.configdatagenerate.Util.SATELLITE_DATA_SUPPORT_BANDWIDTH_CONSTRAINED;
 import static com.android.telephony.tools.configdatagenerate.Util.SERVICE_TYPE_MMS;
 
@@ -63,6 +64,7 @@ public class SatelliteConfigProtoGeneratorTest {
     private static final String COUNTRY_CODE_US = "US";
     private static final int VERSION_VALID = 14;
     private static final int CARRIER_ID_VALID = 1;
+    private static final String ENTITLEMENT_URL = "https://example.com";
 
     private Path mTempDirPath;
     private Path mInputDirPath;
@@ -161,8 +163,16 @@ public class SatelliteConfigProtoGeneratorTest {
                 CARRIER_ID_VALID,
                 PLMN_VALID_310062,
                 SERVICE_TYPE_MMS,
+                1,    // ntnConnectType, MANUAL(1)
                 SATELLITE_DATA_SUPPORT_BANDWIDTH_CONSTRAINED,
                 DEVICE_SATELLITE_PLMNS,
+                true, // overrideWfcRoamingMode
+                true, // attachSupported
+                SATELLITE_DATA_SUPPORT_ALL,
+                2,    // ntnConnectType HYBRID(2),
+                true, // emergencyMessagingSupported
+                true, // entitlementSupported
+                ENTITLEMENT_URL,
                 COUNTRY_CODE_US,
                 true,
                 getS2CellFile(true),
@@ -180,10 +190,18 @@ public class SatelliteConfigProtoGeneratorTest {
         CarrierSupportedSatelliteServicesProto serviceProto =
                 satelliteConfigProto.getCarrierSupportedSatelliteServices(0);
         assertEquals(CARRIER_ID_VALID, serviceProto.getCarrierId());
+        assertTrue(serviceProto.getAttachSupported());
+        assertEquals(SATELLITE_DATA_SUPPORT_ALL, serviceProto.getDataSupportMode());
+        assertEquals(2 /* HYBRID */, serviceProto.getNtnConnectType());
+        assertTrue(serviceProto.getEmergencyMessagingSupported());
+        assertTrue(serviceProto.getEntitlementSupported());
+        assertEquals(ENTITLEMENT_URL, serviceProto.getEntitlementServerUrl());
+
         SatelliteProviderCapabilityProto providerCapabilityProto =
                 serviceProto.getSupportedSatelliteProviderCapabilities(0);
         assertEquals(PLMN_VALID_310062, providerCapabilityProto.getCarrierPlmn());
         assertEquals(SERVICE_TYPE_MMS, providerCapabilityProto.getAllowedServices(0));
+        assertEquals(1 /* MANUAL */, providerCapabilityProto.getNtnConnectType());
 
         CarrierRoamingConfigProto carrierRoamingConfigProto =
                 satelliteConfigProto.getCarrierRoamingConfig();
@@ -191,6 +209,7 @@ public class SatelliteConfigProtoGeneratorTest {
                 carrierRoamingConfigProto.getMaxAllowedDataMode());
         assertEquals(DEVICE_SATELLITE_PLMNS,
                 carrierRoamingConfigProto.getDeviceSatellitePlmnList());
+        assertTrue(carrierRoamingConfigProto.getOverrideWfcRoamingModeWhileUsingNtn());
 
         SatelliteRegionProto regionProto = satelliteConfigProto.getDeviceSatelliteRegion();
         assertEquals(COUNTRY_CODE_US, regionProto.getCountryCodes(0));
@@ -209,8 +228,16 @@ public class SatelliteConfigProtoGeneratorTest {
                 CARRIER_ID_VALID,
                 PLMN_VALID_310062,
                 SERVICE_TYPE_MMS,
+                null,
                 SATELLITE_DATA_SUPPORT_BANDWIDTH_CONSTRAINED,
                 DEVICE_SATELLITE_PLMNS,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
                 COUNTRY_CODE_US,
                 true,
                 getS2CellFile(true),
@@ -230,8 +257,16 @@ public class SatelliteConfigProtoGeneratorTest {
                 CARRIER_ID_VALID,
                 PLMN_VALID_310062,
                 SERVICE_TYPE_MMS,
+                null, // providerNtnConnectType
                 null, // Max allowed data mode null
                 null, // Device satellite plmns null
+                null, // overrideWfcRoamingMode
+                null, // attachSupported
+                null, // dataSupportMode
+                null, // ntnConnectType
+                null, // emergencyMessagingSupported
+                null, // entitlementSupported
+                null, // entitlementServerUrl
                 COUNTRY_CODE_US,
                 true,
                 getS2CellFile(true),
@@ -250,6 +285,21 @@ public class SatelliteConfigProtoGeneratorTest {
         assertFalse(satelliteConfigProto.getCarrierRoamingConfig().hasMaxAllowedDataMode());
         assertTrue(satelliteConfigProto.getCarrierRoamingConfig()
                 .getDeviceSatellitePlmnList().isEmpty());
+        assertFalse(satelliteConfigProto.getCarrierRoamingConfig()
+                .hasOverrideWfcRoamingModeWhileUsingNtn());
+
+        CarrierSupportedSatelliteServicesProto serviceProto =
+                satelliteConfigProto.getCarrierSupportedSatelliteServices(0);
+        assertFalse(serviceProto.hasAttachSupported());
+        assertFalse(serviceProto.hasDataSupportMode());
+        assertFalse(serviceProto.hasNtnConnectType());
+        assertFalse(serviceProto.hasEmergencyMessagingSupported());
+        assertFalse(serviceProto.hasEntitlementSupported());
+        assertFalse(serviceProto.hasEntitlementServerUrl());
+
+        SatelliteProviderCapabilityProto providerCapabilityProto =
+                serviceProto.getSupportedSatelliteProviderCapabilities(0);
+        assertFalse(providerCapabilityProto.hasNtnConnectType());
     }
 
     private void createInputXml(
@@ -258,8 +308,16 @@ public class SatelliteConfigProtoGeneratorTest {
             int carrierId,
             String plmn,
             int allowedService,
+            Integer providerNtnConnectType,
             Integer maxAllowedDataMode,
             List<String> satellitePlmnList,
+            Boolean overrideWfcRoamingMode,
+            Boolean attachSupported,
+            Integer dataSupportMode,
+            Integer ntnConnectType,
+            Boolean emergencyMessagingSupported,
+            Boolean entitlementSupported,
+            String entitlementServerUrl,
             String countryCode,
             boolean isAllowed,
             String inputS2CellFileName,
@@ -285,12 +343,48 @@ public class SatelliteConfigProtoGeneratorTest {
             carrierSupportedServices.appendChild(createElementWithText(doc,
                     SatelliteConfigProtoGenerator.TAG_CARRIER_ID, String.valueOf(carrierId)));
 
+            if (attachSupported != null) {
+                carrierSupportedServices.appendChild(createElementWithText(doc,
+                        SatelliteConfigProtoGenerator.TAG_ATTACH_SUPPORTED,
+                        String.valueOf(attachSupported)));
+            }
+            if (dataSupportMode != null) {
+                carrierSupportedServices.appendChild(createElementWithText(doc,
+                        SatelliteConfigProtoGenerator.TAG_DATA_SUPPORT_MODE,
+                        String.valueOf(dataSupportMode)));
+            }
+            if (ntnConnectType != null) {
+                carrierSupportedServices.appendChild(createElementWithText(doc,
+                        SatelliteConfigProtoGenerator.TAG_NTN_CONNECT_TYPE,
+                        String.valueOf(ntnConnectType)));
+            }
+            if (emergencyMessagingSupported != null) {
+                carrierSupportedServices.appendChild(createElementWithText(doc,
+                        SatelliteConfigProtoGenerator.TAG_EMERGENCY_MESSAGING_SUPPORTED,
+                        String.valueOf(emergencyMessagingSupported)));
+            }
+            if (entitlementSupported != null) {
+                carrierSupportedServices.appendChild(createElementWithText(doc,
+                        SatelliteConfigProtoGenerator.TAG_ENTITLEMENT_SUPPORTED,
+                        String.valueOf(entitlementSupported)));
+            }
+            if (entitlementServerUrl != null) {
+                carrierSupportedServices.appendChild(createElementWithText(doc,
+                        SatelliteConfigProtoGenerator.TAG_ENTITLEMENT_SERVER_URL,
+                        entitlementServerUrl));
+            }
+
             Element providerCapability = doc.createElement(
                     SatelliteConfigProtoGenerator.TAG_PROVIDER_CAPABILITY);
             providerCapability.appendChild(createElementWithText(doc,
                     SatelliteConfigProtoGenerator.TAG_CARRIER_PLMN, plmn));
             providerCapability.appendChild(createElementWithText(doc,
                     SatelliteConfigProtoGenerator.TAG_SERVICE, String.valueOf(allowedService)));
+            if (providerNtnConnectType != null) {
+                providerCapability.appendChild(createElementWithText(doc,
+                        SatelliteConfigProtoGenerator.TAG_NTN_CONNECT_TYPE,
+                        String.valueOf(providerNtnConnectType)));
+            }
             carrierSupportedServices.appendChild(providerCapability);
             rootElement.appendChild(carrierSupportedServices);
 
@@ -306,6 +400,11 @@ public class SatelliteConfigProtoGeneratorTest {
                     carrierRoamingConfig.appendChild(createElementWithText(doc,
                             SatelliteConfigProtoGenerator.TAG_DEVICE_SATELLITE_PLMN, satPlmn));
                 }
+            }
+            if (overrideWfcRoamingMode != null) {
+                carrierRoamingConfig.appendChild(createElementWithText(doc,
+                        SatelliteConfigProtoGenerator.TAG_OVERRIDE_WFC_ROAMING_MODE_WHILE_USING_NTN,
+                        String.valueOf(overrideWfcRoamingMode)));
             }
             rootElement.appendChild(carrierRoamingConfig);
 
@@ -344,4 +443,3 @@ public class SatelliteConfigProtoGeneratorTest {
         return element;
     }
 }
-

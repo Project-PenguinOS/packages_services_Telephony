@@ -18,13 +18,34 @@ package com.android.telephony.tools.configdatagenerate;
 
 import java.util.List;
 
+/**
+ * Satellite Roaming Config Proto.
+ *
+ * Represents the device-specific carrier roaming configuration. Container for all device-level
+ * satellite-related configurations that can be dynamically updated. These settings apply
+ * globally to the device, regardless of the active carrier.
+ */
 public class RoamingConfigProto {
 
+    /** The maximum allowed data mode for satellite roaming. */
     public Integer mMaxAllowedDataMode;
+
+    /** List of satellite PLMNs supported by the device. */
     public List<String> mDeviceSatellitePlmns;
 
-    public RoamingConfigProto(Integer maxAllowedDataMode, List<String> deviceSatellitePlmns) {
+    /**
+     * Determines whether to forcefully override the roaming mode of Wi-Fi Calling
+     * when connected to NTN.
+     */
+    public Boolean mOverrideWfcRoamingModeWhileUsingNtn;
+
+    /**
+     * Constructor for RoamingConfigProto
+     */
+    public RoamingConfigProto(Integer maxAllowedDataMode, List<String> deviceSatellitePlmns,
+            Boolean overrideWfcRoamingModeWhileUsingNtn) {
         this.mMaxAllowedDataMode = maxAllowedDataMode;
         this.mDeviceSatellitePlmns = deviceSatellitePlmns;
+        this.mOverrideWfcRoamingModeWhileUsingNtn = overrideWfcRoamingModeWhileUsingNtn;
     }
 }

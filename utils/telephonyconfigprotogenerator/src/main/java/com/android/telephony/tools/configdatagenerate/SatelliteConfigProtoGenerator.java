@@ -46,12 +46,21 @@ public class SatelliteConfigProtoGenerator extends BaseConfigGenerator {
     public static final String TAG_CARRIER_ROAMING_CONFIG = "carrier_roaming_config";
     public static final String TAG_MAX_ALLOWED_DATA_MODE = "max_allowed_data_mode";
     public static final String TAG_DEVICE_SATELLITE_PLMN = "device_satellite_plmn";
+    public static final String TAG_OVERRIDE_WFC_ROAMING_MODE_WHILE_USING_NTN =
+            "override_wfc_roaming_mode_while_using_ntn";
 
     public static final String TAG_SATELLITE_REGION =  "satelliteregion";
     public static final String TAG_S2_CELL_FILE = "s2_cell_file";
     public static final String TAG_COUNTRY_CODE = "country_code";
     public static final String TAG_IS_ALLOWED = "is_allowed";
     public static final String TAG_SATELLITE_ACCESS_CONFIG_FILE = "satellite_access_config_file";
+
+    public static final String TAG_ATTACH_SUPPORTED = "attach_supported";
+    public static final String TAG_DATA_SUPPORT_MODE = "data_support_mode";
+    public static final String TAG_NTN_CONNECT_TYPE = "ntn_connect_type";
+    public static final String TAG_EMERGENCY_MESSAGING_SUPPORTED = "emergency_messaging_supported";
+    public static final String TAG_ENTITLEMENT_SUPPORTED = "entitlement_supported";
+    public static final String TAG_ENTITLEMENT_SERVER_URL = "entitlement_server_url";
 
     private int mVersion;
     private ArrayList<ServiceProto> mServiceProtoList;
@@ -145,8 +154,22 @@ public class SatelliteConfigProtoGenerator extends BaseConfigGenerator {
             }
 
             System.out.println();
+
+            Node nodeOverrideWfcRoamingMode = carrierRoamingConfigElement.getElementsByTagName(
+                    TAG_OVERRIDE_WFC_ROAMING_MODE_WHILE_USING_NTN).item(0);
+            Boolean overrideWfcRoamingMode = null;
+            if (nodeOverrideWfcRoamingMode != null) {
+                overrideWfcRoamingMode = Boolean.parseBoolean(
+                        nodeOverrideWfcRoamingMode.getTextContent());
+                System.out.println("└ OverrideWfcRoamingModeWhileUsingNtn: "
+                        + overrideWfcRoamingMode);
+            } else {
+                System.out.println("└ OverrideWfcRoamingModeWhileUsingNtn: empty");
+            }
+
             mCarrierRoamingConfig =
-                    new RoamingConfigProto(maxAllowedDataMode, satellitePlmnList);
+                    new RoamingConfigProto(maxAllowedDataMode, satellitePlmnList,
+                            overrideWfcRoamingMode);
         } else {
             System.out.println("\nCarrier Roaming Config is empty");
             mCarrierRoamingConfig = null;
@@ -208,9 +231,26 @@ public class SatelliteConfigProtoGenerator extends BaseConfigGenerator {
                                         allowedServiceArray[k] = service;
                                     }
                                     System.out.println();
+
+                                    NodeList ntnConnectTypeList = providerCapabilityElement
+                                            .getElementsByTagName(TAG_NTN_CONNECT_TYPE);
+                                    Integer providerNtnConnectType = null;
+                                    if (ntnConnectTypeList.getLength() > 0) {
+                                        providerNtnConnectType = Integer.parseInt(
+                                                ntnConnectTypeList.item(0).getTextContent());
+                                        System.out.println("└ Provider NtnConnectType: "
+                                                + providerNtnConnectType);
+                                        if (!Util.isValidNtnConnectType(providerNtnConnectType)) {
+                                            throw new ParameterException("Invalid ntnConnectType:"
+                                                    + providerNtnConnectType);
+                                        }
+                                    } else {
+                                        System.out.println("└ Provider NtnConnectType: empty");
+                                    }
+
                                     ProviderCapabilityProto capabilityProto =
                                             new ProviderCapabilityProto(carrierPlmn,
-                                                    allowedServiceArray);
+                                                    allowedServiceArray, providerNtnConnectType);
                                     capabilityProtoList[j] = capabilityProto;
                                 }
                             }
@@ -227,9 +267,70 @@ public class SatelliteConfigProtoGenerator extends BaseConfigGenerator {
                         throw new ParameterException("* carrierId is empty");
                     }
 
+                    Node nodeAttachSupported = carrierServiceElement.getElementsByTagName(
+                            TAG_ATTACH_SUPPORTED).item(0);
+                    Boolean attachSupported = (nodeAttachSupported != null)
+                            ? Boolean.parseBoolean(nodeAttachSupported.getTextContent()) : null;
+                    if (attachSupported != null) {
+                        System.out.println("└ Attach Supported: " + attachSupported);
+                    }
+
+                    Node nodeDataSupportMode = carrierServiceElement.getElementsByTagName(
+                            TAG_DATA_SUPPORT_MODE).item(0);
+                    Integer dataSupportMode = (nodeDataSupportMode != null)
+                            ? Integer.parseInt(nodeDataSupportMode.getTextContent()) : null;
+                    if (dataSupportMode != null) {
+                        System.out.println("└ Data Support Mode: " + dataSupportMode);
+                        if (!Util.isValidMaxAllowedDataMode(dataSupportMode)) {
+                            throw new ParameterException("Invalid dataSupportMode: "
+                                    + dataSupportMode);
+                        }
+                    }
+
+                    Node nodeNtnConnectType = carrierServiceElement.getElementsByTagName(
+                            TAG_NTN_CONNECT_TYPE).item(0);
+                    Integer ntnConnectType = (nodeNtnConnectType != null)
+                            ? Integer.parseInt(nodeNtnConnectType.getTextContent()) : null;
+                    if (ntnConnectType != null) {
+                        System.out.println("└ Ntn Connect Type: " + ntnConnectType);
+                        if (!Util.isValidNtnConnectType(ntnConnectType)) {
+                            throw new ParameterException("Invalid ntnConnectType: "
+                                    + ntnConnectType);
+                        }
+                    }
+
+                    Node nodeEmergencyMessagingSupported = carrierServiceElement
+                            .getElementsByTagName(TAG_EMERGENCY_MESSAGING_SUPPORTED).item(0);
+                    Boolean emergencyMessagingSupported = (nodeEmergencyMessagingSupported != null)
+                            ? Boolean.parseBoolean(nodeEmergencyMessagingSupported.getTextContent())
+                            : null;
+                    if (emergencyMessagingSupported != null) {
+                        System.out.println("└ Emergency Messaging Supported: "
+                                + emergencyMessagingSupported);
+                    }
+
+                    Node nodeEntitlementSupported = carrierServiceElement.getElementsByTagName(
+                            TAG_ENTITLEMENT_SUPPORTED).item(0);
+                    Boolean entitlementSupported = (nodeEntitlementSupported != null)
+                            ? Boolean.parseBoolean(nodeEntitlementSupported.getTextContent())
+                            : null;
+                    if (entitlementSupported != null) {
+                        System.out.println("└ Entitlement Supported: " + entitlementSupported);
+                    }
+
+                    Node nodeEntitlementServerUrl = carrierServiceElement.getElementsByTagName(
+                            TAG_ENTITLEMENT_SERVER_URL).item(0);
+                    String entitlementServerUrl = (nodeEntitlementServerUrl != null)
+                            ? nodeEntitlementServerUrl.getTextContent() : null;
+                    if (entitlementServerUrl != null) {
+                        System.out.println("└ Entitlement Server URL: " + entitlementServerUrl);
+                    }
+
                     if (capabilityProtoList.length != 0) {
                         ServiceProto serviceProto = new ServiceProto(Integer.parseInt(carrierId),
-                                capabilityProtoList);
+                                capabilityProtoList, attachSupported, dataSupportMode,
+                                ntnConnectType, emergencyMessagingSupported, entitlementSupported,
+                                entitlementServerUrl);
                         mServiceProtoList.add(serviceProto);
                     } else {
                         throw new ParameterException("capabilityProtoList is empty");
@@ -344,6 +445,31 @@ public class SatelliteConfigProtoGenerator extends BaseConfigGenerator {
             for (int i = 0; i < mServiceProtoList.size(); i++) {
                 ServiceProto proto = mServiceProtoList.get(i);
                 carrierSupportedSatelliteServiceBuilder.setCarrierId(proto.mCarrierId);
+                if (proto.mAttachSupported != null) {
+                    carrierSupportedSatelliteServiceBuilder.setAttachSupported(
+                            proto.mAttachSupported);
+                }
+                if (proto.mDataSupportMode != null) {
+                    carrierSupportedSatelliteServiceBuilder.setDataSupportMode(
+                            proto.mDataSupportMode);
+                }
+                if (proto.mNtnConnectType != null) {
+                    carrierSupportedSatelliteServiceBuilder.setNtnConnectType(
+                            proto.mNtnConnectType);
+                }
+                if (proto.mEmergencyMessagingSupported != null) {
+                    carrierSupportedSatelliteServiceBuilder.setEmergencyMessagingSupported(
+                            proto.mEmergencyMessagingSupported);
+                }
+                if (proto.mEntitlementSupported != null) {
+                    carrierSupportedSatelliteServiceBuilder.setEntitlementSupported(
+                            proto.mEntitlementSupported);
+                }
+                if (proto.mEntitlementServerUrl != null) {
+                    carrierSupportedSatelliteServiceBuilder.setEntitlementServerUrl(
+                            proto.mEntitlementServerUrl);
+                }
+
                 TelephonyConfigData.SatelliteProviderCapabilityProto.Builder
                         satelliteProviderCapabilityBuilder =
                         TelephonyConfigData.SatelliteProviderCapabilityProto.newBuilder();
@@ -355,6 +481,10 @@ public class SatelliteConfigProtoGenerator extends BaseConfigGenerator {
                     for (int k = 0; k < allowedServiceList.length; k++) {
                         satelliteProviderCapabilityBuilder
                                 .addAllowedServices(allowedServiceList[k]);
+                    }
+                    if (capabilityProto.mNtnConnectType != null) {
+                        satelliteProviderCapabilityBuilder.setNtnConnectType(
+                                capabilityProto.mNtnConnectType);
                     }
                     carrierSupportedSatelliteServiceBuilder
                             .addSupportedSatelliteProviderCapabilities(
@@ -381,6 +511,11 @@ public class SatelliteConfigProtoGenerator extends BaseConfigGenerator {
             if (mCarrierRoamingConfig.mDeviceSatellitePlmns != null) {
                 carrierRoamingConfigBuilder.addAllDeviceSatellitePlmn(
                         mCarrierRoamingConfig.mDeviceSatellitePlmns);
+            }
+
+            if (mCarrierRoamingConfig.mOverrideWfcRoamingModeWhileUsingNtn != null) {
+                carrierRoamingConfigBuilder.setOverrideWfcRoamingModeWhileUsingNtn(
+                        mCarrierRoamingConfig.mOverrideWfcRoamingModeWhileUsingNtn);
             }
 
             satelliteConfigBuilder.setCarrierRoamingConfig(carrierRoamingConfigBuilder);
