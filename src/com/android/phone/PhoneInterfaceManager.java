@@ -236,6 +236,8 @@ import com.android.internal.telephony.TelephonyCountryDetector;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.TelephonyPermissions;
 import com.android.internal.telephony.configupdate.TelephonyConfigUpdateInstallReceiver;
+import com.android.internal.telephony.data.DataNetworkController;
+import com.android.internal.telephony.data.DataProfileManager;
 import com.android.internal.telephony.data.DataUtils;
 import com.android.internal.telephony.domainselection.DomainSelectionResolver;
 import com.android.internal.telephony.emergency.EmergencyNumberTracker;
@@ -8201,6 +8203,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
                 setNetworkSelectionModeAutomatic(subId);
                 Phone phone = getPhone(subId);
                 cleanUpAllowedNetworkTypes(phone, subId);
+                clearLastInternetDataProfiles(phone, subId);
 
                 setDataRoamingEnabled(subId, phone == null ? false
                         : phone.getDataSettingsManager().isDefaultDataRoamingEnabled());
@@ -8230,6 +8233,17 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
             sendEraseDataInSharedPreferences();
         } finally {
             Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    private void clearLastInternetDataProfiles(Phone phone, int subId) {
+        if (phone == null) return;
+        DataNetworkController dnc = phone.getDataNetworkController();
+        if (dnc != null) {
+            DataProfileManager dpm = dnc.getDataProfileManager();
+            if (dpm != null) {
+                dpm.clearLastInternetDataProfiles(subId);
+            }
         }
     }
 
