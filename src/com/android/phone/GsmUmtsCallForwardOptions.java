@@ -159,19 +159,21 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
     private boolean mCallForwardByUssd;
 
 // QTI_BEGIN: 2026-02-04: Telephony: FR114115 Dialer Enhancements
+    private boolean mIsVideoCfEnabled = false;
+
     private ImsMmTelManager.CapabilityCallback mCapabilityCallback =
         new ImsMmTelManager.CapabilityCallback() {
             @Override
             public void onCapabilitiesStatusChanged(MmTelFeature.MmTelCapabilities capabilities) {
-                    boolean isUtCapable = capabilities.isCapable(
-                            MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_UT);
-                    boolean isVtCapable = capabilities.isCapable(
+                    mIsVideoCfEnabled = capabilities.isCapable(
+                            MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_UT) &&
+                            capabilities.isCapable(
                             MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VIDEO);
                     if (mServiceClass == CommandsInterface.SERVICE_CLASS_DATA_SYNC
                             + CommandsInterface.SERVICE_CLASS_PACKET) {
-                        Log.d(LOG_TAG, "update CF according to UtAvailability=" + isUtCapable);
+                        Log.d(LOG_TAG,"update CF according to UtAvailability=" + mIsVideoCfEnabled);
                         QtiCallForwardUtils.updateAllCfRows(mPreferences,
-                                isUtCapable && isVtCapable);
+                                mIsVideoCfEnabled);
                     }
             }
     };
@@ -667,6 +669,7 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
         }
 
         super.onFinished(preference, reading);
+        updateVideoCfPreference(preference);
 // QTI_BEGIN: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."
 
         // Update CFNL also if CFNRc is changed
@@ -688,12 +691,21 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
             return;
         }
         super.onError(preference, error);
+        updateVideoCfPreference(preference);
 // QTI_END: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."
     }
 
 // QTI_BEGIN: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
     private boolean canExpectMoreCallFwdReq() {
         return (mInitIndex < mPreferences.size()-1);
+    }
+
+
+    private void updateVideoCfPreference(Preference preference) {
+        if (mServiceClass == CommandsInterface.SERVICE_CLASS_DATA_SYNC
+            + CommandsInterface.SERVICE_CLASS_PACKET) {
+            preference.setEnabled(mIsVideoCfEnabled);
+        }
     }
 
 // QTI_END: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
