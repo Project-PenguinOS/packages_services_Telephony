@@ -322,7 +322,9 @@ public class PhoneInformationV2FragmentDataNetwork extends Fragment {
                         networkTypeBitmask |= TelephonyManager.NETWORK_TYPE_BITMASK_HSUPA;
                         networkTypeBitmask |= TelephonyManager.NETWORK_TYPE_BITMASK_HSPA;
                         networkTypeBitmask |= TelephonyManager.NETWORK_TYPE_BITMASK_HSPAP;
-                        networkTypeBitmask |= TelephonyManager.NETWORK_TYPE_BITMASK_TD_SCDMA;
+                        if (PhoneInformationUtil.isTdscdmaSupported(mContext)) {
+                            networkTypeBitmask |= TelephonyManager.NETWORK_TYPE_BITMASK_TD_SCDMA;
+                        }
                     }
                     if (mFilterGsm.isChecked()) {
                         networkTypeBitmask |= TelephonyManager.NETWORK_TYPE_BITMASK_GSM;

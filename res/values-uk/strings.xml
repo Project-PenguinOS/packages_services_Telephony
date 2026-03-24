@@ -522,6 +522,7 @@
     <string name="label_puk2_code" msgid="2852217004288085562">"Введіть PUK2-код"</string>
     <string name="fdn_enable_puk2_requested" msgid="5793652792131588041">"Неправильний пароль. PIN2-код заблоковано. Щоб повторити спробу, змініть PIN2-код."</string>
     <string name="puk2_requested" msgid="6992374450720307514">"Неправильний пароль. SIM-карту заблоковано. Введіть PUK2-код."</string>
+    <string name="pin2_blocked" msgid="1179589285280498087">"Код PIN2 заблоковано. Щоб розблокувати, введіть код PUK2."</string>
     <string name="puk2_blocked" msgid="3131139031779319911">"PUK2-код назавжди заблоковано."</string>
     <string name="pin2_attempts" msgid="5625178102026453023">\n"У вас залишилося стільки спроб: <xliff:g id="NUMBER">%d</xliff:g>."</string>
     <string name="puk2_locked" msgid="6497760825455461057">"Заблоковано кодом PUK2. Щоб розблокувати, зв’яжіться з оператором."</string>

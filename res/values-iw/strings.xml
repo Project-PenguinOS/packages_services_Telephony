@@ -522,6 +522,7 @@
     <string name="label_puk2_code" msgid="2852217004288085562">"‏הזנת קוד PUK2"</string>
     <string name="fdn_enable_puk2_requested" msgid="5793652792131588041">"‏סיסמה שגויה. קוד אימות 2 חסום כעת. כדי לנסות שוב, יש לשנות את PIN 2."</string>
     <string name="puk2_requested" msgid="6992374450720307514">"‏סיסמה שגויה. ה-SIM נעול כעת. יש להזין PUK2."</string>
+    <string name="pin2_blocked" msgid="1179589285280498087">"‏קוד האימות השני (PIN2) חסום. כדי לבטל את החסימה, צריך להקליד את קוד ה-PUK2."</string>
     <string name="puk2_blocked" msgid="3131139031779319911">"‏PUK2 נחסם לצמיתות."</string>
     <string name="pin2_attempts" msgid="5625178102026453023">\n"נותרו לך עוד <xliff:g id="NUMBER">%d</xliff:g> ניסיונות."</string>
     <string name="puk2_locked" msgid="6497760825455461057">"‏נעילת PUK2. כדי לבטל את הנעילה, צריך לפנות לספק השירות."</string>
@@ -608,8 +609,7 @@
     <string name="hac_mode_summary" msgid="7774989500136009881">"הפעלת תאימות למכשיר שמיעה"</string>
     <string name="rtt_mode_title" msgid="3075948111362818043">"‏שיחת RTT (טקסט בזמן אמת)"</string>
     <string name="rtt_mode_summary" msgid="8631541375609989562">"אפשר לשלוח הודעות טקסט בזמן שיחה"</string>
-    <!-- syntax error in translation for rtt_mode_more_information (587500128658756318) org.xmlpull.v1.XmlPullParserException: expected: /br read: string (position:END_TAG </string>@1:430 in     <string name="rtt_mode_more_information" msgid="587500128658756318">"‏RTT (טקסט בזמן אמת) היא תכונת נגישות שעוזרת לחרשים, לקויי שמיעה, לקויי דיבור או אנשים שלא יכולים להסתפק רק בשיחות קוליות.&lt;br&gt; &lt;a href=<xliff:g id="URL">http://support.google.com/mobile?p=telephony_rtt</xliff:g>&gt;למידע נוסף&lt;/a&gt;\n &lt;br&gt;&lt;br&gt; - שיחות RTT מתומללות ונשמרות כהודעות\n <br> - אי אפשר להשתמש ב-RTT לשיחות וידאו"</string>
-)  -->
+    <string name="rtt_mode_more_information" msgid="587500128658756318">"‏RTT (טקסט בזמן אמת) היא תכונת נגישות שעוזרת לחרשים, לקויי שמיעה, לקויי דיבור או אנשים שלא יכולים להסתפק רק בשיחות קוליות.&lt;br&gt; &lt;a href=<xliff:g id="URL">http://support.google.com/mobile?p=telephony_rtt</xliff:g>&gt;למידע נוסף&lt;/a&gt;\n &lt;br&gt;&lt;br&gt; - שיחות RTT מתומללות ונשמרות כהודעות\n &lt;br&gt; - אי אפשר להשתמש ב-RTT לשיחות וידאו"</string>
     <string name="no_rtt_when_roaming" msgid="5268008247378355389">"‏הערה: אי אפשר להשתמש ב-RTT בזמן נדידה"</string>
   <string-array name="tty_mode_entries">
     <item msgid="3238070884803849303">"‏TTY כבוי"</item>

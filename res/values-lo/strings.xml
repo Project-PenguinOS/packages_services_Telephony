@@ -522,6 +522,7 @@
     <string name="label_puk2_code" msgid="2852217004288085562">"ປ້ອນ​ລະ​ຫັດ PUK2 ເຂົ້າ​ໄປ"</string>
     <string name="fdn_enable_puk2_requested" msgid="5793652792131588041">"ລະ​ຫັດ​ຜ່ານ​ບໍ່​ຖືກ​ຕ້ອງ. PIN2 ຖືກບ​ລັອກ​ແລ້ວ​ດຽວ​ນີ້. ລອງ​ໃໝ່​ອີກ, ປ່ຽນ PIN 2."</string>
     <string name="puk2_requested" msgid="6992374450720307514">"ລະ​ຫັດ​ຜ່ານ​ບໍ່​ຖືກ​ຕ້ອງ​. SIM ຖືກ​ລັອກ​ແລ້ວ​ດຽວ​ນີ້​. ປ້ອນ PUK2 ເຂົ້າ​ໄປ​."</string>
+    <string name="pin2_blocked" msgid="1179589285280498087">"PIN2 ຖືກບລັອກ. ລະບຸ PUK2 ເພື່ອຍົກເລີກການບລັອກ."</string>
     <string name="puk2_blocked" msgid="3131139031779319911">"PUK2 ຖືກບລັອກຢ່າງຖາວອນແລ້ວ."</string>
     <string name="pin2_attempts" msgid="5625178102026453023">\n"ທ່ານ​ຍັງ​ພະ​ຍາ​ຍາມ​ໄດ້​ອີກ <xliff:g id="NUMBER">%d</xliff:g> ຄັ້ງ."</string>
     <string name="puk2_locked" msgid="6497760825455461057">"ລັອກ PUK2 ແລ້ວ. ຕິດຕໍ່ຜູ້ໃຫ້ບໍລິການເພື່ອປົດລັອກ."</string>

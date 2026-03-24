@@ -522,6 +522,7 @@
     <string name="label_puk2_code" msgid="2852217004288085562">"Wpisz kod PUK2"</string>
     <string name="fdn_enable_puk2_requested" msgid="5793652792131588041">"Hasło jest nieprawidłowe. PIN2 został zablokowany. Aby spróbować ponownie, zmień PIN2."</string>
     <string name="puk2_requested" msgid="6992374450720307514">"Nieprawidłowe hasło. Karta SIM została zablokowana. Wpisz PUK2."</string>
+    <string name="pin2_blocked" msgid="1179589285280498087">"Kod PIN2 jest zablokowany. Wpisz kod PUK2, aby odblokować."</string>
     <string name="puk2_blocked" msgid="3131139031779319911">"PUK2 został trwale zablokowany."</string>
     <string name="pin2_attempts" msgid="5625178102026453023">\n"Masz jeszcze <xliff:g id="NUMBER">%d</xliff:g> prób(y)."</string>
     <string name="puk2_locked" msgid="6497760825455461057">"Kod PUK2 zablokowany. Aby odblokować, skontaktuj się z dostawcą usług."</string>

@@ -522,6 +522,7 @@
     <string name="label_puk2_code" msgid="2852217004288085562">"PUK2 ಕೋಡ್ ನಮೂದಿಸಿ"</string>
     <string name="fdn_enable_puk2_requested" msgid="5793652792131588041">"ಪಾಸ್‌ವರ್ಡ್ ತಪ್ಪಾಗಿದೆ. PIN2 ಇದೀಗ ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಲು, PIN 2 ಬದಲಾಯಿಸಿ."</string>
     <string name="puk2_requested" msgid="6992374450720307514">"ಪಾಸ್‌ವರ್ಡ್ ತಪ್ಪಾಗಿದೆ. SIM ಅನ್ನು ಇದೀಗ ಲಾಕ್ ಮಾಡಲಾಗಿದೆ. PUK2 ನಮೂದಿಸಿ."</string>
+    <string name="pin2_blocked" msgid="1179589285280498087">"PIN2 ಅನ್ನು ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ. ನಿರ್ಬಂಧವನ್ನು ತೆಗೆದುಹಾಕಲು PUK2 ಅನ್ನು ನಮೂದಿಸಿ."</string>
     <string name="puk2_blocked" msgid="3131139031779319911">"PUK2 ಅನ್ನು ಶಾಶ್ವತವಾಗಿ ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ."</string>
     <string name="pin2_attempts" msgid="5625178102026453023">\n"ನೀವು <xliff:g id="NUMBER">%d</xliff:g> ಬಾಕಿ ಉಳಿದಿರುವ ಪ್ರಯತ್ನಗಳನ್ನು ಹೊಂದಿರುವಿರಿ."</string>
     <string name="puk2_locked" msgid="6497760825455461057">"PUK2 ಲಾಕ್ ಆಗಿದೆ. ಅನ್‌ಲಾಕ್ ಮಾಡಲು ಸೇವೆ ಒದಗಿಸುವವರನ್ನು ಸಂಪರ್ಕಿಸಿ."</string>

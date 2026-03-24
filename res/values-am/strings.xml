@@ -522,6 +522,7 @@
     <string name="label_puk2_code" msgid="2852217004288085562">"PUK2 ኮድ ያስገቡ"</string>
     <string name="fdn_enable_puk2_requested" msgid="5793652792131588041">"የይለፍ ቃል ልክ አይደለም። PIN2 አሁን ታግዷል። እንደገና ይሞክሩ፣ PIN 2 ይለውጡ።"</string>
     <string name="puk2_requested" msgid="6992374450720307514">"የይለፍ ቃል ልክ አይደለም። SIM አሁን ተቆልፏል። PUK2 ያስገቡ።"</string>
+    <string name="pin2_blocked" msgid="1179589285280498087">"ፒን2 ታግዷል። እገዳን ለማንሳት PUK2 ያስገቡ።"</string>
     <string name="puk2_blocked" msgid="3131139031779319911">"ፒን2 በቋሚነት ታግዷል።"</string>
     <string name="pin2_attempts" msgid="5625178102026453023">\n"እርስዎ <xliff:g id="NUMBER">%d</xliff:g> ቀሪ ሙከራዎች አልዎት።"</string>
     <string name="puk2_locked" msgid="6497760825455461057">"PUK2 ተቆልፏል። ለማስከፈት የአገልግሎት አቅራቢን ያነጋግሩ።"</string>

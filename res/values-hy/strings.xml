@@ -522,6 +522,7 @@
     <string name="label_puk2_code" msgid="2852217004288085562">"Մուտքագրեք PUK2 կոդը"</string>
     <string name="fdn_enable_puk2_requested" msgid="5793652792131588041">"Գաղտնաբառը սխալ է: PIN2 կոդն այժմ արգելափակվել է: Կրկին փորձելու համար փոխեք PIN 2 կոդը:"</string>
     <string name="puk2_requested" msgid="6992374450720307514">"Գաղտնաբառը սխալ է: SIM քարտն այժմ կողպված է: Մուտքագրեք PUK2 կոդը:"</string>
+    <string name="pin2_blocked" msgid="1179589285280498087">"PIN2 կոդն արգելափակված է։ արգելաբացելու համար մուտքագրեք PUK2 կոդը։"</string>
     <string name="puk2_blocked" msgid="3131139031779319911">"PUK2-ն ընդմիշտ արգելափակված է:"</string>
     <string name="pin2_attempts" msgid="5625178102026453023">\n"Ձեզ մնացել է <xliff:g id="NUMBER">%d</xliff:g> փորձ:"</string>
     <string name="puk2_locked" msgid="6497760825455461057">"Կողպված է PUK2-ով։ Ապակողպելու համար կապվեք ձեր օպերատորի հետ։"</string>

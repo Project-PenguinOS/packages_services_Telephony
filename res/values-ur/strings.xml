@@ -522,6 +522,7 @@
     <string name="label_puk2_code" msgid="2852217004288085562">"‏PUK2 کوڈ درج کریں"</string>
     <string name="fdn_enable_puk2_requested" msgid="5793652792131588041">"‏پاس ورڈ غلط ہے۔ PIN2 اب مسدود ہوگئی۔ دوبارہ کوشش کرنے کیلئے، PIN 2 تبدیل کریں۔"</string>
     <string name="puk2_requested" msgid="6992374450720307514">"‏پاس ورڈ غلط ہے۔ SIM اب مقفل ہے۔ PUK2 درج کریں۔"</string>
+    <string name="pin2_blocked" msgid="1179589285280498087">"‏‫PIN2 بلاک ہے۔ اَن بلاک کرنے کے لیے PUK2 درج کریں۔"</string>
     <string name="puk2_blocked" msgid="3131139031779319911">"‏PUK2 مستقل طور پر مسدود ہے۔"</string>
     <string name="pin2_attempts" msgid="5625178102026453023">\n"آپ کے پاس <xliff:g id="NUMBER">%d</xliff:g> کوششیں بچی ہیں۔"</string>
     <string name="puk2_locked" msgid="6497760825455461057">"‏PUK2 مقفل ہے۔ غیر مقفل کرنے کے ليے سروس فراہم کنندہ سے رابطہ کریں۔"</string>
@@ -780,19 +781,19 @@
     <string name="sum_call_barring_disabled" msgid="5699448000600153096">"آف"</string>
     <string name="call_barring_baoc" msgid="7400892586336429326">"سبھی باہر جانے والی"</string>
     <string name="call_barring_baoc_enabled" msgid="3131509193386668182">"سبھی باہر جانے والی کالز کو مسدود کرنے کو غیر فعال کریں؟"</string>
-    <string name="call_barring_baoc_disabled" msgid="8534224684091141509">"سبھی باہر جانے والی کالز کو مسدود کریں؟"</string>
+    <string name="call_barring_baoc_disabled" msgid="8534224684091141509">"سبھی باہر جانے والی کالز کو بلاک کریں؟"</string>
     <string name="call_barring_baoic" msgid="8668125428666851665">"باہر جانے والے بین الاقوامی"</string>
     <string name="call_barring_baoic_enabled" msgid="1203758092657630123">"باہر جانے والی بین الاقوامی کالز کو مسدود کرنے کو غیر فعال کریں؟"</string>
-    <string name="call_barring_baoic_disabled" msgid="5656889339002997449">"باہر جانے والی بین الاقوامی کالز کو مسدود کریں؟"</string>
+    <string name="call_barring_baoic_disabled" msgid="5656889339002997449">"باہر جانے والی بین الاقوامی کالز کو بلاک کریں؟"</string>
     <string name="call_barring_baoicr" msgid="8566167764432343487">"باہر جانے والی بین الاقوامی رومنگ"</string>
     <string name="call_barring_baoicr_enabled" msgid="1615324165512798478">"باہر جانے والی بین الاقوامی رومنگ کو مسدود کرنے کو غیر فعال کریں؟"</string>
-    <string name="call_barring_baoicr_disabled" msgid="172010175248142831">"باہر جانے والی بین الاقوامی رومنگ کو مسدود کریں؟"</string>
+    <string name="call_barring_baoicr_disabled" msgid="172010175248142831">"باہر جانے والی بین الاقوامی رومنگ کو بلاک کریں؟"</string>
     <string name="call_barring_baic" msgid="7941393541678658566">"سبھی آنے والی"</string>
     <string name="call_barring_baic_enabled" msgid="4357332358020337470">"سبھی آنے والی کالز کو مسدود کرنے کو غیر فعال کریں؟"</string>
-    <string name="call_barring_baic_disabled" msgid="2355945245938240958">"سبھی آنے والی کالز کو مسدود کریں؟"</string>
+    <string name="call_barring_baic_disabled" msgid="2355945245938240958">"سبھی آنے والی کالز کو بلاک کریں؟"</string>
     <string name="call_barring_baicr" msgid="8712249337313034226">"آنے والی بین الاقوامی رومنگ"</string>
     <string name="call_barring_baicr_enabled" msgid="64774270234828175">"سبھی آنے والی بین الاقوامی رومنگ کو مسدود کرنے کو غیر فعال کریں؟"</string>
-    <string name="call_barring_baicr_disabled" msgid="3488129262744027262">"آنے والی بین الاقوامی رومنگ کو مسدود کریں؟"</string>
+    <string name="call_barring_baicr_disabled" msgid="3488129262744027262">"آنے والی بین الاقوامی رومنگ کو بلاک کریں؟"</string>
     <string name="call_barring_deactivate_all" msgid="7837931580047157328">"سبھی کو غیر فعال کریں"</string>
     <string name="call_barring_deactivate_all_description" msgid="4474119585042121604">"کال میں رکاوٹ والی سبھی ترتیبات کو غیر فعال کریں"</string>
     <string name="call_barring_deactivate_success" msgid="3545644320298275337">"کال میں رکاوٹ کو غیر فعال کر دیا گیا"</string>

@@ -522,6 +522,7 @@
     <string name="label_puk2_code" msgid="2852217004288085562">"Voer PUK2-kode in"</string>
     <string name="fdn_enable_puk2_requested" msgid="5793652792131588041">"Wagwoord is verkeerd. PIN2 is nou geblokkeer. Verander PIN 2 om weer te probeer."</string>
     <string name="puk2_requested" msgid="6992374450720307514">"Wagwoord is verkeerd. SIM is nou geblokkeer. Voer PUK2 in."</string>
+    <string name="pin2_blocked" msgid="1179589285280498087">"PIN2 is geblokkeer. Voer PUK2 in om te deblokkeer."</string>
     <string name="puk2_blocked" msgid="3131139031779319911">"PUK2 is permanent geblokkeer."</string>
     <string name="pin2_attempts" msgid="5625178102026453023">\n"Jy het <xliff:g id="NUMBER">%d</xliff:g> oorblywende pogings."</string>
     <string name="puk2_locked" msgid="6497760825455461057">"PUK2 is gesluit. Kontak diensverskaffer om te ontsluit."</string>

@@ -522,6 +522,7 @@
     <string name="label_puk2_code" msgid="2852217004288085562">"PUK2 कोड डालें"</string>
     <string name="fdn_enable_puk2_requested" msgid="5793652792131588041">"पासवर्ड गलत है. PIN2 अब अवरोधित है. फिर से प्रयास करने के लिए, PIN 2 को बदलें."</string>
     <string name="puk2_requested" msgid="6992374450720307514">"पासवर्ड गलत है. सिम अब लॉक हो गई है. PUK2 डालें."</string>
+    <string name="pin2_blocked" msgid="1179589285280498087">"PIN2 ब्लॉक है. अनब्लॉक करने के लिए PUK2 डालें."</string>
     <string name="puk2_blocked" msgid="3131139031779319911">"PUK2 स्थायी रूप से अवरोधित है."</string>
     <string name="pin2_attempts" msgid="5625178102026453023">\n"आपके पास <xliff:g id="NUMBER">%d</xliff:g> प्रयास शेष हैं."</string>
     <string name="puk2_locked" msgid="6497760825455461057">"सिम कार्ड PUK2 से लॉक है. अनलॉक करने के लिए, सेवा देने वाली कंपनी से संपर्क करें."</string>

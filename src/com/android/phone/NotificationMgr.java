@@ -347,14 +347,14 @@ public class NotificationMgr {
             String vmNumber = phone.getVoiceMailNumber();
             if (DBG) log("- got vm number: '" + vmNumber + "'");
 
-            // The voicemail number may be null because:
+            // The voicemail number may be null or empty because:
             //   (1) This phone has no voicemail number.
             //   (2) This phone has a voicemail number, but the SIM isn't ready yet. This may
             //       happen when the device first boots if we get a MWI notification when we
             //       register on the network before the SIM has loaded. In this case, the
             //       SubscriptionListener in CallNotifier will update this once the SIM is loaded.
-            if ((vmNumber == null) && !phone.getIccRecordsLoaded()) {
-                Log.i(LOG_TAG, "updateMwi - Null vm number: SIM records not loaded (yet)...");
+            if (TextUtils.isEmpty(vmNumber) && !phone.getIccRecordsLoaded()) {
+                Log.i(LOG_TAG, "updateMwi - Null/empty vm number: SIM records not loaded (yet)...");
                 return;
             }
 

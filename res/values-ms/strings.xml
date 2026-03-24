@@ -522,6 +522,7 @@
     <string name="label_puk2_code" msgid="2852217004288085562">"Masukkan kod PUK2"</string>
     <string name="fdn_enable_puk2_requested" msgid="5793652792131588041">"Kata laluan tidak betul. PIN2 kini Disekat. Untuk mencuba lagi, tukar PIN 2."</string>
     <string name="puk2_requested" msgid="6992374450720307514">"Kata laluan tidak betul. SIM kini dikunci. Masukkan PUK2."</string>
+    <string name="pin2_blocked" msgid="1179589285280498087">"PIN2 disekat. Masukkan PUK2 untuk menyahsekat."</string>
     <string name="puk2_blocked" msgid="3131139031779319911">"PUK2 disekat secara kekal."</string>
     <string name="pin2_attempts" msgid="5625178102026453023">\n"Anda mempunyai <xliff:g id="NUMBER">%d</xliff:g> percubaan lagi."</string>
     <string name="puk2_locked" msgid="6497760825455461057">"PUK2 dikunci. Hubungi penyedia perkhidmatan untuk membuka kunci."</string>

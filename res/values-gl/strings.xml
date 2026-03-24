@@ -522,6 +522,7 @@
     <string name="label_puk2_code" msgid="2852217004288085562">"Introducir código PUK2"</string>
     <string name="fdn_enable_puk2_requested" msgid="5793652792131588041">"Contrasinal incorrecto. O PIN2 está bloqueado agora. Para tentalo de novo, cambia o PIN2."</string>
     <string name="puk2_requested" msgid="6992374450720307514">"Contrasinal incorrecto. A SIM está bloqueada agora. Introduce o PUK2."</string>
+    <string name="pin2_blocked" msgid="1179589285280498087">"O PIN2 está bloqueado. Introduce o PUK2 para desbloquear a SIM."</string>
     <string name="puk2_blocked" msgid="3131139031779319911">"O PUK2 está permanentemente bloqueado."</string>
     <string name="pin2_attempts" msgid="5625178102026453023">\n"Quédanche <xliff:g id="NUMBER">%d</xliff:g> intentos."</string>
     <string name="puk2_locked" msgid="6497760825455461057">"PUK2 bloqueado. Contacta co fornecedor de servizo para desbloquealo."</string>

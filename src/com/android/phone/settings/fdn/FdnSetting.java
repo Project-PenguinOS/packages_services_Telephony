@@ -68,6 +68,8 @@ public class FdnSetting extends PreferenceActivity
     private static final String BUTTON_CHANGE_PIN2_KEY = "button_change_pin2_key";
     private static final String FDN_LIST_PREF_SCREEN_KEY = "fdn_list_pref_screen_key";
 
+    public static final String EXTRA_AUTO_CHANGE_PIN2 = "auto_change_pin2";
+
     private EditPinPreference mButtonEnableFDN;
     private EditPinPreference mButtonChangePin2;
 
@@ -582,6 +584,15 @@ public class FdnSetting extends PreferenceActivity
         mPhone = mSubscriptionInfoHelper.getPhone();
         updateEnableFDN();
         updateChangePIN2();
+
+        if (getIntent().getBooleanExtra(EXTRA_AUTO_CHANGE_PIN2, false)) {
+            // Reset the intent extra so that we don't trigger this again on rotation.
+            getIntent().putExtra(EXTRA_AUTO_CHANGE_PIN2, false);
+            if (mPhone.getIccCard().getIccPin2Blocked()) {
+                resetPinChangeStateForPUK2();
+                displayPinChangeDialog(mButtonChangePin2, 0, true);
+            }
+        }
     }
 
     /**

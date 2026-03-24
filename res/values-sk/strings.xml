@@ -522,6 +522,7 @@
     <string name="label_puk2_code" msgid="2852217004288085562">"Zadajte kód PUK2"</string>
     <string name="fdn_enable_puk2_requested" msgid="5793652792131588041">"Heslo je nesprávne. Kód PIN2 bol zablokovaný. Ak to chcete skúsiť znova, zmeňte kód PIN 2."</string>
     <string name="puk2_requested" msgid="6992374450720307514">"Heslo je nesprávne. SIM karta bola uzamknutá. Zadajte kód PUK2."</string>
+    <string name="pin2_blocked" msgid="1179589285280498087">"Kód PIN2 je zablokovaný. Odblokujete ho zadaním kódu PUK2."</string>
     <string name="puk2_blocked" msgid="3131139031779319911">"Kód PUK2 je natrvalo blokovaný."</string>
     <string name="pin2_attempts" msgid="5625178102026453023">\n"Zostávajú vám pokusy (počet: <xliff:g id="NUMBER">%d</xliff:g>)"</string>
     <string name="puk2_locked" msgid="6497760825455461057">"SIM karta je blokovaná kódom PUK2. Ak ju chcete odblokovať, kontaktujte poskytovateľa služieb."</string>
@@ -606,7 +607,7 @@
     <string name="failedToImportSingleContactMsg" msgid="228095510489830266">"Kontakt sa nepodarilo importovať"</string>
     <string name="hac_mode_title" msgid="4127986689621125468">"Načúvadlá"</string>
     <string name="hac_mode_summary" msgid="7774989500136009881">"Zapnúť kompatibilitu s načúvadlom"</string>
-    <string name="rtt_mode_title" msgid="3075948111362818043">"Posielanie okamžitého textu (RTT) počas hovorov"</string>
+    <string name="rtt_mode_title" msgid="3075948111362818043">"Hovor s okamžitým textom"</string>
     <string name="rtt_mode_summary" msgid="8631541375609989562">"Povoliť posielanie správ počas hlasového hovoru"</string>
     <string name="rtt_mode_more_information" msgid="587500128658756318">"Okamžitý text pomáha volajúcim, ktorí nepočujú, majú problémy so sluchom, rečovú poruchu alebo potrebujú viac ako samotný hlas.&lt;br&gt; &lt;a href=<xliff:g id="URL">http://support.google.com/mobile?p=telephony_rtt</xliff:g>&gt;Ďalšie informácie&lt;/a&gt;\n       &lt;br&gt;&lt;br&gt; – Okamžitý text poslaný počas hovoru sa uloží ako prepis správ\n       &lt;br&gt; – Okamžitý text nie je k dispozícii počas videohovorov"</string>
     <string name="no_rtt_when_roaming" msgid="5268008247378355389">"Poznámka: Okamžitý text nie je počas roamingu k dispozícii."</string>

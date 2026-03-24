@@ -522,6 +522,7 @@
     <string name="label_puk2_code" msgid="2852217004288085562">"Angiv PUK-kode 2"</string>
     <string name="fdn_enable_puk2_requested" msgid="5793652792131588041">"Forkert adgangskode. Pinkode 2 er nu blokeret. For at prøve igen skal du ændre pinkode 2."</string>
     <string name="puk2_requested" msgid="6992374450720307514">"Forkert adgangskode. SIM-kortet er nu låst. Angiv PUK-kode 2."</string>
+    <string name="pin2_blocked" msgid="1179589285280498087">"PIN2 er blokeret. Angiv PUK2-koden for at fjerne blokeringen."</string>
     <string name="puk2_blocked" msgid="3131139031779319911">"PUK2 er permanent blokeret."</string>
     <string name="pin2_attempts" msgid="5625178102026453023">\n"Du har <xliff:g id="NUMBER">%d</xliff:g> forsøg tilbage."</string>
     <string name="puk2_locked" msgid="6497760825455461057">"PUK2-låst. Kontakt din udbyder for at låse op."</string>

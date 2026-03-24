@@ -522,6 +522,7 @@
     <string name="label_puk2_code" msgid="2852217004288085562">"Unesite PUK2 kȏd"</string>
     <string name="fdn_enable_puk2_requested" msgid="5793652792131588041">"Lozinka je netačna. PIN2 je sada blokiran. Da pokušate ponovo, promijenite PIN 2."</string>
     <string name="puk2_requested" msgid="6992374450720307514">"Lozinka je netačna. SIM je sada zaključan. Unesite PUK2."</string>
+    <string name="pin2_blocked" msgid="1179589285280498087">"PIN2 je blokiran. Unesite PUK2 da deblokirate."</string>
     <string name="puk2_blocked" msgid="3131139031779319911">"PUK2 je trajno blokiran."</string>
     <string name="pin2_attempts" msgid="5625178102026453023">\n"Broj preostalih pokušaja: <xliff:g id="NUMBER">%d</xliff:g>."</string>
     <string name="puk2_locked" msgid="6497760825455461057">"SIM je zaključan kodom PUK2. Kontaktirajte pružaoca usluge da ga otključate."</string>

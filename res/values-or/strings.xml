@@ -522,6 +522,7 @@
     <string name="label_puk2_code" msgid="2852217004288085562">"PUK2 ହୋଡ୍ ପ୍ରବେଶ କରନ୍ତୁ"</string>
     <string name="fdn_enable_puk2_requested" msgid="5793652792131588041">"ଭୁଲ୍ ପାସ୍‌ୱର୍ଡ। ବର୍ତ୍ତମାନ PIN2କୁ ଅବରୋଧ କରାଯାଇଛି। ପୁଣି ଚେଷ୍ଟା କରିବା ପାଇଁ PIN 2କୁ ବଦଳାନ୍ତୁ।"</string>
     <string name="puk2_requested" msgid="6992374450720307514">"ଭୁଲ୍ ପାସ୍‌ୱର୍ଡ। ବର୍ତ୍ତମାନ SIM ଲକ୍ ହୋ‌ଇଗଲା। PUK2କୁ ପ୍ରବେଶ କରନ୍ତୁ।"</string>
+    <string name="pin2_blocked" msgid="1179589285280498087">"PIN2କୁ ବ୍ଲକ କରାଯାଇଛି। ଅନବ୍ଲକ କରିବାକୁ PUK2 ଲେଖନ୍ତୁ।"</string>
     <string name="puk2_blocked" msgid="3131139031779319911">"PUK2କୁ ସ୍ଥାୟୀରୂପେ ଅବରୋଧ କରାଯାଇଛି।"</string>
     <string name="pin2_attempts" msgid="5625178102026453023">\n"ଆପଣଙ୍କର <xliff:g id="NUMBER">%d</xliff:g>ଟି ସୁଯୋଗ ବଳକା ଅଛି।"</string>
     <string name="puk2_locked" msgid="6497760825455461057">"PUK2 ଲକ କରାଯାଇଛି। ଅନଲକ କରିବାକୁ ସେବା ପ୍ରଦାନକାରୀ ସହ କଣ୍ଟାକ୍ଟ କରନ୍ତୁ।"</string>

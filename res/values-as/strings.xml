@@ -522,6 +522,7 @@
     <string name="label_puk2_code" msgid="2852217004288085562">"PUK2 ক\'ড দিয়ক"</string>
     <string name="fdn_enable_puk2_requested" msgid="5793652792131588041">"ভুল পাছৱৰ্ড। এতিয়া PIN2 অৱৰোধ কৰা হ’ল আকৌ চেষ্টা কৰিবলৈ PIN 2 সলনি কৰক।"</string>
     <string name="puk2_requested" msgid="6992374450720307514">"ভুল পাছৱৰ্ড। এতিয়া ছিম লক কৰা হৈছে। PUK2 লিখক।"</string>
+    <string name="pin2_blocked" msgid="1179589285280498087">"PIN2 অৱৰোধ কৰা হৈছে। অৱৰোধৰ পৰা আঁতৰাবলৈ PUK2 দিয়ক।"</string>
     <string name="puk2_blocked" msgid="3131139031779319911">"PUK2 স্থায়ীভাৱে অৱৰোধ কৰা হৈছে।"</string>
     <string name="pin2_attempts" msgid="5625178102026453023">\n"আপোনাৰ হাতত <xliff:g id="NUMBER">%d</xliff:g>টা প্ৰয়াস বাকী আছে।"</string>
     <string name="puk2_locked" msgid="6497760825455461057">"PUK2 লক কৰা আছে। আনলক কৰিবলৈ সেৱা প্ৰদানকাৰীৰ সৈতে যোগাযোগ কৰক।"</string>

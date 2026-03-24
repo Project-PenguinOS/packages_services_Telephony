@@ -522,6 +522,7 @@
     <string name="label_puk2_code" msgid="2852217004288085562">"Weka msimbo wa PUK2"</string>
     <string name="fdn_enable_puk2_requested" msgid="5793652792131588041">"Nenosiri si sahihi. PIN2 sasa Imezuiwa. Ili ujaribu tena, badilisha PIN 2."</string>
     <string name="puk2_requested" msgid="6992374450720307514">"Nenosiri si sahihi. SIM sasa imefungwa. Weka PUK2."</string>
+    <string name="pin2_blocked" msgid="1179589285280498087">"PIN2 imezuiwa. Weka PUK2 ili uondoe kizuizi."</string>
     <string name="puk2_blocked" msgid="3131139031779319911">"PUK2 Imezuiwa kabisa."</string>
     <string name="pin2_attempts" msgid="5625178102026453023">\n"Una majaribio <xliff:g id="NUMBER">%d</xliff:g> yaliyobaki."</string>
     <string name="puk2_locked" msgid="6497760825455461057">"Imefungwa kwa sababu PUK2 si sahihi. Wasiliana na mtoa huduma ili aifungue."</string>

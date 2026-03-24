@@ -24,6 +24,7 @@ import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.never;
 
 import android.content.BroadcastReceiver;
 import android.content.ContentProvider;
@@ -34,10 +35,13 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.PersistableBundle;
 import android.os.UserHandle;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.telecom.PhoneAccount;
 import android.telecom.TelecomManager;
 import android.telephony.CarrierConfigManager;
 import android.telephony.ServiceState;
+import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;
 import android.telephony.TelephonyCallback;
@@ -50,11 +54,13 @@ import com.android.TelephonyTestBase;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.SimultaneousCallingTracker;
+import com.android.internal.telephony.flags.Flags;
 import com.android.phone.PhoneInterfaceManager;
 import com.android.phone.R;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -67,6 +73,7 @@ public class TelecomAccountRegistryTest extends TelephonyTestBase {
 
     private static final String TAG = "TelecomAccountRegistryTest";
     private static final int TEST_SUB_ID = 1;
+    private static final int TEST_SUB_ID_2 = 2;
     private static final long TIMEOUT = 10000;
 
     // We need more functions that what TelephonyTestBase.mContext supports.
@@ -78,9 +85,13 @@ public class TelecomAccountRegistryTest extends TelephonyTestBase {
     @Mock SubscriptionManager mSubscriptionManager;
     @Mock ContentProvider mContentProvider;
     @Mock Phone mPhone;
+    @Mock Phone mPhone2;
     @Mock Resources mResources;
     @Mock Drawable mDrawable;
     @Mock PhoneInterfaceManager mPhoneInterfaceManager;
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     private TelecomAccountRegistry mTelecomAccountRegistry;
 
@@ -99,6 +110,10 @@ public class TelecomAccountRegistryTest extends TelephonyTestBase {
         when(mPhone.getPhoneType()).thenReturn(PhoneConstants.PHONE_TYPE_GSM);
         when(mPhone.getContext()).thenReturn(mMockedContext);
         when(mPhone.getSubId()).thenReturn(TEST_SUB_ID);
+        when(mPhoneInterfaceManager.isRttEnabled(anyInt())).thenReturn(false);
+        when(mPhone2.getPhoneType()).thenReturn(PhoneConstants.PHONE_TYPE_GSM);
+        when(mPhone2.getContext()).thenReturn(mMockedContext);
+        when(mPhone2.getSubId()).thenReturn(TEST_SUB_ID_2);
         when(mPhoneInterfaceManager.isRttEnabled(anyInt())).thenReturn(false);
 
         when(mMockedContext.getResources()).thenReturn(mResources);
@@ -313,6 +328,25 @@ public class TelecomAccountRegistryTest extends TelephonyTestBase {
                 PhoneAccount.EXTRA_LOW_BATTERY_ALERT_INTERVAL_SECONDS)).isFalse();
         assertThat(phoneAccount.getExtras().containsKey(
                 PhoneAccount.EXTRA_LOW_BATTERY_ALERT_LEVEL_THRESHOLD)).isFalse();
+    }
+
+    @Test
+    public void testSkipPrivateNetworkSubscriptions() {
+        SubscriptionInfo subInfo1 = Mockito.mock(SubscriptionInfo.class);
+        when(subInfo1.isPrivateNetwork()).thenReturn(true);
+        when(mSubscriptionManager.getActiveSubscriptionInfo(TEST_SUB_ID)).thenReturn(subInfo1);
+        SubscriptionInfo subInfo2 = Mockito.mock(SubscriptionInfo.class);
+        when(subInfo2.isPrivateNetwork()).thenReturn(false);
+        when(mSubscriptionManager.getActiveSubscriptionInfo(TEST_SUB_ID_2)).thenReturn(subInfo2);
+
+        // Trigger account update
+        onLocaleChanged();
+
+        ArgumentCaptor<PhoneAccount> phoneAccountArgumentCaptor =
+                ArgumentCaptor.forClass(PhoneAccount.class);
+        verify(mTelecomManager, timeout(TIMEOUT).atLeastOnce()).registerPhoneAccount(
+                phoneAccountArgumentCaptor.capture());
+        assertThat(phoneAccountArgumentCaptor.getAllValues().size()).isEqualTo(1);
     }
 
     private PhoneAccount verifyAndCaptureRegisteredPhoneAccount() {

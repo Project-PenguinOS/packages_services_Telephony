@@ -522,6 +522,7 @@
     <string name="label_puk2_code" msgid="2852217004288085562">"PUK2 குறியீட்டை உள்ளிடவும்"</string>
     <string name="fdn_enable_puk2_requested" msgid="5793652792131588041">"கடவுச்சொல் தவறானது. பின்2 தடைசெய்யப்பட்டது. மீண்டும் முயல, பின்2ஐ மாற்றவும்."</string>
     <string name="puk2_requested" msgid="6992374450720307514">"கடவுச்சொல் தவறானது. சிம் இப்போது பூட்டப்பட்டது. PUK2ஐ உள்ளிடவும்."</string>
+    <string name="pin2_blocked" msgid="1179589285280498087">"பின்2 தடுக்கப்பட்டுள்ளது. தடுப்பை நீக்க PUK2வை டைப் செய்யவும்."</string>
     <string name="puk2_blocked" msgid="3131139031779319911">"PUK2 தற்காலிகமாகத் தடுக்கப்பட்டது."</string>
     <string name="pin2_attempts" msgid="5625178102026453023">\n"நீங்கள் <xliff:g id="NUMBER">%d</xliff:g> முறை முயற்சிக்கலாம்."</string>
     <string name="puk2_locked" msgid="6497760825455461057">"PUK2 லாக் செய்யப்பட்டுள்ளது. அன்லாக் செய்ய சேவை வழங்குநரைத் தொடர்புகொள்ளவும்."</string>

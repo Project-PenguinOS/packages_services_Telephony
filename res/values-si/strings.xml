@@ -522,6 +522,7 @@
     <string name="label_puk2_code" msgid="2852217004288085562">"PUK2 කේතය ඇතුළු කරන්න"</string>
     <string name="fdn_enable_puk2_requested" msgid="5793652792131588041">"මුරපදය වැරදිය. PIN2 දැන් අවහිර කර තිබේ. නැවත උත්සාහ කිරීමට, PIN 2 වෙනස් කරන්න."</string>
     <string name="puk2_requested" msgid="6992374450720307514">"මුරපදය වැරදිය. SIM දැන් අගුළු දමා තිබේ. PUK2 ඇතුළු කරන්න."</string>
+    <string name="pin2_blocked" msgid="1179589285280498087">"PIN2 අවහිර කර ඇත. අවහිර කිරීම ඉවත් කිරීමට PUK2 ඇතුළු කරන්න."</string>
     <string name="puk2_blocked" msgid="3131139031779319911">"PUK2 සදාකාලිකවම අවහිරයි."</string>
     <string name="pin2_attempts" msgid="5625178102026453023">\n"ඔබට නැවත උත්සාහ කිරීම් <xliff:g id="NUMBER">%d</xliff:g> ක් තිබේ."</string>
     <string name="puk2_locked" msgid="6497760825455461057">"PUK2 අගුළු දැමිණි. අගුළු ඇරීමට සේවා සපයන්නා සම්බන්ධ කර ගන්න."</string>

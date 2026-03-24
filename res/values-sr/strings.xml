@@ -522,6 +522,7 @@
     <string name="label_puk2_code" msgid="2852217004288085562">"Унесите кôд PUK2"</string>
     <string name="fdn_enable_puk2_requested" msgid="5793652792131588041">"Лозинка није тачна. PIN2 је сада блокиран. Да бисте покушали поново, промените PIN 2."</string>
     <string name="puk2_requested" msgid="6992374450720307514">"Лозинка није тачна. SIM је сада блокиран. Унесите PUK2."</string>
+    <string name="pin2_blocked" msgid="1179589285280498087">"PIN2 је блокиран. Унесите PUK2 да бисте одблокирали."</string>
     <string name="puk2_blocked" msgid="3131139031779319911">"PUK2 је трајно блокиран."</string>
     <string name="pin2_attempts" msgid="5625178102026453023">\n"Имате још <xliff:g id="NUMBER">%d</xliff:g> покушаја."</string>
     <string name="puk2_locked" msgid="6497760825455461057">"PUK2 је закључан. За откључавање се обратите добављачу услуге."</string>
@@ -643,7 +644,7 @@
     <string name="ota_spc_failure" msgid="904092035241370080">"СЛУЧАЈНА SPC ГРЕШКА"</string>
     <string name="ota_call_end" msgid="8657746378290737034">"Назад"</string>
     <string name="ota_try_again" msgid="6914781945599998550">"Пробај поново"</string>
-    <string name="ota_next" msgid="2041016619313475914">"Следеће"</string>
+    <string name="ota_next" msgid="2041016619313475914">"Даље"</string>
     <string name="ecm_exit_dialog" msgid="4200691880721429078">"Дијалог за излазак из режима хитног повратног позива"</string>
     <string name="phone_entered_ecm_text" msgid="8431238297843035842">"Унет је режим за хитан повратни позив"</string>
     <string name="phone_in_ecm_notification_title" msgid="6825016389926367946">"Режим за хитан повратни позив"</string>

@@ -522,6 +522,7 @@
     <string name="label_puk2_code" msgid="2852217004288085562">"‏کد PUK2 را وارد کنید"</string>
     <string name="fdn_enable_puk2_requested" msgid="5793652792131588041">"گذرواژه نادرست است. اکنون پین۲ مسدود شده است. برای امتحان مجدد، پین۲ را تغییر دهید."</string>
     <string name="puk2_requested" msgid="6992374450720307514">"‏گذرواژه نادرست است. اکنون سیم‌کارت قفل شده است. PUK2 را وارد کنید."</string>
+    <string name="pin2_blocked" msgid="1179589285280498087">"‏‫PIN2 مسدود است. برای رفع انسداد، PUK2 را وارد کنید."</string>
     <string name="puk2_blocked" msgid="3131139031779319911">"‏PUK2 به صورت دائمی مسدود شده است."</string>
     <string name="pin2_attempts" msgid="5625178102026453023">\n"<xliff:g id="NUMBER">%d</xliff:g> تلاش باقی‌مانده دارید."</string>
     <string name="puk2_locked" msgid="6497760825455461057">"‏PUK2 قفل است. برای باز کردن قفل، با ارائه دهنده خدمات تماس بگیرید."</string>
@@ -838,12 +839,12 @@
     <string name="supp_service_over_ut_precautions_dialog_dismiss" msgid="5934541487903081652">"بستن"</string>
     <string name="radio_info_data_connection_enable" msgid="6183729739783252840">"فعال کردن اتصال داده"</string>
     <string name="radio_info_data_connection_disable" msgid="6404751291511368706">"غیرفعال کردن اتصال داده"</string>
-    <string name="radio_info_apply_preferred_network_type" msgid="8828433232282314858">"اعمال"</string>
+    <string name="radio_info_apply_preferred_network_type" msgid="8828433232282314858">"اعمال کردن"</string>
     <string name="radio_info_all_label" msgid="4326377691373938122">"همه"</string>
     <string name="radio_info_nr_label" msgid="4346984853962997752">"NR (5G)"</string>
     <string name="radio_info_lte_label" msgid="5721318031926928485">"LTE (4G)"</string>
     <string name="radio_info_wcdma_label" msgid="5157664869835235769">"UMTS (3G)"</string>
-    <string name="radio_info_gsm_label" msgid="2947899997551185529">"‏‫GSM (نسل دوم)"</string>
+    <string name="radio_info_gsm_label" msgid="2947899997551185529">"GSM (2G)"</string>
     <string name="volte_provisioned_switch_string" msgid="4812874990480336178">"‏مشروط به VoLTE"</string>
     <string name="vt_provisioned_switch_string" msgid="8295542122512195979">"مجوز تماس تصویری داده شد"</string>
     <string name="wfc_provisioned_switch_string" msgid="3835004640321078988">"‏مجوز تماس با Wifi داده شد"</string>

@@ -522,6 +522,7 @@
     <string name="label_puk2_code" msgid="2852217004288085562">"Adja meg a PUK2 kódot"</string>
     <string name="fdn_enable_puk2_requested" msgid="5793652792131588041">"A jelszó helytelen. A PIN2 kód le van tiltva. Az újrapróbálkozáshoz módosítsa a PIN2 kódot."</string>
     <string name="puk2_requested" msgid="6992374450720307514">"A jelszó helytelen. SIM kártya zárolva. Adja meg a PUK2 kódot."</string>
+    <string name="pin2_blocked" msgid="1179589285280498087">"A PIN2 le van tiltva. A feloldáshoz adja meg a PUK2-kódot."</string>
     <string name="puk2_blocked" msgid="3131139031779319911">"A PUK2 végleg letiltva."</string>
     <string name="pin2_attempts" msgid="5625178102026453023">\n"<xliff:g id="NUMBER">%d</xliff:g> próbálkozási lehetősége maradt."</string>
     <string name="puk2_locked" msgid="6497760825455461057">"A PUK2 zárolva van. A feloldás ügyében forduljon a szolgáltatóhoz."</string>

@@ -194,9 +194,6 @@ public class TelecomAccountRegistry {
         TWO
     }
 
-    // TODO: Verify this value matches frameworks/base/telecomm/java/android/telecom/PhoneAccount.java
-    private static final int CAPABILITY_DOWNGRADE_RTT = 0x4000000; // Example value; check your source
-
 // QTI_END: 2018-02-22: Telephony: Fixes related to manul provisioning
     final class AccountEntry implements PstnPhoneCapabilitiesNotifier.Listener {
         private final Phone mPhone;
@@ -557,9 +554,15 @@ public class TelecomAccountRegistry {
                 mIsRttCapable = false;
             }
 
+            if (isCarrierRttDowngradeToAudioSupported()) {
+                capabilities |= PhoneAccount.CAPABILITY_CHANGE_RTT_CALL_TO_AUDIO_CALL;
+            }
+
 // QTI_BEGIN: 2023-01-18: Telephony: IMS : Move RTT downgrade and upgrade logic completely to AOSP.
             if (isRttDowngradeSupported()) {
-                capabilities |= CAPABILITY_DOWNGRADE_RTT;
+// QTI_END: 2023-01-18: Telephony: IMS : Move RTT downgrade and upgrade logic completely to AOSP.
+                capabilities |= PhoneAccount.CAPABILITY_DOWNGRADE_RTT;
+// QTI_BEGIN: 2023-01-18: Telephony: IMS : Move RTT downgrade and upgrade logic completely to AOSP.
             }
 
 // QTI_END: 2023-01-18: Telephony: IMS : Move RTT downgrade and upgrade logic completely to AOSP.
@@ -978,6 +981,16 @@ public class TelecomAccountRegistry {
                     PhoneGlobals.getInstance().getCarrierConfigForSubId(mPhone.getSubId());
             if (b == null) return false;
             return b.getBoolean(CarrierConfigManager.KEY_RTT_SUPPORTED_WHILE_ROAMING_BOOL);
+        }
+
+        /**
+         * Determines from carrier config whether changing an RTT call to audio-only is supported.
+         */
+        private boolean isCarrierRttDowngradeToAudioSupported() {
+            PersistableBundle b =
+                    PhoneGlobals.getInstance().getCarrierConfigForSubId(mPhone.getSubId());
+            if (b == null) return false;
+            return b.getBoolean(CarrierConfigManager.KEY_RTT_DOWNGRADE_SUPPORTED_BOOL);
         }
 
         /**
@@ -1437,8 +1450,15 @@ public class TelecomAccountRegistry {
             }
             if (isTearingDownNeeded) {
                 Log.i(this, "TelecomAccountRegistry: onSubscriptionsChanged - update accounts");
-                tearDownAccounts();
-                setupAccounts();
+                if (Flags.rebuildTelecomAccountsAsync()) {
+                    mHandler.post(() -> {
+                        tearDownAccounts();
+                        setupAccounts();
+                    });
+                } else {
+                    tearDownAccounts();
+                    setupAccounts();
+                }
             } else {
                 Log.i(this, "TelecomAccountRegistry: onSubscriptionsChanged - reregister accounts");
                 synchronized (mAccountsLock) {
@@ -1458,8 +1478,15 @@ public class TelecomAccountRegistry {
             // Even though registering the listener failed, we will still try to setup the phone
             // accounts now; the phone instances should already be present and ready, so even if
             // telephony registry is poking along we can still try to setup the phone account.
-            tearDownAccounts();
-            setupAccounts();
+            if (Flags.rebuildTelecomAccountsAsync()) {
+                mHandler.post(() -> {
+                    tearDownAccounts();
+                    setupAccounts();
+                });
+            } else {
+                tearDownAccounts();
+                setupAccounts();
+            }
 
             if (mSubscriptionListenerState == LISTENER_STATE_UNREGISTERED) {
                 // Initial registration attempt failed; start exponential backoff.
@@ -2222,6 +2249,10 @@ public class TelecomAccountRegistry {
 // QTI_BEGIN: 2021-05-04: Telephony: Remove provision check
                                 " slotId: " + slotId);
 // QTI_END: 2021-05-04: Telephony: Remove provision check
+                        // Upstream moved this logic to shouldSkipAccountEntry()
+                        // so it's being duplicated here to preserve the
+                        // modification of isAccountAdded.
+
                         // setupAccounts can be called multiple times during service changes.
                         // Don't add an account if subscription is not ready.
                         if (!SubscriptionManager.isValidSubscriptionId(subscriptionId)) {
@@ -2250,28 +2281,8 @@ public class TelecomAccountRegistry {
 // QTI_END: 2020-06-10: Telephony: MSIM: Emergency account handle support.
                             continue;
                         }
-                        // Don't add account if it's opportunistic subscription, which is considered
-                        // data only for now.
-                        SubscriptionInfo info = SubscriptionManager.from(mContext)
-                                .getActiveSubscriptionInfo(subscriptionId);
-                        if (info == null || info.isOpportunistic()) {
-                            Log.d(this, "setupAccounts: skipping unknown or opportunistic subid %d",
-                                    subscriptionId);
-                            continue;
-                        }
 
-                        // Skip the sim for bootstrap
-                        if (info.getProfileClass() == SubscriptionManager
-                                .PROFILE_CLASS_PROVISIONING) {
-                            Log.d(this, "setupAccounts: skipping bootstrap sub id "
-                                    + subscriptionId);
-                            continue;
-                        }
-
-                        // Skip the sim for satellite as it does not support call for now
-                        if (info.isOnlyNonTerrestrialNetwork()) {
-                            Log.d(this, "setupAccounts: skipping satellite sub id "
-                                    + subscriptionId);
+                        if (shouldSkipAccountEntry(subscriptionId)) {
                             continue;
                         }
 
@@ -2382,6 +2393,51 @@ public class TelecomAccountRegistry {
             }
         }
     }
+// QTI_END: 2020-07-13: Telephony: MSIM:Set available SIM as default outgoing phoneaccount.
+
+    private boolean shouldSkipAccountEntry(int subscriptionId) {
+        // setupAccounts can be called multiple times during service changes.
+        // Don't add an account if subscription is not ready.
+        if (!SubscriptionManager.isValidSubscriptionId(subscriptionId)) {
+            Log.d(this, "setupAccounts: skipping invalid subid %d", subscriptionId);
+            return true;
+        }
+
+        // Don't add account if it's opportunistic subscription, which is considered
+        // data only for now.
+        SubscriptionInfo info = mSubscriptionManager.getActiveSubscriptionInfo(subscriptionId);
+        if (info == null || info.isOpportunistic()) {
+            Log.d(this, "setupAccounts: skipping unknown or opportunistic subid %d",
+                    subscriptionId);
+            return true;
+        }
+
+        // Private networks are considered data only for now. Skip them for telecom
+        // accounts.
+        if (info.isPrivateNetwork()) {
+            Log.d(this, "setupAccounts: skipping private network subid %d",
+                    subscriptionId);
+            return true;
+        }
+
+        // Skip the sim for bootstrap
+        if (info.getProfileClass() == SubscriptionManager
+                .PROFILE_CLASS_PROVISIONING) {
+            Log.d(this, "setupAccounts: skipping bootstrap sub id "
+                    + subscriptionId);
+            return true;
+        }
+
+        // Skip the sim for satellite as it does not support call for now
+        if (info.isOnlyNonTerrestrialNetwork()) {
+            Log.d(this, "setupAccounts: skipping satellite sub id "
+                    + subscriptionId);
+            return true;
+        }
+
+        return false;
+    }
+// QTI_BEGIN: 2020-07-13: Telephony: MSIM:Set available SIM as default outgoing phoneaccount.
 
     private boolean areAllSimAccountsFound() {
         final Iterator<PhoneAccountHandle> phoneAccounts =

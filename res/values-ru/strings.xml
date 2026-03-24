@@ -314,7 +314,7 @@
     <string name="sim_change_data_title" msgid="9142726786345906606">"Смена SIM-карты"</string>
     <string name="sim_change_data_message" msgid="3567358694255933280">"Использовать для передачи данных по мобильной сети SIM-карту \"<xliff:g id="NEW_SIM">%1$s</xliff:g>\" (вместо \"<xliff:g id="OLD_SIM">%2$s</xliff:g>\")?"</string>
     <string name="wifi_calling_settings_title" msgid="5800018845662016507">"Звонки по Wi-Fi"</string>
-    <string name="video_calling_settings_title" msgid="342829454913266078">"Видеозвонки"</string>
+    <string name="video_calling_settings_title" msgid="342829454913266078">"Видеовызовы через оператора"</string>
     <string name="gsm_umts_options" msgid="4968446771519376808">"Параметры GSM/UMTS"</string>
     <string name="cdma_options" msgid="3669592472226145665">"Параметры CDMA"</string>
     <string name="throttle_data_usage" msgid="1944145350660420711">"Передача данных"</string>
@@ -522,6 +522,7 @@
     <string name="label_puk2_code" msgid="2852217004288085562">"Введите код PUK2"</string>
     <string name="fdn_enable_puk2_requested" msgid="5793652792131588041">"Неверный пароль. Код PIN2 заблокирован. Смените его, чтобы продолжить работу."</string>
     <string name="puk2_requested" msgid="6992374450720307514">"Неверный пароль. SIM-карта заблокирована. Введите код PUK2."</string>
+    <string name="pin2_blocked" msgid="1179589285280498087">"Код PIN2 заблокирован. Для разблокировки введите код PUK2."</string>
     <string name="puk2_blocked" msgid="3131139031779319911">"Код PUK2 заблокирован навсегда"</string>
     <string name="pin2_attempts" msgid="5625178102026453023">\n"Осталось попыток: <xliff:g id="NUMBER">%d</xliff:g>."</string>
     <string name="puk2_locked" msgid="6497760825455461057">"Код PUK2 заблокирован. Чтобы разблокировать его, обратитесь к оператору."</string>
