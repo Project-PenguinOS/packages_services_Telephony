@@ -72,10 +72,10 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.ICarrierConfigLoader;
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.Phone;
-import com.android.internal.telephony.TelephonyStatsLog;
 import com.android.internal.telephony.PhoneConfigurationManager;
 import com.android.internal.telephony.PhoneFactory;
 import com.android.internal.telephony.TelephonyPermissions;
+import com.android.internal.telephony.TelephonyStatsLog;
 import com.android.internal.telephony.flags.FeatureFlags;
 import com.android.internal.telephony.subscription.SubscriptionManagerService;
 import com.android.internal.telephony.util.ArrayUtils;
@@ -1552,24 +1552,30 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
     }
 
     private boolean isSystemApp() {
-        try {
-            int callingUid = getBinderCallingUid();
-            if (isSdkSandboxUidInternal(callingUid)) {
-                loge("isSystemApp: rejected call from SDK sandbox with uid=" + callingUid);
-                return false;
-            }
-
-            String callingPackage = mContext.getPackageManager().getNameForUid(
-                    callingUid);
-
-            ApplicationInfo appInfo = mContext.getPackageManager().getApplicationInfo(
-                    callingPackage, 0);
-            return (appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0
-                    || (appInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0;
-        } catch (Exception e) {
-            loge("isSystemApp: failed to get application info: " + e);
+        int callingUid = getBinderCallingUid();
+        if (isSdkSandboxUidInternal(callingUid)) {
+            loge("isSystemApp: rejected call from SDK sandbox with uid=" + callingUid);
             return false;
         }
+
+        String[] packages = mContext.getPackageManager().getPackagesForUid(callingUid);
+        if (packages != null) {
+            for (String pkg : packages) {
+                try {
+                    ApplicationInfo appInfo =
+                            mContext.getPackageManager().getApplicationInfo(pkg, 0);
+                    if (appInfo != null
+                            && ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0
+                            || (appInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0)) {
+                        return true;
+                    }
+                } catch (Exception e) {
+                    // Log the exception for this specific package and continue to the next one
+                    loge("isSystemApp: failed to get application info for " + pkg + ": " + e);
+                }
+            }
+        }
+        return false;
     }
 
     @VisibleForTesting
