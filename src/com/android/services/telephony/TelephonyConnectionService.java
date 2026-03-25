@@ -1371,6 +1371,7 @@ public class TelephonyConnectionService extends ConnectionService {
                         && (imsPhone == null || !imsPhone.canMakeWifiCall())) {
                     Log.d(this, "onCreateOutgoingConnection, cannot make call "
                             + "when device is connected to carrier roaming satellite network");
+                    mSatelliteController.onNonEmergencyDialerDialogDisplayed(phone);
                     return Connection.createFailedConnection(
                             mDisconnectCauseFactory.toTelecomDisconnectCause(
                                     android.telephony.DisconnectCause.SATELLITE_ENABLED,
