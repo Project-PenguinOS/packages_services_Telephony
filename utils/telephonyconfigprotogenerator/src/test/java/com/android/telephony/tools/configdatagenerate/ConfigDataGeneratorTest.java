@@ -655,17 +655,16 @@ public class ConfigDataGeneratorTest {
 
         HashMap<RoamingConfigProto, Boolean> roamingConfigProtoMap = new HashMap<>();
         roamingConfigProtoMap.put(null, true);
-        roamingConfigProtoMap.put(new RoamingConfigProto(null, null, null), true);
+        roamingConfigProtoMap.put(new RoamingConfigProto(null, null), true);
         roamingConfigProtoMap.put(new RoamingConfigProto(
-                SATELLITE_DATA_SUPPORT_BANDWIDTH_CONSTRAINED, null, null), true);
-        roamingConfigProtoMap.put(new RoamingConfigProto(null, DEVICE_SATELLITE_PLMNS, null), true);
+                SATELLITE_DATA_SUPPORT_BANDWIDTH_CONSTRAINED, null), true);
+        roamingConfigProtoMap.put(new RoamingConfigProto(null, DEVICE_SATELLITE_PLMNS), true);
         roamingConfigProtoMap.put(new RoamingConfigProto(
-                SATELLITE_DATA_SUPPORT_BANDWIDTH_CONSTRAINED, DEVICE_SATELLITE_PLMNS, null), true);
+                SATELLITE_DATA_SUPPORT_BANDWIDTH_CONSTRAINED, DEVICE_SATELLITE_PLMNS), true);
 
         ServiceProto serviceProtoValid = new ServiceProto(CARRIER_ID_VALID,
                 new ProviderCapabilityProto[]{new ProviderCapabilityProto(PLMN_VALID_45005,
-                        new int[]{SERVICE_TYPE_MMS}, null)},
-                null, null, null, null, null, null);
+                        new int[]{SERVICE_TYPE_MMS})});
         RegionProto regionProtoValid = new RegionProto(
                 getS2CellFile(true),
                 new String[]{COUNTRY_CODE_US},
@@ -695,29 +694,23 @@ public class ConfigDataGeneratorTest {
         Map<ServiceProto, Boolean> serviceProtoMap = new LinkedHashMap<>();
 
         serviceProtoMap.put(null, true);
-        serviceProtoMap.put(new ServiceProto(null, null, null, null, null, null, null, null),
-                false);
+        serviceProtoMap.put(new ServiceProto(null, null), false);
         serviceProtoMap.put(new ServiceProto(null, new ProviderCapabilityProto[]{
-                new ProviderCapabilityProto(PLMN_VALID_45005, new int[]{SERVICE_TYPE_MMS}, null)},
-                null, null, null, null, null, null),
+                new ProviderCapabilityProto(PLMN_VALID_45005, new int[]{SERVICE_TYPE_MMS})}),
                 false);
-        serviceProtoMap.put(new ServiceProto(1, null, null, null, null, null, null, null), false);
+        serviceProtoMap.put(new ServiceProto(1, null), false);
         serviceProtoMap.put(new ServiceProto(1, new ProviderCapabilityProto[]{
-                new ProviderCapabilityProto(null, null, null)},
-                null, null, null, null, null, null), false);
+                new ProviderCapabilityProto(null, null)}), false);
         serviceProtoMap.put(new ServiceProto(1, new ProviderCapabilityProto[]{
-                new ProviderCapabilityProto(null, new int[]{SERVICE_TYPE_MMS}, null)},
-                null, null, null, null, null, null), false);
+                new ProviderCapabilityProto(null, new int[]{SERVICE_TYPE_MMS})}), false);
         serviceProtoMap.put(new ServiceProto(1, new ProviderCapabilityProto[]{
-                new ProviderCapabilityProto(PLMN_VALID_45005, null, null)},
-                null, null, null, null, null, null), false);
+                new ProviderCapabilityProto(PLMN_VALID_45005, null)}), false);
         serviceProtoMap.put(new ServiceProto(1, new ProviderCapabilityProto[]{
-                new ProviderCapabilityProto(PLMN_VALID_45005, new int[]{SERVICE_TYPE_MMS}, null)},
-                null, null, null, null, null, null), true);
+                new ProviderCapabilityProto(PLMN_VALID_45005, new int[]{SERVICE_TYPE_MMS})}), true);
 
         RoamingConfigProto roamingConfigProtoValid =
                 new RoamingConfigProto(SATELLITE_DATA_SUPPORT_BANDWIDTH_CONSTRAINED,
-                        DEVICE_SATELLITE_PLMNS, null);
+                        DEVICE_SATELLITE_PLMNS);
         RegionProto regionProtoValid = new RegionProto(getS2CellFile(true),
                 new String[]{COUNTRY_CODE_US},
                 true, getSACJsonFile(true));
@@ -771,12 +764,11 @@ public class ConfigDataGeneratorTest {
                 getSACJsonFile(true)), true);
 
         RoamingConfigProto roamingConfigProtoValid =
-                new RoamingConfigProto(1, DEVICE_SATELLITE_PLMNS, null);
+                new RoamingConfigProto(1, DEVICE_SATELLITE_PLMNS);
         ServiceProto serviceProtoValid = new ServiceProto(
                 CARRIER_ID_VALID,
                 new ProviderCapabilityProto[]{new ProviderCapabilityProto(PLMN_VALID_45005,
-                        new int[]{SERVICE_TYPE_MMS}, null)},
-                null, null, null, null, null, null);
+                        new int[]{SERVICE_TYPE_MMS})});
 
         int iterationCount = 1;
         Set<RegionProto> keys = regionProtoMap.keySet();

@@ -3238,14 +3238,6 @@ public class TelephonyConnectionService extends ConnectionService {
             releaseEmergencyCallDomainSelection(false, false);
             mEmergencyStateTracker.endCall(c);
             return false;
-        } else if (mFeatureFlags.enforceEmergencyExitMultiCall()
-                && mEmergencyStateTracker != null
-                && mEmergencyStateTracker.hasActiveCall(c)) {
-            Log.i(this, "maybeReselectDomain: unmanaged active emergency call disconnected, "
-                    + "ending call in tracker");
-            c.removeTelephonyConnectionListener(mEmergencyConnectionListener);
-            mEmergencyStateTracker.endCall(c);
-            return false;
         }
 
         if (reasonInfo != null) {

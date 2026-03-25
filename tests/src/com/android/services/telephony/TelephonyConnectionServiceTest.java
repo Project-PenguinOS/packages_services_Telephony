@@ -2394,27 +2394,6 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
     }
 
     @Test
-    public void testUnmanagedEmergencyCallDisconnectTriggersEndCall() throws Exception {
-        setupForCallTest();
-
-        int preciseDisconnectCause = com.android.internal.telephony.CallFailCause.ERROR_UNSPECIFIED;
-        int disconnectCause = android.telephony.DisconnectCause.ERROR_UNSPECIFIED;
-        int selectedDomain = DOMAIN_CS;
-
-        TestTelephonyConnection c = setupForReDialForDomainSelection(
-                mPhone0, selectedDomain, preciseDisconnectCause, disconnectCause, true);
-
-        // Invalidate the managed emergency connection.
-        mTestConnectionService.setEmergencyConnection(null);
-        when(mFeatureFlags.enforceEmergencyExitMultiCall()).thenReturn(true);
-        when(mEmergencyStateTracker.hasActiveCall(eq(c))).thenReturn(true);
-
-        assertFalse(mTestConnectionService.maybeReselectDomain(c, null, true,
-                android.telephony.DisconnectCause.NOT_VALID));
-        verify(mEmergencyStateTracker).endCall(eq(c));
-    }
-
-    @Test
     public void testDomainSelectionRejectIncoming() throws Exception {
         setupForCallTest();
 

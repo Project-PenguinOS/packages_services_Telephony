@@ -59,28 +59,14 @@ def validate_consistency(json_data, cts_path):
     return errors
 
 def main():
-    # Attempt to find repo root from script location: ROOT/packages/services/Telephony/utils/validate_carrier_allowlist.py
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    repo_root = os.path.abspath(os.path.join(script_dir, "..", "..", "..", ".."))
-
-    # Fallback to REPO_ROOT or ANDROID_BUILD_TOP if repo_root doesn't seem right
-    if not os.path.exists(os.path.join(repo_root, "packages/services/Telephony")):
-        repo_root = os.environ.get("REPO_ROOT") or os.environ.get("ANDROID_BUILD_TOP", ".")
-
+    repo_root = os.environ.get("ANDROID_BUILD_TOP", ".")
     telephony_path = os.path.join(repo_root, "packages/services/Telephony")
     json_path = os.path.join(telephony_path, "assets/CarrierRestrictionOperatorDetails.json")
     cts_path = os.path.join(repo_root, "cts/tests/tests/telephony/current/src/android/telephony/cts/TelephonyManagerTest.java")
 
     if not os.path.exists(json_path):
-        # Last attempt: if we're running from within Telephony directory
-        if os.path.exists("assets/CarrierRestrictionOperatorDetails.json"):
-            json_path = "assets/CarrierRestrictionOperatorDetails.json"
-            # We also need to find cts_path. If we're in Telephony dir, we're at <root>/packages/services/Telephony
-            # so root is ../../..
-            cts_path = os.path.join("../../..", "cts/tests/tests/telephony/current/src/android/telephony/cts/TelephonyManagerTest.java")
-        else:
-            print(f"Error: JSON file not found at {json_path}")
-            sys.exit(1)
+        print(f"Error: JSON file not found at {json_path}")
+        sys.exit(1)
 
     json_errors, json_data = validate_json_format(json_path)
     consistency_errors = validate_consistency(json_data, cts_path)

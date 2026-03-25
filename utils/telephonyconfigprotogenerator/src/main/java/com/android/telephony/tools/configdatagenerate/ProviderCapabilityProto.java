@@ -16,32 +16,13 @@
 
 package com.android.telephony.tools.configdatagenerate;
 
-/**
- * Represents the detailed satellite settings and capabilities per provider PLMN.
- *
- * Some of these fields are mapped from: KEY_SATELLITE_CONFIGS_PER_PLMN_BUNDLE.
- */
 public class ProviderCapabilityProto {
 
-    /** The satellite provider's PLMN identifier. */
     public String mPlmn;
-
-    /** Array of allowed services (e.g., SMS, MMS) for this satellite provider. */
     public int[] mAllowedServices;
 
-    /**
-     * Satellite connection method.
-     * 0: Automatic, 1: Manual, 2: Hybrid.
-     * Mapped from: KEY_CARRIER_ROAMING_NTN_CONNECT_TYPE_INT.
-     */
-    public Integer mNtnConnectType;
-
-    /**
-     * Constructor for ProviderCapabilityProto
-     */
-    public ProviderCapabilityProto(String plmn, int[] allowedServices, Integer ntnConnectType) {
+    public ProviderCapabilityProto(String plmn, int[] allowedServices) {
         mPlmn = plmn;
         mAllowedServices = allowedServices;
-        mNtnConnectType = ntnConnectType;
     }
 }

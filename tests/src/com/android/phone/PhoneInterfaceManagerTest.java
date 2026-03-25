@@ -46,7 +46,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -703,14 +702,14 @@ public class PhoneInterfaceManagerTest extends TelephonyTestBase {
     public void testGetSatelliteDataOptimizedApps() throws Exception {
         mPhoneInterfaceManager.setFeatureFlags(mFeatureFlags);
         loge("FeatureFlagApi is set to return true");
+
         boolean containsCtsApp = false;
         String ctsPackageName = "android.telephony.cts";
-        String satelliteCtsPackageName = "android.telephony.satellite.cts";
         List<String> listSatelliteApplications =
                 mPhoneInterfaceManager.getSatelliteDataOptimizedApps();
 
         for (String packageName : listSatelliteApplications) {
-            if (ctsPackageName.equals(packageName) || satelliteCtsPackageName.equals(packageName)) {
+            if (ctsPackageName.equals(packageName)) {
                 containsCtsApp = true;
             }
         }
@@ -1290,44 +1289,5 @@ public class PhoneInterfaceManagerTest extends TelephonyTestBase {
         // Verify mSatelliteController.requestSatelliteEnabled is NOT called
         verify(mSatelliteController, never())
                 .requestSatelliteEnabled(anyBoolean(), anyBoolean(), anyBoolean(), any());
-    }
-
-    @Test
-    public void testRequestEnableSatellite_Auto_NotUser() throws Exception {
-        final int subId = 1;
-        int[] nonUserReasons = {
-                SatelliteManager.SATELLITE_ENABLEMENT_REQUEST_REASON_UNKNOWN,
-                SatelliteManager.SATELLITE_ENABLEMENT_REQUEST_REASON_PURCHASE,
-                SatelliteManager.SATELLITE_ENABLEMENT_REQUEST_REASON_POWER,
-                SatelliteManager.SATELLITE_ENABLEMENT_REQUEST_REASON_CARRIER_CONFIG_UPDATE,
-                SatelliteManager.SATELLITE_ENABLEMENT_REQUEST_REASON_ENTITLEMENT
-        };
-
-        for (int reason : nonUserReasons) {
-            // Setup attributes for automatic mode but reason not user
-            EnableRequestAttributes attributes = new EnableRequestAttributes.Builder(true)
-                    .setConnectType(CarrierConfigManager.CARRIER_ROAMING_NTN_CONNECT_AUTOMATIC)
-                    .setSatelliteEnablementRequestReason(reason)
-                    .build();
-
-            // Mock permission check
-            doNothing().when(mPhoneGlobals).enforceCallingOrSelfPermission(
-                    eq(Manifest.permission.SATELLITE_COMMUNICATION), anyString());
-
-            // Call requestEnableSatellite
-            mPhoneInterfaceManager.requestEnableSatellite(subId, attributes, mIIntegerConsumer);
-
-            // Verify mIIntegerConsumer.accept is called with SATELLITE_RESULT_REQUEST_NOT_SUPPORTED
-            verify(mIIntegerConsumer).accept(
-                    eq(SatelliteManager.SATELLITE_RESULT_REQUEST_NOT_SUPPORTED));
-
-            clearInvocations(mIIntegerConsumer);
-        }
-
-        // Verify neither requestEnableSatelliteForCarrier nor requestSatelliteEnabled is called
-        verify(mSatelliteController, never()).requestEnableSatelliteForCarrier(anyInt(),
-                anyBoolean(), anyInt(), any());
-        verify(mSatelliteController, never()).requestSatelliteEnabled(anyBoolean(),
-                anyBoolean(), anyBoolean(), any());
     }
 }
