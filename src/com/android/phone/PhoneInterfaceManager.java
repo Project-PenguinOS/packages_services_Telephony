@@ -3789,7 +3789,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         } catch (PackageManager.NameNotFoundException e) {
             // packageUid is -1
         }
-        if (packageUid != callingUid) {
+        if (!PccAwareUidComparator.isSameApp(pm, packageUid, callingUid)) {
             throw new SecurityException(message + ": Package " + callingPackage
                     + " does not belong to " + callingUid);
         }
