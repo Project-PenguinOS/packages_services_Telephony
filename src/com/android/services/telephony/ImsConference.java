@@ -1335,6 +1335,13 @@ public class ImsConference extends TelephonyConferenceBase implements Holdable {
             setCallDirection(entry.getCallDirection());
             mLoneParticipantIdentity = new Pair<>(entry.getUserEntity(), entry.getEndpoint());
 
+            Bundle extras = entry.getExtras();
+            if (extras != null && extras.getBoolean(TelecomManager.EXTRA_DO_NOT_LOG_CALL)) {
+                Bundle newExtras = new Bundle();
+                newExtras.putBoolean(TelecomManager.EXTRA_DO_NOT_LOG_CALL, true);
+                putExtras(newExtras);
+            }
+
             // Remove the participant from Telecom.  It'll get picked up in a future CEP update
             // again anyways.
             entry.setDisconnected(new DisconnectCause(DisconnectCause.CANCELED,
