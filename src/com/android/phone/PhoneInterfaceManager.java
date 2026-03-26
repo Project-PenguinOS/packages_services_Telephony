@@ -236,6 +236,8 @@ import com.android.internal.telephony.TelephonyCountryDetector;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.TelephonyPermissions;
 import com.android.internal.telephony.configupdate.TelephonyConfigUpdateInstallReceiver;
+import com.android.internal.telephony.data.DataNetworkController;
+import com.android.internal.telephony.data.DataProfileManager;
 import com.android.internal.telephony.data.DataUtils;
 import com.android.internal.telephony.domainselection.DomainSelectionResolver;
 import com.android.internal.telephony.emergency.EmergencyNumberTracker;
@@ -485,6 +487,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     private static final int LINE1_NUMBER_MAX_LEN = 50;
 
     private static final String CTS_PACKAGE = "android.telephony.cts";
+    private static final String SATELLITE_CTS_PACKAGE = "android.telephony.satellite.cts";
     private static final String PHONE_PACKAGE = "com.android.phone";
     private boolean mIsInCtsMode = false;
 
@@ -8218,6 +8221,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
                 setNetworkSelectionModeAutomatic(subId);
                 Phone phone = getPhone(subId);
                 cleanUpAllowedNetworkTypes(phone, subId);
+                clearLastInternetDataProfiles(phone, subId);
 
                 setDataRoamingEnabled(subId, phone == null ? false
                         : phone.getDataSettingsManager().isDefaultDataRoamingEnabled());
@@ -8247,6 +8251,17 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
             sendEraseDataInSharedPreferences();
         } finally {
             Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    private void clearLastInternetDataProfiles(Phone phone, int subId) {
+        if (phone == null) return;
+        DataNetworkController dnc = phone.getDataNetworkController();
+        if (dnc != null) {
+            DataProfileManager dpm = dnc.getDataProfileManager();
+            if (dpm != null) {
+                dpm.clearLastInternetDataProfiles(subId);
+            }
         }
     }
 
@@ -12823,17 +12838,28 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         try {
             Log.d(LOG_TAG, "requestEnableSatellite: subId=" + subId
                     + ", attributes=" + attributes);
-            final boolean isAutomaticAndUser = attributes.getConnectType()
-                    == CarrierConfigManager.CARRIER_ROAMING_NTN_CONNECT_AUTOMATIC
-                    && attributes.getSatelliteEnablementRequestReason()
-                    == SatelliteManager.SATELLITE_ENABLEMENT_REQUEST_REASON_USER;
-            if (isAutomaticAndUser) {
-                Log.d(LOG_TAG, "requestEnableSatellite: isAutomaticAndUser, calling"
-                        + " requestEnableSatelliteForCarrier");
-                mSatelliteController.requestEnableSatelliteForCarrier(subId,
-                        attributes.isEnabled(),
-                        SatelliteManager.SATELLITE_COMMUNICATION_RESTRICTION_REASON_USER,
-                        callback);
+            final boolean isAutomatic = attributes.getConnectType()
+                    == CarrierConfigManager.CARRIER_ROAMING_NTN_CONNECT_AUTOMATIC;
+            if (isAutomatic) {
+                if (attributes.getSatelliteEnablementRequestReason()
+                        == SatelliteManager.SATELLITE_ENABLEMENT_REQUEST_REASON_USER) {
+                    Log.d(LOG_TAG, "requestEnableSatellite: isAutomaticAndUser, calling"
+                            + " requestEnableSatelliteForCarrier with enable="
+                            + attributes.isEnabled());
+                    mSatelliteController.requestEnableSatelliteForCarrier(subId,
+                            attributes.isEnabled(),
+                            SatelliteManager.SATELLITE_COMMUNICATION_RESTRICTION_REASON_USER,
+                            callback);
+                } else {
+                    Log.d(LOG_TAG, "requestEnableSatellite: isAutomatic but reason is "
+                            + attributes.getSatelliteEnablementRequestReason()
+                            + ", returning SATELLITE_RESULT_REQUEST_NOT_SUPPORTED");
+                    try {
+                        callback.accept(SatelliteManager.SATELLITE_RESULT_REQUEST_NOT_SUPPORTED);
+                    } catch (RemoteException e) {
+                        Log.e(LOG_TAG, "requestEnableSatellite: " + e);
+                    }
+                }
             } else {
                 Log.d(LOG_TAG, "requestEnableSatellite: falling back to requestSatelliteEnabled");
                 mSatelliteController.requestSatelliteEnabled(
@@ -13144,6 +13170,9 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     @Override
     public void requestIsSatelliteProvisioned(@NonNull ResultReceiver result) {
         enforceSatelliteCommunicationPermission("requestIsSatelliteProvisioned");
+        if (shouldIgnoreSatelliteRequestInCtsMode("requestIsSatelliteProvisioned", result)) {
+            return;
+        }
         final long identity = Binder.clearCallingIdentity();
         try {
             mSatelliteController.requestIsSatelliteProvisioned(result);
@@ -15059,7 +15088,7 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
      * {@code false} otherwise.
      */
     public boolean setCtsMode(boolean ctsMode) {
-        Log.d(LOG_TAG, "setCtsMode - " + ctsMode);
+        Rlog.d(LOG_TAG, "setCtsMode - " + ctsMode);
         TelephonyPermissions.enforceShellOnly(
                 Binder.getCallingUid(), "setCtsMode");
         TelephonyPermissions.enforceCallingOrSelfModifyPermissionOrCarrierPrivilege(mApp,
@@ -15106,21 +15135,32 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
     }
 
     private boolean isCallingPackageAllowedInCtsMode(String methodName) {
+        int callingUid = Binder.getCallingUid();
         PackageManager pm = mApp.getBaseContext().createContextAsUser(
                 Binder.getCallingUserHandle(), 0).getPackageManager();
-        if (pm == null) return false;
-        String[] callingPackages = pm.getPackagesForUid(Binder.getCallingUid());
-        if (callingPackages == null) return false;
+        if (pm == null) {
+            Rlog.e(LOG_TAG, "isCallingPackageAllowedInCtsMode: pm is null");
+            return false;
+        }
+        String[] callingPackages = pm.getPackagesForUid(callingUid);
+        if (callingPackages == null) {
+            Log.e(LOG_TAG, "isCallingPackageAllowedInCtsMode: callingPackages is null for uid="
+                    + callingUid);
+            return false;
+        }
 
         for (String callingPackage : callingPackages) {
-            if (TextUtils.equals(callingPackage, CTS_PACKAGE)
-                    || TextUtils.equals(callingPackage, PHONE_PACKAGE)) {
+            Rlog.w(LOG_TAG, "isCallingPackageAllowedInCtsMode: checking " + callingPackage);
+            if (callingPackage != null && (callingPackage.contains(".preconditions")
+                    || TextUtils.equals(callingPackage, CTS_PACKAGE)
+                    || TextUtils.equals(callingPackage, SATELLITE_CTS_PACKAGE)
+                    || TextUtils.equals(callingPackage, PHONE_PACKAGE))) {
                 return true;
             }
         }
-        Log.d(LOG_TAG, "isCallingPackageAllowedInCtsMode: calling packages="
-                + String.join(",", callingPackages) + " is not allowed in CTS mode"
-                + " for method: " + methodName);
+        Log.e(LOG_TAG, "isCallingPackageAllowedInCtsMode: callingUid=" + callingUid
+                + ", callingPackages=" + String.join(",", callingPackages)
+                + " is not allowed in CTS mode for method: " + methodName);
         return false;
     }
 
