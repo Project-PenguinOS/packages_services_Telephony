@@ -46,12 +46,14 @@ import android.os.RemoteException;
 import android.telephony.CarrierConfigManager;
 import android.telephony.Rlog;
 import android.telephony.SubscriptionManager;
+import android.text.TextUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.telephony.ExponentialBackoff;
 import com.android.internal.telephony.IIntegerConsumer;
 import com.android.internal.telephony.flags.FeatureFlags;
+import com.android.internal.telephony.satellite.SatelliteConfig;
 import com.android.internal.telephony.satellite.SatelliteConstants;
 import com.android.internal.telephony.satellite.SatelliteController;
 import com.android.internal.telephony.satellite.metrics.EntitlementMetricsStats;
@@ -85,6 +87,7 @@ public class SatelliteEntitlementController extends Handler {
     private static final int AIRPLANE_MODE_CHANGED = 4;
 
     private static final int CMD_START_QUERY_ENTITLEMENT_FOR_SUB_ID = 5;
+    private static final int CMD_UPDATE_CONFIG_DATA = 6;
 
     private static final boolean IS_DEBUG_BUILD = !"user".equals(Build.TYPE);
 
@@ -210,6 +213,8 @@ public class SatelliteEntitlementController extends Handler {
         context.registerReceiver(mReceiver, intentFilter);
         mEntitlementMetricsStats = EntitlementMetricsStats.getOrCreateInstance();
         SatelliteController.getInstance().registerIccRefresh(this, CMD_SIM_REFRESH);
+        SatelliteController.getInstance()
+                .registerForConfigUpdateChanged(this, CMD_UPDATE_CONFIG_DATA, null);
     }
 
     @Override
@@ -246,8 +251,27 @@ public class SatelliteEntitlementController extends Handler {
                     args.recycle();
                 }
                 break;
+            case CMD_UPDATE_CONFIG_DATA:
+                logd("CMD_UPDATE_CONFIG_DATA");
+                handleCmdUpdateConfigData();
+                break;
             default:
                 logd("do not used this message");
+        }
+    }
+
+    /**
+     * Handles the configuration update event.
+     * When the satellite configuration is updated, this method checks if the entitlement
+     * related settings have changed and triggers a new query if necessary.
+     */
+    private void handleCmdUpdateConfigData() {
+        logd("handleCmdUpdateConfigData: sending CMD_START_QUERY_ENTITLEMENT");
+        if (isEntitlementItemExistOnSatelliteConfig()) {
+            Message message = obtainMessage();
+            message.what = CMD_START_QUERY_ENTITLEMENT;
+            message.arg2 = SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_CONFIG_UPDATED;
+            sendMessage(message);
         }
     }
 
@@ -919,8 +943,10 @@ public class SatelliteEntitlementController extends Handler {
         return true;
     }
 
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
     // update for removing the satellite entitlement restricted reason
-    private void resetSatelliteEntitlementRestrictedReason(int subId) {
+    protected void resetSatelliteEntitlementRestrictedReason(int subId) {
+        logd("resetSatelliteEntitlementRestrictedReason, subId=" + subId);
         SatelliteEntitlementResult enabledResult =
                 new SatelliteEntitlementResult(
                         SatelliteEntitlementResult.SATELLITE_ENTITLEMENT_STATUS_ENABLED,
@@ -1018,8 +1044,57 @@ public class SatelliteEntitlementController extends Handler {
         return true;
     }
 
+    private boolean isEntitlementItemExistOnSatelliteConfig() {
+        SatelliteConfig config = SatelliteController.getInstance().getSatelliteConfig();
+        if (config == null) {
+            logd("isEntitlementItemExistOnSatelliteConfig: "
+                    + "return false (SatelliteConfig is null)");
+            return false;
+        }
+
+        for (Integer slotIndex : mSubIdPerSlot.keySet()) {
+            int subId = mSubIdPerSlot.get(slotIndex);
+            Boolean entitlementSupported = config.isSatelliteEntitlementSupportedBySubId(subId);
+            if (entitlementSupported != null) {
+                logd("isEntitlementItemExistOnSatelliteConfig:"
+                        + " entitlement support exist, return true");
+                return true;
+            }
+
+            String url = config.getSatelliteEntitlementServerUrlBySubId(subId);
+            if (!TextUtils.isEmpty(url)) {
+                logd("isEntitlementItemExistOnSatelliteConfig: entitlement url exist, return true");
+                return true;
+            }
+        }
+
+        logd("isEntitlementItemExistOnSatelliteConfig: entitlement related item is not exist ");
+        return false;
+    }
+
+    @Nullable
+    private Boolean getEntitlementSupportedFromSatelliteConfig(int subId) {
+        SatelliteConfig config = SatelliteController.getInstance().getSatelliteConfig();
+        if (config == null) {
+            logd("getEntitlementSupportedFromSatelliteConfig: "
+                    + "return null (SatelliteConfig is null)");
+            return null;
+        }
+
+        return config.isSatelliteEntitlementSupportedBySubId(subId);
+    }
+
     /** Return the satellite entitlement supported bool from carrier config. */
-    private boolean isSatelliteEntitlementSupported(int subId) {
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+    protected boolean isSatelliteEntitlementSupported(int subId) {
+        // 1. get from SatelliteConfig
+        Boolean supported = getEntitlementSupportedFromSatelliteConfig(subId);
+        if (supported != null) {
+            logd("isSatelliteEntitlementSupported: using SatelliteConfig for subId=" + subId
+                    + ", entitlementSupported=" + supported);
+            return supported;
+        }
+        // 2. get from CarrierConfig
         return getConfigForSubId(subId)
                 .getBoolean(CarrierConfigManager.KEY_SATELLITE_ENTITLEMENT_SUPPORTED_BOOL);
     }
