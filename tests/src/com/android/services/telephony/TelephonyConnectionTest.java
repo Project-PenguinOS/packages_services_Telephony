@@ -398,6 +398,37 @@ public class TelephonyConnectionTest extends TelephonyTestBase {
         assertTrue(c.isNetworkIdentifiedEmergencyCall());
     }
 
+    @Test
+    public void testMaybePersistDropsFgCallExtra() {
+        TestTelephonyConnection c = new TestTelephonyConnection();
+        c.setOriginalConnection(mImsPhoneConnection);
+        when(mImsPhoneConnection.isActiveCallDisconnectedOnAnswer()).thenReturn(false);
+
+        // 1. Extra not set, config off -> extra should be removed
+        c.getCarrierConfigBundle().putBoolean(
+                CarrierConfigManager.KEY_SHOW_VOWIFI_DROP_DIALOG_ON_DSDS_BOOL, false);
+        c.setOriginalConnection(mImsPhoneConnection);
+        assertFalse(c.getExtras() != null && c.getExtras().containsKey(
+                Connection.EXTRA_ANSWERING_DROPS_FG_CALL));
+
+        // 2. Extra set (e.g. by Telecom), config on -> extra should be persisted
+        c.getCarrierConfigBundle().putBoolean(
+                CarrierConfigManager.KEY_SHOW_VOWIFI_DROP_DIALOG_ON_DSDS_BOOL, true);
+        Bundle extras = new Bundle();
+        extras.putBoolean(Connection.EXTRA_ANSWERING_DROPS_FG_CALL, true);
+        c.putTelephonyExtras(extras);
+
+        c.setOriginalConnection(mImsPhoneConnection);
+        assertTrue(c.getExtras().getBoolean(Connection.EXTRA_ANSWERING_DROPS_FG_CALL));
+
+        // 3. Extra set, config off -> extra should be removed
+        c.getCarrierConfigBundle().putBoolean(
+                CarrierConfigManager.KEY_SHOW_VOWIFI_DROP_DIALOG_ON_DSDS_BOOL, false);
+        c.setOriginalConnection(mImsPhoneConnection);
+        assertFalse(c.getExtras() != null && c.getExtras().containsKey(
+                Connection.EXTRA_ANSWERING_DROPS_FG_CALL));
+    }
+
     private EmergencyNumber getEmergencyNumber(int eccCategory) {
         return new EmergencyNumber("", "", "", eccCategory,
             new ArrayList<String>(),

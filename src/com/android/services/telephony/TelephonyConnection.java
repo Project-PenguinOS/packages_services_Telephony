@@ -1695,9 +1695,11 @@ abstract class TelephonyConnection extends Connection implements Holdable, Commu
 
         Bundle extrasToPut = new Bundle();
         List<String> extrasToRemove = new ArrayList<>();
+        boolean persistDropsFgCallExtra = maybePersistDropsFgCallExtra();
+        Log.i(this, "persistDropsFgCallExtra? " + persistDropsFgCallExtra);
         if (mOriginalConnection.isActiveCallDisconnectedOnAnswer()) {
             extrasToPut.putBoolean(Connection.EXTRA_ANSWERING_DROPS_FG_CALL, true);
-        } else {
+        } else if (!persistDropsFgCallExtra) {
             extrasToRemove.add(Connection.EXTRA_ANSWERING_DROPS_FG_CALL);
         }
 
@@ -1727,6 +1729,18 @@ abstract class TelephonyConnection extends Connection implements Holdable, Commu
         }
 
         fireOnOriginalConnectionConfigured();
+    }
+
+    private boolean maybePersistDropsFgCallExtra() {
+        Bundle extras = getExtras();
+        // Check if the extras already has the drops fg call extra already set (e.g. by Telecom).
+        // Used to prevent removal in the case that KEY_SHOW_VOWIFI_DROP_DIALOG_ON_DSDS_BOOL is
+        // enabled so that users can be warned that a VoLTE call will be dropped by answering a
+        // VoWiFi call.
+        PersistableBundle b = getCarrierConfig();
+        return b.getBoolean(
+                CarrierConfigManager.KEY_SHOW_VOWIFI_DROP_DIALOG_ON_DSDS_BOOL)
+                && extras.getBoolean(Connection.EXTRA_ANSWERING_DROPS_FG_CALL, false);
     }
 
     /**
