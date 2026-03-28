@@ -688,7 +688,8 @@ public class ImsRcsController extends IImsRcsController.Stub {
             int remoteUid;
             remoteUid = mApp.getPackageManager().getPackageUidAsUser(packageName, 0 /*flags*/,
                     Binder.getCallingUserHandle().getIdentifier());
-            if (!UserHandle.isSameApp(Binder.getCallingUid(), remoteUid)) {
+            if (!PccAwareUidComparator.isSameApp(mApp.getPackageManager(), Binder.getCallingUid(),
+                    remoteUid)) {
                 throw new SecurityException("passed in packageName does not match the caller");
             }
         } catch (PackageManager.NameNotFoundException e) {
