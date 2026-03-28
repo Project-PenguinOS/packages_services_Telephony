@@ -38,4 +38,33 @@
     <item msgid="1898895770647738117">"503"</item>
     <item msgid="2420418633305128093">"503_NO_RETRY_AFTER"</item>
   </string-array>
+    <!-- no translation found for data_plan_type_label (6571895909927244218) -->
+    <skip />
+    <!-- no translation found for service_type_label (5778585335411078154) -->
+    <skip />
+    <!-- no translation found for service_policy_label (4132043416893841942) -->
+    <skip />
+    <!-- no translation found for plmn_id_label (8058228564151694348) -->
+    <skip />
+    <!-- no translation found for add_plmn_button (1674513590425103807) -->
+    <skip />
+    <!-- no translation found for bar_plmn_button (2476955538708126437) -->
+    <skip />
+    <!-- no translation found for clear_all_button (8066635149916015212) -->
+    <skip />
+    <!-- no translation found for data_plan_type_checkbox (3416488122240116800) -->
+    <skip />
+    <!-- no translation found for data_service_checkbox (1053897552977297849) -->
+    <skip />
+    <!-- no translation found for voice_service_checkbox (2955463313373337638) -->
+    <skip />
+    <!-- no translation found for barred_plmn_id_label (505024831880097474) -->
+    <skip />
+    <!-- no translation found for data_plan_type_array:0 (4481708547874319163) -->
+    <!-- no translation found for data_plan_type_array:1 (847694900028477007) -->
+    <!-- no translation found for service_type_array:0 (8060338003865848773) -->
+    <!-- no translation found for service_type_array:1 (6815202494927703427) -->
+    <!-- no translation found for service_policy_array:0 (1671188299707229210) -->
+    <!-- no translation found for service_policy_array:1 (5432811344446551182) -->
+    <!-- no translation found for service_policy_array:2 (2865228900925141156) -->
 </resources>
