@@ -70,9 +70,8 @@ public class ConferenceParticipantConnection extends Connection {
             com.android.internal.telephony.Connection parentConnection,
             ConferenceParticipant participant,
 // QTI_BEGIN: 2020-11-30: Telephony: IMS: Set property PROPERTY_IS_PARTICIPANT_HOST
-            boolean isRemotelyHosted,
-            boolean isParticipantHost) {
 // QTI_END: 2020-11-30: Telephony: IMS: Set property PROPERTY_IS_PARTICIPANT_HOST
+            boolean isRemotelyHosted) {
 
         mParentConnection = parentConnection;
 
@@ -103,9 +102,9 @@ public class ConferenceParticipantConnection extends Connection {
         mEndpoint = participant.getEndpoint();
 
 // QTI_BEGIN: 2020-11-30: Telephony: IMS: Set property PROPERTY_IS_PARTICIPANT_HOST
-        setCapabilitiesAndProperties(isRemotelyHosted, isParticipantHost);
 // QTI_END: 2020-11-30: Telephony: IMS: Set property PROPERTY_IS_PARTICIPANT_HOST
 // QTI_BEGIN: 2018-10-24: Telephony: Create ConferenceParticipantConnection with actual participant state
+        setCapabilitiesAndProperties(isRemotelyHosted);
         updateState(participant.getState());
 // QTI_END: 2018-10-24: Telephony: Create ConferenceParticipantConnection with actual participant state
     }
@@ -186,9 +185,8 @@ public class ConferenceParticipantConnection extends Connection {
      *                         hosted on a remote device, {@code false} otherwise.
      */
 // QTI_BEGIN: 2020-11-30: Telephony: IMS: Set property PROPERTY_IS_PARTICIPANT_HOST
-    private void setCapabilitiesAndProperties(boolean isRemotelyHosted,
-            boolean isParticipantHost) {
 // QTI_END: 2020-11-30: Telephony: IMS: Set property PROPERTY_IS_PARTICIPANT_HOST
+    private void setCapabilitiesAndProperties(boolean isRemotelyHosted) {
         int capabilities = CAPABILITY_DISCONNECT_FROM_CONFERENCE;
         setConnectionCapabilities(capabilities);
 
@@ -196,10 +194,6 @@ public class ConferenceParticipantConnection extends Connection {
             setConnectionProperties(PROPERTY_REMOTELY_HOSTED);
         }
 // QTI_BEGIN: 2020-11-30: Telephony: IMS: Set property PROPERTY_IS_PARTICIPANT_HOST
-
-        if (isParticipantHost) {
-            setConnectionProperties(PROPERTY_IS_PARTICIPANT_HOST);
-        }
 // QTI_END: 2020-11-30: Telephony: IMS: Set property PROPERTY_IS_PARTICIPANT_HOST
     }
 
