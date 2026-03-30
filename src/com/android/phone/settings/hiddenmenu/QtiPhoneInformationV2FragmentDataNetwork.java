@@ -5,8 +5,6 @@
 package com.android.phone.settings.hiddenmenu;
 
 import android.os.Bundle;
-import android.os.PersistableBundle;
-import android.telephony.CarrierConfigManager;
 import android.telephony.ims.ImsMmTelManager;
 import android.telephony.SubscriptionManager;
 import android.util.Log;
@@ -41,7 +39,6 @@ public class QtiPhoneInformationV2FragmentDataNetwork extends PhoneInformationV2
     @Override
     public void updateAllFields() {
         super.updateAllFields();
-
         updateVoLteState();
         updateVoNrState();
     }
@@ -135,31 +132,8 @@ public class QtiPhoneInformationV2FragmentDataNetwork extends PhoneInformationV2
                 ImsMmTelManager imsMmTelManager = mImsManager.getImsMmTelManager(subId);
                 try {
                     if (isChecked != QtiPhoneInformationUtil.isVolteEnabled(imsMmTelManager)) {
-                        Log.d(TAG, "setVoLteEnabled: " + isChecked + " on subId=" + subId +
-                                " mPhoneId:" + mPhoneId);
-                        if (isChecked) {
-                            mTelephonyManager.enableIms(phoneId);
-                        } else {
-                            mTelephonyManager.disableIms(phoneId);
-                        }
-                    }
-
-                    //Update Enhanced 4G LTE Mode Settings
-                    SubscriptionManager.setSubscriptionProperty(
-                            subId, SubscriptionManager.ENHANCED_4G_MODE_ENABLED,
-                            (isChecked ? "1" : "0"));
-
-                    PersistableBundle b = PhoneInformationUtil.getCarrierConfig(mContext).
-                            getConfigForSubId(subId);
-                    //If Enhanced 4G LTE Mode is uneditable, hidden and VoLTE is disabled we will
-                    //enable VoIMS opt-in to allow the user to change the IMS enabled setting, this
-                    //is to adapt to the logic in ImsManager.java
-                    boolean isUiUnEditable = !b.getBoolean(CarrierConfigManager.
-                            KEY_EDITABLE_ENHANCED_4G_LTE_BOOL, false) || b.getBoolean
-                            (CarrierConfigManager.KEY_HIDE_ENHANCED_4G_LTE_BOOL, false);
-                    if (isUiUnEditable) {
-                        SubscriptionManager.setSubscriptionProperty(subId,
-                                SubscriptionManager.VOIMS_OPT_IN_STATUS, (isChecked ?"0" : "1"));
+                        QtiPhoneInformationUtil.setVoImsOptInSetting(isChecked, mContext, subId);
+                        imsMmTelManager.setAdvancedCallingSettingEnabled(isChecked);
                     }
                 } catch (Exception e) {
                     Log.e(TAG, "fail to set VoLTE=" + isChecked + ". subId=" + subId, e);
