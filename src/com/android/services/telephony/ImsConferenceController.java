@@ -301,6 +301,18 @@ public class ImsConferenceController {
                 }
             }
         }
+
+       for (ImsConference conference : mImsConferences) {
+            if (conference.getState() != Connection.STATE_DISCONNECTED) {
+                PhoneAccount pa = tm.getPhoneAccount(conference.getPhoneAccountHandle());
+                if (pa != null && pa.hasSimultaneousCallingRestriction()) {
+                    if (pa.getSimultaneousCallingRestriction().isEmpty()) {
+                        return conference.getPhoneAccountHandle();
+                    }
+                }
+           }
+        }
+
         return null;
     }
 
@@ -324,6 +336,10 @@ public class ImsConferenceController {
             for (PhoneAccountHandle handle : allPaHandles) {
                 mTelecomAccountRegistry.refreshAdhocConference(handle.equals(activeDsdsPaHandle),
                         handle, activeDsdsPaHandle != null);
+            }
+        } else {
+            for (PhoneAccountHandle handle : allPaHandles) {
+                mTelecomAccountRegistry.refreshAdhocConference(true, handle, false);
             }
         }
 // QTI_END: 2026-02-04: Telephony: FR114115 Dialer Enhancements
