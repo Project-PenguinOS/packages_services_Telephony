@@ -1379,8 +1379,6 @@ public class ImsConference extends TelephonyConferenceBase implements Holdable {
         // active call.
         ConferenceParticipantConnection connection = new ConferenceParticipantConnection(
                 parent.getOriginalConnection(), participant,
-// QTI_BEGIN: 2020-11-30: Telephony: IMS: Set property PROPERTY_IS_PARTICIPANT_HOST
-// QTI_END: 2020-11-30: Telephony: IMS: Set property PROPERTY_IS_PARTICIPANT_HOST
 
                 !isConferenceHost() /* isRemotelyHosted */);
         if (participant.getConnectTime() == 0) {
