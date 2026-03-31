@@ -15420,4 +15420,68 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
         }
         resultReceiver.send(resultToSend, bundleToSend);
     }
+
+    @Override
+    public boolean isSatelliteAttachSupported(int subId) {
+        enforceSatelliteCommunicationPermission("isSatelliteAttachSupported");
+        final long identity = Binder.clearCallingIdentity();
+
+        if (!SubscriptionManager.isValidSubscriptionId(subId)) {
+            throw new IllegalArgumentException("Invalid Subscription ID: " + subId);
+        }
+
+        try {
+            return mSatelliteController.isSatelliteSupportedViaCarrier(subId);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public boolean isSatelliteEntitlementSupported(int subId) {
+        enforceSatelliteCommunicationPermission("isSatelliteEntitlementSupported");
+        final long identity = Binder.clearCallingIdentity();
+
+        if (!SubscriptionManager.isValidSubscriptionId(subId)) {
+            throw new IllegalArgumentException("Invalid Subscription ID: " + subId);
+        }
+
+        try {
+            return mSatelliteController.isSatelliteEntitlementSupported(subId);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public String getSatelliteEntitlementServerUrl(int subId) {
+        enforceSatelliteCommunicationPermission("getSatelliteEntitlementServerUrl");
+
+        if (!SubscriptionManager.isValidSubscriptionId(subId)) {
+            throw new IllegalArgumentException("Invalid Subscription ID: " + subId);
+        }
+
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return mSatelliteController.getSatelliteEntitlementServerUrl(subId);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public int getSatelliteNtnConnectType(int subId) {
+        enforceSatelliteCommunicationPermission("getSatelliteNtnConnectType");
+
+        if (!SubscriptionManager.isValidSubscriptionId(subId)) {
+            throw new IllegalArgumentException("Invalid Subscription ID: " + subId);
+        }
+
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return mSatelliteController.getCarrierRoamingNtnConnectType(subId);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
 }
