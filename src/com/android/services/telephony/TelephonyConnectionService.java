@@ -244,6 +244,19 @@ public class TelephonyConnectionService extends ConnectionService {
 
     private ImsConferenceController mImsConferenceController;
 
+    /**
+     * Determines if there is an active conference call for the given phone account handle.
+     *
+     * @param handle The phone account handle.
+     * @return {@code true} if there is an active conference call, {@code false} otherwise.
+     */
+    public boolean isConferenceActive(PhoneAccountHandle handle) {
+        if (mImsConferenceController != null) {
+            return mImsConferenceController.hasActiveConference(handle);
+        }
+        return false;
+    }
+
     private ComponentName mExpectedComponentName = null;
     private RadioOnHelper mRadioOnHelper;
     private EmergencyTonePlayer mEmergencyTonePlayer;
