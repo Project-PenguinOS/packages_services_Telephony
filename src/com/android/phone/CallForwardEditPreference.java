@@ -1260,6 +1260,12 @@ public class CallForwardEditPreference extends EditPhoneNumberPreference {
 
             Log.d(LOG_TAG, "handleSetCFResponse: re get");
             if (!mCallForwardByUssd) {
+                if (isUtUnavailableForVideoCallForward()) {
+                    Log.d(LOG_TAG, "handleSetCFResponse: skip CS retry for video CF");
+                    mTcpListener.onFinished(CallForwardEditPreference.this, false);
+                    return;
+                }
+
                 mPhone.getCallForwardingOption(reason, mServiceClass,
                         obtainMessage(MESSAGE_GET_CF, msg.arg1, MESSAGE_SET_CF, ar.exception));
             } else {
