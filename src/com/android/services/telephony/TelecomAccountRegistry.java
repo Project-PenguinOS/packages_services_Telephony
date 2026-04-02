@@ -1399,6 +1399,10 @@ public class TelecomAccountRegistry {
             return !(mIsTestAccount || mIsEmergency);
         }
 // QTI_END: 2021-10-29: Telephony: Fix phone account isn't associated
+
+        public Set<Integer> getSimultaneousCallSupportedSubIds() {
+            return mSimultaneousCallSupportedSubIds;
+        }
     }
 
     private OnSubscriptionsChangedListener mOnSubscriptionsChangedListener =
@@ -1948,7 +1952,9 @@ public class TelecomAccountRegistry {
 // QTI_BEGIN: 2026-02-04: Telephony: FR114115 Dialer Enhancements
     public void refreshAdhocConference(boolean isEnableAdhocConf, PhoneAccountHandle handle,
             boolean isActiveCallInDsds) {
-        if ((!isSimultaneousCallingEnabled() || handle == null) && !isActiveCallInDsds) {
+        boolean simultaneousCallingEnabled = isSimultaneousCallingSupported()
+                && isSimultaneousCallingEnabled();
+        if ((!simultaneousCallingEnabled || handle == null) && !isActiveCallInDsds) {
             Log.i(this, "refreshadhocconference handle: " + handle);
 // QTI_END: 2026-02-04: Telephony: FR114115 Dialer Enhancements
             refreshAdhocConference(isEnableAdhocConf);
@@ -1976,7 +1982,7 @@ public class TelecomAccountRegistry {
         }
     }
 
-    private boolean isSimultaneousCallingEnabled() {
+    private boolean isSimultaneousCallingSupported() {
         try {
             return mTelephonyManager.getMaxNumberOfSimultaneouslyActiveSims() > 1
                     || mTelephonyManager.getPhoneCapability().getMaxActiveVoiceSubscriptions() > 1;
@@ -1984,8 +1990,24 @@ public class TelecomAccountRegistry {
             Log.w(this, "Telephony not supported");
             return false;
         } catch (Exception e) {
-            Log.w(this, "exception in isSimultaneousCallingEnabled(): ", e);
+            Log.w(this, "exception in isSimultaneousCallingSupported(): ", e);
             return false;
+        }
+    }
+
+    /**
+     * Checks the simultaneous call supported subscription id list to determine whether
+     * simultaneous calling is enabled (different from supported). If any of the entries has an
+     * empty list, we will consider simultaneous calling to be disabled.
+     * @return {@code true} if enabled, {@code false} otherwise.
+     */
+    private boolean isSimultaneousCallingEnabled() {
+        if (!Flags.dsdaAdhocFiltering()) {
+            return true;
+        }
+        synchronized (mAccountsLock) {
+            return mAccounts.stream().noneMatch(
+                    entry -> entry.getSimultaneousCallSupportedSubIds().isEmpty());
         }
     }
 
