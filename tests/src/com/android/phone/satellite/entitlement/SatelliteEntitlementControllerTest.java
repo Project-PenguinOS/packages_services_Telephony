@@ -41,6 +41,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
@@ -60,6 +61,7 @@ import android.net.NetworkCapabilities;
 import android.net.wifi.WifiInfo;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
 import android.os.PersistableBundle;
 import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
@@ -79,6 +81,7 @@ import com.android.internal.telephony.LocaleTracker;
 import com.android.internal.telephony.ServiceStateTracker;
 import com.android.internal.telephony.domainselection.DomainSelectionResolver;
 import com.android.internal.telephony.flags.FeatureFlags;
+import com.android.internal.telephony.satellite.SatelliteConfig;
 import com.android.internal.telephony.satellite.SatelliteConstants;
 import com.android.internal.telephony.satellite.SatelliteController;
 import com.android.internal.telephony.subscription.SubscriptionManagerService;
@@ -147,6 +150,7 @@ public class SatelliteEntitlementControllerTest extends TelephonyTestBase {
     @Mock SatelliteEntitlementResult mSatelliteEntitlementResult;
     @Mock SatelliteController mSatelliteController;
     @Mock private FeatureFlags mMockFeatureFlags;
+    @Mock private SatelliteConfig mMockSatelliteConfig;
     @Mock private IIntegerConsumer mCallback;
     @Mock private DomainSelectionResolver mMockDomainSelectionResolver;
     @Mock private ServiceStateTracker mMockSST;
@@ -1352,6 +1356,78 @@ public class SatelliteEntitlementControllerTest extends TelephonyTestBase {
                 "mSubIdPerSlot", mSatelliteEntitlementController, new ConcurrentHashMap<>());
     }
 
+    @Test
+    public void testShouldStartQueryEntitlement_withSatelliteConfig() throws Exception {
+        doReturn(ACTIVE_SUB_ID).when(mMockSubscriptionManagerService).getActiveSubIdList(true);
+        doReturn(true).when(mMockFeatureFlags).configForEnablingCarrier();
+
+        SatelliteConfig mockSatelliteConfig = mock(SatelliteConfig.class);
+        doReturn(mockSatelliteConfig).when(mSatelliteController).getSatelliteConfig();
+        doReturn(1).when(mTelephonyManager).getSimCarrierId();
+
+        // 1. Verify entitlement supported from SatelliteConfig
+        doReturn(true).when(mockSatelliteConfig).isSatelliteEntitlementSupportedBySubId(anyInt());
+        // Set CarrierConfig to false to ensure we are using SatelliteConfig
+        mCarrierConfigBundle.putBoolean(
+                CarrierConfigManager.KEY_SATELLITE_ENTITLEMENT_SUPPORTED_BOOL, false);
+
+        setInternetConnected(true);
+        setLastQueryTime(0L);
+
+        mSatelliteEntitlementController.handleCmdStartQueryEntitlement(
+                SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_UNKNOWN);
+        verify(mSatelliteEntitlementApi).checkEntitlementStatus();
+
+        // 2. Verify entitlement NOT supported from SatelliteConfig
+        clearInvocations(mSatelliteEntitlementApi);
+        doReturn(false).when(mockSatelliteConfig).isSatelliteEntitlementSupportedBySubId(anyInt());
+
+        mSatelliteEntitlementController.handleCmdStartQueryEntitlement(
+                SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_UNKNOWN);
+        verify(mSatelliteEntitlementApi, never()).checkEntitlementStatus();
+    }
+
+    @Test
+    public void testRegisterForConfigUpdateChanged() {
+        SatelliteConfig mockSatelliteConfig = mock(SatelliteConfig.class);
+        doReturn(true).when(mockSatelliteConfig).isSatelliteEntitlementSupportedBySubId(anyInt());
+        // Reset the singleton mock to capture the registration call in constructor
+        reset(mSatelliteController);
+
+        SatelliteEntitlementController testController = new SatelliteEntitlementController(
+                mContext, mTestableLooper.getLooper(), mMockFeatureFlags);
+
+        verify(mSatelliteController).registerForConfigUpdateChanged(
+                eq(testController), eq(6 /* CMD_UPDATE_CONFIG_DATA */), any());
+    }
+
+    @Test
+    public void testReceiveConfigUpdateMessage() throws Exception {
+        // Prepare mock environment
+        doReturn(true).when(mMockFeatureFlags).configForEnablingCarrier();
+        replaceInstance(SatelliteEntitlementController.class, "mSubscriptionManagerService",
+                mSatelliteEntitlementController, mMockSubscriptionManagerService);
+        doReturn(new int[]{SUB_ID}).when(mMockSubscriptionManagerService).getActiveSubIdList(true);
+
+        // Satisfy isEntitlementItemExistOnSatelliteConfig() condition
+        SatelliteConfig mockSatelliteConfig = mock(SatelliteConfig.class);
+        doReturn(mockSatelliteConfig).when(mSatelliteController).getSatelliteConfig();
+        doReturn(true).when(mockSatelliteConfig).isSatelliteEntitlementSupportedBySubId(anyInt());
+
+        // 1. Send the message CMD_UPDATE_CONFIG_DATA (6)
+        Message msgUpdate = mSatelliteEntitlementController.obtainMessage(6);
+        mSatelliteEntitlementController.handleMessage(msgUpdate);
+
+        // 2. Manually trigger the resulting entitlement query to avoid async looper issues
+        // In handleCmdUpdateConfigData, it sends CMD_START_QUERY_ENTITLEMENT (1)
+        Message msgQuery = mSatelliteEntitlementController.obtainMessage(1);
+        msgQuery.arg2 = SatelliteConstants.SATELLITE_ENTITLEMENT_QUERY_TRIGGER_CONFIG_UPDATED;
+        mSatelliteEntitlementController.handleMessage(msgQuery);
+
+        // Verify that the controller eventually accessed the sub list during entitlement query
+        verify(mMockSubscriptionManagerService, atLeastOnce()).getActiveSubIdList(true);
+    }
+
     private void setInternetConnected(boolean connected) {
         NetworkCapabilities networkCapabilities = new NetworkCapabilities.Builder().build();
 
@@ -1456,11 +1532,21 @@ public class SatelliteEntitlementControllerTest extends TelephonyTestBase {
         }
 
         @Override
-        protected void handleCmdStartQueryEntitlementForSubId(int subId,
+        public void handleCmdStartQueryEntitlementForSubId(int subId,
                 boolean shouldEnforceTimeout, @Nullable IIntegerConsumer callback,
                 int triggerEvent) {
             super.handleCmdStartQueryEntitlementForSubId(subId, shouldEnforceTimeout,
                     callback, triggerEvent);
+        }
+
+        @Override
+        public boolean isSatelliteEntitlementSupported(int subId) {
+            return super.isSatelliteEntitlementSupported(subId);
+        }
+
+        @Override
+        public void resetSatelliteEntitlementRestrictedReason(int subId) {
+            super.resetSatelliteEntitlementRestrictedReason(subId);
         }
     }
 }

@@ -86,6 +86,17 @@ public class Util {
     }
 
     /**
+     * @param ntnConnectType target ntn connect type for validation.
+     * @return {@code true} if the target ntnConnectType is valid {@code false} otherwise.
+     */
+    public static boolean isValidNtnConnectType(int ntnConnectType) {
+        if (ntnConnectType < 0) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * @param rule target rule string for validation.
      * @return {@code true} if the rule is in format "int:int:boolean", {@code false} otherwise.
      */
