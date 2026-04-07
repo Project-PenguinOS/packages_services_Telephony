@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+/*
+​​ * ​​​Changes from Qualcomm Technologies, Inc. are provided under the following license:
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+ * SPDX-License-Identifier: BSD-3-Clause-Clear
+ */
+
 package com.android.services.telephony;
 
 import static android.telephony.CarrierConfigManager.KEY_USE_ONLY_DIALED_SIM_ECC_LIST_BOOL;
@@ -3908,6 +3914,9 @@ public class TelephonyConnectionService extends ConnectionService {
                  break;
             case CallStateException.ERROR_FDN_BLOCKED:
                  cause = android.telephony.DisconnectCause.FDN_BLOCKED;
+                 break;
+            case CallStateException.ERROR_NARROWBAND_TERRESTRIAL_NETWORK:
+                 cause = android.telephony.DisconnectCause.NARROWBAND_TERRESTRIAL_NETWORK;
                  break;
         }
         connection.setTelephonyConnectionDisconnected(

@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+/*
+​​ * ​​​Changes from Qualcomm Technologies, Inc. are provided under the following license:
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+ * SPDX-License-Identifier: BSD-3-Clause-Clear
+ */
+
 package com.android.services.telephony;
 
 import android.content.Context;
@@ -284,6 +290,7 @@ public class DisconnectCauseUtil {
 // QTI_BEGIN: 2021-08-12: Telephony: IMS: Add support for additional call information
             case android.telephony.DisconnectCause.CONCURRENT_CALLS_NOT_POSSIBLE:
 // QTI_END: 2021-08-12: Telephony: IMS: Add support for additional call information
+            case android.telephony.DisconnectCause.NARROWBAND_TERRESTRIAL_NETWORK:
                 return DisconnectCause.ERROR;
 
             case android.telephony.DisconnectCause.DIALED_MMI:
@@ -526,6 +533,9 @@ public class DisconnectCauseUtil {
                 resourceId = R.string.callFailed_concurrent_calls_not_possible;
                 break;
 // QTI_END: 2021-08-12: Telephony: IMS: Add support for additional call information
+            case android.telephony.DisconnectCause.NARROWBAND_TERRESTRIAL_NETWORK:
+                resourceId = R.string.callFailed_narrowband_terrestrial_network;
+                break;
             default:
                 break;
         }
@@ -1181,6 +1191,9 @@ public class DisconnectCauseUtil {
                 resourceId = R.string.callFailed_concurrent_calls_not_possible;
                 break;
 // QTI_END: 2021-08-12: Telephony: IMS: Add support for additional call information
+            case android.telephony.DisconnectCause.NARROWBAND_TERRESTRIAL_NETWORK:
+                resourceId = R.string.callFailed_narrowband_terrestrial_network;
+                break;
             default:
                 break;
         }
