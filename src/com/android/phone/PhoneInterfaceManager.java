@@ -59,6 +59,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ComponentInfo;
 import android.content.pm.PackageManager;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.os.AsyncResult;
 import android.os.Binder;
@@ -2820,15 +2821,23 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
                 PackageManager.FEATURE_TELEPHONY_CALLING, "getCurrentTtyMode");
         final Phone defaultPhone = getDefaultPhone();
         final long identity = Binder.clearCallingIdentity();
+        int ttyMode = TelephonyManager.TTY_MODE_OFF;
         try {
-            return Settings.Secure.getIntForUser(defaultPhone.getContext().getContentResolver(),
+            ttyMode = Settings.Secure.getIntForUser(defaultPhone.getContext().getContentResolver(),
                     Settings.Secure.PREFERRED_TTY_MODE, defaultPhone.getContext().getUserId());
+            if (ttyMode != TelephonyManager.TTY_MODE_OFF) {
+                AudioManager audioManager = defaultPhone.getContext()
+                        .getSystemService(AudioManager.class);
+                if (audioManager == null || !audioManager.isWiredHeadsetOn()) {
+                    ttyMode = TelephonyManager.TTY_MODE_OFF;
+                }
+            }
         } catch (Settings.SettingNotFoundException e) {
             // Do nothing. TTY_MODE_OFF will be returned below.
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
-        return TelephonyManager.TTY_MODE_OFF;
+        return ttyMode;
     }
 
     @Deprecated
@@ -8302,7 +8311,8 @@ public class PhoneInterfaceManager extends ITelephony.Stub {
             // exact locale (e.g. fr_FR = French/France). So, if the locale returned from
             // the SIM and carrier preferences does not include a country we add the country
             // determined from the SIM MCC to provide an exact locale.
-            final Locale mccLocale = LocaleUtils.getLocaleFromMcc(mApp, mcc, simLanguage);
+            final Locale mccLocale = LocaleUtils.getLocaleFromMccMnc(mApp, mcc,
+                                                                 info.getMncString(), simLanguage);
             if (mccLocale != null) {
                 if (DBG) log("No locale from SIM, using mcc locale:" + mccLocale);
                 return matchLocaleFromSupportedLocaleList(phone, mccLocale);

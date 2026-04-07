@@ -146,9 +146,13 @@ public class PhoneInterfaceManagerTest extends TelephonyTestBase {
     PackageManager mPackageManager;
     @Mock
     private SubscriptionManagerService mSubscriptionManagerService;
+    @Mock
+    private com.android.internal.telephony.data.DataNetworkController mDataNetworkController;
 
     @Mock
     private AppOpsManager mAppOps;
+    @Mock
+    private android.media.AudioManager mAudioManager;
     @Mock
     private SatelliteController mSatelliteController;
 
@@ -195,6 +199,9 @@ public class PhoneInterfaceManagerTest extends TelephonyTestBase {
         doReturn(mPhoneGlobals).when(mPhoneGlobals).getBaseContext();
         doReturn(mPhoneGlobals).when(mPhoneGlobals).createContextAsUser(
                 any(UserHandle.class), anyInt());
+        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        doReturn(context.getContentResolver()).when(mPhoneGlobals).getContentResolver();
+        doReturn(context.getUserId()).when(mPhoneGlobals).getUserId();
         doReturn(mSubscriptionManagerService).when(mPhoneInterfaceManager)
                 .getSubscriptionManagerService();
         TelephonyManager.setupISubForTest(mSubscriptionManagerService);
@@ -203,8 +210,8 @@ public class PhoneInterfaceManagerTest extends TelephonyTestBase {
         // Make sure they return sensible values and the mPhone mock instance is set
         // as the default phone.
         doReturn(new HalVersion(2, 1)).when(mPhone).getHalVersion(anyInt());
-        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        when(mPhone.getContext()).thenReturn(context);
+        when(mPhone.getContext()).thenReturn(mPhoneGlobals);
+        doReturn(mDataNetworkController).when(mPhone).getDataNetworkController();
         doReturn(mPhone).when(mPhoneInterfaceManager).getDefaultPhone();
 
         // In order not to affect the existing implementation, define a telephony features
@@ -221,6 +228,13 @@ public class PhoneInterfaceManagerTest extends TelephonyTestBase {
         when(mPhoneGlobals.getSystemService(AppOpsManager.class)).thenReturn(mAppOps);
         when(mPhoneGlobals.getSystemService(Context.APP_OPS_SERVICE)).thenReturn(mAppOps);
         doNothing().when(mAppOps).checkPackage(anyInt(), anyString());
+
+        when(mPhoneGlobals.getSystemServiceName(android.media.AudioManager.class)).thenReturn(
+                Context.AUDIO_SERVICE);
+        when(mPhoneGlobals.getSystemService(android.media.AudioManager.class)).thenReturn(
+                mAudioManager);
+        when(mPhoneGlobals.getSystemService(Context.AUDIO_SERVICE)).thenReturn(mAudioManager);
+        when(mAudioManager.isWiredHeadsetOn()).thenReturn(false);
     }
 
     @Test
@@ -842,38 +856,64 @@ public class PhoneInterfaceManagerTest extends TelephonyTestBase {
     }
 
     @Test
-    public void testGetCurrentTtyMode_returnsCorrectValue() {
+    public void testGetCurrentTtyMode_headsetNotConnected_returnsTtyOff() {
         // Setup: Mock permissions and feature checks to pass
         doNothing().when(mPhoneInterfaceManager).enforceReadPrivilegedPermission(anyString());
-        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
 
-        // Set the TTY mode setting to a specific value
-        int expectedTtyMode = TelephonyManager.TTY_MODE_HCO;
-        Settings.Secure.putIntForUser(context.getContentResolver(),
-                Settings.Secure.PREFERRED_TTY_MODE, expectedTtyMode, context.getUserId());
+        // Set the TTY mode setting to a specific value (not OFF)
+        int preferredTtyMode = TelephonyManager.TTY_MODE_HCO;
+        Settings.Secure.putIntForUser(mPhoneGlobals.getContentResolver(),
+                Settings.Secure.PREFERRED_TTY_MODE, preferredTtyMode, mPhoneGlobals.getUserId());
+
+        // Mock AudioManager to report no wired headset
+        when(mAudioManager.isWiredHeadsetOn()).thenReturn(false);
 
         // Action: Call the method under test
         int actualTtyMode = mPhoneInterfaceManager.getCurrentTtyMode();
 
-        // Assert: The correct TTY mode is returned
+        // Assert: TTY_MODE_OFF is returned because headset is not connected
+        assertEquals(TelephonyManager.TTY_MODE_OFF, actualTtyMode);
+
+        // Cleanup
+        Settings.Secure.putIntForUser(mPhoneGlobals.getContentResolver(),
+                Settings.Secure.PREFERRED_TTY_MODE, TelephonyManager.TTY_MODE_OFF,
+                mPhoneGlobals.getUserId());
+    }
+
+    @Test
+    public void testGetCurrentTtyMode_headsetConnected_returnsCorrectValue() {
+        // Setup: Mock permissions and feature checks to pass
+        doNothing().when(mPhoneInterfaceManager).enforceReadPrivilegedPermission(anyString());
+
+        // Set the TTY mode setting to a specific value
+        int expectedTtyMode = TelephonyManager.TTY_MODE_HCO;
+        Settings.Secure.putIntForUser(mPhoneGlobals.getContentResolver(),
+                Settings.Secure.PREFERRED_TTY_MODE, expectedTtyMode, mPhoneGlobals.getUserId());
+
+        // Mock AudioManager to report wired headset is connected
+        when(mAudioManager.isWiredHeadsetOn()).thenReturn(true);
+
+        // Action: Call the method under test
+        int actualTtyMode = mPhoneInterfaceManager.getCurrentTtyMode();
+
+        // Assert: The correct TTY mode is returned because headset is connected
         assertEquals(expectedTtyMode, actualTtyMode);
 
         // Cleanup
-        Settings.Secure.putIntForUser(context.getContentResolver(),
+        Settings.Secure.putIntForUser(mPhoneGlobals.getContentResolver(),
                 Settings.Secure.PREFERRED_TTY_MODE, TelephonyManager.TTY_MODE_OFF,
-                context.getUserId());
+                mPhoneGlobals.getUserId());
     }
 
     @Test
     public void testGetCurrentTtyMode_settingNotFound_returnsDefault() {
         // Setup: Mock permissions and feature checks to pass
         doNothing().when(mPhoneInterfaceManager).enforceReadPrivilegedPermission(anyString());
-        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
 
         // Ensure the setting is not present
-        Settings.Secure.putIntForUser(context.getContentResolver(),
+        Settings.Secure.putIntForUser(mPhoneGlobals.getContentResolver(),
                 Settings.Secure.PREFERRED_TTY_MODE, TelephonyManager.TTY_MODE_OFF,
-                context.getUserId());
+                mPhoneGlobals.getUserId());
 
         // Action: Call the method under test
         int actualTtyMode = mPhoneInterfaceManager.getCurrentTtyMode();

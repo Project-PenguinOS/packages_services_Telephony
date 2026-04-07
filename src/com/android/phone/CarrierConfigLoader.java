@@ -2111,7 +2111,8 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
         return INVALID_UID;
     }
 
-    private void logCarrierServiceCarrierConfigOverrides(int phoneId,
+    @VisibleForTesting
+    void logCarrierServiceCarrierConfigOverrides(int phoneId,
             @NonNull PersistableBundle config) {
         String carrierServicePackageName = getCarrierPackageForPhoneId(phoneId);
         if (TextUtils.isEmpty(carrierServicePackageName)) {
@@ -2150,6 +2151,12 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
 
         int[] packageUids = packageUidsSet.stream().mapToInt(Integer::intValue).toArray();
 
+        writeCarrierServiceConfigOverridesReported(carrierId, carrierServiceUid, packageUids);
+    }
+
+    @VisibleForTesting
+    protected void writeCarrierServiceConfigOverridesReported(int carrierId, int carrierServiceUid,
+            int[] packageUids) {
         TelephonyStatsLog.write(TelephonyStatsLog.CARRIER_SERVICE_CONFIG_OVERRIDES_REPORTED,
                 carrierId,
                 carrierServiceUid,

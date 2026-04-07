@@ -4,6 +4,10 @@
  */
 package com.android.phone.settings.hiddenmenu;
 
+import android.content.Context;
+import android.os.PersistableBundle;
+import android.telephony.CarrierConfigManager;
+import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.telephony.ims.ImsMmTelManager;
 import android.util.Log;
@@ -54,5 +58,33 @@ public class QtiPhoneInformationUtil {
             Log.e(TAG, "isVoNrEnabled IllegalStateException =", e);
         }
         return false;
+    }
+
+    public static void setVoImsOptInSetting(boolean isChecked, Context context, int subId) {
+        if (context == null) {
+            return;
+        }
+
+        CarrierConfigManager carrierConfigManager = PhoneInformationUtil.getCarrierConfig(context);
+        if (carrierConfigManager == null ) {
+            return;
+        }
+
+        PersistableBundle b = carrierConfigManager.getConfigForSubId(subId,
+            CarrierConfigManager.KEY_EDITABLE_ENHANCED_4G_LTE_BOOL,
+            CarrierConfigManager.KEY_HIDE_ENHANCED_4G_LTE_BOOL
+        );
+        //If Enhanced 4G LTE Mode is uneditable, hidden and VoLTE is disabled we
+        //will enable VoIMS opt-in to allow the user to change the IMS enabled
+        //setting, this is to adapt to the logic in ImsManager.java
+        if (b != null) {
+            boolean isUiUnEditable = !b.getBoolean(CarrierConfigManager.
+                    KEY_EDITABLE_ENHANCED_4G_LTE_BOOL, false) || b.getBoolean
+                    (CarrierConfigManager.KEY_HIDE_ENHANCED_4G_LTE_BOOL, false);
+            if (isUiUnEditable) {
+                SubscriptionManager.setSubscriptionProperty(subId,
+                        SubscriptionManager.VOIMS_OPT_IN_STATUS, (isChecked ? "0" : "1"));
+            }
+        }
     }
 }
