@@ -605,11 +605,13 @@ public class TelecomAccountRegistry {
                 if (mTelephonyConnectionService != null
                         && mTelephonyConnectionService.isConferenceActive(phoneAccountHandle)) {
                     capabilities &= ~PhoneAccount.CAPABILITY_ADHOC_CONFERENCE_CALLING;
+                    mIsAdhocConfCapable = false;
                 } else {
                     capabilities |= PhoneAccount.CAPABILITY_ADHOC_CONFERENCE_CALLING;
                 }
             } else {
                 capabilities &= ~PhoneAccount.CAPABILITY_ADHOC_CONFERENCE_CALLING;
+                mIsAdhocConfCapable = false;
             }
 
             final boolean isHandoverFromSupported = mContext.getResources().getBoolean(
