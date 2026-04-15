@@ -53,6 +53,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PermissionEnforcer;
 import android.os.PersistableBundle;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.SystemProperties;
@@ -79,10 +80,10 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.ICarrierConfigLoader;
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.Phone;
-import com.android.internal.telephony.TelephonyStatsLog;
 import com.android.internal.telephony.PhoneConfigurationManager;
 import com.android.internal.telephony.PhoneFactory;
 import com.android.internal.telephony.TelephonyPermissions;
+import com.android.internal.telephony.TelephonyStatsLog;
 import com.android.internal.telephony.flags.FeatureFlags;
 import com.android.internal.telephony.subscription.SubscriptionManagerService;
 import com.android.internal.telephony.util.ArrayUtils;
@@ -1575,7 +1576,7 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
     private void secureOverrideConfig(@Nullable PersistableBundle overrides, boolean persistent) {
         // Do not allow shell UID to override the carrier config. This will not impact
         // the CTS and telephony shell commands as they use different uids
-        if (TelephonyPermissions.isShell(getCallingUid())) {
+        if (TelephonyPermissions.isShell(getBinderCallingUid())) {
             throw new SecurityException("overrideConfig cannot be invoked by shell");
         }
 
@@ -1652,18 +1653,30 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
     }
 
     private boolean isSystemApp() {
-        try {
-            String callingPackage = mContext.getPackageManager().getNameForUid(
-                    Binder.getCallingUid());
-
-            ApplicationInfo appInfo = mContext.getPackageManager().getApplicationInfo(
-                    callingPackage, 0);
-            return (appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0
-                    || (appInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0;
-        } catch (Exception e) {
-            loge("isSystemApp: failed to get application info: " + e);
+        int callingUid = getBinderCallingUid();
+        if (isSdkSandboxUidInternal(callingUid)) {
+            loge("isSystemApp: rejected call from SDK sandbox with uid=" + callingUid);
             return false;
         }
+
+        String[] packages = mContext.getPackageManager().getPackagesForUid(callingUid);
+        if (packages != null) {
+            for (String pkg : packages) {
+                try {
+                    ApplicationInfo appInfo =
+                            mContext.getPackageManager().getApplicationInfo(pkg, 0);
+                    if (appInfo != null
+                            && ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0
+                            || (appInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0)) {
+                        return true;
+                    }
+                } catch (Exception e) {
+                    // Log the exception for this specific package and continue to the next one
+                    loge("isSystemApp: failed to get application info for " + pkg + ": " + e);
+                }
+            }
+        }
+        return false;
     }
 
     @VisibleForTesting
@@ -1709,7 +1722,7 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
         // from clearing the cache is passed back to the carrier app. With the files successfully
         // deleted, this can return and we will eventually bind to the carrier app.
         String callingPackageName = mContext.getPackageManager().getNameForUid(
-                Binder.getCallingUid());
+                getBinderCallingUid());
         clearCachedConfigForPackage(callingPackageName);
         mNeedNotifyCallback[phoneId] = true;
         updateConfigForPhoneId(phoneId);
@@ -1879,8 +1892,8 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
         IndentingPrintWriter indentPW = new IndentingPrintWriter(pw, "    ");
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
                 != PackageManager.PERMISSION_GRANTED) {
-            indentPW.println("Permission Denial: can't dump carrierconfig from from pid="
-                    + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid());
+            indentPW.println("Permission Denial: can't dump carrierconfig from pid="
+                    + Binder.getCallingPid() + ", uid=" + getBinderCallingUid());
             return;
         }
         String requestingPackage = null;
@@ -1988,7 +2001,7 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
      */
     private void enforceCallerIsSystemOrRequestingPackage(@NonNull String requestingPackage)
             throws SecurityException {
-        final int callingUid = Binder.getCallingUid();
+        final int callingUid = getBinderCallingUid();
         if (TelephonyPermissions.isRootOrShell(callingUid)
                 || TelephonyPermissions.isSystemOrPhone(
                 callingUid)) {
@@ -2163,6 +2176,16 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
                 packageUids);
     }
 
+    @VisibleForTesting
+    protected int getBinderCallingUid() {
+        return Binder.getCallingUid();
+    }
+
+    @VisibleForTesting
+    protected boolean isSdkSandboxUidInternal(int uid) {
+        return Process.isSdkSandboxUid(uid);
+    }
+
     private boolean hasCarrierPrivileges(@NonNull String pkgName, int phoneId) {
         int subId = SubscriptionManager.getSubscriptionId(phoneId);
         if (!SubscriptionManager.isValidSubscriptionId(subId)) {
@@ -2182,7 +2205,7 @@ public class CarrierConfigLoader extends ICarrierConfigLoader.Stub {
         PackageManager pm = mContext.createContextAsUser(Binder.getCallingUserHandle(), 0)
                 .getPackageManager();
         if (pm == null) return null;
-        String[] callingPackageNames = pm.getPackagesForUid(Binder.getCallingUid());
+        String[] callingPackageNames = pm.getPackagesForUid(getBinderCallingUid());
         return (callingPackageNames == null) ? null : callingPackageNames[0];
     }
 

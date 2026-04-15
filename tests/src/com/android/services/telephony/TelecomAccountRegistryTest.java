@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -31,13 +32,17 @@ import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
 import android.os.PersistableBundle;
 import android.os.UserHandle;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.telecom.PhoneAccount;
+import android.telecom.PhoneAccountHandle;
 import android.telecom.TelecomManager;
 import android.telephony.CarrierConfigManager;
 import android.telephony.ServiceState;
@@ -53,6 +58,7 @@ import android.testing.TestableLooper;
 import com.android.TelephonyTestBase;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneConstants;
+import com.android.internal.telephony.PhoneFactory;
 import com.android.internal.telephony.SimultaneousCallingTracker;
 import com.android.internal.telephony.flags.Flags;
 import com.android.phone.PhoneInterfaceManager;
@@ -84,11 +90,11 @@ public class TelecomAccountRegistryTest extends TelephonyTestBase {
     @Mock ImsManager mImsManager;
     @Mock SubscriptionManager mSubscriptionManager;
     @Mock ContentProvider mContentProvider;
-    @Mock Phone mPhone;
     @Mock Phone mPhone2;
     @Mock Resources mResources;
     @Mock Drawable mDrawable;
     @Mock PhoneInterfaceManager mPhoneInterfaceManager;
+    @Mock PackageManager mPackageManager;
 
     @Rule
     public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
@@ -123,6 +129,10 @@ public class TelecomAccountRegistryTest extends TelephonyTestBase {
         when(mResources.getDrawable(anyInt(), any())).thenReturn(mDrawable);
         when(mDrawable.getIntrinsicWidth()).thenReturn(5);
         when(mDrawable.getIntrinsicHeight()).thenReturn(5);
+
+        when(mMockedContext.getPackageManager()).thenReturn(mPackageManager);
+        when(mPackageManager.hasSystemFeature(
+                PackageManager.FEATURE_TELEPHONY_IMS)).thenReturn(true);
 
         PersistableBundle bundle = new PersistableBundle();
         bundle.putBoolean(CarrierConfigManager.KEY_SUPPORT_IMS_CONFERENCE_CALL_BOOL, false);
@@ -159,8 +169,18 @@ public class TelecomAccountRegistryTest extends TelephonyTestBase {
         //Simulate isTelecomReady is true so setupOnBootInternal is called during test setup.
         when(mTelecomManager.getSystemDialerPackage()).thenReturn("");
 
+        // Mock SubscriptionInfo
+        SubscriptionInfo subscriptionInfo = Mockito.mock(SubscriptionInfo.class);
+        when(subscriptionInfo.getDisplayName()).thenReturn("Test Sub");
+        when(subscriptionInfo.getSimSlotIndex()).thenReturn(0);
+        when(subscriptionInfo.createIconBitmap(any())).thenReturn(
+                Bitmap.createBitmap(1, 1, Bitmap.Config.ALPHA_8));
+        when(mSubscriptionManager.getActiveSubscriptionInfo(
+                anyInt())).thenReturn(subscriptionInfo);
+
         mTestableLooper = TestableLooper.get(this);
         when(mMockedContext.getMainLooper()).thenReturn(mTestableLooper.getLooper());
+        replaceInstance(Handler.class, "mLooper", mPhone, mTestableLooper.getLooper());
         mTelecomAccountRegistry = new TelecomAccountRegistry(mMockedContext);
         mTelecomAccountRegistry.setupOnBoot();
         // Benign; in the unflagged context this does nothing, but in the flagged context this will
@@ -347,6 +367,58 @@ public class TelecomAccountRegistryTest extends TelephonyTestBase {
         verify(mTelecomManager, timeout(TIMEOUT).atLeastOnce()).registerPhoneAccount(
                 phoneAccountArgumentCaptor.capture());
         assertThat(phoneAccountArgumentCaptor.getAllValues().size()).isEqualTo(1);
+    }
+
+    @Test
+    public void testAdhocConferenceCapability_withActiveConference_shouldDisableCapability() {
+        // Setup Adhoc config enabled
+        PersistableBundle bundle = new PersistableBundle();
+        bundle.putBoolean(CarrierConfigManager.KEY_SUPPORT_ADHOC_CONFERENCE_CALLS_BOOL, true);
+        overrideSubscriptionServiceCapabilities(bundle);
+
+        // Setup IMS registered
+        when(mPhone.isImsRegistered()).thenReturn(true);
+
+        // Mock TelephonyConnectionService saying active conference
+        TelephonyConnectionService mockConnectionService = Mockito.mock(
+                TelephonyConnectionService.class);
+        when(mockConnectionService.isConferenceActive(
+                nullable(PhoneAccountHandle.class))).thenReturn(true);
+        mTelecomAccountRegistry.setTelephonyConnectionService(mockConnectionService);
+
+        // Trigger registration
+        onLocaleChanged();
+
+        PhoneAccount phoneAccount = verifyAndCaptureRegisteredPhoneAccount();
+
+        assertThat(phoneAccount.hasCapabilities(
+                PhoneAccount.CAPABILITY_ADHOC_CONFERENCE_CALLING)).isFalse();
+    }
+
+    @Test
+    public void testAdhocConferenceCapability_withoutActiveConference_shouldEnableCapability() {
+        // Setup Adhoc config enabled
+        PersistableBundle bundle = new PersistableBundle();
+        bundle.putBoolean(CarrierConfigManager.KEY_SUPPORT_ADHOC_CONFERENCE_CALLS_BOOL, true);
+        overrideSubscriptionServiceCapabilities(bundle);
+
+        // Setup IMS registered
+        when(mPhone.isImsRegistered()).thenReturn(true);
+
+        // Mock TelephonyConnectionService saying NO active conference
+        TelephonyConnectionService mockConnectionService = Mockito.mock(
+                TelephonyConnectionService.class);
+        when(mockConnectionService.isConferenceActive(
+                nullable(PhoneAccountHandle.class))).thenReturn(false);
+        mTelecomAccountRegistry.setTelephonyConnectionService(mockConnectionService);
+
+        // Trigger registration
+        onLocaleChanged();
+
+        PhoneAccount phoneAccount = verifyAndCaptureRegisteredPhoneAccount();
+
+        assertThat(phoneAccount.hasCapabilities(
+                PhoneAccount.CAPABILITY_ADHOC_CONFERENCE_CALLING)).isTrue();
     }
 
     private PhoneAccount verifyAndCaptureRegisteredPhoneAccount() {

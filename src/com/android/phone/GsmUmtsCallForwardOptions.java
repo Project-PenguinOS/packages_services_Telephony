@@ -158,20 +158,28 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
 // QTI_END: 2018-06-11: Telephony: IMS: No prompt to notify user to switch off enhanced 4G
     private boolean mCallForwardByUssd;
 
+    private boolean mIsVideoCfEnabled = false;
+
 // QTI_BEGIN: 2026-02-04: Telephony: FR114115 Dialer Enhancements
     private ImsMmTelManager.CapabilityCallback mCapabilityCallback =
         new ImsMmTelManager.CapabilityCallback() {
             @Override
             public void onCapabilitiesStatusChanged(MmTelFeature.MmTelCapabilities capabilities) {
-                    boolean isUtCapable = capabilities.isCapable(
-                            MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_UT);
-                    boolean isVtCapable = capabilities.isCapable(
+// QTI_END: 2026-02-04: Telephony: FR114115 Dialer Enhancements
+                    mIsVideoCfEnabled = capabilities.isCapable(
+                            MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_UT) &&
+                            capabilities.isCapable(
+// QTI_BEGIN: 2026-02-04: Telephony: FR114115 Dialer Enhancements
                             MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VIDEO);
                     if (mServiceClass == CommandsInterface.SERVICE_CLASS_DATA_SYNC
                             + CommandsInterface.SERVICE_CLASS_PACKET) {
-                        Log.d(LOG_TAG, "update CF according to UtAvailability=" + isUtCapable);
+// QTI_END: 2026-02-04: Telephony: FR114115 Dialer Enhancements
+                        Log.d(LOG_TAG,"update CF according to UtAvailability=" + mIsVideoCfEnabled);
+// QTI_BEGIN: 2026-02-04: Telephony: FR114115 Dialer Enhancements
                         QtiCallForwardUtils.updateAllCfRows(mPreferences,
-                                isUtCapable && isVtCapable);
+// QTI_END: 2026-02-04: Telephony: FR114115 Dialer Enhancements
+                                mIsVideoCfEnabled);
+// QTI_BEGIN: 2026-02-04: Telephony: FR114115 Dialer Enhancements
                     }
             }
     };
@@ -667,6 +675,7 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
         }
 
         super.onFinished(preference, reading);
+        updateVideoCfPreference(preference);
 // QTI_BEGIN: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."
 
         // Update CFNL also if CFNRc is changed
@@ -689,6 +698,7 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
         }
         super.onError(preference, error);
 // QTI_END: 2021-11-29: Telephony: Revert " Revert "Support standalone Call Forwarding ..."
+        updateVideoCfPreference(preference);
     }
 
 // QTI_BEGIN: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
@@ -697,6 +707,14 @@ public class GsmUmtsCallForwardOptions extends TimeConsumingPreferenceActivity
     }
 
 // QTI_END: 2021-05-27: Telephony: Add CallForwarding and CallBarring expectMore support.
+
+    private void updateVideoCfPreference(Preference preference) {
+        if (mServiceClass == CommandsInterface.SERVICE_CLASS_DATA_SYNC
+            + CommandsInterface.SERVICE_CLASS_PACKET) {
+            preference.setEnabled(mIsVideoCfEnabled);
+        }
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.d(LOG_TAG, "onActivityResult: done");

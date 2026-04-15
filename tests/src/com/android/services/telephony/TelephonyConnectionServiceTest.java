@@ -62,6 +62,8 @@ import android.net.Uri;
 import android.os.AsyncResult;
 import android.os.Bundle;
 import android.os.Handler;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.telecom.Conference;
 import android.telecom.Conferenceable;
 import android.telecom.ConnectionRequest;
@@ -106,6 +108,7 @@ import com.android.internal.telephony.emergency.EmergencyStateTracker;
 import com.android.internal.telephony.emergency.RadioOnHelper;
 import com.android.internal.telephony.emergency.RadioOnStateListener;
 import com.android.internal.telephony.flags.FeatureFlags;
+import com.android.internal.telephony.flags.Flags;
 import com.android.internal.telephony.gsm.SuppServiceNotification;
 import com.android.internal.telephony.imsphone.ImsPhone;
 import com.android.internal.telephony.imsphone.ImsPhoneCall;
@@ -118,6 +121,7 @@ import com.android.services.telephony.domainselection.DynamicRoutingController;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -140,6 +144,7 @@ import java.util.function.Consumer;
 
 @RunWith(AndroidJUnit4.class)
 public class TelephonyConnectionServiceTest extends TelephonyTestBase {
+    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
     private static final String NORMAL_ROUTED_EMERGENCY_NUMBER = "110";
     private static final String EMERGENCY_ROUTED_EMERGENCY_NUMBER = "911";
     private static final EmergencyNumber MOCK_NORMAL_NUMBER = new EmergencyNumber(
@@ -995,6 +1000,7 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
         TestTelephonyConnection c = new TestTelephonyConnection();
         Phone slot0Phone = c.getPhone();
         when(slot0Phone.getPhoneId()).thenReturn(SLOT_0_PHONE_ID);
+        setPhonesDialConnection(slot0Phone, c.getOriginalConnection());
         List<Phone> phones = new ArrayList<>(1);
         phones.add(slot0Phone);
         setPhones(phones);
@@ -1145,6 +1151,7 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
         TestTelephonyConnection c = new TestTelephonyConnection();
         Phone slot0Phone = c.getPhone();
         when(slot0Phone.getPhoneId()).thenReturn(SLOT_0_PHONE_ID);
+        setPhonesDialConnection(slot0Phone, c.getOriginalConnection());
         Phone slot1Phone = makeTestPhone(SLOT_1_PHONE_ID, ServiceState.STATE_OUT_OF_SERVICE,
                 false /*isEmergencyOnly*/);
         setPhonesDialConnection(slot1Phone, c.getOriginalConnection());
@@ -1689,6 +1696,9 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
         doReturn(true).when(testPhone0).isWifiCallingEnabled();
         doReturn(false).when(testPhone1).isRadioOn();
         doReturn(true).when(testPhone1).isWifiCallingEnabled();
+        TestTelephonyConnection c = new TestTelephonyConnection();
+        c.setMockPhone(testPhone0);
+        setPhonesDialConnection(testPhone0, c.getOriginalConnection());
         List<Phone> phones = new ArrayList<>(2);
         phones.add(testPhone0);
         phones.add(testPhone1);
@@ -2386,6 +2396,28 @@ public class TelephonyConnectionServiceTest extends TelephonyTestBase {
         verify(mEmergencyCallDomainSelectionConnection).reselectDomain(any());
         verify(mEmergencyCallDomainSelectionConnection).cancelSelection();
         verify(mEmergencyStateTracker).endCall(any());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENFORCE_EMERGENCY_EXIT_MULTI_CALL)
+    public void testUnmanagedEmergencyCallDisconnectTriggersEndCall() throws Exception {
+        setupForCallTest();
+
+        int preciseDisconnectCause = com.android.internal.telephony.CallFailCause.ERROR_UNSPECIFIED;
+        int disconnectCause = android.telephony.DisconnectCause.ERROR_UNSPECIFIED;
+        int selectedDomain = DOMAIN_CS;
+
+        TestTelephonyConnection c = setupForReDialForDomainSelection(
+                mPhone0, selectedDomain, preciseDisconnectCause, disconnectCause, true);
+
+        // Invalidate the managed emergency connection.
+        mTestConnectionService.setEmergencyConnection(null);
+        doReturn(true).when(mFeatureFlags).enforceEmergencyExitMultiCall();
+        doReturn(true).when(mEmergencyStateTracker).hasActiveCall(eq(c));
+
+        assertFalse(mTestConnectionService.maybeReselectDomain(c, null, true,
+                android.telephony.DisconnectCause.NOT_VALID));
+        verify(mEmergencyStateTracker).endCall(eq(c));
     }
 
     @Test
