@@ -79,6 +79,13 @@ public class QtiCallBarringDeselectAllHelper {
 
     public void init(Phone phone) {
         mPhone = phone;
+        // Check carrier config: if Set All Call Barring is not supported over IMS
+        // for this operator (IR92 v9 and below), disable the button immediately.
+        if (!QtiPhoneUtilsHelper.isSupportSetAllCallBarringOverIms(phone)) {
+            Log.d(LOG_TAG, "Set All Call Barring not supported over IMS for this operator");
+            mDisableAll.setEnabled(false);
+            return;
+        }
         if (mQtiImsExtConnector == null) {
             createQtiImsExtConnector(mDisableAll.getContext());
             //Connect will get the QtiImsExtManager instance.
@@ -90,4 +97,3 @@ public class QtiCallBarringDeselectAllHelper {
         }
     }
 }
-
