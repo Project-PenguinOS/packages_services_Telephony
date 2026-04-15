@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+/*
+​​ * ​​​Changes from Qualcomm Technologies, Inc. are provided under the following license:
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+ * SPDX-License-Identifier: BSD-3-Clause-Clear
+ */
+
 package com.android.services.telephony;
 
 import static android.telephony.CarrierConfigManager.KEY_USE_ONLY_DIALED_SIM_ECC_LIST_BOOL;
@@ -3909,6 +3915,9 @@ public class TelephonyConnectionService extends ConnectionService {
             case CallStateException.ERROR_FDN_BLOCKED:
                  cause = android.telephony.DisconnectCause.FDN_BLOCKED;
                  break;
+            case CallStateException.ERROR_NARROWBAND_TERRESTRIAL_NETWORK:
+                 cause = android.telephony.DisconnectCause.NARROWBAND_TERRESTRIAL_NETWORK;
+                 break;
         }
         connection.setTelephonyConnectionDisconnected(
                 DisconnectCauseUtil.toTelecomDisconnectCause(cause, e.getMessage(),
@@ -5194,6 +5203,29 @@ private List<Connection> disconnectAllCallsOnOtherSubs(@NonNull PhoneAccountHand
     public void setFeatureFlags(FeatureFlags featureFlags,
             com.android.server.telecom.flags.FeatureFlags telecomFlags) {
         mFeatureFlags = featureFlags;
+    }
+
+    @Override
+    public void onStartRtt(@NonNull Conference conference,
+            @NonNull Connection.RttTextStream rttTextStream) {
+        if (conference instanceof ImsConference) {
+            Connection hostConnection = ((ImsConference) conference).getConferenceHost();
+            if (hostConnection instanceof TelephonyConnection) {
+                Log.i(this, "onStartRtt: routing to ImsConference host connection");
+                ((TelephonyConnection) hostConnection).onStartRtt(rttTextStream);
+            }
+        }
+    }
+
+    @Override
+    public void onStopRtt(@NonNull Conference conference) {
+        if (conference instanceof ImsConference) {
+            Connection hostConnection = ((ImsConference) conference).getConferenceHost();
+            if (hostConnection instanceof TelephonyConnection) {
+                Log.i(this, "onStopRtt: routing to ImsConference host connection");
+                ((TelephonyConnection) hostConnection).onStopRtt();
+            }
+        }
     }
 
     private void loge(String s) {
