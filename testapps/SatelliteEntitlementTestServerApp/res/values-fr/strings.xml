@@ -51,7 +51,7 @@
     <string name="barred_plmn_id_label" msgid="505024831880097474">"ID du PLMN interdit :"</string>
   <string-array name="data_plan_type_array">
     <item msgid="4481708547874319163">"facturé à l\'usage"</item>
-    <item msgid="847694900028477007">"non facturé à l\'usage"</item>
+    <item msgid="847694900028477007">"sans compteur"</item>
   </string-array>
   <string-array name="service_type_array">
     <item msgid="8060338003865848773">"données"</item>
