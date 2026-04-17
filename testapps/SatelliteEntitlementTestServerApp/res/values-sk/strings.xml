@@ -43,7 +43,7 @@
     <string name="service_policy_label" msgid="4132043416893841942">"Pravidlá služby:"</string>
     <string name="plmn_id_label" msgid="8058228564151694348">"Identifikátor siete PLMN:"</string>
     <string name="add_plmn_button" msgid="1674513590425103807">"PRIDAŤ DO ZOZNAMU SIETÍ PLMN"</string>
-    <string name="bar_plmn_button" msgid="2476955538708126437">"BARR PLMN"</string>
+    <string name="bar_plmn_button" msgid="2476955538708126437">"ZAKÁZAŤ SIEŤ PLMN"</string>
     <string name="clear_all_button" msgid="8066635149916015212">"VYMAZAŤ VŠETKO"</string>
     <string name="data_plan_type_checkbox" msgid="3416488122240116800">"Zahrnúť DataPlanType"</string>
     <string name="data_service_checkbox" msgid="1053897552977297849">"Dátová služba"</string>
