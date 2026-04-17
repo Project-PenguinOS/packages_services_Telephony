@@ -265,6 +265,26 @@ public final class QtiPhoneUtilsHelper {
         return false;
     }
 
+    /**
+     * Returns true if "Set All Call Barring" (Deactivate all) is supported over IMS.
+     * Requires IR92 v10 or above. Returns false only for operators that explicitly
+     * set config_support_set_all_call_barring_over_ims=false (IR92 v9 and below).
+     */
+    static boolean isSupportSetAllCallBarringOverIms(Phone phone) {
+        if (phone == null) {
+            return true;
+        }
+        CarrierConfigManager configManager = (CarrierConfigManager)phone.getContext()
+                .getSystemService(Context.CARRIER_CONFIG_SERVICE);
+        if (configManager != null) {
+            PersistableBundle pb = configManager.getConfigForSubId(phone.getSubId());
+            return pb != null
+                    ? pb.getBoolean("config_support_set_all_call_barring_over_ims", true)
+                    : true;
+        }
+        return true;
+    }
+
     static int getActiveNetworkType(Phone phone) {
         if (phone == null) {
             return ConnectivityManager.TYPE_NONE;
