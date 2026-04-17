@@ -493,7 +493,7 @@
     <string name="simContacts_title" msgid="2714029230160136647">"Valige imporditavad kontaktid"</string>
     <string name="simContacts_airplaneMode" msgid="4654884030631503808">"Kontaktide importimiseks SIM-kaardilt lülitage lennurežiim välja."</string>
     <string name="enable_pin" msgid="967674051730845376">"SIM-i PIN-koodi lubamine/keelamine"</string>
-    <string name="change_pin" msgid="3657869530942905790">"Muuda SIM-kaardi PIN-koodi"</string>
+    <string name="change_pin" msgid="3657869530942905790">"SIMi PIN-koodi muutmine"</string>
     <string name="enter_pin_text" msgid="3182311451978663356">"SIM-i PIN-kood"</string>
     <string name="oldPinLabel" msgid="8618515202411987721">"Vana PIN-kood"</string>
     <string name="newPinLabel" msgid="3585899083055354732">"Uus PIN-kood"</string>
