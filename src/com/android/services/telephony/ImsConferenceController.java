@@ -337,10 +337,6 @@ public class ImsConferenceController {
                 mTelecomAccountRegistry.refreshAdhocConference(handle.equals(activeDsdsPaHandle),
                         handle, activeDsdsPaHandle != null);
             }
-        } else {
-            for (PhoneAccountHandle handle : allPaHandles) {
-                mTelecomAccountRegistry.refreshAdhocConference(true, handle, false);
-            }
         }
 // QTI_END: 2026-02-04: Telephony: FR114115 Dialer Enhancements
 
