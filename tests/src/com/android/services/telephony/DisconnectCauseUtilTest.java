@@ -19,11 +19,11 @@ package com.android.services.telephony;
 import static android.media.ToneGenerator.TONE_PROP_PROMPT;
 import static android.media.ToneGenerator.TONE_SUP_BUSY;
 
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.TestCase.assertEquals;
-
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
 import android.content.res.Configuration;
@@ -183,6 +183,87 @@ public class DisconnectCauseUtilTest extends TelephonyTestBase {
         assertEquals(r.getString(R.string.callFailed_userBusy), tcCause.getLabel().toString());
         // The tone should be the busy tone.
         assertEquals(TONE_SUP_BUSY, tcCause.getTone());
+    }
+
+    /**
+     * Assert that when a cause is in the KEY_DISCONNECT_CAUSE_NETWORK_BUSY_INT_ARRAY, the returned
+     * label and description are callFailed_NetworkBusy.
+     */
+    @Test
+    public void
+            testToTelecomDisconnectCause_returnsNetworkBusyLabelAndDescription() {
+        int telephonyCause = DisconnectCause.IMS_ACCESS_BLOCKED;
+
+        PersistableBundle carrierConfig = new PersistableBundle();
+        carrierConfig.putIntArray(
+                CarrierConfigManager.KEY_DISCONNECT_CAUSE_NETWORK_BUSY_INT_ARRAY,
+                new int[]{telephonyCause});
+
+        android.telecom.DisconnectCause tcCause =
+                DisconnectCauseUtil.toTelecomDisconnectCause(telephonyCause,
+                        CallFailCause.NOT_VALID, "reason", PHONE_ID, null, carrierConfig,
+                        mFeatureFlags, false);
+
+        Resources r = getResourcesForLocale(InstrumentationRegistry.getTargetContext(), Locale.US);
+        assertEquals(r.getString(R.string.callFailed_NetworkBusy), tcCause.getLabel().toString());
+        assertEquals(
+                r.getString(R.string.callFailed_NetworkBusy), tcCause.getDescription().toString());
+    }
+
+    /**
+     * Assert that when a cause is NOT in the KEY_DISCONNECT_CAUSE_NETWORK_BUSY_INT_ARRAY, it does
+     * not return the NetworkBusy label.
+     */
+    @Test
+    public void testToTelecomDisconnectCause_withoutNetworkBusyConfig_returnsStandardLabel() {
+        int telephonyCause = DisconnectCause.IMS_ACCESS_BLOCKED;
+
+        PersistableBundle carrierConfig = new PersistableBundle();
+        // Array exists but does not contain our cause
+        carrierConfig.putIntArray(
+                CarrierConfigManager.KEY_DISCONNECT_CAUSE_NETWORK_BUSY_INT_ARRAY,
+                new int[] {DisconnectCause.POWER_OFF});
+
+        android.telecom.DisconnectCause tcCause =
+                DisconnectCauseUtil.toTelecomDisconnectCause(
+                        telephonyCause,
+                        CallFailCause.NOT_VALID,
+                        "reason",
+                        PHONE_ID,
+                        null,
+                        carrierConfig,
+                        mFeatureFlags,
+                        false);
+
+        Resources r = getResourcesForLocale(InstrumentationRegistry.getTargetContext(), Locale.US);
+        assertNotEquals(
+                r.getString(R.string.callFailed_NetworkBusy), tcCause.getLabel().toString());
+    }
+
+    @Test
+    public void testDoesCarrierClassifyDisconnectCauseAsNetworkBusyCause_CauseInArrayReturnsTrue() {
+        int telephonyCause = DisconnectCause.IMS_ACCESS_BLOCKED;
+        PersistableBundle config = new PersistableBundle();
+        config.putIntArray(
+                CarrierConfigManager.KEY_DISCONNECT_CAUSE_NETWORK_BUSY_INT_ARRAY,
+                new int[]{telephonyCause});
+
+        assertTrue(DisconnectCauseUtil.doesCarrierClassifyDisconnectCauseAsNetworkBusyCause(
+                telephonyCause, config));
+    }
+
+    @Test
+    public void
+            testDoesCarrierClassifyDisconnectCauseAsNetworkBusyCause_CauseNotInArrayReturnsFalse() {
+        int telephonyCause = DisconnectCause.IMS_ACCESS_BLOCKED;
+        PersistableBundle config = new PersistableBundle();
+        config.putIntArray(
+                CarrierConfigManager.KEY_DISCONNECT_CAUSE_NETWORK_BUSY_INT_ARRAY,
+                new int[] {DisconnectCause.POWER_OFF});
+
+        assertFalse(
+                DisconnectCauseUtil.doesCarrierClassifyDisconnectCauseAsNetworkBusyCause(
+                        telephonyCause, config));
     }
 
     /**
