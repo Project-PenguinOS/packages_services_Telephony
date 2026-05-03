@@ -897,7 +897,7 @@
     <string name="radioInfo_service_emergency" msgid="4763879891415016848">"Appels d\'urgence uniquement"</string>
     <string name="radioInfo_service_off" msgid="3456583511226783064">"Signal radio désactivé"</string>
     <string name="radioInfo_roaming_in" msgid="3156335577793145965">"Itinérance"</string>
-    <string name="radioInfo_roaming_not" msgid="1904547918725478110">"Sans itinérance"</string>
+    <string name="radioInfo_roaming_not" msgid="1904547918725478110">"Pas en itinérance"</string>
     <string name="radioInfo_phone_idle" msgid="2191653783170757819">"Inactif"</string>
     <string name="radioInfo_phone_ringing" msgid="8100354169567413370">"Sonnerie"</string>
     <string name="radioInfo_phone_offhook" msgid="7564601639749936170">"Appel en cours"</string>

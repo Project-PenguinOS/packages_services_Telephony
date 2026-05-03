@@ -14,6 +14,11 @@
      limitations under the License.
 -->
 
+<!-- Changes from Qualcomm Technologies, Inc. are provided under the following license:
+     Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+     SPDX-License-Identifier: BSD-3-Clause-Clear
+-->
+
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- DO NOT TRANSLATE. Internal key for a telephony attribution tag. -->
     <string name="telephony_attribution_tag">Telephony</string>
@@ -2045,6 +2050,8 @@
     <string name="callFailed_too_many_calls">Cannot place a call as there are already two calls in progress.  Disconnect one of the calls or merge them into a conference prior to placing a new call.</string>
     <!-- In-call screen: error message shown when the user attempts to place a call in Secure Mode -->
     <string name="callFailed_secure_mode">Cannot place a non-emergency call in Secure Mode.</string>
+    <!-- In-call screen: error message shown when the user attempts to place a call on a narrowband terrestrial network -->
+    <string name="callFailed_narrowband_terrestrial_network">Cannot place a call on an NB-IoT network.</string>
     <!-- Message displayed to the user when they attempt to edit options for a supplementary service
          (call waiting, call barring, call forwarding, and caller ID), but they are required to
          enable mobile data first. -->
