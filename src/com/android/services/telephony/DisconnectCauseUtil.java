@@ -170,7 +170,8 @@ public class DisconnectCauseUtil {
                 .setLabel(toTelecomDisconnectCauseLabel(context, telephonyDisconnectCause,
                         telephonyPreciseDisconnectCause, carrierConfig, featureFlags))
                 .setDescription(toTelecomDisconnectCauseDescription(
-                        context, telephonyDisconnectCause, phoneId, shouldTreatAsEmergency))
+                        context, telephonyDisconnectCause, phoneId, shouldTreatAsEmergency,
+                        carrierConfig))
                 .setReason(toTelecomDisconnectReason(
                         context, telephonyDisconnectCause, reason, phoneId))
                 .setTone(toTelecomDisconnectCauseTone(
@@ -378,6 +379,10 @@ public class DisconnectCauseUtil {
             if (doesCarrierClassifyDisconnectCauseAsBusyCause(telephonyDisconnectCause,
                     carrierConfig)) {
                 return context.getResources().getString(R.string.callFailed_userBusy);
+            }
+            if (doesCarrierClassifyDisconnectCauseAsNetworkBusyCause(telephonyDisconnectCause,
+                    carrierConfig)) {
+                return context.getResources().getString(R.string.callFailed_NetworkBusy);
             }
             label = getLabelFromDisconnectCause(context, telephonyDisconnectCause);
         }
@@ -734,9 +739,14 @@ public class DisconnectCauseUtil {
      */
     private static CharSequence toTelecomDisconnectCauseDescription(
             Context context, int telephonyDisconnectCause, int phoneId,
-            boolean shouldTreatAsEmergency) {
+            boolean shouldTreatAsEmergency, PersistableBundle carrierConfig) {
         if (context == null ) {
             return "";
+        }
+
+        if (doesCarrierClassifyDisconnectCauseAsNetworkBusyCause(telephonyDisconnectCause,
+                carrierConfig)) {
+            return context.getResources().getString(R.string.callFailed_NetworkBusy);
         }
 
         Integer resourceId = null;
@@ -1325,6 +1335,28 @@ public class DisconnectCauseUtil {
         for (int busyTone : busyToneArray) {
             if (busyTone == telephonyDisconnectCause) {
                 return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Helper method that examines the carrierConfig KEY_DISCONNECT_CAUSE_NETWORK_BUSY_INT_ARRAY
+     * containing the DisconnectCauses that are classified as Network Busy.
+     */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public static boolean doesCarrierClassifyDisconnectCauseAsNetworkBusyCause(
+            int telephonyDisconnectCause, PersistableBundle carrierConfig) {
+        if (carrierConfig == null) {
+            return false;
+        }
+        int[] networkBusyArray = carrierConfig.getIntArray(
+                CarrierConfigManager.KEY_DISCONNECT_CAUSE_NETWORK_BUSY_INT_ARRAY);
+        if (networkBusyArray != null) {
+            for (int networkBusy : networkBusyArray) {
+                if (networkBusy == telephonyDisconnectCause) {
+                    return true;
+                }
             }
         }
         return false;
