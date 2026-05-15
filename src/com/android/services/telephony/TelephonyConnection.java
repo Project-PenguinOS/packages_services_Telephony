@@ -518,6 +518,11 @@ abstract class TelephonyConnection extends Connection implements Holdable,
 // QTI_END: 2018-03-21: Telephony: Display Supplementary Service Notification
         sendTelephonyConnectionEvent(TelephonyManager.EVENT_SUPPLEMENTARY_SERVICE_NOTIFICATION,
                 extras);
+        // Persist the supplementary service notification state into Call Extras so that
+        // late-binding InCallServices (e.g., Dialer) can retrieve the state upon initialization
+        // and update the UI correctly, even if the transient ConnectionEvent was missed.
+        // This follows the recommendation from Google (b/500880243).
+        putTelephonyExtras(extras);
     }
 
     /**
