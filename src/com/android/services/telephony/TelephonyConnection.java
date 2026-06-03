@@ -2883,12 +2883,16 @@ abstract class TelephonyConnection extends Connection implements Holdable,
                         setTelephonyConnectionDisconnected(disconnectCause);
 
                         // Check carrier config and that the call was remotely disconnected
+                        int code = disconnectCause.getCode();
+                        boolean hasRemoteDisconnectCause =
+                                code == android.telecom.DisconnectCause.REMOTE
+                                || code == android.telecom.DisconnectCause.BUSY
+                                || code == android.telecom.DisconnectCause.REJECTED;
                         boolean isAutoUnholdSupported = Flags.supportAutoUnhold()
                                 && getCarrierConfig().getBoolean(
                                         CarrierConfigManager
                                                 .KEY_AUTO_UNHOLD_ON_REMOTE_DISCONNECT_BOOL)
-                                && disconnectCause.getCode()
-                                == android.telecom.DisconnectCause.REMOTE;
+                                && hasRemoteDisconnectCause;
                         // Try unholding the background call if it exists.
                         if (isAutoUnholdSupported) {
                             sendUnhold();
