@@ -15,7 +15,7 @@
  */
 
 /*
-​​ * ​​​Changes from Qualcomm Technologies, Inc. are provided under the following license:
+ * Changes from Qualcomm Technologies, Inc. are provided under the following license:
  * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  * SPDX-License-Identifier: BSD-3-Clause-Clear
  */
@@ -118,6 +118,7 @@ import com.android.phone.R;
 import com.android.phone.callcomposer.CallComposerPictureManager;
 import com.android.phone.settings.SuppServicesUiUtil;
 import com.android.services.telephony.domainselection.DynamicRoutingController;
+import com.android.telecom.vendor.ext.ConnectionServiceVendor;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -146,7 +147,8 @@ import javax.annotation.Nullable;
 /**
  * Service for making GSM and CDMA connections.
  */
-public class TelephonyConnectionService extends ConnectionService {
+public class TelephonyConnectionService extends ConnectionService
+        implements ConnectionServiceVendor.Delegate {
     private static final String LOG_TAG = TelephonyConnectionService.class.getSimpleName();
     // Timeout before we continue with the emergency call without waiting for DDS switch response
     // from the modem.
@@ -174,6 +176,8 @@ public class TelephonyConnectionService extends ConnectionService {
     private static final String DISCONNECT_REASON_SATELLITE_ENABLED = "SATELLITE_ENABLED";
     private static final String DISCONNECT_REASON_CARRIER_ROAMING_SATELLITE_MODE =
             "CARRIER_ROAMING_SATELLITE_MODE";
+
+    private ConnectionServiceVendor mVendor = null;
 
     private final TelephonyConnectionServiceProxy mTelephonyConnectionServiceProxy =
             new TelephonyConnectionServiceProxy() {
@@ -1019,6 +1023,7 @@ public class TelephonyConnectionService extends ConnectionService {
         mDomainSelectionMainExecutor = getApplicationContext().getMainExecutor();
         mDomainSelectionResolver = DomainSelectionResolver.getInstance();
         mSatelliteController = SatelliteController.getInstance();
+        mVendor = new ConnectionServiceVendor(this /*delegate*/, this /*ConnectionService*/);
 
         IntentFilter intentFilter = new IntentFilter(
                 TelecomManager.ACTION_TTY_PREFERRED_MODE_CHANGED);
@@ -1100,15 +1105,15 @@ public class TelephonyConnectionService extends ConnectionService {
     }
 
 // QTI_BEGIN: 2020-07-28: Telephony: IMS: Add logic for Pseudo DSDA support
-    @Override
 // QTI_END: 2020-07-28: Telephony: IMS: Add logic for Pseudo DSDA support
 // QTI_BEGIN: 2021-04-16: Telephony: IMS: Fix issue of answering calls for some 3rd party apps
-    protected void answer(String callId) {
+    @Override
+    public void answer(String callId) {
         answerVideo(callId, VideoProfile.STATE_AUDIO_ONLY);
     }
 
     @Override
-    protected void answerVideo(String callId, int videoState) {
+    public void answerVideo(String callId, int videoState) {
 // QTI_END: 2021-04-16: Telephony: IMS: Fix issue of answering calls for some 3rd party apps
 // QTI_BEGIN: 2020-07-28: Telephony: IMS: Add logic for Pseudo DSDA support
         if (mAnswerAndReleaseHandler != null) {
@@ -1132,7 +1137,9 @@ public class TelephonyConnectionService extends ConnectionService {
         if (!isAnswerAndReleaseConnection) {
 // QTI_END: 2020-07-28: Telephony: IMS: Add logic for Pseudo DSDA support
 // QTI_BEGIN: 2021-04-16: Telephony: IMS: Fix issue of answering calls for some 3rd party apps
-            super.answerVideo(callId, videoState);
+            if (mVendor != null) {
+                mVendor.answerVideo(callId, videoState);
+            }
 // QTI_END: 2021-04-16: Telephony: IMS: Fix issue of answering calls for some 3rd party apps
 // QTI_BEGIN: 2020-07-28: Telephony: IMS: Add logic for Pseudo DSDA support
             return;
