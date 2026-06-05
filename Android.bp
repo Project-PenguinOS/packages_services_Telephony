@@ -56,6 +56,7 @@ android_app {
         "satellite-s2storage-ro",
         "s2-geometry-library-java",
         "dropbox_flags_lib",
+        "telecom-vendor-ext",
     ],
 
     srcs: [
