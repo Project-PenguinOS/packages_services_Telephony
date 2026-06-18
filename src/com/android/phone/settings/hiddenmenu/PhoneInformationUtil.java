@@ -1148,13 +1148,35 @@ public class PhoneInformationUtil {
         return updatedPrefdNwLabels.toArray(new String[updatedPrefdNwLabels.size()]);
     }
 
-    public static HashMap<String, Integer> createPrefNwLabelsToValueFullMapping() {
-        final HashMap<String, Integer> prefNwLabelToIntMap = new HashMap<>();
+    /**
+     * Creates a mapping from each network label string to its index in
+     * PREFERRED_NETWORK_LABELS_RF (the full, unfiltered array).
+     * This index is used to look up the corresponding entry in
+     * PREFERRED_NETWORK_MODES_RF.
+     */
+    public static HashMap<String, Integer> createPrefNwLabelsToIndexMapping() {
+        final HashMap<String, Integer> prefNwLabelToIndexMap = new HashMap<>();
         for (int i = 0; i < PREFERRED_NETWORK_LABELS_RF.length; i++) {
-            String entry = PREFERRED_NETWORK_LABELS_RF[i];
-            prefNwLabelToIntMap.put(entry, i);
+            prefNwLabelToIndexMap.put(PREFERRED_NETWORK_LABELS_RF[i], i);
         }
-        return prefNwLabelToIntMap;
+        return prefNwLabelToIndexMap;
+    }
+
+    /**
+     * Given a label string from the (possibly filtered) Spinner array,
+     * returns the corresponding RILConstants network mode integer by
+     * looking it up in the full PREFERRED_NETWORK_MODES_RF list.
+     * Returns -1 if the label is not found or has no valid mode.
+     */
+    public static int getNetworkModeFromLabel(String label) {
+        for (int i = 0; i < PREFERRED_NETWORK_LABELS_RF.length; i++) {
+            if (PREFERRED_NETWORK_LABELS_RF[i].equals(label)) {
+                if (i < PREFERRED_NETWORK_MODES_RF.size()) {
+                    return PREFERRED_NETWORK_MODES_RF.get(i);
+                }
+            }
+        }
+        return -1;
     }
 
     public static int getPrefNwTypeIndexFromUpdatedArray(int type, String[] updatedPrefNwLabels) {
