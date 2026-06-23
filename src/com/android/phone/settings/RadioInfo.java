@@ -698,7 +698,7 @@ public class RadioInfo extends AppCompatActivity {
             setNrStatsVisibility(View.GONE);
         }
 
-        mPrefNwLabelToIntMap = PhoneInformationUtil.createPrefNwLabelsToValueFullMapping();
+        mPrefNwLabelToIntMap = PhoneInformationUtil.createPrefNwLabelsToIndexMapping();
         mUpdatedPrefNwLabels = PhoneInformationUtil.getUpdatedPrefNwLabels(mContext);
         mPreferredNetworkType = (Spinner) findViewById(R.id.preferredNetworkType);
         ArrayAdapter<String> mPreferredNetworkTypeAdapter =
@@ -2742,11 +2742,19 @@ public class RadioInfo extends AppCompatActivity {
                     if (mPreferredNetworkTypeResult != pos && pos >= 0
                             && pos <= mUpdatedPrefNwLabels.length - 2) {
                         final String prefNwLabel = mUpdatedPrefNwLabels[pos];
-                        mPreferredNetworkTypeResult = mPrefNwLabelToIntMap.get(prefNwLabel);
+                        mPreferredNetworkTypeResult = pos;
 
                         new Thread(() -> {
+                            // Use label string to look up the correct network mode
+                            // from the full (unfiltered) list, avoiding index mismatch
+                            // when TDSCDMA entries are filtered out.
                             int networkType =
-                                    PhoneInformationUtil.PREFERRED_NETWORK_MODES_RF.get(pos);
+                                    PhoneInformationUtil.getNetworkModeFromLabel(prefNwLabel);
+                            if (networkType == -1) {
+                                log("mPreferredNetworkHandler: no valid mode for: "
+                                        + prefNwLabel);
+                                return;
+                            }
                             mTelephonyManager.setAllowedNetworkTypesForReason(
                                     TelephonyManager.ALLOWED_NETWORK_TYPES_REASON_USER,
                                     RadioAccessFamily.getRafFromNetworkType(networkType));
