@@ -30,7 +30,8 @@ public class QtiPhoneInformationV2FragmentDataNetwork extends PhoneInformationV2
 
         mEnableVoLteSwitch = (Switch) view.findViewById(R.id.enable_volte_switch);
         mEnableVoNrSwitch = (Switch) view.findViewById(R.id.enable_vonr_switch);
-        if (!isImsSupportedOnDevice()) {
+        if (!QtiPhoneInformationUtil.isVoLteVoNrSwitchVisible(mContext, mSubId) ||
+                !isImsSupportedOnDevice()) {
             mEnableVoLteSwitch.setVisibility(View.GONE);
             mEnableVoNrSwitch.setVisibility(View.GONE);
         }
@@ -39,8 +40,11 @@ public class QtiPhoneInformationV2FragmentDataNetwork extends PhoneInformationV2
     @Override
     public void updateAllFields() {
         super.updateAllFields();
-        updateVoLteState();
-        updateVoNrState();
+        if (QtiPhoneInformationUtil.isVoLteVoNrSwitchVisible(mContext, mSubId) &&
+                isImsSupportedOnDevice()) {
+            updateVoLteState();
+            updateVoNrState();
+        }
     }
 
     private void updateVoLteState() {
@@ -54,11 +58,8 @@ public class QtiPhoneInformationV2FragmentDataNetwork extends PhoneInformationV2
             return;
         }
 
-        int voLteSetting = SubscriptionManager.getIntegerSubscriptionProperty(
-                mSubId, SubscriptionManager.ENHANCED_4G_MODE_ENABLED, -1, mContext);
-        boolean voLteEnabled = (voLteSetting != 0) ? true : false;
         ImsMmTelManager imsMmTelManager = mImsManager.getImsMmTelManager(mSubId);
-        mEnableVoLteSwitch.setChecked(voLteEnabled);
+        mEnableVoLteSwitch.setChecked(QtiPhoneInformationUtil.getVoLteEnabled(mContext, mSubId));
         mEnableVoLteSwitch.setEnabled(true);
         mEnableVoLteSwitch.setOnCheckedChangeListener(mVoLteOnChangeListener);
     }
@@ -80,18 +81,12 @@ public class QtiPhoneInformationV2FragmentDataNetwork extends PhoneInformationV2
                     return;
                 }
                 ImsMmTelManager imsMmTelManager = mImsManager.getImsMmTelManager(subId);
-                int voNRSetting = SubscriptionManager.getIntegerSubscriptionProperty(
-                        subId, SubscriptionManager.NR_ADVANCED_CALLING_ENABLED, -1, mContext);
-                boolean voNrEnabled = (voNRSetting != 0) ? true : false;
-
-                int voLteSetting = SubscriptionManager.getIntegerSubscriptionProperty(
-                        subId, SubscriptionManager.ENHANCED_4G_MODE_ENABLED, -1, mContext);
-                boolean voLteEnabled = (voLteSetting != 0) ? true : false;
 
                 getActivity().runOnUiThread(() -> {
-                    mEnableVoNrSwitch.setChecked(voNrEnabled);
+                    mEnableVoNrSwitch.setChecked(QtiPhoneInformationUtil.getVoNrEnabled(mContext,
+                            subId));
                     // Disable VoNr option if VoLte is disabled
-                    if (!voLteEnabled) {
+                    if (!QtiPhoneInformationUtil.getVoLteEnabled(mContext, subId)) {
                         mEnableVoNrSwitch.setEnabled(false);
                     }
                 });

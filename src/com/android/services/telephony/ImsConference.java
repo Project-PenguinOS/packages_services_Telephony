@@ -12,6 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License
+ *
+ * Changes from Qualcomm Technologies, Inc. are provided under the following license:
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+ * SPDX-License-Identifier: BSD-3-Clause-Clear
  */
 
 package com.android.services.telephony;
@@ -1686,7 +1690,7 @@ public class ImsConference extends TelephonyConferenceBase implements Holdable {
             if (phone != null) {
                 Context context = phone.getContext();
 // QTI_BEGIN: 2018-03-09: Telephony: Fix for Wi-Fi Call to show Sub Information
-                String displaySubId = "";
+                String subInfoSuffix = "";
 // QTI_END: 2018-03-09: Telephony: Fix for Wi-Fi Call to show Sub Information
                 if (TelephonyManager.getDefault().getActiveModemCount() > 1) {
 // QTI_BEGIN: 2018-03-09: Telephony: Fix for Wi-Fi Call to show Sub Information
@@ -1695,14 +1699,14 @@ public class ImsConference extends TelephonyConferenceBase implements Holdable {
                             mConferenceHost.getPhone().getContext())
                         .getActiveSubscriptionInfoForSimSlotIndex(phoneId);
                     if (sub != null) {
-                        displaySubId = sub.getDisplayName().toString();
-                        displaySubId  = " " + displaySubId;
+                        String displayName = sub.getDisplayName().toString();
+                        subInfoSuffix = " " + displayName + " SIM " + (sub.getSimSlotIndex() + 1);
                     }
                 }
 // QTI_END: 2018-03-09: Telephony: Fix for Wi-Fi Call to show Sub Information
                 StatusHints hints = new StatusHints(
 // QTI_BEGIN: 2018-03-09: Telephony: Fix for Wi-Fi Call to show Sub Information
-                        context.getString(R.string.status_hint_label_wifi_call) + displaySubId,
+                        context.getString(R.string.status_hint_label_wifi_call) + subInfoSuffix,
 // QTI_END: 2018-03-09: Telephony: Fix for Wi-Fi Call to show Sub Information
                         Icon.createWithResource(
                                 context, R.drawable.ic_signal_wifi_4_bar_24dp),
